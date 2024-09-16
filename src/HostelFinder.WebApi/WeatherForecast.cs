@@ -1,4 +1,4 @@
-namespace RoomFinder.WebApi
+namespace HostelFinder.WebApi
 {
     public class WeatherForecast
     {

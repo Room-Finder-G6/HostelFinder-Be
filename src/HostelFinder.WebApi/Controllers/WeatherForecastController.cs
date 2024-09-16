@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace RoomFinder.WebApi.Controllers
+namespace HostelFinder.WebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]

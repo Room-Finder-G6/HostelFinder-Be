@@ -10,4 +10,10 @@
     <ProjectReference Include="..\RoomFinder.Application\RoomFinder.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entites\" />
+    <Folder Include="Enums\" />
+    <Folder Include="Exceptions\" />
+  </ItemGroup>
+
 </Project>
