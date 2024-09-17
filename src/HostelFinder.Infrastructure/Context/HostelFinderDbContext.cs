@@ -37,8 +37,6 @@ public class HostelFinderDbContext : DbContext
     base.OnModelCreating(modelBuilder);
 
     // Hostel
-    modelBuilder.Entity<Hostel>()
-        .HasKey(h => h.HostelId);
     
     modelBuilder.Entity<Hostel>()
         .HasOne(h => h.Landlord)
@@ -65,9 +63,6 @@ public class HostelFinderDbContext : DbContext
         .OnDelete(DeleteBehavior.Restrict); 
 
     // Room
-    modelBuilder.Entity<Room>()
-        .HasKey(r => r.RoomId);
-
     modelBuilder.Entity<Room>()
         .HasOne(r => r.Hostel)
         .WithMany(h => h.Rooms)
@@ -99,13 +94,8 @@ public class HostelFinderDbContext : DbContext
         .OnDelete(DeleteBehavior.Restrict); 
 
     // RoomType
-    modelBuilder.Entity<RoomType>()
-        .HasKey(rt => rt.RoomTypeId);
 
     // Review
-    modelBuilder.Entity<Review>()
-        .HasKey(r => r.ReviewId);
-
     modelBuilder.Entity<Review>()
         .HasOne(r => r.User)
         .WithMany(u => u.Reviews)
@@ -146,9 +136,6 @@ public class HostelFinderDbContext : DbContext
 
     // Service
     modelBuilder.Entity<Service>()
-        .HasKey(s => s.ServiceId);
-
-    modelBuilder.Entity<Service>()
         .HasOne(s => s.Hostel)
         .WithMany(h => h.Services)
         .HasForeignKey(s => s.HostelId)
@@ -177,9 +164,6 @@ public class HostelFinderDbContext : DbContext
         .OnDelete(DeleteBehavior.Restrict); 
 
     // Image
-    modelBuilder.Entity<Image>()
-        .HasKey(i => i.ImageId);
-
     modelBuilder.Entity<Image>()
         .HasOne(i => i.Hostel)
         .WithMany(h => h.Images)

@@ -1,40 +1,31 @@
 ﻿using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HostelFinder.Domain.Entities
 {
     public class Hostel : BaseEntity
     {
+        [ForeignKey("User")]
+        public Guid? LandlordId { get; set; }
         [Required]
-        public Guid LandlordId { get; set; }
-
-        [Required]
-        [MaxLength(100)]
+        [MaxLength(50)]
         public string HostelName { get; set; } 
-
-        [MaxLength(500)]
+        [MaxLength(255)]
         public string? Description { get; set; } 
-
         [Required]
-        [MaxLength(256)]
+        [MaxLength(255)]
         public string Address { get; set; } 
-
         public float? Size { get; set; }
-
         [Required]
         public int NumberOfRooms { get; set; }
-
         public string? Coordinates { get; set; }
-
-        public string? Images { get; set; } 
-
-        public float OverallRating { get; set; }
-
-        public Guid ServiceId { get; set; }
-
-
-       
-        public virtual Service Service { get; set; } 
+        [Required]
+        public float Rating { get; set; }
+        public virtual ICollection<Service> Services { get; set; } 
+        public virtual ICollection<Room> Rooms { get; set; }
+        public virtual ICollection<Review> Reviews { get; set; }
+        public virtual ICollection<Image> Images { get; set; }
         public virtual User Landlord { get; set; } 
     }
 }

@@ -15,9 +15,8 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "RoomTypes",
                 columns: table => new
                 {
-                    RoomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Room_Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Room_Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -27,7 +26,7 @@ namespace HostelFinder.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoomTypes", x => x.RoomTypeId);
+                    table.PrimaryKey("PK_RoomTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -57,7 +56,7 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "Hostels",
                 columns: table => new
                 {
-                    HostelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LandlordId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     HostelName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
@@ -66,7 +65,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     NumberOfRooms = table.Column<int>(type: "int", nullable: false),
                     Coordinates = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Rating = table.Column<float>(type: "real", nullable: false),
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -76,7 +74,7 @@ namespace HostelFinder.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Hostels", x => x.HostelId);
+                    table.PrimaryKey("PK_Hostels", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Hostels_Users_LandlordId",
                         column: x => x.LandlordId,
@@ -89,13 +87,12 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "Reviews",
                 columns: table => new
                 {
-                    ReviewId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     rating = table.Column<int>(type: "int", nullable: false),
                     ReviewDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     HostelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -105,12 +102,12 @@ namespace HostelFinder.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Reviews", x => x.ReviewId);
+                    table.PrimaryKey("PK_Reviews", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Reviews_Hostels_HostelId",
                         column: x => x.HostelId,
                         principalTable: "Hostels",
-                        principalColumn: "HostelId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Reviews_Users_UserId",
@@ -124,13 +121,12 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "Rooms",
                 columns: table => new
                 {
-                    RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     HostelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoomName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -140,18 +136,18 @@ namespace HostelFinder.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Rooms", x => x.RoomId);
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Rooms_Hostels_HostelId",
                         column: x => x.HostelId,
                         principalTable: "Hostels",
-                        principalColumn: "HostelId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Rooms_RoomTypes_RoomTypeId",
                         column: x => x.RoomTypeId,
                         principalTable: "RoomTypes",
-                        principalColumn: "RoomTypeId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -159,11 +155,10 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "Services",
                 columns: table => new
                 {
-                    ServiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ServiceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     HostelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -173,12 +168,12 @@ namespace HostelFinder.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Services", x => x.ServiceId);
+                    table.PrimaryKey("PK_Services", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Services_Hostels_HostelId",
                         column: x => x.HostelId,
                         principalTable: "Hostels",
-                        principalColumn: "HostelId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -206,7 +201,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         name: "FK_BookingRequests_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
-                        principalColumn: "RoomId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_BookingRequests_Users_UserId",
@@ -220,12 +215,11 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "Images",
                 columns: table => new
                 {
-                    ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     HostelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -235,18 +229,18 @@ namespace HostelFinder.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Images", x => x.ImageId);
+                    table.PrimaryKey("PK_Images", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Images_Hostels_HostelId",
                         column: x => x.HostelId,
                         principalTable: "Hostels",
-                        principalColumn: "HostelId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Images_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
-                        principalColumn: "RoomId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -255,7 +249,7 @@ namespace HostelFinder.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -271,7 +265,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         name: "FK_RoomFeatures_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
-                        principalColumn: "RoomId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
