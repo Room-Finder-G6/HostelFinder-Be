@@ -7,12 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
+    <Compile Remove="Entites\**" />
+    <Compile Remove="Exeptions\**" />
+    <EmbeddedResource Remove="Entites\**" />
+    <EmbeddedResource Remove="Exeptions\**" />
+    <None Remove="Entites\**" />
+    <None Remove="Exeptions\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entites\" />
-    <Folder Include="Exeptions\" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
   </ItemGroup>
 
 </Project>
