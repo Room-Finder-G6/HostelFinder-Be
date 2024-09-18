@@ -14,6 +14,8 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Service> Services { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Image> Images { get; set; }
+
+    public DbSet<BlackListToken> BlackListTokens { get; set; }
     
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
