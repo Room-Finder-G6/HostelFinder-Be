@@ -6,6 +6,7 @@ namespace HostelFinder.Domain.Entities
     public class Deposit : BaseEntity
     {
         [Required]
+        [Key]
         public Guid UserId { get; set; }
 
         [Required]

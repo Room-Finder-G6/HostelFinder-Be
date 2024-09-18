@@ -7,5 +7,6 @@ namespace HostelFinder.Domain.Entities
     {
         [Required]
         public string Room_Type {  get; set; }
+        public virtual ICollection<Room> Rooms { get; set; }    
     }
 }
