@@ -1,7 +1,7 @@
 ## Technology Stack
 
 - **Backend**: C#
-- **Frontend**: TypeScript, React
+- **Frontend**: TypeScript, React, NextJS
 - **Database**: SQL Server
 
 ## Installation
