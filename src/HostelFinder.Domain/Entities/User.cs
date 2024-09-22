@@ -17,8 +17,11 @@ namespace HostelFinder.Domain.Entities
         [MaxLength(256)]
         public string Email { get; set; }
         [Phone]
+        [Required]
         [MaxLength(20)]
-        public string? Phone { get; set; }
+        public string Phone { get; set; }
+        [MaxLength(255)]
+        public string? AvatarUrl { get; set; }
         [Required]
         public UserRole Role { get; set; }
         [Required]

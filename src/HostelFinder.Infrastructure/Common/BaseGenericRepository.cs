@@ -10,7 +10,7 @@ namespace HostelFinder.Infrastructure.Common
 
     public class BaseGenericRepository<T> : IBaseGenericRepository<T> where T : BaseEntity
     {
-        private readonly HostelFinderDbContext _dbContext;
+        public readonly HostelFinderDbContext _dbContext;
 
         public BaseGenericRepository
             (HostelFinderDbContext dbContext)

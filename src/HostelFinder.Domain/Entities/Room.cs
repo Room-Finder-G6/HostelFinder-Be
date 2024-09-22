@@ -12,11 +12,14 @@ namespace HostelFinder.Domain.Entities
         public Guid RoomTypeId { get; set; }
         [Required]
         [MaxLength(50)]
-        public string RoomName { get; set; }
+        public string Title { get; set; }
         [MaxLength(255)]
         public string? Description { get; set; }
         [Required]
         public decimal Price { get; set; }
+        public decimal? Size { get; set; }
+        public bool Available { get; set; } = true;
+        public DateTime DateAvailable { get; set; }
         public virtual Hostel Hostel { get; set; }  
         public virtual RoomType RoomType { get; set; } 
         public virtual ICollection<BookingRequest> BookingRequests { get; set; }
