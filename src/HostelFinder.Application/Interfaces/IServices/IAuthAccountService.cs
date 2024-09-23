@@ -10,6 +10,5 @@ namespace HostelFinder.Application.Interfaces.IServices
 
         Task<Response<string>> ChangePasswordAsync(ChangePasswordRequest request);
 
-        Task<Response<>>
     }
 }
