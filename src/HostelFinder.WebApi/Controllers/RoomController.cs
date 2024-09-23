@@ -1,4 +1,4 @@
-﻿using HostelFinder.Application.Interfaces;
+﻿using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
