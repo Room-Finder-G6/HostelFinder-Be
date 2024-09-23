@@ -13,7 +13,12 @@
   <ItemGroup>
     <Folder Include="DTOs\Room\Requests\" />
     <Folder Include="DTOs\Room\Responses\" />
+    <Folder Include="Mappings\" />
     <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
   </ItemGroup>
 
 </Project>
