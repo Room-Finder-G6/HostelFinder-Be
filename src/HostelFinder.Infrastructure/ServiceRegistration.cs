@@ -16,7 +16,6 @@ public class ServiceRegistration
 {
     public static void Configure(IServiceCollection service, IConfiguration configuration)
     {
-        
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         service.AddDbContext<HostelFinderDbContext>(options =>
             options.UseSqlServer(connectionString));
