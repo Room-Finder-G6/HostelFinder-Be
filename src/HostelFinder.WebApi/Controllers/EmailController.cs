@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/test-sendEmail")]
     [ApiController]
     public class EmailController : ControllerBase
     {
