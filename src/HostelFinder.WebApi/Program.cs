@@ -9,6 +9,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
+HostelFinder.Application.ServiceExtentions.ConfigureServices(builder.Services, builder.Configuration);
 HostelFinder.Infrastructure.ServiceRegistration.Configure(builder.Services, builder.Configuration);
 
 var app = builder.Build();

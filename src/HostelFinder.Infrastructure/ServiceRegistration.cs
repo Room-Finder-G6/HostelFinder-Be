@@ -1,7 +1,9 @@
-﻿using HostelFinder.Infrastructure.Common;
+using HostelFinder.Infrastructure.Common;
+using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Infrastructure.Context;
 using HostelFinder.Infrastructure.Services;
 using HostelFinder.Infrastructure.Services.Interfaces;
+using HostelFinder.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,10 +14,13 @@ public class ServiceRegistration
 {
     public static void Configure(IServiceCollection service, IConfiguration configuration)
     {
+        
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         service.AddDbContext<HostelFinderDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        service.AddScoped<IRoomRepository, RoomRepository>();
+        
         service.AddScoped<IEmailService, EmailService>();
     }
 }
