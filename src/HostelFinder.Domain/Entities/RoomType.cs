@@ -1,5 +1,6 @@
 ﻿using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations;
+using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Domain.Entities
 {
@@ -7,7 +8,7 @@ namespace HostelFinder.Domain.Entities
     {
         [Required]
         [MaxLength(50)]
-        public string TypeName{  get; set; }
+        public RoomTypeEnum TypeName{  get; set; }
         public virtual ICollection<Room> Rooms { get; set; }    
     }
 }

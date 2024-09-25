@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
+HostelFinder.Application.ServiceExtentions.ConfigureServices(builder.Services, builder.Configuration);
 
 // Add CORS policy
 builder.Services.AddCors(options =>
