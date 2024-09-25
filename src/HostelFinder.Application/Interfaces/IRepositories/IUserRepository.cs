@@ -11,6 +11,5 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 
         Task<bool?> CheckUserNameOrEmailExistAsync(string userName, string email);
 
-
     }
 }
