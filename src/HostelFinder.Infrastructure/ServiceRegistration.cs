@@ -1,11 +1,8 @@
 using HostelFinder.Application.Interfaces.IRepositories;
-using HostelFinder.Infrastructure.Common;
-using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Infrastructure.Context;
 using HostelFinder.Infrastructure.Repositories;
 using HostelFinder.Infrastructure.Services;
 using HostelFinder.Infrastructure.Services.Interfaces;
-using HostelFinder.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
