@@ -1,6 +1,4 @@
 using HostelFinder.Infrastructure.Common;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +9,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
+HostelFinder.Application.ServiceExtentions.ConfigureServices(builder.Services, builder.Configuration);
+HostelFinder.Application.ServiceExtentions.ConfigureServices(builder.Services, builder.Configuration);
+HostelFinder.Application.ServiceExtentions.ConfigureServices(builder.Services, builder.Configuration);
+HostelFinder.Application.ServiceExtentions.ConfigureServices(builder.Services, builder.Configuration);
 
 // Add CORS policy
 builder.Services.AddCors(options =>
