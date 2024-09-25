@@ -1,6 +1,4 @@
 using HostelFinder.Infrastructure.Common;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
