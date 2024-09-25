@@ -13,17 +13,19 @@ namespace HostelFinder.Domain.Entities
         [Required]
         [MaxLength(50)]
         public string Title { get; set; }
-        [MaxLength(255)]
-        public string? Description { get; set; }
         [Required]
-        public decimal Price { get; set; }
+        [MaxLength(255)]
+        public string Description { get; set; }
         public decimal? Size { get; set; }
-        public bool Available { get; set; } = true;
+        public decimal MonthlyRentCost { get; set; }
+        public bool IsAvailable { get; set; } = true;
         public DateTime DateAvailable { get; set; }
         public virtual Hostel Hostel { get; set; }  
         public virtual RoomType RoomType { get; set; } 
         public virtual ICollection<BookingRequest> BookingRequests { get; set; }
-        public virtual ICollection<RoomFeature> RoomFeatures { get; set; }
+        public virtual RoomDetails RoomDetails { get; set; }
+        public virtual RoomAmenities RoomAmenities { get; set; }
         public virtual ICollection<Image> Images { get; set; }
+        public virtual ICollection<ServiceCost> ServiceCosts { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    partial class HostelFinderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240924081746_AddRoomDetailsTable")]
+    partial class AddRoomDetailsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -281,6 +284,9 @@ namespace HostelFinder.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("Available")
+                        .HasColumnType("bit");
+
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -298,9 +304,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<Guid>("HostelId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -310,7 +313,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LastModifiedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<decimal>("MonthlyRentCost")
+                    b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("RoomTypeId")
@@ -339,44 +342,10 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("HostelFinder.Domain.Entities.RoomAmenities", b =>
-                {
-                    b.Property<Guid>("RoomId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("HasAirConditioner")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasElevator")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasEmergencyExit")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasFireExtinguisher")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasFridge")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasGarage")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasWifi")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("OtherAmenities")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("RoomId");
-
-                    b.ToTable("RoomAmenities");
-                });
-
             modelBuilder.Entity("HostelFinder.Domain.Entities.RoomDetails", b =>
                 {
-                    b.Property<Guid>("RoomId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("BathRooms")
@@ -385,12 +354,35 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<int>("BedRooms")
                         .HasColumnType("int");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Kitchen")
                         .HasColumnType("int");
 
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("LastModifiedOn")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("OtherDetails")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<decimal>("Size")
                         .HasColumnType("decimal(18,2)");
@@ -398,7 +390,10 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
-                    b.HasKey("RoomId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId")
+                        .IsUnique();
 
                     b.ToTable("RoomDetails");
                 });
@@ -430,9 +425,10 @@ namespace HostelFinder.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int>("TypeName")
+                    b.Property<string>("TypeName")
+                        .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -481,46 +477,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasIndex("HostelId");
 
                     b.ToTable("Services");
-                });
-
-            modelBuilder.Entity("HostelFinder.Domain.Entities.ServiceCost", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("LastModifiedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("RoomId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoomId");
-
-                    b.ToTable("ServiceCosts");
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.User", b =>
@@ -669,17 +625,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Navigation("RoomType");
                 });
 
-            modelBuilder.Entity("HostelFinder.Domain.Entities.RoomAmenities", b =>
-                {
-                    b.HasOne("HostelFinder.Domain.Entities.Room", "Room")
-                        .WithOne("RoomAmenities")
-                        .HasForeignKey("HostelFinder.Domain.Entities.RoomAmenities", "RoomId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Room");
-                });
-
             modelBuilder.Entity("HostelFinder.Domain.Entities.RoomDetails", b =>
                 {
                     b.HasOne("HostelFinder.Domain.Entities.Room", "Room")
@@ -702,17 +647,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Navigation("Hostel");
                 });
 
-            modelBuilder.Entity("HostelFinder.Domain.Entities.ServiceCost", b =>
-                {
-                    b.HasOne("HostelFinder.Domain.Entities.Room", "Room")
-                        .WithMany("ServiceCosts")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Room");
-                });
-
             modelBuilder.Entity("HostelFinder.Domain.Entities.Hostel", b =>
                 {
                     b.Navigation("Images");
@@ -730,13 +664,8 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.Navigation("Images");
 
-                    b.Navigation("RoomAmenities")
-                        .IsRequired();
-
                     b.Navigation("RoomDetails")
                         .IsRequired();
-
-                    b.Navigation("ServiceCosts");
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.RoomType", b =>
