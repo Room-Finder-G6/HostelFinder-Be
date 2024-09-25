@@ -1,5 +1,4 @@
-using HostelFinder.Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using HostelFinder.Infrastructure.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 HostelFinder.Infrastructure.ServiceRegistration.Configure(builder.Services, builder.Configuration);
 
