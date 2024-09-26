@@ -14,21 +14,21 @@ public class RoomController : ControllerBase
     {
         _roomRepository = roomRepository;
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> GetRoomsByHostelId(Guid hostelId)
     {
         var rooms = await _roomRepository.GetRoomsByHostelId(hostelId);
         return Ok(rooms);
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> GetRoomsByHostelId(Guid hostelId, string? search)
     {
         var rooms = await _roomRepository.GetRoomsByHostelId(hostelId, search);
         return Ok(rooms);
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> GetRoomByRoomId(Guid roomId)
     {
