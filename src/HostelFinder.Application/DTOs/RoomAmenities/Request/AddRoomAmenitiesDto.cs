@@ -1,13 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HostelFinder.Domain.Entities;
+namespace HostelFinder.Application.DTOs.RoomAmenities.Request;
 
-public class RoomAmenities
+public class AddRoomAmenitiesDto
 {
-    [Key]
-    public Guid RoomId { get; set; }
-
     public bool HasAirConditioner { get; set; }
     public bool HasElevator { get; set; } 
     public bool HasWifi { get; set; } 
@@ -16,7 +12,5 @@ public class RoomAmenities
     public bool HasFireExtinguisher { get; set; } 
     public bool HasEmergencyExit { get; set; }
     [MaxLength(255)]
-    public string? OtherAmenities { get; set; }
-
-    public virtual Room Room { get; set; } = default!;
+    public string? OtherAmenities { get; set; } = string.Empty;
 }
