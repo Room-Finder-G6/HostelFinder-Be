@@ -10,11 +10,13 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Hostel> Hostels { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Room> Rooms { get; set; }
-    public DbSet<RoomFeature> RoomFeatures { get; set; }
+    public DbSet<RoomDetails> RoomDetails { get; set; }
+    public DbSet<RoomAmenities> RoomAmenities { get; set; }
     public DbSet<RoomType> RoomTypes { get; set; }
     public DbSet<Service> Services { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Image> Images { get; set; }
+    public DbSet<ServiceCost> ServiceCosts { get; set; }
 
     public DbSet<BlackListToken> BlackListTokens { get; set; }
 
@@ -84,9 +86,15 @@ public class HostelFinderDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Room>()
-            .HasMany(r => r.RoomFeatures)
+            .HasOne(r => r.RoomDetails)
             .WithOne(rf => rf.Room)
-            .HasForeignKey(rf => rf.RoomId)
+            .HasForeignKey<RoomDetails>(rf => rf.RoomId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Room>()
+            .HasOne(r => r.RoomAmenities)
+            .WithOne(ra => ra.Room)
+            .HasForeignKey<RoomAmenities>(ra => ra.RoomId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Room>()
@@ -97,12 +105,21 @@ public class HostelFinderDbContext : DbContext
 
         modelBuilder.Entity<Room>(entity =>
         {
-            entity.Property(e => e.Price)
-                .HasColumnType("decimal(18,2)");
-
             entity.Property(e => e.Size)
                 .HasColumnType("decimal(18,2)");
         });
+
+        modelBuilder.Entity<Room>(entity =>
+        {
+            entity.Property(e => e.MonthlyRentCost)
+                .HasColumnType("decimal(18,2)");
+        });
+        
+        modelBuilder.Entity<Room>()
+            .HasMany(r=>r.ServiceCosts)
+            .WithOne(sc=>sc.Room)
+            .HasForeignKey(sc=>sc.RoomId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // RoomType
         modelBuilder.Entity<RoomType>()
@@ -137,16 +154,6 @@ public class HostelFinderDbContext : DbContext
             .HasOne(br => br.User)
             .WithMany(u => u.BookingRequests)
             .HasForeignKey(br => br.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // RoomFeature
-        modelBuilder.Entity<RoomFeature>()
-            .HasKey(rf => rf.Id);
-
-        modelBuilder.Entity<RoomFeature>()
-            .HasOne(rf => rf.Room)
-            .WithMany(r => r.RoomFeatures)
-            .HasForeignKey(rf => rf.RoomId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Service
@@ -190,5 +197,19 @@ public class HostelFinderDbContext : DbContext
             .WithMany(r => r.Images)
             .HasForeignKey(i => i.RoomId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // RoomDetails
+        modelBuilder.Entity<RoomDetails>(entity =>
+        {
+            entity.Property(e => e.Size)
+                .HasColumnType("decimal(18,2)");
+        });
+        
+        // ServiceCost
+        modelBuilder.Entity<ServiceCost>(entity =>
+        {
+            entity.Property(e => e.Cost)
+                .HasColumnType("decimal(18,2)");
+        });
     }
 }

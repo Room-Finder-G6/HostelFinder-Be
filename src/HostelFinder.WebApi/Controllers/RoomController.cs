@@ -1,66 +1,29 @@
-﻿using HostelFinder.Application.Interfaces.IRepositories;
-using HostelFinder.Domain.Entities;
+using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]/[action]")]
+[Route("api/[controller]")]
 public class RoomController : ControllerBase
 {
-    private readonly IRoomRepository _roomRepository;
-    
-    public RoomController(IRoomRepository roomRepository)
+    private readonly IRoomService _roomService;
+
+    public RoomController(IRoomService roomService)
     {
-        _roomRepository = roomRepository;
+        _roomService = roomService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetRoomsByHostelId(Guid hostelId)
+    [Route("GetAllRoomFeaturesByRoomId/{roomId}")]
+    public async Task<IActionResult> GetAllRoomFeaturesByRoomId(Guid roomId)
     {
-        var rooms = await _roomRepository.GetRoomsByHostelId(hostelId);
-        return Ok(rooms);
-    }
+        var result = await _roomService.GetAllRoomFeaturesByIdAsync(roomId);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
 
-    [HttpGet]
-    public async Task<IActionResult> GetRoomsByHostelId(Guid hostelId, string? search)
-    {
-        var rooms = await _roomRepository.GetRoomsByHostelId(hostelId, search);
-        return Ok(rooms);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetRoomByRoomId(Guid roomId)
-    {
-        var room = await _roomRepository.GetRoomByRoomId(roomId);
-        return Ok(room);
-    }
-    
-    [HttpGet]
-    public async Task<IActionResult> GetRoomsByRoomType(string roomType)
-    {
-        var rooms = await _roomRepository.GetRoomsByRoomType(roomType);
-        return Ok(rooms);
-    }
-    
-    [HttpGet]
-    public async Task<IActionResult> GetRoomsByPrice(decimal minPrice, decimal maxPrice)
-    {
-        var rooms = await _roomRepository.GetRoomsByPrice(minPrice, maxPrice);
-        return Ok(rooms);
-    }
-    
-    [HttpGet]
-    public async Task<IActionResult> GetRoomsByTitle(string title)
-    {
-        var rooms = await _roomRepository.GetRoomsByTitle(title);
-        return Ok(rooms);
-    }
-    
-    [HttpPost]
-    public async Task<IActionResult> AddRoomAsync(Room room)
-    {
-        var addedRoom = await _roomRepository.AddRoomAsync(room);
-        return Ok(addedRoom);
+        return NotFound();
     }
 }
