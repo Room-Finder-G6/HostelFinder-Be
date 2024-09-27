@@ -21,10 +21,12 @@ namespace HostelFinder.Application
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAuthAccountService, AuthAccountService>();
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<IHostelService, HostelService>();
+
 
 
             //register automapper
-            services.AddAutoMapper(typeof(GeneralProfile));
+            services.AddAutoMapper(typeof(GeneralProfile).Assembly);
 
             //register jwt token
             var jwtSettings = services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));

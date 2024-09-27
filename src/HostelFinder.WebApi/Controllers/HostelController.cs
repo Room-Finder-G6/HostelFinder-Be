@@ -35,9 +35,9 @@ namespace HostelFinder.WebApi.Controllers
             return BadRequest(result.Errors);
         }
 
-        // PUT: api/Hostel/UpdateHostel
-        [HttpPut("UpdateHostel")]
-        public async Task<IActionResult> UpdateHostel([FromBody] UpdateHostelRequestDto hostelDto)
+        // PUT: api/Hostel/hostelId
+        [HttpPut("UpdateHostel/{hostelId}")]
+        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromBody] UpdateHostelRequestDto hostelDto)
         {
             var result = await _hostelService.UpdateHostelAsync(hostelDto);
             if (result.Succeeded)

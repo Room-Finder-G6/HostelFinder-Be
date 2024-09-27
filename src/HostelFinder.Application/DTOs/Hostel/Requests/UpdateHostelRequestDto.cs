@@ -1,7 +1,4 @@
-﻿using HostelFinder.Application.DTOs.Room.Requests;
-using HostelFinder.Application.DTOs.ServiceCost.Request;
-
-namespace HostelFinder.Application.DTOs.Hostel.Requests
+﻿namespace HostelFinder.Application.DTOs.Hostel.Requests
 {
     public class UpdateHostelRequestDto
     {

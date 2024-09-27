@@ -42,6 +42,7 @@ public class GeneralProfile : Profile
         // Hostel Mapping
         CreateMap<Hostel, HostelResponseDto>().ReverseMap();
         CreateMap<Hostel, AddHostelRequestDto>().ReverseMap();
+        CreateMap<Hostel, UpdateHostelRequestDto>().ReverseMap();
 
         // RoomDetails Mapping
         CreateMap<RoomDetails, RoomDetailsResponseDto>().ReverseMap();

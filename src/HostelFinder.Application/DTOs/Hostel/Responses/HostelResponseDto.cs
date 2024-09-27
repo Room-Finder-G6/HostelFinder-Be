@@ -1,12 +1,4 @@
-﻿using HostelFinder.Application.DTOs.Room.Requests;
-using HostelFinder.Application.DTOs.ServiceCost.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HostelFinder.Application.DTOs.Hostel.Responses
+﻿namespace HostelFinder.Application.DTOs.Hostel.Responses
 {
     public class HostelResponseDto
     {
