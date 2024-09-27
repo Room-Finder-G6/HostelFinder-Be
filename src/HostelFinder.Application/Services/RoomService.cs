@@ -40,6 +40,8 @@ public class RoomService : IRoomService
             roomDomain.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetails);
             roomDomain.RoomAmenities = _mapper.Map<RoomAmenities>(roomDto.RoomAmenities);
             roomDomain.ServiceCosts = _mapper.Map<List<ServiceCost>>(roomDto.ServiceCosts);
+            roomDomain.CreatedOn = DateTime.Now;
+            roomDomain.CreatedBy = "System";
             var room = await _roomRepository.AddAsync(roomDomain);
 
             var roomResponseDto = _mapper.Map<AddRoomRequestDto>(room);
