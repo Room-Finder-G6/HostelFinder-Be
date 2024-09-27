@@ -7,7 +7,6 @@ namespace HostelFinder.Domain.Entities;
 public class RoomDetails
 {
     [Key]
-    [ForeignKey("Room")]
     public Guid RoomId { get; set; }
 
     public int BedRooms { get; set; } 
@@ -16,7 +15,7 @@ public class RoomDetails
     public decimal Size { get; set; }
     public bool Status { get; set; }
     [MaxLength(255)]
-    public string? OtherDetails { get; set; } = string.Empty;
+    public string? OtherDetails { get; set; }
     
     public virtual Room Room { get; set; } = default!;
 }

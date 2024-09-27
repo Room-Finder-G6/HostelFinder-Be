@@ -6,4 +6,5 @@ namespace HostelFinder.Application.Interfaces.IServices;
 public interface IRoomService
 {
     Task<Response<RoomResponseDto>> GetAllRoomFeaturesByIdAsync(Guid roomId);
+    Task<Response<AddRoomRequestDto>> AddRoomAsync(AddRoomRequestDto roomDto);
 }

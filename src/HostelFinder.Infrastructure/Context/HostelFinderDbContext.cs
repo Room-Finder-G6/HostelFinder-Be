@@ -12,7 +12,6 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Room> Rooms { get; set; }
     public DbSet<RoomDetails> RoomDetails { get; set; }
     public DbSet<RoomAmenities> RoomAmenities { get; set; }
-    public DbSet<RoomType> RoomTypes { get; set; }
     public DbSet<Service> Services { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Image> Images { get; set; }
@@ -74,12 +73,6 @@ public class HostelFinderDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Room>()
-            .HasOne(r => r.RoomType)
-            .WithMany(rt => rt.Rooms)
-            .HasForeignKey(r => r.RoomTypeId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Room>()
             .HasMany(r => r.BookingRequests)
             .WithOne(br => br.Room)
             .HasForeignKey(br => br.RoomId)
@@ -119,12 +112,6 @@ public class HostelFinderDbContext : DbContext
             .HasMany(r=>r.ServiceCosts)
             .WithOne(sc=>sc.Room)
             .HasForeignKey(sc=>sc.RoomId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // RoomType
-        modelBuilder.Entity<RoomType>()
-            .HasMany(rt => rt.Rooms)
-            .WithOne(r => r.RoomType)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Review

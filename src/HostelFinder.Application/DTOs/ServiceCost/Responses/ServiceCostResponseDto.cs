@@ -1,4 +1,4 @@
-﻿namespace HostelFinder.Application.DTOs.ServiceCostDto.Responses;
+﻿namespace HostelFinder.Application.DTOs.ServiceCost.Responses;
 
 public class ServiceCostResponseDto
 {

@@ -20,6 +20,8 @@ namespace HostelFinder.Application
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAuthAccountService, AuthAccountService>();
+            services.AddScoped<IRoomService, RoomService>();
+
 
             //register automapper
             services.AddAutoMapper(typeof(GeneralProfile));
