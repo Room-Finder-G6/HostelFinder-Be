@@ -1,5 +1,5 @@
-﻿using HostelFinder.Application.Interfaces.IRepositories;
-using HostelFinder.Domain.Entities;
+﻿using HostelFinder.Application.DTOs.Hostel.Requests;
+using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -8,88 +8,55 @@ namespace HostelFinder.WebApi.Controllers
     [ApiController]
     public class HostelController : ControllerBase
     {
-        private readonly IHostelRepository _hostelRepository;
+        private readonly IHostelService _hostelService;
 
-        public HostelController(IHostelRepository hostelRepository)
+        public HostelController(IHostelService hostelService)
         {
-            _hostelRepository = hostelRepository;
-        }
-
-        // GET: api/Hostel/GetAllHostels
-        [HttpGet]
-        public async Task<IActionResult> GetAllHostels()
-        {
-            var hostels = await _hostelRepository.GetAllHostelsAsync();
-            return Ok(hostels);
-        }
-
-        // GET: api/Hostel/GetHostelById/{id}
-        [HttpGet]
-        public async Task<IActionResult> GetHostelById(Guid id)
-        {
-            var hostel = await _hostelRepository.GetHostelWithDetailsAsync(id);
-            if (hostel == null)
-            {
-                return NotFound();
-            }
-            return Ok(hostel);
+            _hostelService = hostelService;
         }
 
         // GET: api/Hostel/GetHostelsByLandlordId/{landlordId}
-        [HttpGet]
+        [HttpGet("GetHostelsByLandlordId/{landlordId}")]
         public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId)
         {
-            var hostels = await _hostelRepository.GetHostelsByLandlordIdAsync(landlordId);
-            return Ok(hostels);
-        }
-
-        // GET: api/Hostel/GetHostelsByName?name={name}
-        [HttpGet]
-        public async Task<IActionResult> GetHostelsByName(string name)
-        {
-            var hostels = await _hostelRepository.GetHostelsByNameAsync(name);
-            return Ok(hostels);
-        }
-
-        // GET: api/Hostel/GetHostelsByAddress?address={address}
-        [HttpGet]
-        public async Task<IActionResult> GetHostelsByAddress(string address)
-        {
-            var hostels = await _hostelRepository.GetHostelsByAddressAsync(address);
+            var hostels = await _hostelService.GetHostelsByLandlordIdAsync(landlordId);
             return Ok(hostels);
         }
 
         // POST: api/Hostel/AddHostel
-        [HttpPost]
-        public async Task<IActionResult> AddHostel(Hostel hostel)
+        [HttpPost("AddHostel")]
+        public async Task<IActionResult> AddHostel([FromBody] AddHostelRequestDto hostelDto)
         {
-            var addedHostel = await _hostelRepository.AddHostelAsync(hostel);
-            return Ok(addedHostel);
+            var result = await _hostelService.AddHostelAsync(hostelDto);
+            if (result.Succeeded)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Errors);
         }
 
-        // PUT: api/Hostel/UpdateHostel/{id}
-        [HttpPut]
-        public async Task<IActionResult> UpdateHostel(Guid id, Hostel hostel)
+        // PUT: api/Hostel/UpdateHostel
+        [HttpPut("UpdateHostel")]
+        public async Task<IActionResult> UpdateHostel([FromBody] UpdateHostelRequestDto hostelDto)
         {
-            if (id != hostel.Id)
+            var result = await _hostelService.UpdateHostelAsync(hostelDto);
+            if (result.Succeeded)
             {
-                return BadRequest("Hostel ID mismatch.");
+                return Ok(result);
             }
-
-            var updatedHostel = await _hostelRepository.UpdateHostelAsync(hostel);
-            return Ok(updatedHostel);
+            return NotFound(result.Errors);
         }
 
         // DELETE: api/Hostel/DeleteHostel/{id}
-        [HttpDelete]
+        [HttpDelete("DeleteHostel/{id}")]
         public async Task<IActionResult> DeleteHostel(Guid id)
         {
-            var deletedHostel = await _hostelRepository.DeleteHostelAsync(id);
-            if (deletedHostel == null)
+            var result = await _hostelService.DeleteHostelAsync(id);
+            if (result.Succeeded)
             {
-                return NotFound();
+                return Ok(result);
             }
-            return Ok(deletedHostel);
+            return NotFound(result.Errors);
         }
     }
 }
