@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HostelFinder.Application.Common;
+using HostelFinder.Domain.Entities;
 
-namespace HostelFinder.Application.Interfaces.IRepositories
+namespace HostelFinder.Application.Interfaces.IRepositories;
+
+public interface IHostelRepository : IBaseGenericRepository<Hostel>
 {
-    internal interface IHostelRepository
-    {
-    }
+    Task<IEnumerable<Hostel>> GetHostelsByLandlordIdAsync(Guid landlordId);
 }

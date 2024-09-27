@@ -16,11 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\Images\Request\" />
-    <Folder Include="DTOs\Images\Response\" />
+    <Folder Include="DTOs\Room\Requests\" />
     <Folder Include="DTOs\Room\Responses\" />
     <Folder Include="Mappings\" />
-    <Folder Include="Services\" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="ClosedXML" Version="0.102.3" />
     <PackageReference Include="FluentValidation" Version="11.10.0" />

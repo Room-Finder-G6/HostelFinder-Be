@@ -7,6 +7,8 @@ using HostelFinder.Application.DTOs.ServiceCost.Responses;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Application.DTOs.Users;
 using HostelFinder.Application.DTOs.Users.Requests;
+using HostelFinder.Application.DTOs.Hostel.Requests;
+using HostelFinder.Application.DTOs.Hostel.Responses;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -36,6 +38,11 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.ServiceCosts,
                 opt => opt.MapFrom(src => src.ServiceCosts))
             ;
+
+        // Hostel Mapping
+        CreateMap<Hostel, HostelResponseDto>().ReverseMap();
+        CreateMap<Hostel, AddHostelRequestDto>().ReverseMap();
+        CreateMap<Hostel, UpdateHostelRequestDto>().ReverseMap();
 
         // RoomDetails Mapping
         CreateMap<RoomDetails, RoomDetailsResponseDto>().ReverseMap();
