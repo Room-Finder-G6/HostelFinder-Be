@@ -1,3 +1,4 @@
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,5 +26,18 @@ public class RoomController : ControllerBase
         }
 
         return NotFound();
+    }
+    
+    [HttpPost]
+    [Route("AddRoom")]
+    public async Task<IActionResult> AddRoom([FromBody] AddRoomRequestDto roomDto)
+    {
+        var result = await _roomService.AddRoomAsync(roomDto);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest();
     }
 }
