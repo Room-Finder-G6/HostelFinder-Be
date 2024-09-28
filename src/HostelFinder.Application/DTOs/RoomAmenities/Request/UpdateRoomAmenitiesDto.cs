@@ -1,6 +1,6 @@
-﻿namespace HostelFinder.Application.DTOs.RoomAmenities.Response;
+﻿namespace HostelFinder.Application.DTOs.RoomAmenities.Request;
 
-public class RoomAmenitiesResponseDto
+public class UpdateRoomAmenitiesDto
 {
     public bool HasAirConditioner { get; set; }
     public bool HasElevator { get; set; } 
