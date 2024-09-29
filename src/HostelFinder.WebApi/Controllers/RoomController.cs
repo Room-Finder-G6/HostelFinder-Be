@@ -32,12 +32,36 @@ public class RoomController : ControllerBase
     [Route("AddRoom")]
     public async Task<IActionResult> AddRoom([FromBody] AddRoomRequestDto roomDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState); 
+        }
+        
         var result = await _roomService.AddRoomAsync(roomDto);
         if (result.Succeeded)
         {
             return Ok(result);
         }
 
-        return BadRequest();
+        return BadRequest(result.Errors);
     }
+    
+    [HttpPut]
+    [Route("UpdateRoom/{roomId}")]
+    public async Task<IActionResult> UpdateRoom([FromBody] UpdateRoomRequestDto roomDto, Guid roomId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState); 
+        }
+        
+        var result = await _roomService.UpdateRoomAsync(roomDto, roomId);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result.Errors);
+    }
+    
 }

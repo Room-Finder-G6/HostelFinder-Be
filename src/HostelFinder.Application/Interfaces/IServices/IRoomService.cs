@@ -7,4 +7,5 @@ public interface IRoomService
 {
     Task<Response<RoomResponseDto>> GetAllRoomFeaturesByIdAsync(Guid roomId);
     Task<Response<AddRoomRequestDto>> AddRoomAsync(AddRoomRequestDto roomDto);
+    Task<Response<UpdateRoomRequestDto>> UpdateRoomAsync(UpdateRoomRequestDto roomDto, Guid roomId);
 }
