@@ -88,4 +88,18 @@ public class RoomService : IRoomService
         var roomResponseDto = _mapper.Map<UpdateRoomRequestDto>(existingRoom);
         return new Response<UpdateRoomRequestDto>(roomResponseDto);
     }
+
+    public async Task<Response<bool>> DeleteRoomAsync(Guid roomId)
+    {
+        var room = await _roomRepository.GetByIdAsync(roomId); 
+        if (room == null)
+        {
+            return new Response<bool>{Succeeded = false, Message="Room not found"};
+        }
+
+        await _roomRepository.DeletePermanentAsync(room.Id); 
+
+        return new Response<bool> { Succeeded = true, Message = "Delete Room Successfully" };
+    }
+
 }

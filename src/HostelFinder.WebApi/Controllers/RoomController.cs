@@ -64,4 +64,16 @@ public class RoomController : ControllerBase
         return BadRequest(result.Errors);
     }
     
+    [HttpDelete]
+    [Route("DeleteRoom/{roomId}")]
+    public async Task<IActionResult> DeleteRoom(Guid roomId)
+    {
+        var result = await _roomService.DeleteRoomAsync(roomId);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return NotFound();
+    }
 }
