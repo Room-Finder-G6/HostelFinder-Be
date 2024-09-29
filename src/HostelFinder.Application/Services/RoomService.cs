@@ -97,7 +97,7 @@ public class RoomService : IRoomService
             return new Response<bool>{Succeeded = false, Message="Room not found"};
         }
 
-        await _roomRepository.DeletePermanentAsync(room.Id); 
+        await _roomRepository.DeleteAsync(room.Id); 
 
         return new Response<bool> { Succeeded = true, Message = "Delete Room Successfully" };
     }
