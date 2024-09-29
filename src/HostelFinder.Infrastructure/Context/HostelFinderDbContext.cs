@@ -107,11 +107,11 @@ public class HostelFinderDbContext : DbContext
             entity.Property(e => e.MonthlyRentCost)
                 .HasColumnType("decimal(18,2)");
         });
-        
+
         modelBuilder.Entity<Room>()
-            .HasMany(r=>r.ServiceCosts)
-            .WithOne(sc=>sc.Room)
-            .HasForeignKey(sc=>sc.RoomId)
+            .HasMany(r => r.ServiceCosts)
+            .WithOne(sc => sc.Room)
+            .HasForeignKey(sc => sc.RoomId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Review
@@ -191,7 +191,7 @@ public class HostelFinderDbContext : DbContext
             entity.Property(e => e.Size)
                 .HasColumnType("decimal(18,2)");
         });
-        
+
         // ServiceCost
         modelBuilder.Entity<ServiceCost>(entity =>
         {

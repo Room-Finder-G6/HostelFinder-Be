@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Room.Requests;
+using HostelFinder.Application.DTOs.RoomAmenities.Response;
+using HostelFinder.Application.DTOs.RoomDetails.Response;
+using HostelFinder.Application.DTOs.ServiceCost.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -27,30 +30,62 @@ public class RoomService : IRoomService
         }
 
         var roomDto = _mapper.Map<RoomResponseDto>(room);
+        roomDto.RoomAmenitiesDto = _mapper.Map<RoomAmenitiesResponseDto>(room.RoomAmenities);
+        roomDto.RoomDetailsDto = _mapper.Map<RoomDetailsResponseDto>(room.RoomDetails);
+        roomDto.ServiceCostsDto = _mapper.Map<List<ServiceCostResponseDto>>(room.ServiceCosts);
+
         var response = new Response<RoomResponseDto>(roomDto);
         return response;
     }
 
     public async Task<Response<AddRoomRequestDto>> AddRoomAsync(AddRoomRequestDto roomDto)
     {
-        try
-        {
-            var roomDomain = _mapper.Map<Room>(roomDto);
+        var roomDomain = _mapper.Map<Room>(roomDto);
 
-            roomDomain.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetails);
-            roomDomain.RoomAmenities = _mapper.Map<RoomAmenities>(roomDto.RoomAmenities);
-            roomDomain.ServiceCosts = _mapper.Map<List<ServiceCost>>(roomDto.ServiceCosts);
-            roomDomain.CreatedOn = DateTime.Now;
-            roomDomain.CreatedBy = "System";
-            var room = await _roomRepository.AddAsync(roomDomain);
+        roomDomain.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetails);
+        roomDomain.RoomAmenities = _mapper.Map<RoomAmenities>(roomDto.RoomAmenities);
+        roomDomain.ServiceCosts = _mapper.Map<List<ServiceCost>>(roomDto.ServiceCosts);
+        roomDomain.CreatedOn = DateTime.Now;
+        roomDomain.CreatedBy = "System";
 
-            var roomResponseDto = _mapper.Map<AddRoomRequestDto>(room);
-            return new Response<AddRoomRequestDto>(roomResponseDto);
-        }
-        catch (Exception ex)
-        {
-            return new Response<AddRoomRequestDto> { Succeeded = false, Errors = { ex.Message } };
-        }  
+        var room = await _roomRepository.AddAsync(roomDomain);
+        var roomResponseDto = _mapper.Map<AddRoomRequestDto>(room);
+        return new Response<AddRoomRequestDto>(roomResponseDto);
     }
 
+    public async Task<Response<UpdateRoomRequestDto>> UpdateRoomAsync(UpdateRoomRequestDto roomDto, Guid roomId)
+    {
+        var existingRoom = await _roomRepository.GetAllRoomFeaturesByRoomId(roomId);
+
+        if (existingRoom == null)
+        {
+            return new Response<UpdateRoomRequestDto>("Room not found");
+        }
+
+        _mapper.Map(roomDto, existingRoom);
+
+        if (existingRoom.RoomDetails == null)
+        {
+            existingRoom.RoomDetails = new RoomDetails { RoomId = roomId };
+        }
+        _mapper.Map(roomDto.RoomDetails, existingRoom.RoomDetails);
+
+        if (existingRoom.RoomAmenities == null)
+        {
+            existingRoom.RoomAmenities = new RoomAmenities { RoomId = roomId };
+        }
+        _mapper.Map(roomDto.RoomAmenities, existingRoom.RoomAmenities);
+
+        /*if (roomDto.ServiceCosts != null)
+        {
+            existingRoom.ServiceCosts = _mapper.Map<List<ServiceCost>>(roomDto.ServiceCosts);
+        }*/
+
+        existingRoom.LastModifiedOn = DateTime.Now;
+        existingRoom.LastModifiedBy = "System"; 
+
+        await _roomRepository.UpdateAsync(existingRoom);
+        var roomResponseDto = _mapper.Map<UpdateRoomRequestDto>(existingRoom);
+        return new Response<UpdateRoomRequestDto>(roomResponseDto);
+    }
 }

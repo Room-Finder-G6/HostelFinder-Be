@@ -15,7 +15,7 @@ namespace HostelFinder.Domain.Entities
         [Required]
         [MaxLength(255)]
         public string Description { get; set; }
-        public virtual RoomType RoomType { get; set; } 
+        public RoomType RoomType { get; set; } 
         public decimal? Size { get; set; }
         public decimal MonthlyRentCost { get; set; }
         public bool IsAvailable { get; set; } = true;

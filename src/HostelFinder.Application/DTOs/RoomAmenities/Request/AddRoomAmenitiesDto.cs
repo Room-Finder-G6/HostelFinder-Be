@@ -12,5 +12,5 @@ public class AddRoomAmenitiesDto
     public bool HasFireExtinguisher { get; set; } 
     public bool HasEmergencyExit { get; set; }
     [MaxLength(255)]
-    public string? OtherAmenities { get; set; } = string.Empty;
+    public string? OtherAmenities { get; set; }
 }

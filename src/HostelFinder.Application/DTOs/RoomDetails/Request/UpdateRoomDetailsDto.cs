@@ -10,5 +10,5 @@ public class UpdateRoomDetailsDto
     public decimal Size { get; set; }
     public bool Status { get; set; }
     [MaxLength(255)]
-    public string? OtherDetails { get; set; } = string.Empty;
+    public string? OtherDetails { get; set; }
 }
