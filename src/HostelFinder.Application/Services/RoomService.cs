@@ -102,4 +102,10 @@ public class RoomService : IRoomService
         return new Response<bool> { Succeeded = true, Message = "Delete Room Successfully" };
     }
 
+    public async Task<Response<List<ListRoomResponseDto>>> GetAllRoomsAsync()
+    {
+        var rooms = await _roomRepository.GetAllRooms();
+        var roomsDto = _mapper.Map<List<ListRoomResponseDto>>(rooms);
+        return new Response<List<ListRoomResponseDto>>(roomsDto);
+    }
 }
