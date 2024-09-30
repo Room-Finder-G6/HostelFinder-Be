@@ -23,6 +23,7 @@ namespace HostelFinder.Application.Services
         {
             _mapper = mapper;
             _userRepository = userRepository;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
         public async Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request)
@@ -44,6 +45,7 @@ namespace HostelFinder.Application.Services
 
                 var userDomain = _mapper.Map<User>(request);
 
+                userDomain.Password = _passwordHasher.HashPassword(userDomain, userDomain.Password);
                 userDomain.IsDeleted = false;
                 userDomain.CreatedOn = DateTime.Now;
 
