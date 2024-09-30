@@ -8,6 +8,7 @@ public class UpdateRoomRequestDto
 {
     public string Title { get; set; }
     public string Description { get; set; }
+    public string PrimaryImageUrl { get; set; }
     public virtual RoomType RoomType { get; set; } 
     public decimal? Size { get; set; }
     public decimal MonthlyRentCost { get; set; }

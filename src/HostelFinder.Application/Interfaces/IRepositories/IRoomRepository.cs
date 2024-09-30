@@ -7,5 +7,5 @@ namespace HostelFinder.Application.Interfaces.IRepositories;
 public interface IRoomRepository : IBaseGenericRepository<Room>
 {
     Task<Room> GetAllRoomFeaturesByRoomId(Guid roomId);
-    /*Task AddRoom(Room room);*/
+    Task<List<Room>> GetAllRooms();
 }

@@ -30,11 +30,10 @@ public class GeneralProfile : Profile
                 opt => opt.MapFrom(src => src.ServiceCosts))
             .ReverseMap()
             ;
-        
+
         CreateMap<AddRoomRequestDto, Room>()
-            .ForMember(dest => dest.Images, 
-                opt => opt.MapFrom(src => src.ImagesUrls.
-                    Select(url => new Image { Url = url })))
+            .ForMember(dest => dest.Images,
+                opt => opt.MapFrom(src => src.ImagesUrls.Select(url => new Image { Url = url })))
             .ForMember(dest => dest.RoomDetails,
                 opt => opt.MapFrom(src => src.RoomDetails))
             .ForMember(dest => dest.RoomAmenities,
@@ -42,22 +41,27 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.ServiceCosts,
                 opt => opt.MapFrom(src => src.ServiceCosts))
             .ReverseMap();
-     
-        /*CreateMap<Room, AddRoomRequestDto>()
-            .ForMember(dest => dest.ImagesUrls, 
-                opt => opt.MapFrom(src => src.Images.Select(image => image.Url)))
-            .ForMember(dest => dest.RoomDetails, opt 
-                => opt.MapFrom(src => src.RoomDetails))
-            .ForMember(dest => dest.RoomAmenities, opt 
-                => opt.MapFrom(src => src.RoomAmenities))
-            .ForMember(dest => dest.ServiceCosts, opt 
-                => opt.MapFrom(src => src.ServiceCosts));*/
 
         CreateMap<Room, UpdateRoomRequestDto>()
             .ForMember(dest => dest.RoomAmenities,
                 opt => opt.MapFrom(src => src.RoomAmenities))
             .ForMember(dest => dest.RoomDetails,
                 opt => opt.MapFrom(src => src.RoomDetails))
+            .ReverseMap();
+
+        CreateMap<Room, ListRoomResponseDto>()
+            .ForMember(dest=>dest.Id,
+                opt=>opt.MapFrom(src=>src.Id))
+            .ForMember(dest => dest.Title,
+                opt => opt.MapFrom(src => src.Title))
+            .ForMember(dest => dest.Address,
+                opt => opt.MapFrom(src => src.Hostel.Address))
+            .ForMember(dest => dest.Size,
+                opt => opt.MapFrom(src => src.RoomDetails.Size))
+            .ForMember(dest => dest.PrimaryImageUrl,
+                opt => opt.MapFrom(src => src.PrimaryImageUrl))
+            .ForMember(dest => dest.MonthlyRentCost,
+                opt => opt.MapFrom(src => src.MonthlyRentCost))
             .ReverseMap();
 
         // Hostel Mapping
