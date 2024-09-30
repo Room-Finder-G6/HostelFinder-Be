@@ -9,7 +9,10 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 
         Task<User?> FindByEmailAsync(string email);
 
-        Task<bool?> CheckUserNameOrEmailExistAsync(string userName, string email);
+        Task<bool> CheckUserNameExistAsync(string userName);
+        Task<bool> CheckEmailExistAsync(string email);
+
+        Task<bool> CheckPhoneNumberAsync(string phoneNumber);
 
     }
 }

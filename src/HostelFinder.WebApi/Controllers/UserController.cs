@@ -15,24 +15,7 @@ namespace HostelFinder.WebApi.Controllers
             _userService = userService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateUserRequestDto request)
-        {
-            try
-            {
-                var response = await _userService.CreateUserAsync(request);
-                if (!response.Succeeded)
-                {
-                    return BadRequest(response);
-                }
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error: {ex.Message}");
-
-            }
-        }
+     
 
     }
 }

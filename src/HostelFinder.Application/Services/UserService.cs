@@ -23,10 +23,23 @@ namespace HostelFinder.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task<Response<UserDto>> CreateUserAsync(CreateUserRequestDto request)
+        public async Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request)
         {
             try
             {
+                if(await _userRepository.CheckUserNameExistAsync(request.Username))
+                {
+                    return new Response<UserDto> { Succeeded = false, Message = "User name already exists. Please enter a different user name." };
+                }
+                if (await _userRepository.CheckEmailExistAsync(request.Email))
+                {
+                    return new Response<UserDto> { Succeeded = false, Message = "Email already exists. Please enter a different email." };
+                }
+                if(await _userRepository.CheckPhoneNumberAsync(request.Phone))
+                {
+                    return new Response<UserDto> { Succeeded = false, Message = "Phone already exists. Please enter a different phone." };
+                }
+
                 var userDomain = _mapper.Map<User>(request);
 
                 userDomain.IsDeleted = false;

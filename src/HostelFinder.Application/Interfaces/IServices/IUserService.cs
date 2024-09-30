@@ -6,6 +6,6 @@ namespace HostelFinder.Application.Interfaces.IServices
 {
     public interface IUserService
     {
-        Task<Response<UserDto>> CreateUserAsync(CreateUserRequestDto request);
+        Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request);
     }
 }
