@@ -76,4 +76,17 @@ public class RoomController : ControllerBase
 
         return NotFound();
     }
+    
+    [HttpGet]
+    [Route("GetFilteredRooms")]
+    public async Task<IActionResult> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location)
+    {
+        var result = await _roomService.GetFilteredRooms(minPrice, maxPrice, location);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return NotFound();
+    }
 }

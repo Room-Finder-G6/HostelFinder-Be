@@ -16,6 +16,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<ServiceCost> ServiceCosts { get; set; }
+    public DbSet<Address> Addresses { get; set; }
 
     public DbSet<BlackListToken> BlackListTokens { get; set; }
 
@@ -64,6 +65,12 @@ public class HostelFinderDbContext : DbContext
             .WithOne(r => r.Hostel)
             .HasForeignKey(r => r.HostelId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Hostel>()
+            .HasOne(h => h.Address)
+            .WithOne(h => h.Hostel)
+            .HasForeignKey<Address>(h => h.HostelId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Room
         modelBuilder.Entity<Room>()
