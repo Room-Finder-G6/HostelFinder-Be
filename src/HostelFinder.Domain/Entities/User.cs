@@ -26,6 +26,9 @@ namespace HostelFinder.Domain.Entities
         public UserRole Role { get; set; }
         [Required]
         public bool IsActive { get; set; } = true;
+        [Required]
+        [MaxLength(255)]
+        public bool IsEmailConfirmed { get; set; }
         public virtual ICollection<Review>? Reviews { get; set; }
         public virtual ICollection<Hostel>? Hostels { get; set; }
         public virtual ICollection<BookingRequest>? BookingRequests { get; set; }

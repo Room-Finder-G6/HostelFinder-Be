@@ -5,6 +5,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace HostelFinder.Application.Services
 {
@@ -12,6 +13,7 @@ namespace HostelFinder.Application.Services
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
+        private readonly PasswordHasher<User> _passwordHasher;
 
         public UserService
         (
