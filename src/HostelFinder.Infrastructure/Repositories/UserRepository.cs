@@ -12,15 +12,34 @@ namespace HostelFinder.Infrastructure.Repositories
         {
         }
 
-        public async Task<bool?> CheckUserNameOrEmailExistAsync(string userName, string email)
+        public async Task<bool> CheckEmailExistAsync(string email)
         {
-            var user = await _dbContext.Users.AnyAsync(u => u.Email == email || u.Username == userName && !u.IsDeleted);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if(user == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public async Task<bool> CheckPhoneNumberAsync(string phoneNumber)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Phone == phoneNumber);
             if (user == null)
             {
                 return false;
             }
             return true;
+        }
 
+        public async Task<bool> CheckUserNameExistAsync(string userName)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Username == userName);
+            if (user == null)
+            {
+                return false;
+            }
+            return true;
         }
 
         public async Task<User?> FindByEmailAsync(string email)
