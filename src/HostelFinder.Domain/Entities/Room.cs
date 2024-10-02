@@ -26,5 +26,7 @@ namespace HostelFinder.Domain.Entities
         public virtual RoomAmenities RoomAmenities { get; set; }
         public virtual ICollection<Image> Images { get; set; }
         public virtual ICollection<ServiceCost> ServiceCosts { get; set; }
+        public virtual ICollection<WishlistRoom> WishlistRooms { get; set; }
+
     }
 }

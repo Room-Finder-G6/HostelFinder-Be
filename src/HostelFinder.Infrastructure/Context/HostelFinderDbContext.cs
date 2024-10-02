@@ -16,8 +16,10 @@ public class HostelFinderDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<ServiceCost> ServiceCosts { get; set; }
-
     public DbSet<BlackListToken> BlackListTokens { get; set; }
+    public DbSet<Wishlist> Wishlists { get; set; }
+    public DbSet<WishlistRoom> WishlistRooms { get; set; }
+
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -114,6 +116,20 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(sc => sc.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        //WishlistRoom
+        modelBuilder.Entity<WishlistRoom>()
+            .HasKey(wr => new { wr.RoomId, wr.WishlistId });
+
+        modelBuilder.Entity<WishlistRoom>()
+            .HasOne(wr => wr.Room)
+            .WithMany(r => r.WishlistRooms)
+            .HasForeignKey(wr => wr.RoomId);
+
+        modelBuilder.Entity<WishlistRoom>()
+            .HasOne(wr => wr.Wishlist)
+            .WithMany(w => w.WishlistRooms)
+            .HasForeignKey(wr => wr.WishlistId);
+
         // Review
         modelBuilder.Entity<Review>()
             .HasOne(r => r.User)
@@ -198,5 +214,6 @@ public class HostelFinderDbContext : DbContext
             entity.Property(e => e.Cost)
                 .HasColumnType("decimal(18,2)");
         });
+
     }
 }
