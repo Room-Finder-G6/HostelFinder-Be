@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    partial class HostelFinderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240930094149_ver1.9 Add prop IsEmailConfirm in table User")]
+    partial class ver19AddpropIsEmailConfirmintableUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,33 +24,6 @@ namespace HostelFinder.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("HostelFinder.Domain.Entities.Address", b =>
-                {
-                    b.Property<Guid>("HostelId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DetailAddress")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("District")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Province")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("commune")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("HostelId");
-
-                    b.ToTable("Addresses");
-                });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.BlackListToken", b =>
                 {
@@ -142,6 +118,11 @@ namespace HostelFinder.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("Coordinates")
                         .HasColumnType("nvarchar(max)");
 
@@ -185,8 +166,6 @@ namespace HostelFinder.Infrastructure.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<float?>("Size")
-                        .IsRequired()
-                        .HasMaxLength(255)
                         .HasColumnType("real");
 
                     b.HasKey("Id");
@@ -336,10 +315,6 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.Property<decimal>("MonthlyRentCost")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PrimaryImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RoomType")
                         .HasColumnType("int");
@@ -583,17 +558,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("HostelFinder.Domain.Entities.Address", b =>
-                {
-                    b.HasOne("HostelFinder.Domain.Entities.Hostel", "Hostel")
-                        .WithOne("Address")
-                        .HasForeignKey("HostelFinder.Domain.Entities.Address", "HostelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Hostel");
-                });
-
             modelBuilder.Entity("HostelFinder.Domain.Entities.BookingRequest", b =>
                 {
                     b.HasOne("HostelFinder.Domain.Entities.Room", "Room")
@@ -716,9 +680,6 @@ namespace HostelFinder.Infrastructure.Migrations
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Hostel", b =>
                 {
-                    b.Navigation("Address")
-                        .IsRequired();
-
                     b.Navigation("Images");
 
                     b.Navigation("Reviews");

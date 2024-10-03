@@ -67,6 +67,12 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(r => r.HostelId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Hostel>()
+            .HasOne(h => h.Address)
+            .WithOne(h => h.Hostel)
+            .HasForeignKey<Address>(h => h.HostelId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // Room
         modelBuilder.Entity<Room>()
             .HasOne(r => r.Hostel)

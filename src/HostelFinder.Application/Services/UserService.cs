@@ -5,6 +5,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace HostelFinder.Application.Services
 {
@@ -12,6 +13,7 @@ namespace HostelFinder.Application.Services
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
+        private readonly PasswordHasher<User> _passwordHasher;
 
         public UserService
         (
@@ -21,14 +23,29 @@ namespace HostelFinder.Application.Services
         {
             _mapper = mapper;
             _userRepository = userRepository;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
-        public async Task<Response<UserDto>> CreateUserAsync(CreateUserRequestDto request)
+        public async Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request)
         {
             try
             {
+                if(await _userRepository.CheckUserNameExistAsync(request.Username))
+                {
+                    return new Response<UserDto> { Succeeded = false, Message = "User name already exists. Please enter a different user name." };
+                }
+                if (await _userRepository.CheckEmailExistAsync(request.Email))
+                {
+                    return new Response<UserDto> { Succeeded = false, Message = "Email already exists. Please enter a different email." };
+                }
+                if(await _userRepository.CheckPhoneNumberAsync(request.Phone))
+                {
+                    return new Response<UserDto> { Succeeded = false, Message = "Phone already exists. Please enter a different phone." };
+                }
+
                 var userDomain = _mapper.Map<User>(request);
 
+                userDomain.Password = _passwordHasher.HashPassword(userDomain, userDomain.Password);
                 userDomain.IsDeleted = false;
                 userDomain.CreatedOn = DateTime.Now;
 

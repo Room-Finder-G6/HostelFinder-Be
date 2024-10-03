@@ -15,7 +15,6 @@ namespace HostelFinder.Domain.Entities
         public string? Description { get; set; } 
         [Required]
         [MaxLength(255)]
-        public string Address { get; set; } 
         public float? Size { get; set; }
         [Required]
         public int NumberOfRooms { get; set; }
@@ -27,5 +26,7 @@ namespace HostelFinder.Domain.Entities
         public virtual ICollection<Review> Reviews { get; set; }
         public virtual ICollection<Image> Images { get; set; }
         public virtual User Landlord { get; set; } 
+        public virtual Address Address { get; set; } 
+
     }
 }
