@@ -5,6 +5,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace HostelFinder.Application.Services
@@ -46,6 +47,7 @@ namespace HostelFinder.Application.Services
                 var userDomain = _mapper.Map<User>(request);
 
                 userDomain.Password = _passwordHasher.HashPassword(userDomain, userDomain.Password);
+                userDomain.Role = UserRole.User;
                 userDomain.IsDeleted = false;
                 userDomain.CreatedOn = DateTime.Now;
 

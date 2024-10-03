@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.Common;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.Interfaces.IRepositories
 {
@@ -13,6 +14,8 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<bool> CheckEmailExistAsync(string email);
 
         Task<bool> CheckPhoneNumberAsync(string phoneNumber);
+
+        Task<UserRole> GetRoleAsync(Guid userId);
 
     }
 }

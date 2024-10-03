@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,16 @@ namespace HostelFinder.Infrastructure.Repositories
                 return null;
             }
             return user;
+        }
+
+        public async Task<UserRole> GetRoleAsync(Guid userId)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+            return user.Role;
         }
     }
 }

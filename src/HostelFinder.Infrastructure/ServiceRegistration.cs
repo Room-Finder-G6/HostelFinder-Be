@@ -1,4 +1,6 @@
 using HostelFinder.Application.Interfaces.IRepositories;
+using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Services;
 using HostelFinder.Infrastructure.Context;
 using HostelFinder.Infrastructure.Repositories;
 using HostelFinder.Infrastructure.Services;
@@ -21,5 +23,6 @@ public class ServiceRegistration
         service.AddScoped<IUserRepository, UserRepository>();   
         service.AddScoped<IRoomRepository, RoomRepository>();
         service.AddScoped<IEmailService, EmailService>();
+        service.AddScoped<IAuthAccountService, AuthAccountService>();
     }
 }
