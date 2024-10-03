@@ -4,18 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/v1/users")]
-    [ApiController]
-    public class UserController : ControllerBase
-    {
-        private readonly IUserService _userService;
+    //[Route("api/v1/users")]
+    //[ApiController]
+    //public class UserController : ControllerBase
+    //{
+    //    private readonly IUserService _userService;
 
-        public UserController(IUserService userService)
-        {
-            _userService = userService;
-        }
+    //    public UserController(IUserService userService)
+    //    {
+    //        _userService = userService;
+    //    }
 
-     
 
-    }
+    //}
 }
