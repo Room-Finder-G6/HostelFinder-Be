@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using RoomFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities;
 

@@ -32,5 +32,6 @@ namespace HostelFinder.Domain.Entities
         public virtual ICollection<Review>? Reviews { get; set; }
         public virtual ICollection<Hostel>? Hostels { get; set; }
         public virtual ICollection<BookingRequest>? BookingRequests { get; set; }
+        public virtual Wishlist? Wishlists { get; set; }
     }
 }
