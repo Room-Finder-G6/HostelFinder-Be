@@ -1,5 +1,4 @@
 ﻿using HostelFinder.Application.Common;
-using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Interfaces.IRepositories;
@@ -7,5 +6,5 @@ namespace HostelFinder.Application.Interfaces.IRepositories;
 public interface IRoomRepository : IBaseGenericRepository<Room>
 {
     Task<Room> GetAllRoomFeaturesByRoomId(Guid roomId);
-    /*Task AddRoom(Room room);*/
+    Task<IEnumerable<Room>> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location);
 }
