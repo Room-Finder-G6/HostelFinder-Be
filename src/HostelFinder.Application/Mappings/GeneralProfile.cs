@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
+using HostelFinder.Application.DTOs.Amenity.Request;
+using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.DTOs.Room.Requests;
-using HostelFinder.Application.DTOs.RoomAmenities.Response;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Request;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
@@ -9,7 +10,6 @@ using HostelFinder.Application.DTOs.Users;
 using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.DTOs.Hostel.Requests;
 using HostelFinder.Application.DTOs.Hostel.Responses;
-using HostelFinder.Application.DTOs.RoomAmenities.Request;
 using HostelFinder.Application.DTOs.RoomDetails.Request;
 
 namespace HostelFinder.Application.Mappings;
@@ -24,7 +24,7 @@ public class GeneralProfile : Profile
                 opt => opt.MapFrom(src => src.Images.Select(x => x.Url).ToList()))
             .ForMember(dest => dest.RoomDetailsDto,
                 opt => opt.MapFrom(src => src.RoomDetails))
-            .ForMember(dest => dest.RoomAmenitiesDto,
+            .ForMember(dest => dest.AmenityResponses,
                 opt => opt.MapFrom(src => src.RoomAmenities))
             .ForMember(dest => dest.ServiceCostsDto,
                 opt => opt.MapFrom(src => src.ServiceCosts))
@@ -36,17 +36,16 @@ public class GeneralProfile : Profile
                 opt => opt.MapFrom(src => src.ImagesUrls.Select(url => new Image { Url = url })))
             .ForMember(dest => dest.RoomDetails,
                 opt => opt.MapFrom(src => src.RoomDetails))
-            .ForMember(dest => dest.RoomAmenities,
-                opt => opt.MapFrom(src => src.RoomAmenities))
             .ForMember(dest => dest.ServiceCosts,
                 opt => opt.MapFrom(src => src.ServiceCosts))
             .ReverseMap();
 
         CreateMap<Room, UpdateRoomRequestDto>()
-            .ForMember(dest => dest.RoomAmenities,
-                opt => opt.MapFrom(src => src.RoomAmenities))
-            .ForMember(dest => dest.RoomDetails,
+            
+            .ForMember(dest => dest.UpdateRoomDetailsDto,
                 opt => opt.MapFrom(src => src.RoomDetails))
+            .ForMember(dest=>dest.AddRoomAmenityDto,
+                opt => opt.Ignore())
             .ReverseMap();
 
         CreateMap<Room, ListRoomResponseDto>()
@@ -62,6 +61,7 @@ public class GeneralProfile : Profile
                 opt => opt.MapFrom(src => src.PrimaryImageUrl))
             .ForMember(dest => dest.MonthlyRentCost,
                 opt => opt.MapFrom(src => src.MonthlyRentCost))
+            
             .ReverseMap();
 
         // Hostel Mapping
@@ -74,10 +74,9 @@ public class GeneralProfile : Profile
         CreateMap<RoomDetails, AddRoomDetailsDto>().ReverseMap();
         CreateMap<RoomDetails, UpdateRoomDetailsDto>().ReverseMap();
 
-        // RoomAmenities Mapping
-        CreateMap<RoomAmenities, RoomAmenitiesResponseDto>().ReverseMap();
-        CreateMap<RoomAmenities, AddRoomAmenitiesDto>().ReverseMap();
-        CreateMap<RoomAmenities, UpdateRoomAmenitiesDto>().ReverseMap();
+        // Amenities Mapping
+        CreateMap<Amenity, AmenityResponse>().ReverseMap();
+        CreateMap<RoomAmenities, AddRoomAmenityDto>().ReverseMap();
 
         // Service Cost Mapping
         CreateMap<ServiceCost, ServiceCostResponseDto>().ReverseMap();

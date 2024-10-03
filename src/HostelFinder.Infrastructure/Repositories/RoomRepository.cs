@@ -46,4 +46,11 @@ public class RoomRepository : BaseGenericRepository<Room>, IRoomRepository
         
         return rooms;
     }
+
+    public async Task<RoomAmenities> AddRoomAmenitiesAsync(RoomAmenities roomAmenity)
+    {
+        await _dbContext.RoomAmenities.AddAsync(roomAmenity);
+        await _dbContext.SaveChangesAsync();
+        return roomAmenity;
+    }
 }

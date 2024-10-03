@@ -11,6 +11,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<RoomDetails> RoomDetails { get; set; }
+    public DbSet<Amenity> Amenities { get; set; }
     public DbSet<RoomAmenities> RoomAmenities { get; set; }
     public DbSet<Service> Services { get; set; }
     public DbSet<User> Users { get; set; }
@@ -92,12 +93,6 @@ public class HostelFinderDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Room>()
-            .HasOne(r => r.RoomAmenities)
-            .WithOne(ra => ra.Room)
-            .HasForeignKey<RoomAmenities>(ra => ra.RoomId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<Room>()
             .HasMany(r => r.Images)
             .WithOne(i => i.Room)
             .HasForeignKey(i => i.RoomId)
@@ -150,6 +145,22 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(br => br.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // RoomAmenities
+        modelBuilder.Entity<RoomAmenities>()
+            .HasKey(ra => new { ra.RoomId, ra.AmenityId });
+        
+        modelBuilder.Entity<RoomAmenities>()
+            .HasOne(ra => ra.Room)
+            .WithMany(r => r.RoomAmenities)
+            .HasForeignKey(ra => ra.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<RoomAmenities>()
+            .HasOne(ra => ra.Amenity)
+            .WithMany(a => a.RoomAmenities)
+            .HasForeignKey(ra => ra.AmenityId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
         // Service
         modelBuilder.Entity<Service>()
             .HasOne(s => s.Hostel)

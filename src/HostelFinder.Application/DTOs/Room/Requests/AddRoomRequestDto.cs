@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using HostelFinder.Application.DTOs.RoomAmenities.Request;
+using HostelFinder.Application.DTOs.Amenity.Request;
+using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.DTOs.RoomDetails.Request;
 using HostelFinder.Application.DTOs.ServiceCost.Request;
-using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.DTOs.Room.Requests;
@@ -24,7 +24,7 @@ public class AddRoomRequestDto
     public decimal MonthlyRentCost { get; set; }
     public bool IsAvailable { get; set; } = true;
     public DateTime DateAvailable { get; set; }
-    public AddRoomAmenitiesDto RoomAmenities { get; set; }
+    public List<AddRoomAmenityDto> AddRoomAmenity { get; set; }
     public AddRoomDetailsDto RoomDetails { get; set; }
     public ICollection<AddServiceCostDto> ServiceCosts { get; set; } = new List<AddServiceCostDto>();
 }
