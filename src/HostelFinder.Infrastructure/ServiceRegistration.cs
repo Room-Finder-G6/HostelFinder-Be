@@ -20,6 +20,7 @@ public class ServiceRegistration
         service.AddScoped<IHostelRepository, HostelRepository>();
         service.AddScoped<IUserRepository, UserRepository>();   
         service.AddScoped<IRoomRepository, RoomRepository>();
+        service.AddScoped<IWishlistRepository, WishlistRepository>();
         service.AddScoped<IEmailService, EmailService>();
     }
 }

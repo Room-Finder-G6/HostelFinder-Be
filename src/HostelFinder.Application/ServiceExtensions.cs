@@ -22,6 +22,8 @@ namespace HostelFinder.Application
             services.AddScoped<IAuthAccountService, AuthAccountService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IHostelService, HostelService>();
+            services.AddScoped<IWishlistService, WishlistService>();
+
 
 
 
