@@ -1,7 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
-using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.DTOs.Room.Requests;

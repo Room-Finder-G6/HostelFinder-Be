@@ -53,6 +53,9 @@ HostelFinder.Infrastructure.ServiceRegistration.Configure(builder.Services, buil
 
 var app = builder.Build();
 
+app.UseMiddleware<TokenValidationMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RequestTimeLoggingMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -68,7 +71,6 @@ app.UseCors(opt =>
         .WithOrigins("http://localhost:3000");
 });
 
-app.UseMiddleware<DatabaseConnectionMiddleware>();
 
 app.UseHttpsRedirection();
 

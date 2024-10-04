@@ -22,7 +22,8 @@ namespace HostelFinder.Application
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IHostelService, HostelService>();
             services.AddScoped<IAmenityService, AmenityService>();
-
+            services.AddScoped<IWishlistService, WishlistService>();
+            
 
             //register automapper
             services.AddAutoMapper(typeof(GeneralProfile).Assembly);
