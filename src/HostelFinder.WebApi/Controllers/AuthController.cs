@@ -46,7 +46,7 @@ namespace HostelFinder.WebApi.Controllers
                 var response = await _authAccountService.LoginAsync(request);
                 if (!response.Succeeded)
                 {
-                    return BadRequest(response.Message);
+                    return BadRequest(response);
                 }
                 return Ok(response);
             }
