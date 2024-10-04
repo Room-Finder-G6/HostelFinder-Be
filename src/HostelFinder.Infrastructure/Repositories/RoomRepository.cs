@@ -4,7 +4,6 @@ using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using Task = DocumentFormat.OpenXml.Office2021.DocumentTasks.Task;
 
 namespace HostelFinder.Infrastructure.Repositories;
 

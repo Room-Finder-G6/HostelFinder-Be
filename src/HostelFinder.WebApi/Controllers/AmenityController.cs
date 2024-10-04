@@ -33,4 +33,16 @@ public class AmenityController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
+    
+    [HttpDelete("amenityId")]
+    public async Task<IActionResult> DeleteAmenity(Guid amenityId)
+    {
+        var result = await _amenityService.DeleteAmenityAsync(amenityId);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return NotFound("Amenity not found");
+    }
 }
