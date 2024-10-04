@@ -22,6 +22,7 @@ namespace HostelFinder.Application
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IHostelService, HostelService>();
             services.AddScoped<IWishlistService, WishlistService>();
+            services.AddScoped<IServiceService, ServiceService>();
 
 
 
