@@ -22,6 +22,8 @@ namespace HostelFinder.Application.Services
         public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto hostelDto)
         {
             var hostel = _mapper.Map<Hostel>(hostelDto);
+            hostel.CreatedOn = DateTime.Now;
+            hostel.CreatedBy = "System";
             await _hostelRepository.AddAsync(hostel);
             var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
             return new Response<HostelResponseDto>(hostelResponseDto);
@@ -35,7 +37,9 @@ namespace HostelFinder.Application.Services
                 return new Response<HostelResponseDto>("Hostel not found");
             }
 
-            _mapper.Map(hostelDto, existingHostel);  // Update the entity with the new values
+            _mapper.Map(hostelDto, existingHostel);
+            existingHostel.LastModifiedOn = DateTime.Now;
+            existingHostel.LastModifiedBy = "System";
             await _hostelRepository.UpdateAsync(existingHostel);
 
             var updatedHostelDto = _mapper.Map<HostelResponseDto>(existingHostel);
