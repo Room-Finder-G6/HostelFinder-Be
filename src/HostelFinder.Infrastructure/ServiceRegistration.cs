@@ -25,5 +25,6 @@ public class ServiceRegistration
         service.AddScoped<IWishlistRepository, WishlistRepository>();
         service.AddScoped<IEmailService, EmailService>();
         service.AddScoped<IAuthAccountService, AuthAccountService>();
+        service.AddScoped<IServiceRepository, ServiceRepository>();
     }
 }
