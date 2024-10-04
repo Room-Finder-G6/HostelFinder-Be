@@ -9,7 +9,7 @@ namespace HostelFinder.WebApi.Middlewares
         {
             try
             {
-
+                await next.Invoke(context);
             }
             catch (NotFoundException notFound)
             {

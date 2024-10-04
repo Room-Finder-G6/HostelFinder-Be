@@ -24,7 +24,8 @@ namespace HostelFinder.Application.Services
                 new Claim ("UserId" , user.Id.ToString()),
                 new Claim (ClaimTypes.Name, user.Username),
                 new Claim (ClaimTypes.Email, user.Email),
-                new Claim (ClaimTypes.Role, role.ToString())
+                new Claim (ClaimTypes.Role, role.ToString()),
+                new Claim("Time", DateTime.Now.AddMinutes(_jwtSettings.ExpiryInMinutes).ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
