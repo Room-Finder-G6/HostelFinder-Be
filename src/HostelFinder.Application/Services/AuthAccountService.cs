@@ -1,9 +1,10 @@
-﻿using HostelFinder.Application.DTOs.Auth.Requests;
+using HostelFinder.Application.DTOs.Auth.Requests;
 using HostelFinder.Application.DTOs.Auth.Responses;
 using HostelFinder.Application.DTOs.Auths.Requests;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -42,9 +43,8 @@ namespace HostelFinder.Application.Services
             }
             var resetToken = await _tokenService.GenerateResetPasswordToken(user);
 
-            var clientUrl = "http://localhost:3000/reset-password";
-            var emailBody = $"Click vào đây để đặt lại mật khẩu của bạn <a href='{clientUrl}'>Đặt lại mật khẩu</a> với OTP: {resetToken}";
-            var emailSubject = "Reset Password";
+            var emailBody = EmailConstants.BodyResetPasswordEmail(user.Email, resetToken);
+            var emailSubject = "Đặt lại mật khẩu";
 
             await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
 
