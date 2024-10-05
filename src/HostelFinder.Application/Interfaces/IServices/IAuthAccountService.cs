@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.Auth.Requests;
 using HostelFinder.Application.DTOs.Auth.Responses;
+using HostelFinder.Application.DTOs.Auths.Requests;
 using HostelFinder.Application.Wrappers;
 
 namespace HostelFinder.Application.Interfaces.IServices
@@ -10,6 +11,8 @@ namespace HostelFinder.Application.Interfaces.IServices
 
         Task<Response<string>> ChangePasswordAsync(ChangePasswordRequest request);
 
+        Task<Response<string>> ForgotPasswordAsync(ForgotPasswordRequest request);
 
+        Task<Response<string>> ResetPasswordAsync(ResetPasswordRequest request);
     }
 }
