@@ -8,5 +8,9 @@ namespace HostelFinder.Application.Interfaces.IServices
         string GenerateJwtToken(User user, UserRole role);
 
         int? ValidateToken(string token);
+
+        Task<string> GenerateResetPasswordToken(User user);
+
+        Task<bool> ValidateResetPasswordToken(User user, string token);
     }
 }
