@@ -1,13 +1,13 @@
 ﻿using HostelFinder.Application.DTOs.RoomAmenities.Response;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
-using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.DTOs.Room.Requests;
 
 public class RoomResponseDto
 {
+    public Guid Id { get; set; }
     public Guid HostelId { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }

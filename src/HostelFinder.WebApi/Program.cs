@@ -1,10 +1,11 @@
 using HostelFinder.Infrastructure.Common;
+using HostelFinder.WebApi.Extensions;
 using HostelFinder.WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.AddPresentation();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -53,6 +54,9 @@ HostelFinder.Infrastructure.ServiceRegistration.Configure(builder.Services, buil
 
 var app = builder.Build();
 
+//app.UseMiddleware<TokenValidationMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RequestTimeLoggingMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -61,7 +65,6 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.UseMiddleware<DatabaseConnectionMiddleware>();
 
 app.UseHttpsRedirection();
 

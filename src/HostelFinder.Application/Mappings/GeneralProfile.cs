@@ -11,6 +11,9 @@ using HostelFinder.Application.DTOs.Hostel.Requests;
 using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.DTOs.RoomAmenities.Request;
 using HostelFinder.Application.DTOs.RoomDetails.Request;
+using HostelFinder.Application.DTOs.Address;
+using HostelFinder.Application.DTOs.Service.Request;
+using HostelFinder.Application.DTOs.Service.Response;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -66,7 +69,12 @@ public class GeneralProfile : Profile
 
         // Hostel Mapping
         CreateMap<Hostel, HostelResponseDto>().ReverseMap();
-        CreateMap<Hostel, AddHostelRequestDto>().ReverseMap();
+        CreateMap<Hostel, AddHostelRequestDto>()
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+            .ReverseMap();
+
+        // Address Mapping
+        CreateMap<Address, AddressDto>().ReverseMap();
         CreateMap<Hostel, UpdateHostelRequestDto>().ReverseMap();
 
         // RoomDetails Mapping
@@ -86,5 +94,10 @@ public class GeneralProfile : Profile
         //Map User
         CreateMap<UserDto, User>().ReverseMap();
         CreateMap<CreateUserRequestDto, User>().ReverseMap();
+
+        //Service Mapping
+        CreateMap<ServiceCreateRequestDTO, Service>();
+        CreateMap<ServiceUpdateRequestDTO, Service>();
+        CreateMap<Service, ServiceResponseDTO>();
     }
 }

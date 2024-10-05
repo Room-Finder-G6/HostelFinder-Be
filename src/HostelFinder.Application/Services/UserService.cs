@@ -5,6 +5,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace HostelFinder.Application.Services
@@ -46,6 +47,7 @@ namespace HostelFinder.Application.Services
                 var userDomain = _mapper.Map<User>(request);
 
                 userDomain.Password = _passwordHasher.HashPassword(userDomain, userDomain.Password);
+                userDomain.Role = UserRole.User;
                 userDomain.IsDeleted = false;
                 userDomain.CreatedOn = DateTime.Now;
 
@@ -59,6 +61,44 @@ namespace HostelFinder.Application.Services
             {
                 return new Response<UserDto> { Succeeded = false, Errors = {ex.Message}};
             }
+        }
+
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        {
+            var users = await _userRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
+        }
+
+        public async Task<Response<UserDto>> UpdateUserAsync(Guid userId, UpdateUserRequestDto updateUserDto)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return new Response<UserDto>("User not found.");
+            }
+
+            // Update fields
+            user.Username = updateUserDto.Username;
+            user.Email = updateUserDto.Email;
+            user.Phone = updateUserDto.Phone;
+            user.AvatarUrl = updateUserDto.AvatarUrl;
+
+            await _userRepository.UpdateAsync(user);
+            var updatedUserDto = _mapper.Map<UserDto>(user);
+            return new Response<UserDto>(updatedUserDto);
+        }
+
+        public async Task<Response<bool>> UnActiveUserAsync(Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return new Response<bool>("User not found.");
+            }
+
+            user.IsActive = false;
+            await _userRepository.UpdateAsync(user);
+            return new Response<bool>(true);
         }
     }
 }

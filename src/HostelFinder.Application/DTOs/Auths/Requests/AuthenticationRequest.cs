@@ -7,8 +7,6 @@ namespace HostelFinder.Application.DTOs.Auth.Requests
         [MaxLength(50)]
         public string UserName { get; set; }
 
-        [MaxLength(50)]
-        public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
