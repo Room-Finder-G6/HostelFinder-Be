@@ -1,4 +1,6 @@
+using AutoMapper;
 using HostelFinder.Application.DTOs.Amenity.Request;
+using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -9,10 +11,13 @@ namespace HostelFinder.Application.Services;
 public class AmenityService : IAmenityService
 {
     private readonly IAmenityRepository _amenityRepository;
+    private readonly IMapper _mapper;
+
     
-    public AmenityService(IAmenityRepository amenityRepository)
+    public AmenityService(IAmenityRepository amenityRepository, IMapper mapper)
     {
         _amenityRepository = amenityRepository;
+        _mapper = mapper;
     }
     
     public async Task<Amenity> AddAmenityAsync(AddAmenityDto addAmenityDto)
@@ -35,5 +40,12 @@ public class AmenityService : IAmenityService
         }
         await _amenityRepository.DeletePermanentAsync(amenityId);
         return new Response<bool>("Amenity deleted successfully");
+    }
+
+    public async Task<List<AmenityResponse>> GetAllAmenitiesAsync()
+    {
+        var amenities = await _amenityRepository.GetAmenitiesAsync();
+        var amenityResponses = _mapper.Map<List<AmenityResponse>>(amenities);
+        return amenityResponses;
     }
 }

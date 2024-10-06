@@ -26,4 +26,9 @@ public class AmenityRepository : BaseGenericRepository<Amenity>, IAmenityReposit
             throw new RepositoryException("An error occurred while adding the amenity.", ex);
         }
     }
+
+    public Task<List<Amenity>> GetAmenitiesAsync()
+    {
+        return _dbContext.Amenities.ToListAsync();
+    }
 }

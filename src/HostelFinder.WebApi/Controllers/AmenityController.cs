@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]/[action]")]
+[Route("api/[controller]/")]
 public class AmenityController : ControllerBase
 {
     private readonly IAmenityService _amenityService;
@@ -32,6 +32,18 @@ public class AmenityController : ControllerBase
         {
             return StatusCode(500, ex.Message);
         }
+    }
+    
+    [HttpGet]
+    [Route("amenities")]
+    public async Task<IActionResult> GetAllAmenities()
+    {
+        var amenities = await _amenityService.GetAllAmenitiesAsync();
+        if(amenities == null)
+        {
+            return NotFound("No amenities found");
+        }
+        return Ok(amenities);
     }
     
     [HttpDelete("amenityId")]

@@ -7,4 +7,5 @@ namespace HostelFinder.Application.Interfaces.IRepositories;
 public interface IAmenityRepository : IBaseGenericRepository<Amenity>
 {
     Task<Amenity> AddAmenityAsync(Amenity amenity);
+    Task<List<Amenity>> GetAmenitiesAsync();
 }

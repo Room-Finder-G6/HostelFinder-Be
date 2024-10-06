@@ -26,7 +26,11 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.RoomDetailsDto,
                 opt => opt.MapFrom(src => src.RoomDetails))
             .ForMember(dest => dest.AmenityResponses,
-                opt => opt.MapFrom(src => src.RoomAmenities))
+                opt => opt.MapFrom(src => src.RoomAmenities.Select(ra => new AmenityResponse
+                {
+                    AmenityName = ra.Amenity.AmenityName,
+                    IsSelected = ra.Amenity.IsSelected
+                })))
             .ForMember(dest => dest.ServiceCostsDto,
                 opt => opt.MapFrom(src => src.ServiceCosts))
             .ReverseMap()
@@ -42,16 +46,15 @@ public class GeneralProfile : Profile
             .ReverseMap();
 
         CreateMap<Room, UpdateRoomRequestDto>()
-            
             .ForMember(dest => dest.UpdateRoomDetailsDto,
                 opt => opt.MapFrom(src => src.RoomDetails))
-            .ForMember(dest=>dest.AddRoomAmenityDto,
+            .ForMember(dest => dest.AddRoomAmenityDto,
                 opt => opt.Ignore())
             .ReverseMap();
 
         CreateMap<Room, ListRoomResponseDto>()
-            .ForMember(dest=>dest.Id,
-                opt=>opt.MapFrom(src=>src.Id))
+            .ForMember(dest => dest.Id,
+                opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Title,
                 opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.Address,
@@ -62,7 +65,6 @@ public class GeneralProfile : Profile
                 opt => opt.MapFrom(src => src.PrimaryImageUrl))
             .ForMember(dest => dest.MonthlyRentCost,
                 opt => opt.MapFrom(src => src.MonthlyRentCost))
-            
             .ReverseMap();
 
         // Hostel Mapping

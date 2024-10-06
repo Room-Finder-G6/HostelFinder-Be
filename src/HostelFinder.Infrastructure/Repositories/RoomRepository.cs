@@ -18,6 +18,7 @@ public class RoomRepository : BaseGenericRepository<Room>, IRoomRepository
         var room = await _dbContext.Rooms
             .Include(x => x.RoomDetails)
             .Include(x => x.RoomAmenities)
+            .ThenInclude(x => x.Amenity)
             .Include(x => x.ServiceCosts)
             .Include(x => x.Images)
             .FirstOrDefaultAsync(x => x.Id == roomId);
