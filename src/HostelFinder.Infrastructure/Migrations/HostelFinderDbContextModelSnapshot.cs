@@ -163,8 +163,8 @@ namespace HostelFinder.Infrastructure.Migrations
                 b.Property<int>("Status")
                     .HasColumnType("int");
 
-                b.Property<Guid>("UserId")
-                    .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                 b.HasKey("RequestId");
 
@@ -563,9 +563,10 @@ namespace HostelFinder.Infrastructure.Migrations
                 b.Property<bool>("IsDeleted")
                     .HasColumnType("bit");
 
-                b.Property<bool>("IsEmailConfirmed")
-                    .HasMaxLength(255)
-                    .HasColumnType("bit");
+                    b.Property<bool?>("IsEmailConfirmed")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("bit");
 
                 b.Property<string>("LastModifiedBy")
                     .HasColumnType("nvarchar(max)");
@@ -578,10 +579,16 @@ namespace HostelFinder.Infrastructure.Migrations
                     .HasMaxLength(256)
                     .HasColumnType("nvarchar(256)");
 
-                b.Property<string>("Phone")
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .HasColumnType("nvarchar(20)");
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                 b.Property<int>("Role")
                     .HasColumnType("int");
@@ -847,7 +854,8 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.Navigation("Images");
 
-                    b.Navigation("RoomAmenities");
+                    b.Navigation("RoomAmenities")
+                        .IsRequired();
 
                     b.Navigation("RoomDetails")
                         .IsRequired();
@@ -868,7 +876,10 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Navigation("Wishlists");
                 });
 
-                modelBuilder.Entity("HostelFinder.Domain.Entities.Wishlist", b => { b.Navigation("WishlistRooms"); });
+            modelBuilder.Entity("HostelFinder.Domain.Entities.Wishlist", b =>
+                {
+                    b.Navigation("WishlistRooms");
+                });
 #pragma warning restore 612, 618
             });
         }

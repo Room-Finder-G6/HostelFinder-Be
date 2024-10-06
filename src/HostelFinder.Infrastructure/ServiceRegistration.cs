@@ -20,11 +20,12 @@ public class ServiceRegistration
             options.UseSqlServer(connectionString));
 
         service.AddScoped<IHostelRepository, HostelRepository>();
-        service.AddScoped<IUserRepository, UserRepository>();   
+        service.AddScoped<IUserRepository, UserRepository>();
         service.AddScoped<IRoomRepository, RoomRepository>();
         service.AddScoped<IAmenityRepository, AmenityRepository>();
         service.AddScoped<IWishlistRepository, WishlistRepository>();
         service.AddScoped<IEmailService, EmailService>();
         service.AddScoped<IAuthAccountService, AuthAccountService>();
+        service.AddScoped<IServiceRepository, ServiceRepository>();
     }
 }

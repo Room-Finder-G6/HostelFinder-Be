@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.Interfaces.IServices;
+﻿using HostelFinder.Application.Interfaces.IRepositories;
+using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using Microsoft.Extensions.Options;
@@ -6,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using RoomFinder.Domain.Common.Settings;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace HostelFinder.Application.Services
@@ -13,10 +15,14 @@ namespace HostelFinder.Application.Services
     public class TokenService : ITokenService
     {
         private readonly JWTSettings _jwtSettings;
-        public TokenService(IOptions<JWTSettings> jwtSettings)
+        private readonly IUserRepository _userRepository;
+
+        public TokenService(IOptions<JWTSettings> jwtSettings, IUserRepository userRepository)
         {
             _jwtSettings = jwtSettings.Value;
+            _userRepository = userRepository;
         }
+
         public string GenerateJwtToken(User user, UserRole role)
         {
             var claims = new List<Claim>()
@@ -31,7 +37,7 @@ namespace HostelFinder.Application.Services
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken (
+            var token = new JwtSecurityToken(
                     _jwtSettings.Issuer,
                     _jwtSettings.Audience,
                     claims,
@@ -39,6 +45,31 @@ namespace HostelFinder.Application.Services
                     signingCredentials: credentials
                     );
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<string> GenerateResetPasswordToken(User user)
+        {
+            var tokenBytes = new byte[64];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(tokenBytes);
+            }
+            var token = Convert.ToBase64String(tokenBytes);
+
+            user.PasswordResetToken = token;
+            user.PasswordResetTokenExpires = DateTime.Now.AddHours(1);
+
+            await _userRepository.UpdateAsync(user);
+            return token;
+        }
+
+        public Task<bool> ValidateResetPasswordToken(User user, string token)
+        {
+            if (user.PasswordResetToken == null || user.PasswordResetTokenExpires == null)
+            {
+                return Task.FromResult(false);
+            }
+            return Task.FromResult(user.PasswordResetToken == token && user.PasswordResetTokenExpires > DateTime.Now);
         }
 
         public int? ValidateToken(string token)

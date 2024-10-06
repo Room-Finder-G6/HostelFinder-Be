@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.Interfaces.IRepositories;
+﻿using DocumentFormat.OpenXml.InkML;
+using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using HostelFinder.Infrastructure.Common;
@@ -72,6 +73,22 @@ namespace HostelFinder.Infrastructure.Repositories
                 throw new Exception("User not found");
             }
             return user.Role;
+        }
+
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _dbContext.Users.ToListAsync();
+        }
+
+        public async Task<User> GetByIdAsync(Guid id)
+        {
+            return await _dbContext.Users.FindAsync(id);
+        }
+
+        public async Task UpdateAsync(User user)
+        {
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
