@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/v1/auth")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {

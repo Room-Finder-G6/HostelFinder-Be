@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/services")]
     [ApiController]
     public class ServiceController : ControllerBase
     {
