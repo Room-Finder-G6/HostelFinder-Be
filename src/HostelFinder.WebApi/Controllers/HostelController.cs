@@ -24,7 +24,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         // POST: api/Hostel/AddHostel
-        [HttpPost("AddHostel")]
+        [HttpPost()]
         public async Task<IActionResult> AddHostel([FromBody] AddHostelRequestDto hostelDto)
         {
             var result = await _hostelService.AddHostelAsync(hostelDto);

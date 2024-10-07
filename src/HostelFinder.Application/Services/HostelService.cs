@@ -26,7 +26,7 @@ namespace HostelFinder.Application.Services
             hostel.CreatedBy = "System";
             await _hostelRepository.AddAsync(hostel);
             var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
-            return new Response<HostelResponseDto>(hostelResponseDto);
+            return new Response<HostelResponseDto> { Data = hostelResponseDto, Message  = "Thêm trọ mới thành công."};
         }
 
         public async Task<Response<HostelResponseDto>> UpdateHostelAsync(UpdateHostelRequestDto hostelDto)
