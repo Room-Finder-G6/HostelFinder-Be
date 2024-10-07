@@ -16,12 +16,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
-
 
 //builder.Services.AddSwaggerGen(options =>
 //{
@@ -48,11 +48,12 @@ builder.Services.AddCors(options =>
 //            });
 //});
 
-
 HostelFinder.Application.ServiceExtensions.ConfigureServices(builder.Services, builder.Configuration);
 HostelFinder.Infrastructure.ServiceRegistration.Configure(builder.Services, builder.Configuration);
 
 var app = builder.Build();
+
+app.UseCors("AllowAllOrigins");
 
 //app.UseMiddleware<TokenValidationMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
@@ -63,8 +64,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-
 
 app.UseHttpsRedirection();
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/rooms")]
 public class RoomController : ControllerBase
 {
     private readonly IRoomService _roomService;
@@ -27,16 +27,16 @@ public class RoomController : ControllerBase
 
         return NotFound();
     }
-    
+
     [HttpPost]
     [Route("AddRoom")]
     public async Task<IActionResult> AddRoom([FromBody] AddRoomRequestDto roomDto)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState); 
+            return BadRequest(ModelState);
         }
-        
+
         var result = await _roomService.AddRoomAsync(roomDto);
         if (result.Succeeded)
         {
@@ -45,16 +45,16 @@ public class RoomController : ControllerBase
 
         return BadRequest(result.Errors);
     }
-    
+
     [HttpPut]
     [Route("UpdateRoom/{roomId}")]
     public async Task<IActionResult> UpdateRoom([FromBody] UpdateRoomRequestDto roomDto, Guid roomId)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState); 
+            return BadRequest(ModelState);
         }
-        
+
         var result = await _roomService.UpdateRoomAsync(roomDto, roomId);
         if (result.Succeeded)
         {
@@ -63,7 +63,7 @@ public class RoomController : ControllerBase
 
         return BadRequest(result.Errors);
     }
-    
+
     [HttpDelete]
     [Route("DeleteRoom/{roomId}")]
     public async Task<IActionResult> DeleteRoom(Guid roomId)
@@ -76,7 +76,7 @@ public class RoomController : ControllerBase
 
         return NotFound();
     }
-    
+
     [HttpGet]
     [Route("GetFilteredRooms")]
     public async Task<IActionResult> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location)

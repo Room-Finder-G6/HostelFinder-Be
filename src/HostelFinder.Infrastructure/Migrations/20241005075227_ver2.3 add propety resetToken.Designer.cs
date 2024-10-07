@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    partial class HostelFinderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241005075227_ver2.3 add propety resetToken")]
+    partial class ver23addpropetyresetToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -544,8 +547,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsEmailConfirmed")
-                        .IsRequired()
+                    b.Property<bool>("IsEmailConfirmed")
                         .HasMaxLength(255)
                         .HasColumnType("bit");
 
@@ -561,6 +563,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordResetToken")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("PasswordResetTokenExpires")

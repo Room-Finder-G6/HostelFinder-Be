@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/wishlists")]
     [ApiController]
     public class WishlistController : ControllerBase
     {
-
         private readonly IWishlistService _wishlistService;
 
         public WishlistController(IWishlistService wishlistService)
@@ -51,6 +50,5 @@ namespace HostelFinder.WebApi.Controllers
             }
             return BadRequest(result.Errors);
         }
-
     }
 }
