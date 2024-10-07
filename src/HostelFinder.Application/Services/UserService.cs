@@ -7,7 +7,6 @@ using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Cryptography;
 
 namespace HostelFinder.Application.Services
 {
@@ -34,15 +33,15 @@ namespace HostelFinder.Application.Services
             {
                 if (await _userRepository.CheckUserNameExistAsync(request.Username))
                 {
-                    return new Response<UserDto> { Succeeded = false, Message = "User name already exists. Please enter a different user name." };
+                    return new Response<UserDto> { Succeeded = false, Message = "Tên người dùng đã tồn tại. Vui lòng nhập tên khác" };
                 }
                 if (await _userRepository.CheckEmailExistAsync(request.Email))
                 {
-                    return new Response<UserDto> { Succeeded = false, Message = "Email already exists. Please enter a different email." };
+                    return new Response<UserDto> { Succeeded = false, Message = "Email đã tồn tại. Vui lòng nhập email khác." };
                 }
                 if (await _userRepository.CheckPhoneNumberAsync(request.Phone))
                 {
-                    return new Response<UserDto> { Succeeded = false, Message = "Phone already exists. Please enter a different phone." };
+                    return new Response<UserDto> { Succeeded = false, Message = "Số điện thoại đã tồn tại. Vui lòng nhập số điện thoại khác." };
                 }
 
                 var userDomain = _mapper.Map<User>(request);
@@ -57,7 +56,7 @@ namespace HostelFinder.Application.Services
 
                 var userDto = _mapper.Map<UserDto>(user);
 
-                return new Response<UserDto> { Succeeded = true, Data = userDto, Message = "Add user successfully" };
+                return new Response<UserDto> { Succeeded = true, Data = userDto, Message = "Bạn đã đăng ký thành công tài khoản" };
             }
             catch (Exception ex)
             {
@@ -76,7 +75,7 @@ namespace HostelFinder.Application.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                return new Response<UserDto>("User not found.");
+                return new Response<UserDto>("Người dùng không tồn tại.");
             }
 
             // Update fields
@@ -95,7 +94,7 @@ namespace HostelFinder.Application.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                return new Response<bool>("User not found.");
+                return new Response<bool>("Người dùng không tồn tại.");
             }
 
             user.IsActive = false;

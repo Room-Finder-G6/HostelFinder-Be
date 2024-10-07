@@ -39,7 +39,7 @@ namespace HostelFinder.Application.Services
             var user = await _userRepository.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                return new Response<string> { Succeeded = false, Message = "Email does not exist. Please check and try again or create a new account." };
+                return new Response<string> { Succeeded = false, Message = "Email không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới." };
             }
             var resetToken = await _tokenService.GenerateResetPasswordToken(user);
 
@@ -48,7 +48,7 @@ namespace HostelFinder.Application.Services
 
             await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
 
-            return new Response<string> { Succeeded = true, Message = "Reset password link has been sent to your email." };
+            return new Response<string> { Succeeded = true, Message = "Link đặt lại mật khẩu đã được gửi tới email của bạn. Vui lòng check email!" };
         }
 
         public async Task<Response<AuthenticationResponse>> LoginAsync(AuthenticationRequest request)
@@ -56,13 +56,13 @@ namespace HostelFinder.Application.Services
             var user = await _userRepository.FindByUserNameAsync(request.UserName);
             if (user == null)
             {
-                return new Response<AuthenticationResponse> { Succeeded = false, Message = "User name does not exist. Please check and try again or create a new account." };
+                return new Response<AuthenticationResponse> { Succeeded = false, Message = "Tên người dùng không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới." };
             }
 
             var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, request.Password);
             if (verificationResult == PasswordVerificationResult.Failed)
             {
-                return new Response<AuthenticationResponse> { Succeeded = false, Message = "Incorrect username or password. Please check your credentials and try again." };
+                return new Response<AuthenticationResponse> { Succeeded = false, Message = "Tài khoản hoặc mật khẩu không đúng. Vui lòng kiểm tra lại!" };
             }
 
             var role = await _userRepository.GetRoleAsync(user.Id);
@@ -75,7 +75,7 @@ namespace HostelFinder.Application.Services
                 Token = token
             };
 
-            return new Response<AuthenticationResponse> { Data = response, Succeeded = true, Message = "Login successfully!" };
+            return new Response<AuthenticationResponse> { Data = response, Succeeded = true, Message = "Đăng nhập thành công" };
         }
 
         public async Task<Response<string>> ResetPasswordAsync(ResetPasswordRequest request)
@@ -83,13 +83,13 @@ namespace HostelFinder.Application.Services
             var user = await _userRepository.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                return new Response<string> { Succeeded = false, Message = "Email does not exist. Please check and try again or create a new account." };
+                return new Response<string> { Succeeded = false, Message = "Email không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới." };
             }
 
             var isValidToken = await _tokenService.ValidateResetPasswordToken(user, request.Token);
             if (!isValidToken)
             {
-                return new Response<string> { Succeeded = false, Message = "Invalid token. Please check and try again." };
+                return new Response<string> { Succeeded = false, Message = "Token không hợp lệ. Vui lòng check và thử lại" };
             }
 
             user.Password = _passwordHasher.HashPassword(user, request.NewPassword);
@@ -98,7 +98,7 @@ namespace HostelFinder.Application.Services
             user.PasswordResetTokenExpires = null;
 
             await _userRepository.UpdateAsync(user);
-            return new Response<string> { Succeeded = true, Message = "Reset password successfully!" };
+            return new Response<string> { Succeeded = true, Message = "Đặt lại mật khẩu thành công!" };
         }
     }
 }
