@@ -62,7 +62,7 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.Address,
                 opt => opt.MapFrom(src => src.Hostel.Address))
             .ForMember(dest => dest.Size,
-                opt => opt.MapFrom(src => src.RoomDetails.Size))
+                opt => opt.MapFrom(src => src.Size))
             .ForMember(dest => dest.PrimaryImageUrl,
                 opt => opt.MapFrom(src => src.PrimaryImageUrl))
             .ForMember(dest => dest.MonthlyRentCost,

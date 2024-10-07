@@ -19,7 +19,7 @@ public class AddRoomRequestDto
     public string PrimaryImageUrl { get; set; }
     public RoomType RoomType { get; set; }
     public ICollection<string> ImagesUrls{ get; set; }
-    public decimal? Size { get; set; }
+    public decimal Size { get; set; }
     [Required]
     public decimal MonthlyRentCost { get; set; }
     public bool IsAvailable { get; set; } = true;
