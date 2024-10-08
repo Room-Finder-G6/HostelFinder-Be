@@ -21,12 +21,32 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto hostelDto)
         {
+            var isDuplicate = await _hostelRepository.CheckDuplicateHostelAsync(
+                hostelDto.HostelName,
+                hostelDto.Address.Province,
+                hostelDto.Address.District,
+                hostelDto.Address.Commune,
+                hostelDto.Address.DetailAddress
+            );
+
+            if (isDuplicate)
+            {
+                return new Response<HostelResponseDto>("Hostel đã tồn tại với cùng địa chỉ.");
+            }
+
             var hostel = _mapper.Map<Hostel>(hostelDto);
             hostel.CreatedOn = DateTime.Now;
             hostel.CreatedBy = "System";
-            await _hostelRepository.AddAsync(hostel);
-            var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
-            return new Response<HostelResponseDto> { Data = hostelResponseDto, Message  = "Thêm trọ mới thành công."};
+            try
+            {
+                await _hostelRepository.AddAsync(hostel);
+                var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
+                return new Response<HostelResponseDto> { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
+            }
+            catch (Exception ex)
+            {
+                return new Response<HostelResponseDto>(message: ex.Message);
+            }
         }
 
         public async Task<Response<HostelResponseDto>> UpdateHostelAsync(UpdateHostelRequestDto hostelDto)
