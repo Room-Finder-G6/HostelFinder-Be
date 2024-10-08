@@ -21,11 +21,11 @@ namespace HostelFinder.Application
             services.AddScoped<IAuthAccountService, AuthAccountService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IHostelService, HostelService>();
+            services.AddScoped<IAmenityService, AmenityService>();
             services.AddScoped<IWishlistService, WishlistService>();
             services.AddScoped<IServiceService, ServiceService>();
 
-
-
+            
 
             //register automapper
             services.AddAutoMapper(typeof(GeneralProfile).Assembly);
@@ -34,10 +34,10 @@ namespace HostelFinder.Application
             var jwtSettings = services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
             services.AddSingleton(jwtSettings);
             services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(o =>
                 {
                     o.RequireHttpsMetadata = false;
@@ -50,7 +50,8 @@ namespace HostelFinder.Application
                         ValidateLifetime = true,
                         ValidIssuer = configuration["JWTSettings:Issuer"],
                         ValidAudience = configuration["JWTSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"]))
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"]))
                     };
                 });
 
@@ -60,7 +61,5 @@ namespace HostelFinder.Application
                 options.AddPolicy($"{UserRole.User}", policy => policy.RequireRole("User"));
             });
         }
-
-       
     }
 }

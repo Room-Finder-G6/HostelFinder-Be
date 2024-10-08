@@ -1,4 +1,4 @@
-﻿using HostelFinder.Application.DTOs.RoomAmenities.Response;
+﻿using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
 using HostelFinder.Domain.Enums;
@@ -18,6 +18,6 @@ public class RoomResponseDto
     public DateTime DateAvailable { get; set; }
     public List<string> ImageUrls { get; set; }
     public RoomDetailsResponseDto RoomDetailsDto { get; set; }
-    public RoomAmenitiesResponseDto RoomAmenitiesDto { get; set; }
+    public List<AmenityResponse> AmenityResponses { get; set; }
     public ICollection<ServiceCostResponseDto> ServiceCostsDto { get; set; }
 }
