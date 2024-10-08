@@ -5,5 +5,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 {
     public interface IServiceRepository : IBaseGenericRepository<Service>
     {
+        Task<bool> CheckDuplicateServiceAsync(string serviceName);
     }
 }
