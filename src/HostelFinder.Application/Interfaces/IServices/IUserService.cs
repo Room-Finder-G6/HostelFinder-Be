@@ -1,7 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.Users;
 using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.Wrappers;
-using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Interfaces.IServices
 {

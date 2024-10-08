@@ -32,7 +32,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return Ok(result);
             }
-            return BadRequest(result.Errors);
+            return BadRequest(result);
         }
 
         // PUT: api/Hostel/hostelId
