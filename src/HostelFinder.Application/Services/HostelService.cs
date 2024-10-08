@@ -57,13 +57,20 @@ namespace HostelFinder.Application.Services
                 return new Response<HostelResponseDto>("Hostel not found");
             }
 
-            _mapper.Map(hostelDto, existingHostel);
-            existingHostel.LastModifiedOn = DateTime.Now;
-            existingHostel.LastModifiedBy = "System";
-            await _hostelRepository.UpdateAsync(existingHostel);
+            try
+            {
+                _mapper.Map(hostelDto, existingHostel);
+                existingHostel.LastModifiedOn = DateTime.Now;
+                existingHostel.LastModifiedBy = "System";
+                await _hostelRepository.UpdateAsync(existingHostel);
 
-            var updatedHostelDto = _mapper.Map<HostelResponseDto>(existingHostel);
-            return new Response<HostelResponseDto>(updatedHostelDto);
+                var updatedHostelDto = _mapper.Map<HostelResponseDto>(existingHostel);
+                return new Response<HostelResponseDto>(updatedHostelDto, "Update successful.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<HostelResponseDto>(message: ex.Message);
+            }
         }
 
         public async Task<Response<bool>> DeleteHostelAsync(Guid hostelId)
@@ -74,9 +81,17 @@ namespace HostelFinder.Application.Services
                 return new Response<bool>(false, "Hostel not found");
             }
 
-            await _hostelRepository.DeleteAsync(hostel.Id);
-            return new Response<bool>(true);
+            try
+            {
+                await _hostelRepository.DeleteAsync(hostel.Id);
+                return new Response<bool>(true, "Delete successful.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(false, message: ex.Message);
+            }
         }
+
 
         public async Task<IEnumerable<HostelResponseDto>> GetHostelsByLandlordIdAsync(Guid landlordId)
         {
