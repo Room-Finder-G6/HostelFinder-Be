@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using HostelFinder.Application.DTOs.Users;
 using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -15,20 +16,28 @@ namespace HostelFinder.Application.Services
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
         private readonly PasswordHasher<User> _passwordHasher;
-
+        private readonly IValidator<CreateUserRequestDto> _createUserValidator;
         public UserService
         (
             IMapper mapper,
-            IUserRepository userRepository
+            IUserRepository userRepository,
+            IValidator<CreateUserRequestDto> createUserValidator
         )
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _passwordHasher = new PasswordHasher<User>();
+            _createUserValidator = createUserValidator;
         }
 
         public async Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request)
         {
+            var validationResult = await _createUserValidator.ValidateAsync( request );
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                return new Response<UserDto> {Succeeded = false, Errors = errors };
+            }
             try
             {
                 if (await _userRepository.CheckUserNameExistAsync(request.Username))
