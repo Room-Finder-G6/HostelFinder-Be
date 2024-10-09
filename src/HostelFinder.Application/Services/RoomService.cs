@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Room.Requests;
-using HostelFinder.Application.DTOs.RoomAmenities.Response;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -30,7 +29,6 @@ public class RoomService : IRoomService
         }
 
         var roomDto = _mapper.Map<RoomResponseDto>(room);
-        roomDto.RoomAmenitiesDto = _mapper.Map<RoomAmenitiesResponseDto>(room.RoomAmenities);
         roomDto.RoomDetailsDto = _mapper.Map<RoomDetailsResponseDto>(room.RoomDetails);
         roomDto.ServiceCostsDto = _mapper.Map<List<ServiceCostResponseDto>>(room.ServiceCosts);
 
@@ -40,17 +38,38 @@ public class RoomService : IRoomService
 
     public async Task<Response<AddRoomRequestDto>> AddRoomAsync(AddRoomRequestDto roomDto)
     {
-        var roomDomain = _mapper.Map<Room>(roomDto);
+        try
+        {
+            var roomDomain = _mapper.Map<Room>(roomDto);
 
-        roomDomain.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetails);
-        roomDomain.RoomAmenities = _mapper.Map<RoomAmenities>(roomDto.RoomAmenities);
-        roomDomain.ServiceCosts = _mapper.Map<List<ServiceCost>>(roomDto.ServiceCosts);
-        roomDomain.CreatedOn = DateTime.Now;
-        roomDomain.CreatedBy = "System";
+            roomDomain.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetails);
+            roomDomain.ServiceCosts = _mapper.Map<List<ServiceCost>>(roomDto.ServiceCosts);
+            roomDomain.CreatedOn = DateTime.Now;
+            roomDomain.CreatedBy = "System";
 
-        var room = await _roomRepository.AddAsync(roomDomain);
-        var roomResponseDto = _mapper.Map<AddRoomRequestDto>(room);
-        return new Response<AddRoomRequestDto>(roomResponseDto);
+            roomDomain = await _roomRepository.AddAsync(roomDomain);
+
+            foreach (var amenityDto in roomDto.AddRoomAmenity)
+            {
+                if (amenityDto.IsSelected)
+                {
+                    var roomAmenity = new RoomAmenities
+                    {
+                        RoomId = roomDomain.Id,
+                        AmenityId = amenityDto.Id
+                    };
+
+                    // Thêm tiện nghi vào phòng
+                    await _roomRepository.AddRoomAmenitiesAsync(roomAmenity);
+                }
+            }
+            var roomResponseDto = _mapper.Map<AddRoomRequestDto>(roomDomain);
+            return new Response<AddRoomRequestDto>(roomResponseDto);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error while adding room", ex);
+        }
     }
 
     public async Task<Response<UpdateRoomRequestDto>> UpdateRoomAsync(UpdateRoomRequestDto roomDto, Guid roomId)
@@ -68,13 +87,10 @@ public class RoomService : IRoomService
         {
             existingRoom.RoomDetails = new RoomDetails { RoomId = roomId };
         }
-        _mapper.Map(roomDto.RoomDetails, existingRoom.RoomDetails);
 
-        if (existingRoom.RoomAmenities == null)
-        {
-            existingRoom.RoomAmenities = new RoomAmenities { RoomId = roomId };
-        }
-        _mapper.Map(roomDto.RoomAmenities, existingRoom.RoomAmenities);
+        _mapper.Map(roomDto.UpdateRoomDetailsDto, existingRoom.RoomDetails);
+
+        _mapper.Map(roomDto.AddRoomAmenityDto, existingRoom.RoomAmenities);
 
         /*if (roomDto.ServiceCosts != null)
         {
@@ -82,7 +98,7 @@ public class RoomService : IRoomService
         }*/
 
         existingRoom.LastModifiedOn = DateTime.Now;
-        existingRoom.LastModifiedBy = "System"; 
+        existingRoom.LastModifiedBy = "System";
 
         await _roomRepository.UpdateAsync(existingRoom);
         var roomResponseDto = _mapper.Map<UpdateRoomRequestDto>(existingRoom);
@@ -91,18 +107,19 @@ public class RoomService : IRoomService
 
     public async Task<Response<bool>> DeleteRoomAsync(Guid roomId)
     {
-        var room = await _roomRepository.GetByIdAsync(roomId); 
+        var room = await _roomRepository.GetByIdAsync(roomId);
         if (room == null)
         {
-            return new Response<bool>{Succeeded = false, Message="Room not found"};
+            return new Response<bool> { Succeeded = false, Message = "Room not found" };
         }
 
-        await _roomRepository.DeleteAsync(room.Id); 
+        await _roomRepository.DeleteAsync(room.Id);
 
         return new Response<bool> { Succeeded = true, Message = "Delete Room Successfully" };
     }
 
-    public async Task<Response<List<ListRoomResponseDto>>> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location)
+    public async Task<Response<List<ListRoomResponseDto>>> GetFilteredRooms(decimal? minPrice, decimal? maxPrice,
+        string? location)
     {
         var rooms = await _roomRepository.GetFilteredRooms(minPrice, maxPrice, location);
         var roomsDto = _mapper.Map<List<ListRoomResponseDto>>(rooms);

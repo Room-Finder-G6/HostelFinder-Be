@@ -3,6 +3,7 @@ using HostelFinder.Application.DTOs.Service.Request;
 using HostelFinder.Application.DTOs.Service.Response;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Services
@@ -18,37 +19,85 @@ namespace HostelFinder.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ServiceResponseDTO>> GetAllServicesAsync()
+        public async Task<Response<IEnumerable<ServiceResponseDTO>>> GetAllServicesAsync()
         {
             var services = await _serviceRepository.ListAllAsync();
-            return _mapper.Map<IEnumerable<ServiceResponseDTO>>(services);
+            var serviceResponseDtos = _mapper.Map<IEnumerable<ServiceResponseDTO>>(services);
+            return new Response<IEnumerable<ServiceResponseDTO>> { Succeeded = true, Data = serviceResponseDtos };
         }
 
-        public async Task<ServiceResponseDTO?> GetServiceByIdAsync(Guid id)
+        public async Task<Response<ServiceResponseDTO>> GetServiceByIdAsync(Guid id)
         {
             var service = await _serviceRepository.GetByIdAsync(id);
-            return _mapper.Map<ServiceResponseDTO>(service);
-        }
-
-        public async Task AddServiceAsync(ServiceCreateRequestDTO serviceCreateRequestDTO)
-        {
-            var service = _mapper.Map<Service>(serviceCreateRequestDTO);
-            await _serviceRepository.AddAsync(service);
-        }
-
-        public async Task UpdateServiceAsync(Guid id, ServiceUpdateRequestDTO serviceUpdateRequestDTO)
-        {
-            var service = await _serviceRepository.GetByIdAsync(id);
-            if (service != null)
+            if (service == null)
             {
-                _mapper.Map(serviceUpdateRequestDTO, service);
-                await _serviceRepository.UpdateAsync(service);
+                return new Response<ServiceResponseDTO>("Service not found.");
+            }
+            var serviceResponseDto = _mapper.Map<ServiceResponseDTO>(service);
+            return new Response<ServiceResponseDTO> { Succeeded = true, Data = serviceResponseDto };
+        }
+
+        public async Task<Response<ServiceResponseDTO>> AddServiceAsync(ServiceCreateRequestDTO serviceCreateRequestDTO)
+        {
+            var isDuplicate = await _serviceRepository.CheckDuplicateServiceAsync(serviceCreateRequestDTO.ServiceName);
+            if (isDuplicate)
+            {
+                return new Response<ServiceResponseDTO>("Dịch vụ đã tồn tại.");
+            }
+
+            var service = _mapper.Map<Service>(serviceCreateRequestDTO);
+            service.CreatedOn = DateTime.Now;
+            service.CreatedBy = "System";
+
+            try
+            {
+                await _serviceRepository.AddAsync(service);
+                var serviceResponseDto = _mapper.Map<ServiceResponseDTO>(service);
+                return new Response<ServiceResponseDTO> { Succeeded = true, Data = serviceResponseDto, Message = "Dịch vụ đã được thêm thành công." };
+            }
+            catch (Exception ex)
+            {
+                return new Response<ServiceResponseDTO>(message: ex.Message);
             }
         }
 
-        public async Task DeleteServiceAsync(Guid id)
+        public async Task<Response<ServiceResponseDTO>> UpdateServiceAsync(Guid id, ServiceUpdateRequestDTO serviceUpdateRequestDTO)
         {
-            await _serviceRepository.DeletePermanentAsync(id);
+            var service = await _serviceRepository.GetByIdAsync(id);
+            if (service == null)
+            {
+                return new Response<ServiceResponseDTO>("Service not found.");
+            }
+
+            try
+            {
+                _mapper.Map(serviceUpdateRequestDTO, service);
+                await _serviceRepository.UpdateAsync(service);
+                var updatedServiceResponseDto = _mapper.Map<ServiceResponseDTO>(service);
+                return new Response<ServiceResponseDTO> { Succeeded = true, Data = updatedServiceResponseDto, Message = "Service updated successfully." };
+            }
+            catch (Exception ex)
+            {
+                return new Response<ServiceResponseDTO>(message: ex.Message);
+            }
+        }
+
+        public async Task<Response<string>> DeleteServiceAsync(Guid id)
+        {
+            try
+            {
+                var service = await _serviceRepository.GetByIdAsync(id);
+                if (service == null)
+                {
+                    return new Response<string>("Service not found.");
+                }
+                await _serviceRepository.DeletePermanentAsync(id);
+                return new Response<string>("Service deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<string>(message: ex.Message);
+            }
         }
     }
 }

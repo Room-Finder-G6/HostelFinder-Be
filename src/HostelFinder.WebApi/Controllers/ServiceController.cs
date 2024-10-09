@@ -15,14 +15,14 @@ namespace HostelFinder.WebApi.Controllers
             _serviceService = serviceService;
         }
 
-        [HttpGet]
+        [HttpGet("GetAllServices")]
         public async Task<IActionResult> GetAllServices()
         {
             var services = await _serviceService.GetAllServicesAsync();
             return Ok(services);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetServiceById/{id}")]
         public async Task<IActionResult> GetServiceById(Guid id)
         {
             var service = await _serviceService.GetServiceByIdAsync(id);
@@ -32,25 +32,37 @@ namespace HostelFinder.WebApi.Controllers
             return Ok(service);
         }
 
-        [HttpPost]
+        [HttpPost("AddService")]
         public async Task<IActionResult> AddService(ServiceCreateRequestDTO serviceCreateRequestDTO)
         {
-            await _serviceService.AddServiceAsync(serviceCreateRequestDTO);
-            return CreatedAtAction(nameof(GetServiceById), new { id = serviceCreateRequestDTO.HostelId }, serviceCreateRequestDTO);
+            var response = await _serviceService.AddServiceAsync(serviceCreateRequestDTO);
+            if (response.Succeeded)
+            {
+                return CreatedAtAction(nameof(GetServiceById), new { id = serviceCreateRequestDTO.HostelId }, response.Data);
+            }
+            return BadRequest(response.Message);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("UpdateService/{id}")]
         public async Task<IActionResult> UpdateService(Guid id, ServiceUpdateRequestDTO serviceUpdateRequestDTO)
         {
-            await _serviceService.UpdateServiceAsync(id, serviceUpdateRequestDTO);
-            return NoContent();
+            var response = await _serviceService.UpdateServiceAsync(id, serviceUpdateRequestDTO);
+            if (response.Succeeded)
+            {
+                return NoContent();
+            }
+            return NotFound(response.Message);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteService/{id}")]
         public async Task<IActionResult> DeleteService(Guid id)
         {
-            await _serviceService.DeleteServiceAsync(id);
-            return NoContent();
+            var response = await _serviceService.DeleteServiceAsync(id);
+            if (response.Succeeded)
+            {
+                return NoContent();
+            }
+            return NotFound(response.Message);
         }
     }
 }

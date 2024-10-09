@@ -22,5 +22,9 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.Services.FindAsync(id);
         }
 
+        public async Task<bool> CheckDuplicateServiceAsync(string serviceName)
+        {
+            return await _dbContext.Services.AnyAsync(s => s.ServiceName == serviceName);
+        }
     }
 }

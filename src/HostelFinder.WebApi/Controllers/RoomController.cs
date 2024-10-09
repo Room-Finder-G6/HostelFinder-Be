@@ -16,7 +16,7 @@ public class RoomController : ControllerBase
     }
 
     [HttpGet]
-    [Route("GetAllRoomFeaturesByRoomId/{roomId}")]
+    [Route("{roomId}")]
     public async Task<IActionResult> GetAllRoomFeaturesByRoomId(Guid roomId)
     {
         var result = await _roomService.GetAllRoomFeaturesByIdAsync(roomId);
@@ -29,7 +29,6 @@ public class RoomController : ControllerBase
     }
 
     [HttpPost]
-    [Route("AddRoom")]
     public async Task<IActionResult> AddRoom([FromBody] AddRoomRequestDto roomDto)
     {
         if (!ModelState.IsValid)
@@ -47,7 +46,7 @@ public class RoomController : ControllerBase
     }
 
     [HttpPut]
-    [Route("UpdateRoom/{roomId}")]
+    [Route("{roomId}")]
     public async Task<IActionResult> UpdateRoom([FromBody] UpdateRoomRequestDto roomDto, Guid roomId)
     {
         if (!ModelState.IsValid)
@@ -65,7 +64,7 @@ public class RoomController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("DeleteRoom/{roomId}")]
+    [Route("{roomId}")]
     public async Task<IActionResult> DeleteRoom(Guid roomId)
     {
         var result = await _roomService.DeleteRoomAsync(roomId);
