@@ -1,6 +1,9 @@
-﻿using HostelFinder.Application.Interfaces.IServices;
+﻿using FluentValidation;
+using HostelFinder.Application.DTOs.Users.Requests;
+using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Mappings;
 using HostelFinder.Application.Services;
+using HostelFinder.Application.Validations.Users;
 using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +28,11 @@ namespace HostelFinder.Application
             services.AddScoped<IWishlistService, WishlistService>();
             services.AddScoped<IServiceService, ServiceService>();
 
-            
+
+            //register validation 
+            services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();
+
+
 
             //register automapper
             services.AddAutoMapper(typeof(GeneralProfile).Assembly);
