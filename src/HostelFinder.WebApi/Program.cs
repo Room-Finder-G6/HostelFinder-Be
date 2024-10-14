@@ -1,4 +1,5 @@
 using HostelFinder.Infrastructure.Common;
+using HostelFinder.Infrastructure.Seeders;
 using HostelFinder.WebApi.Extensions;
 using HostelFinder.WebApi.Middlewares;
 
@@ -52,6 +53,12 @@ HostelFinder.Application.ServiceExtensions.ConfigureServices(builder.Services, b
 HostelFinder.Infrastructure.ServiceRegistration.Configure(builder.Services, builder.Configuration);
 
 var app = builder.Build();
+
+var scope = app.Services.CreateScope();
+var seeder = scope.ServiceProvider.GetRequiredService<IHostelSeeder>();
+
+
+await seeder.Seed();
 
 app.UseCors("AllowAllOrigins");
 
