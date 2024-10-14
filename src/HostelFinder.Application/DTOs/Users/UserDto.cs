@@ -24,5 +24,6 @@ namespace HostelFinder.Application.DTOs.Users
         public string? AvatarUrl { get; set; }
         [Required]
         public UserRole Role { get; set; }
+        public bool IsActive { get; set; }
     }
 }

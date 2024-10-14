@@ -26,4 +26,9 @@
     <ProjectReference Include="..\HostelFinder.Application\HostelFinder.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Seeders\" />
+    <Folder Include="Services\Interfaces\" />
+  </ItemGroup>
+
 </Project>

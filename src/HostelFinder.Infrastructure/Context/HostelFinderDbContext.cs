@@ -11,13 +11,16 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<RoomDetails> RoomDetails { get; set; }
+    public DbSet<Amenity> Amenities { get; set; }
     public DbSet<RoomAmenities> RoomAmenities { get; set; }
     public DbSet<Service> Services { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<ServiceCost> ServiceCosts { get; set; }
-
     public DbSet<BlackListToken> BlackListTokens { get; set; }
+    public DbSet<Wishlist> Wishlists { get; set; }
+    public DbSet<WishlistRoom> WishlistRooms { get; set; }
+
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -65,6 +68,12 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(r => r.HostelId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Hostel>()
+            .HasOne(h => h.Address)
+            .WithOne(h => h.Hostel)
+            .HasForeignKey<Address>(h => h.HostelId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // Room
         modelBuilder.Entity<Room>()
             .HasOne(r => r.Hostel)
@@ -82,12 +91,6 @@ public class HostelFinderDbContext : DbContext
             .HasOne(r => r.RoomDetails)
             .WithOne(rf => rf.Room)
             .HasForeignKey<RoomDetails>(rf => rf.RoomId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<Room>()
-            .HasOne(r => r.RoomAmenities)
-            .WithOne(ra => ra.Room)
-            .HasForeignKey<RoomAmenities>(ra => ra.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Room>()
@@ -113,6 +116,20 @@ public class HostelFinderDbContext : DbContext
             .WithOne(sc => sc.Room)
             .HasForeignKey(sc => sc.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        //WishlistRoom
+        modelBuilder.Entity<WishlistRoom>()
+            .HasKey(wr => new { wr.RoomId, wr.WishlistId });
+
+        modelBuilder.Entity<WishlistRoom>()
+            .HasOne(wr => wr.Room)
+            .WithMany(r => r.WishlistRooms)
+            .HasForeignKey(wr => wr.RoomId);
+
+        modelBuilder.Entity<WishlistRoom>()
+            .HasOne(wr => wr.Wishlist)
+            .WithMany(w => w.WishlistRooms)
+            .HasForeignKey(wr => wr.WishlistId);
 
         // Review
         modelBuilder.Entity<Review>()
@@ -143,6 +160,22 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(br => br.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // RoomAmenities
+        modelBuilder.Entity<RoomAmenities>()
+            .HasKey(ra => new { ra.RoomId, ra.AmenityId });
+        
+        modelBuilder.Entity<RoomAmenities>()
+            .HasOne(ra => ra.Room)
+            .WithMany(r => r.RoomAmenities)
+            .HasForeignKey(ra => ra.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<RoomAmenities>()
+            .HasOne(ra => ra.Amenity)
+            .WithMany(a => a.RoomAmenities)
+            .HasForeignKey(ra => ra.AmenityId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
         // Service
         modelBuilder.Entity<Service>()
             .HasOne(s => s.Hostel)
@@ -198,5 +231,6 @@ public class HostelFinderDbContext : DbContext
             entity.Property(e => e.Cost)
                 .HasColumnType("decimal(18,2)");
         });
+
     }
 }

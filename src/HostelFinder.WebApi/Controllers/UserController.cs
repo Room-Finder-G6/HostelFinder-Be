@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/v1/users")]
+    [Route("api/users")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -15,24 +15,36 @@ namespace HostelFinder.WebApi.Controllers
             _userService = userService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateUserRequestDto request)
+        // GET: api/User/GetListUser
+        [HttpGet("GetListUser")]
+        public async Task<IActionResult> GetListUser()
         {
-            try
-            {
-                var response = await _userService.CreateUserAsync(request);
-                if (!response.Succeeded)
-                {
-                    return BadRequest(response);
-                }
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error: {ex.Message}");
-
-            }
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
         }
 
+        // PUT: api/User/UpdateUser/{userId}
+        [HttpPut("UpdateUser/{userId}")]
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserRequestDto request)
+        {
+            var result = await _userService.UpdateUserAsync(userId, request);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+            return Ok(result.Data);
+        }
+
+        // PUT: api/User/UnActiveUser/{userId}
+        [HttpPut("UnActiveUser/{userId}")]
+        public async Task<IActionResult> UnActiveUser(Guid userId)
+        {
+            var result = await _userService.UnActiveUserAsync(userId);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+            return Ok(result.Data);
+        }
     }
 }
