@@ -3,6 +3,7 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Services;
 using HostelFinder.Infrastructure.Context;
 using HostelFinder.Infrastructure.Repositories;
+using HostelFinder.Infrastructure.Seeders;
 using HostelFinder.Infrastructure.Services;
 using HostelFinder.Infrastructure.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -28,5 +29,6 @@ public class ServiceRegistration
         service.AddScoped<IAuthAccountService, AuthAccountService>();
         service.AddScoped<IServiceRepository, ServiceRepository>();
         service.AddScoped<IS3Service, S3Service>();
+        service.AddScoped<IHostelSeeder, HostelSeeder>();
     }
 }
