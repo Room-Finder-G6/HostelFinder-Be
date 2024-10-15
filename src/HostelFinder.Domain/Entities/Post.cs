@@ -5,7 +5,7 @@ using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Domain.Entities
 {
-    public class Room : BaseEntity
+    public class Post : BaseEntity
     {
         [ForeignKey("Hostel")]
         public Guid HostelId { get; set; }
@@ -24,7 +24,7 @@ namespace HostelFinder.Domain.Entities
         public virtual Hostel Hostel { get; set; }  
         public virtual ICollection<BookingRequest> BookingRequests { get; set; }
         public virtual RoomDetails RoomDetails { get; set; }
-        public List<RoomAmenities>  RoomAmenities { get; set; }
+        public virtual List<RoomAmenities> RoomAmenities { get; set; }
         public virtual ICollection<Image> Images { get; set; }
         public virtual ICollection<ServiceCost> ServiceCosts { get; set; }
         public virtual ICollection<WishlistRoom> WishlistRooms { get; set; }

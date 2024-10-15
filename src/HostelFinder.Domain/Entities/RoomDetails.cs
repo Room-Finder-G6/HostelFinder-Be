@@ -5,7 +5,7 @@ namespace HostelFinder.Domain.Entities;
 public class RoomDetails
 {
     [Key]
-    public Guid RoomId { get; set; }
+    public Guid PostId { get; set; }
 
     public int BedRooms { get; set; } 
     public int BathRooms { get; set; }
@@ -15,5 +15,5 @@ public class RoomDetails
     [MaxLength(255)]
     public string? OtherDetails { get; set; }
     
-    public virtual Room Room { get; set; } = default!;
+    public virtual Post Post { get; set; } = default!;
 }

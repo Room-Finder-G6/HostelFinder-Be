@@ -6,5 +6,5 @@ public class Amenity : BaseEntity
 {
     public string AmenityName { get; set; }
     public bool IsSelected { get; set; }
-    public ICollection<RoomAmenities> RoomAmenities { get; set; }
+    public virtual ICollection<RoomAmenities> RoomAmenities { get; set; }
 }

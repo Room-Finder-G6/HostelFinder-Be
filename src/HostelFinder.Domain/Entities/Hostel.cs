@@ -22,7 +22,7 @@ namespace HostelFinder.Domain.Entities
         [Required]
         public float Rating { get; set; }
         public virtual ICollection<Service> Services { get; set; } 
-        public virtual ICollection<Room> Rooms { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }
         public virtual ICollection<Review> Reviews { get; set; }
         public virtual ICollection<Image> Images { get; set; }
         public virtual User Landlord { get; set; } 

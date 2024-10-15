@@ -5,7 +5,7 @@ using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.DTOs.Room.Requests;
 
-public class RoomResponseDto
+public class PostResponseDto
 {
     public Guid Id { get; set; }
     public Guid HostelId { get; set; }
