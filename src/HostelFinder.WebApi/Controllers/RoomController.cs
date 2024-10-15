@@ -1,5 +1,6 @@
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers;
@@ -9,10 +10,12 @@ namespace HostelFinder.WebApi.Controllers;
 public class RoomController : ControllerBase
 {
     private readonly IRoomService _roomService;
-
-    public RoomController(IRoomService roomService)
+private readonly IS3Service _s3Service;
+    
+    public RoomController(IRoomService roomService, IS3Service s3Service)
     {
         _roomService = roomService;
+        _s3Service = s3Service;
     }
 
     [HttpGet]
@@ -78,14 +81,28 @@ public class RoomController : ControllerBase
 
     [HttpGet]
     [Route("GetFilteredRooms")]
-    public async Task<IActionResult> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location)
+    public async Task<IActionResult> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location, RoomType roomType)
     {
-        var result = await _roomService.GetFilteredRooms(minPrice, maxPrice, location);
+        var result = await _roomService.GetFilteredRooms(minPrice, maxPrice, location, roomType);
         if (result.Succeeded)
         {
             return Ok(result);
         }
 
         return NotFound();
+    }
+    
+    [HttpPost("upload")]
+    public async Task<IActionResult> UploadFile(IFormFile file)
+    {
+        try
+        {
+            var fileUrl = await _s3Service.UploadFileAsync(file);
+            return Ok(new { Url = fileUrl });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 }

@@ -28,12 +28,9 @@ namespace HostelFinder.Application
             services.AddScoped<IWishlistService, WishlistService>();
             services.AddScoped<IServiceService, ServiceService>();
 
-
             //register validation 
             services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();
-
-
-
+            
             //register automapper
             services.AddAutoMapper(typeof(GeneralProfile).Assembly);
 
@@ -67,6 +64,8 @@ namespace HostelFinder.Application
                 options.AddPolicy($"{UserRole.Admin}", policy => policy.RequireRole("Admin"));
                 options.AddPolicy($"{UserRole.User}", policy => policy.RequireRole("User"));
             });
+
+            
         }
     }
 }

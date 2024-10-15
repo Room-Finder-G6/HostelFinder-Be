@@ -14,6 +14,8 @@ using HostelFinder.Application.DTOs.RoomDetails.Request;
 using HostelFinder.Application.DTOs.Address;
 using HostelFinder.Application.DTOs.Service.Request;
 using HostelFinder.Application.DTOs.Service.Response;
+using HostelFinder.Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Http;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -23,8 +25,8 @@ public class GeneralProfile : Profile
     {
         // Room Mapping
         CreateMap<Room, RoomResponseDto>()
-            .ForMember(dest => dest.ImageUrls,
-                opt => opt.MapFrom(src => src.Images.Select(x => x.Url).ToList()))
+            .ForMember(dest => dest.Images,
+                opt => opt.MapFrom(src => src.Images))
             .ForMember(dest => dest.RoomDetailsDto,
                 opt => opt.MapFrom(src => src.RoomDetails))
             .ForMember(dest => dest.AmenityResponses,
@@ -39,8 +41,8 @@ public class GeneralProfile : Profile
             ;
 
         CreateMap<AddRoomRequestDto, Room>()
-            .ForMember(dest => dest.Images,
-                opt => opt.MapFrom(src => src.ImagesUrls.Select(url => new Image { Url = url })))
+            .ForMember(dest => dest.Images, opt => opt.Ignore()) // Ignore vì sẽ xử lý thủ công
+            .ForMember(dest => dest.PrimaryImageUrl, opt => opt.Ignore()) 
             .ForMember(dest => dest.RoomDetails,
                 opt => opt.MapFrom(src => src.RoomDetails))
             .ForMember(dest => dest.ServiceCosts,
@@ -72,7 +74,8 @@ public class GeneralProfile : Profile
         // Hostel Mapping
         CreateMap<Hostel, HostelResponseDto>().ReverseMap();
         CreateMap<Hostel, AddHostelRequestDto>()
-            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+            .ForMember(dest => dest.Address, 
+                opt => opt.MapFrom(src => src.Address))
             .ReverseMap();
 
         // Address Mapping
@@ -100,5 +103,8 @@ public class GeneralProfile : Profile
         CreateMap<ServiceCreateRequestDTO, Service>();
         CreateMap<ServiceUpdateRequestDTO, Service>();
         CreateMap<Service, ServiceResponseDTO>();
+        
     }
+    
+
 }

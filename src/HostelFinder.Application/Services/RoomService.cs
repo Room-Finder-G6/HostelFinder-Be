@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HostelFinder.Application.DTOs.Amenity.Request;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
@@ -6,6 +7,8 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace HostelFinder.Application.Services;
 
@@ -13,11 +16,13 @@ public class RoomService : IRoomService
 {
     private readonly IMapper _mapper;
     private readonly IRoomRepository _roomRepository;
+    private readonly IS3Service _s3Service;
 
-    public RoomService(IMapper mapper, IRoomRepository roomRepository)
+    public RoomService(IMapper mapper, IRoomRepository roomRepository, IS3Service s3Service)
     {
         _mapper = mapper;
         _roomRepository = roomRepository;
+        _s3Service = s3Service;
     }
 
     public async Task<Response<RoomResponseDto>> GetAllRoomFeaturesByIdAsync(Guid roomId)
@@ -40,35 +45,64 @@ public class RoomService : IRoomService
     {
         try
         {
+            if (roomDto.PrimaryImage == null)
+            {
+                throw new ArgumentException("Primary image is required.");
+            }
+
+            // Upload primary image to S3
+            var primaryImageUrl = await _s3Service.UploadFileAsync(roomDto.PrimaryImage);
+
+            // Upload other images (if any)
+            var images = new List<Image>();
+            if (roomDto.Images != null && roomDto.Images.Length > 0)
+            {
+                var uploadTasks = roomDto.Images.Select(file => _s3Service.UploadFileAsync(file));
+                var urls = await Task.WhenAll(uploadTasks);
+                images.AddRange(urls.Select(url => new Image { Url = url }));
+            }
+
+            // Map DTO to domain after uploading images
             var roomDomain = _mapper.Map<Room>(roomDto);
+            roomDomain.PrimaryImageUrl = primaryImageUrl;
+            roomDomain.Images = images;
 
-            roomDomain.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetails);
-            roomDomain.ServiceCosts = _mapper.Map<List<ServiceCost>>(roomDto.ServiceCosts);
-            roomDomain.CreatedOn = DateTime.Now;
-            roomDomain.CreatedBy = "System";
-
+            // Save room information to database
             roomDomain = await _roomRepository.AddAsync(roomDomain);
 
-            foreach (var amenityDto in roomDto.AddRoomAmenity)
-            {
-                if (amenityDto.IsSelected)
-                {
-                    var roomAmenity = new RoomAmenities
-                    {
-                        RoomId = roomDomain.Id,
-                        AmenityId = amenityDto.Id
-                    };
+            // Add amenities for the room
+            await AddRoomAmenitiesAsync(roomDto.AddRoomAmenity, roomDomain.Id);
 
-                    // Thêm tiện nghi vào phòng
-                    await _roomRepository.AddRoomAmenitiesAsync(roomAmenity);
-                }
-            }
+            // Map back from domain to DTO
             var roomResponseDto = _mapper.Map<AddRoomRequestDto>(roomDomain);
             return new Response<AddRoomRequestDto>(roomResponseDto);
         }
+        catch (ArgumentException ex)
+        {
+            // Handle validation errors
+            return new Response<AddRoomRequestDto>(ex.Message);
+        }
         catch (Exception ex)
         {
-            throw new Exception("Error while adding room", ex);
+            return new Response<AddRoomRequestDto>("An error occurred while adding the room. Please try again.");
+        }
+    }
+
+
+    private async Task AddRoomAmenitiesAsync(List<AddRoomAmenityDto> amenities, Guid roomId)
+    {
+        foreach (var amenityDto in amenities)
+        {
+            if (amenityDto.IsSelected)
+            {
+                var roomAmenity = new RoomAmenities
+                {
+                    RoomId = roomId,
+                    AmenityId = amenityDto.Id
+                };
+
+                await _roomRepository.AddRoomAmenitiesAsync(roomAmenity);
+            }
         }
     }
 
@@ -119,9 +153,9 @@ public class RoomService : IRoomService
     }
 
     public async Task<Response<List<ListRoomResponseDto>>> GetFilteredRooms(decimal? minPrice, decimal? maxPrice,
-        string? location)
+        string? location, RoomType roomType)
     {
-        var rooms = await _roomRepository.GetFilteredRooms(minPrice, maxPrice, location);
+        var rooms = await _roomRepository.GetFilteredRooms(minPrice, maxPrice, location, roomType);
         var roomsDto = _mapper.Map<List<ListRoomResponseDto>>(rooms);
         return new Response<List<ListRoomResponseDto>>(roomsDto);
     }

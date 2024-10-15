@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.0-preview.3" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.0-preview.3" />
     <PackageReference Include="MailKit" Version="4.7.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
@@ -28,7 +30,6 @@
 
   <ItemGroup>
     <Folder Include="Seeders\" />
-    <Folder Include="Services\Interfaces\" />
   </ItemGroup>
 
 </Project>

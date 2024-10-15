@@ -1,6 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ public class RoomRepository : BaseGenericRepository<Room>, IRoomRepository
         return room;
     }
 
-    public async Task<IEnumerable<Room>> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location)
+    public async Task<IEnumerable<Room>> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location, RoomType roomType)
     {
         var rooms = await ListAllAsync();
 
@@ -42,6 +43,11 @@ public class RoomRepository : BaseGenericRepository<Room>, IRoomRepository
         if (!string.IsNullOrEmpty(location))
         {
             rooms = rooms.Where(x => x.Hostel.Address.Province.Contains(location)).ToList();
+        }
+        
+        if (roomType != RoomType.None) // Assuming RoomType.None is a default value indicating no filter
+        {
+            rooms = rooms.Where(x => x.RoomType == roomType).ToList();
         }
         
         return rooms;

@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using HostelFinder.Application.DTOs.Amenity.Request;
-using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.DTOs.RoomDetails.Request;
 using HostelFinder.Application.DTOs.ServiceCost.Request;
 using HostelFinder.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace HostelFinder.Application.DTOs.Room.Requests;
 
@@ -16,9 +16,9 @@ public class AddRoomRequestDto
     [Required]
     [MaxLength(255)]
     public string Description { get; set; }
-    public string PrimaryImageUrl { get; set; }
+    public IFormFile PrimaryImage { get; set; }
     public RoomType RoomType { get; set; }
-    public ICollection<string> ImagesUrls{ get; set; }
+    public IFormFile[] Images{ get; set; }
     public decimal Size { get; set; }
     [Required]
     public decimal MonthlyRentCost { get; set; }

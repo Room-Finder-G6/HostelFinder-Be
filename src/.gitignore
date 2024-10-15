@@ -21,6 +21,3 @@ bld/
 # Others
 *.log
 *.DS_Store
-
-#Ignore the appsettings.json file
-HostelFinder.WebApi/appsettings.json
