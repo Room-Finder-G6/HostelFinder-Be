@@ -4,7 +4,7 @@ using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.DTOs.Room.Requests;
 
-public class UpdateRoomRequestDto
+public class UpdatePostRequestDto
 {
     public string Title { get; set; }
     public string Description { get; set; }

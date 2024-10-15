@@ -1,6 +1,6 @@
 ﻿namespace HostelFinder.Application.DTOs.Room.Requests;
 
-public class ListRoomResponseDto
+public class ListPostResponseDto
 {
     public Guid Id { get; set; }
     public string Title { get; set; }

@@ -21,8 +21,8 @@ public class GeneralProfile : Profile
 {
     public GeneralProfile()
     {
-        // Room Mapping
-        CreateMap<Room, RoomResponseDto>()
+        // Post Mapping
+        CreateMap<Post, PostResponseDto>()
             .ForMember(dest => dest.ImageUrls,
                 opt => opt.MapFrom(src => src.Images.Select(x => x.Url).ToList()))
             .ForMember(dest => dest.RoomDetailsDto,
@@ -38,7 +38,7 @@ public class GeneralProfile : Profile
             .ReverseMap()
             ;
 
-        CreateMap<AddRoomRequestDto, Room>()
+        CreateMap<AddPostRequestDto, Post>()
             .ForMember(dest => dest.Images,
                 opt => opt.MapFrom(src => src.ImagesUrls.Select(url => new Image { Url = url })))
             .ForMember(dest => dest.RoomDetails,
@@ -47,14 +47,14 @@ public class GeneralProfile : Profile
                 opt => opt.MapFrom(src => src.ServiceCosts))
             .ReverseMap();
 
-        CreateMap<Room, UpdateRoomRequestDto>()
+        CreateMap<Post, UpdatePostRequestDto>()
             .ForMember(dest => dest.UpdateRoomDetailsDto,
                 opt => opt.MapFrom(src => src.RoomDetails))
             .ForMember(dest => dest.AddRoomAmenityDto,
                 opt => opt.Ignore())
             .ReverseMap();
 
-        CreateMap<Room, ListRoomResponseDto>()
+        CreateMap<Post, ListPostResponseDto>()
             .ForMember(dest => dest.Id,
                 opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Title,

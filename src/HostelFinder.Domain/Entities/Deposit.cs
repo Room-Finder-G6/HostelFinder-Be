@@ -10,7 +10,7 @@ namespace HostelFinder.Domain.Entities
         public Guid UserId { get; set; }
 
         [Required]
-        public Guid RoomId { get; set; }
+        public Guid postId { get; set; }
 
         [Required]
         public decimal TotalAmount { get; set; }
@@ -20,6 +20,6 @@ namespace HostelFinder.Domain.Entities
         public string Status { get; set; }
 
         public virtual User User { get; set; }
-        public virtual Room Room { get; set; }
+        public virtual Post Post { get; set; }
     }
 }

@@ -1,5 +1,7 @@
 using HostelFinder.Application.DTOs.Room.Requests;
+using HostelFinder.Application.Filter;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers;
@@ -8,18 +10,18 @@ namespace HostelFinder.WebApi.Controllers;
 [Route("api/rooms")]
 public class RoomController : ControllerBase
 {
-    private readonly IRoomService _roomService;
+    private readonly IPostService _postService;
 
-    public RoomController(IRoomService roomService)
+    public RoomController(IPostService postService)
     {
-        _roomService = roomService;
+        _postService = postService;
     }
 
     [HttpGet]
     [Route("{roomId}")]
     public async Task<IActionResult> GetAllRoomFeaturesByRoomId(Guid roomId)
     {
-        var result = await _roomService.GetAllRoomFeaturesByIdAsync(roomId);
+        var result = await _postService.GetAllRoomFeaturesByIdAsync(roomId);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -29,14 +31,14 @@ public class RoomController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddRoom([FromBody] AddRoomRequestDto roomDto)
+    public async Task<IActionResult> AddRoom([FromBody] AddPostRequestDto postDto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _roomService.AddRoomAsync(roomDto);
+        var result = await _postService.AddRoomAsync(postDto);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -47,14 +49,14 @@ public class RoomController : ControllerBase
 
     [HttpPut]
     [Route("{roomId}")]
-    public async Task<IActionResult> UpdateRoom([FromBody] UpdateRoomRequestDto roomDto, Guid roomId)
+    public async Task<IActionResult> UpdateRoom([FromBody] UpdatePostRequestDto postDto, Guid roomId)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _roomService.UpdateRoomAsync(roomDto, roomId);
+        var result = await _postService.UpdateRoomAsync(postDto, roomId);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -67,7 +69,7 @@ public class RoomController : ControllerBase
     [Route("{roomId}")]
     public async Task<IActionResult> DeleteRoom(Guid roomId)
     {
-        var result = await _roomService.DeleteRoomAsync(roomId);
+        var result = await _postService.DeleteRoomAsync(roomId);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -76,16 +78,5 @@ public class RoomController : ControllerBase
         return NotFound();
     }
 
-    [HttpGet]
-    [Route("GetFilteredRooms")]
-    public async Task<IActionResult> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location)
-    {
-        var result = await _roomService.GetFilteredRooms(minPrice, maxPrice, location);
-        if (result.Succeeded)
-        {
-            return Ok(result);
-        }
-
-        return NotFound();
-    }
+    
 }
