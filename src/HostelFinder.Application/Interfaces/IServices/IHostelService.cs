@@ -10,5 +10,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<HostelResponseDto>> UpdateHostelAsync(UpdateHostelRequestDto hostelDto);
         Task<Response<bool>> DeleteHostelAsync(Guid hostelId);
         Task<IEnumerable<HostelResponseDto>> GetHostelsByLandlordIdAsync(Guid landlordId);
+        Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId);
     }
 }
