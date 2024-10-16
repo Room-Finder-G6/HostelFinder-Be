@@ -91,6 +91,7 @@ public class GeneralProfile : Profile
         // Service Cost Mapping
         CreateMap<ServiceCost, ServiceCostResponseDto>().ReverseMap();
         CreateMap<ServiceCost, AddServiceCostDto>().ReverseMap();
+        CreateMap<UpdateServiceCostDto, ServiceCost>();
 
         //Map User
         CreateMap<UserDto, User>().ReverseMap();
