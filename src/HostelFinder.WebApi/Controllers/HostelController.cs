@@ -15,6 +15,13 @@ namespace HostelFinder.WebApi.Controllers
             _hostelService = hostelService;
         }
 
+        [HttpGet("{hostelId}")]
+        public async Task<IActionResult> GetHostelById(Guid hostelId)
+        {
+            var result = await _hostelService.GetHostelByIdAsync(hostelId);
+            return Ok(result);
+        }
+
         // GET: api/Hostel/GetHostelsByLandlordId/{landlordId}
         [HttpGet("GetHostelsByLandlordId/{landlordId}")]
         public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId)

@@ -11,11 +11,13 @@ namespace HostelFinder.Application.Services
     public class HostelService : IHostelService
     {
         private readonly IHostelRepository _hostelRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
 
-        public HostelService(IHostelRepository hostelRepository, IMapper mapper)
+        public HostelService(IHostelRepository hostelRepository,IReviewRepository reviewRepository, IMapper mapper)
         {
             _hostelRepository = hostelRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
         }
 
@@ -92,11 +94,26 @@ namespace HostelFinder.Application.Services
             }
         }
 
-
         public async Task<IEnumerable<HostelResponseDto>> GetHostelsByLandlordIdAsync(Guid landlordId)
         {
             var hostels = await _hostelRepository.GetHostelsByLandlordIdAsync(landlordId);
             return _mapper.Map<IEnumerable<HostelResponseDto>>(hostels);
+        }
+
+        public async Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId)
+        {
+            var hostel = await _hostelRepository.GetByIdAsync(hostelId);
+            if (hostel == null)
+            {
+                return new Response<HostelResponseDto>("Hostel not found.");
+            }
+
+            var hostelDto = _mapper.Map<HostelResponseDto>(hostel);
+
+            var averageRating = await _reviewRepository.GetAverageRatingForHostelAsync(hostelId);
+            hostelDto.Rating = averageRating;
+
+            return new Response<HostelResponseDto>(hostelDto);
         }
     }
 
