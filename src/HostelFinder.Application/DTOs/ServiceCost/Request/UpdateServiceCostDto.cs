@@ -5,7 +5,8 @@ namespace HostelFinder.Application.DTOs.ServiceCost.Request;
 
 public class UpdateServiceCostDto
 {
-    public Guid? ServiceCostId { get; set; } // Nullable for new entries
+    public Guid PostId { get; set; }
+    public Guid? ServiceCostId { get; set; }
     [Required]
     public string ServiceName { get; set; }
 

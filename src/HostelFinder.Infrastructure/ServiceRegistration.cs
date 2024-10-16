@@ -28,6 +28,7 @@ public class ServiceRegistration
         service.AddScoped<IEmailService, EmailService>();
         service.AddScoped<IAuthAccountService, AuthAccountService>();
         service.AddScoped<IServiceRepository, ServiceRepository>();
+        service.AddScoped<IServiceCostRepository, ServiceCostRepository>();
         service.AddScoped<IHostelSeeder, HostelSeeder>();
     }
 }

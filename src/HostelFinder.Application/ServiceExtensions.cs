@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using RoomFinder.Domain.Common.Settings;
 using System.Text;
-using Microsoft.AspNetCore.Http;
 
 namespace HostelFinder.Application
 {
@@ -28,7 +27,8 @@ namespace HostelFinder.Application
             services.AddScoped<IAmenityService, AmenityService>();
             services.AddScoped<IWishlistService, WishlistService>();
             services.AddScoped<IServiceService, ServiceService>();
-            
+            services.AddScoped<IServiceCostService, ServiceCostService>();
+
 
             //register validation 
             services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();
