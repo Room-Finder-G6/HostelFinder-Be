@@ -78,5 +78,17 @@ public class RoomController : ControllerBase
         return NotFound();
     }
 
-    
+    [HttpGet("{postId}/landlord")]
+    public async Task<IActionResult> GetLandlordByPostId(Guid postId)
+    {
+        var landlord = await _postService.GetLandlordByPostIdAsync(postId);
+
+        if (landlord == null)
+        {
+            return NotFound("Post or associated landlord not found.");
+        }
+
+        return Ok(landlord);
+    }
+
 }

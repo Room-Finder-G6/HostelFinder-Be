@@ -47,4 +47,6 @@ namespace HostelFinder.WebApi.Controllers
             return Ok(result.Data);
         }
     }
+
+
 }

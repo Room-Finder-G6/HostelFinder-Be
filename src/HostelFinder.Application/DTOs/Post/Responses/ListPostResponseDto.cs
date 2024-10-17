@@ -7,6 +7,5 @@ public class ListPostResponseDto
     public string Address { get; set; }
     public decimal Size { get; set; }
     public string PrimaryImageUrl { get; set; }
-
     public decimal MonthlyRentCost { get; set; }
 }

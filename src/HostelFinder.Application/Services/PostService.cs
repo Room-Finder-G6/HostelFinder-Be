@@ -2,7 +2,7 @@
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
-
+using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -15,13 +15,15 @@ public class PostService : IPostService
 {
     private readonly IMapper _mapper;
     private readonly IPostRepository _postRepository;
+    private readonly IUserRepository _userRepository;
 
-    public PostService(IMapper mapper, IPostRepository postRepository)
+    public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository)
     {
         _mapper = mapper;
         _postRepository = postRepository;
+        _userRepository = userRepository;
     }
-  
+
     public async Task<Response<PostResponseDto>> GetAllRoomFeaturesByIdAsync(Guid roomId)
     {
         var room = await _postRepository.GetAllRoomFeaturesByRoomId(roomId);
@@ -120,5 +122,25 @@ public class PostService : IPostService
 
         return new Response<bool> { Succeeded = true, Message = "Delete Post Successfully" };
     }
-    
+
+    public async Task<LandlordResponseDto> GetLandlordByPostIdAsync(Guid postId)
+    {
+        var hostel = await _userRepository.GetHostelByPostIdAsync(postId);
+
+        if (hostel == null || hostel.Landlord == null)
+        {
+            return null; 
+        }
+
+        var landlordDto = new LandlordResponseDto
+        {
+            Id = hostel.Landlord.Id,
+            FullName = hostel.Landlord.Username,
+            Email = hostel.Landlord.Email,
+            Phone = hostel.Landlord.Phone,
+            AvatarUrl = hostel.Landlord.AvatarUrl
+        };
+
+        return landlordDto;
+    }
 }

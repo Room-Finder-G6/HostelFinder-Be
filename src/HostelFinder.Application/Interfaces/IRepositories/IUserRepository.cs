@@ -15,6 +15,7 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<IEnumerable<User>> GetAllAsync();
         Task<User> GetByIdAsync(Guid id);
         Task UpdateAsync(User user);
-
+        Task<User> GetLandlordByHostelIdAsync(Guid hostelId);
+        Task<Hostel> GetHostelByPostIdAsync(Guid postId);
     }
 }
