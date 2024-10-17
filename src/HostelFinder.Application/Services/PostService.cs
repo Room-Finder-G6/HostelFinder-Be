@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Hostel.Responses;
-using HostelFinder.Application.DTOs.Review.Response;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
@@ -134,15 +133,7 @@ public class PostService : IPostService
         {
             return null; 
         }
-
-        var landlordDto = new LandlordResponseDto
-        {
-            Id = hostel.Landlord.Id,
-            FullName = hostel.Landlord.Username,
-            Email = hostel.Landlord.Email,
-            Phone = hostel.Landlord.Phone,
-            AvatarUrl = hostel.Landlord.AvatarUrl
-        };
+        var landlordDto = _mapper.Map<LandlordResponseDto>(hostel.Landlord);
 
         return landlordDto;
     }
@@ -156,34 +147,16 @@ public class PostService : IPostService
             throw new NullReferenceException("Hostel not found for the provided Post ID.");
         }
 
-        if (hostel.Reviews == null)
-        {
-            hostel.Reviews = new List<Review>(); 
-        }
-
         float averageRating = (float)(hostel.Reviews.Any() ? hostel.Reviews.Average(r => r.rating) : 0);
 
-        var reviewsDto = hostel.Reviews.Select(review => new ReviewResponseDto
-        {
-            Id = review.Id,
-            Comment = review.Comment,
-            Rating = review.rating,
-            ReviewDate = review.ReviewDate,
-            UserId = review.UserId,
-            HostelId = review.HostelId
-        }).ToList();
+        var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
 
-        var hostelResponseDto = new HostelResponseDto
+        hostelResponseDto.Rating = averageRating;
+
+        if (hostel.Images != null)
         {
-            Id = hostel.Id,
-            HostelName = hostel.HostelName,
-            Description = hostel.Description,
-            Address = hostel.Address.ToString(),
-            NumberOfRooms = hostel.NumberOfRooms,
-            Rating = averageRating,
-            Image = hostel.Images.ToString()
-            //Reviews = reviewsDto
-        };
+            hostelResponseDto.Image = string.Join(", ", hostel.Images); 
+        }
 
         return hostelResponseDto;
     }
