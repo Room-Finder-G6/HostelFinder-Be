@@ -1,7 +1,5 @@
 using HostelFinder.Application.DTOs.Room.Requests;
-using HostelFinder.Application.Filter;
 using HostelFinder.Application.Interfaces.IServices;
-using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers;
@@ -91,4 +89,16 @@ public class RoomController : ControllerBase
         return Ok(landlord);
     }
 
+    [HttpGet("{postId}/hostel")]
+    public async Task<IActionResult> GetHostelByPostId(Guid postId)
+    {
+        var hostel = await _postService.GetHostelByPostIdAsync(postId);
+
+        if (hostel == null)
+        {
+            return NotFound("Hostel not found.");
+        }
+
+        return Ok(hostel);
+    }
 }

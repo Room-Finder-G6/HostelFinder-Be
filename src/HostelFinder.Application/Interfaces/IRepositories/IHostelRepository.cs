@@ -7,4 +7,5 @@ public interface IHostelRepository : IBaseGenericRepository<Hostel>
 {
     Task<bool> CheckDuplicateHostelAsync(string hostelName, string province, string district, string commune, string detailAddress);
     Task<IEnumerable<Hostel>> GetHostelsByLandlordIdAsync(Guid landlordId);
+    Task<Hostel> GetHostelWithReviewsByPostIdAsync(Guid postId);
 }

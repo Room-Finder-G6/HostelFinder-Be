@@ -1,9 +1,7 @@
-﻿using HostelFinder.Application.DTOs.Room.Requests;
+﻿using HostelFinder.Application.DTOs.Hostel.Responses;
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Users.Response;
-using HostelFinder.Application.Filter;
 using HostelFinder.Application.Wrappers;
-using HostelFinder.Domain.Enums;
-using Task = DocumentFormat.OpenXml.Office2021.DocumentTasks.Task;
 
 namespace HostelFinder.Application.Interfaces.IServices;
 
@@ -14,4 +12,5 @@ public interface IPostService
     Task<Response<UpdatePostRequestDto>> UpdateRoomAsync(UpdatePostRequestDto postDto, Guid roomId);
     Task<Response<bool>> DeleteRoomAsync(Guid roomId);
     Task<LandlordResponseDto> GetLandlordByPostIdAsync(Guid hostelId);
+    Task<HostelResponseDto> GetHostelByPostIdAsync(Guid postId);
 }
