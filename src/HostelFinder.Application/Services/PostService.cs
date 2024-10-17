@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using HostelFinder.Application.DTOs.Hostel.Responses;
+using HostelFinder.Application.DTOs.Review.Response;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
@@ -7,7 +9,6 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
-using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.Services;
 
@@ -16,12 +17,14 @@ public class PostService : IPostService
     private readonly IMapper _mapper;
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IHostelRepository _hostelRepository;
 
-    public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository)
+    public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository, IHostelRepository hostelRepository)
     {
         _mapper = mapper;
         _postRepository = postRepository;
         _userRepository = userRepository;
+        _hostelRepository = hostelRepository;
     }
 
     public async Task<Response<PostResponseDto>> GetAllRoomFeaturesByIdAsync(Guid roomId)
@@ -143,4 +146,45 @@ public class PostService : IPostService
 
         return landlordDto;
     }
+
+    public async Task<HostelResponseDto> GetHostelByPostIdAsync(Guid postId)
+    {
+        var hostel = await _hostelRepository.GetHostelWithReviewsByPostIdAsync(postId);
+
+        if (hostel == null)
+        {
+            throw new NullReferenceException("Hostel not found for the provided Post ID.");
+        }
+
+        if (hostel.Reviews == null)
+        {
+            hostel.Reviews = new List<Review>(); 
+        }
+
+        float averageRating = (float)(hostel.Reviews.Any() ? hostel.Reviews.Average(r => r.rating) : 0);
+
+        var reviewsDto = hostel.Reviews.Select(review => new ReviewResponseDto
+        {
+            Id = review.Id,
+            Comment = review.Comment,
+            Rating = review.rating,
+            ReviewDate = review.ReviewDate,
+            UserId = review.UserId,
+            HostelId = review.HostelId
+        }).ToList();
+
+        var hostelResponseDto = new HostelResponseDto
+        {
+            Id = hostel.Id,
+            HostelName = hostel.HostelName,
+            Description = hostel.Description,
+            Address = hostel.Address.ToString(),
+            NumberOfRooms = hostel.NumberOfRooms,
+            Rating = averageRating,
+            Reviews = reviewsDto
+        };
+
+        return hostelResponseDto;
+    }
+
 }
