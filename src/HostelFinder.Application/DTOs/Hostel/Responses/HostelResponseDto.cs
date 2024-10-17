@@ -10,6 +10,8 @@ namespace HostelFinder.Application.DTOs.Hostel.Responses
         public string Address { get; set; }
         public int NumberOfRooms { get; set; }
         public float Rating { get; set; }
-        public List<ReviewResponseDto> Reviews { get; set; }
+        public string Image { get; set; }
+
+        //public List<ReviewResponseDto> Reviews { get; set; }
     }
 }

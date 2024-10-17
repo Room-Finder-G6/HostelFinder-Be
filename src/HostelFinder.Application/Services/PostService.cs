@@ -181,7 +181,8 @@ public class PostService : IPostService
             Address = hostel.Address.ToString(),
             NumberOfRooms = hostel.NumberOfRooms,
             Rating = averageRating,
-            Reviews = reviewsDto
+            Image = hostel.Images.ToString()
+            //Reviews = reviewsDto
         };
 
         return hostelResponseDto;
