@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Application.DTOs.Room.Requests;
+using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Filter;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Enums;
@@ -12,4 +13,5 @@ public interface IPostService
     Task<Response<AddPostRequestDto>> AddRoomAsync(AddPostRequestDto postDto);
     Task<Response<UpdatePostRequestDto>> UpdateRoomAsync(UpdatePostRequestDto postDto, Guid roomId);
     Task<Response<bool>> DeleteRoomAsync(Guid roomId);
+    Task<LandlordResponseDto> GetLandlordByPostIdAsync(Guid hostelId);
 }
