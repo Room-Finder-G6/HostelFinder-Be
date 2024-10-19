@@ -101,6 +101,7 @@ public class GeneralProfile : Profile
 
         //Map User
         CreateMap<UserDto, User>().ReverseMap();
+        CreateMap<UserProfileResponse, User>().ReverseMap();
         CreateMap<CreateUserRequestDto, User>().ReverseMap();
 
         //Service Mapping
