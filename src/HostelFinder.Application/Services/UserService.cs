@@ -2,6 +2,7 @@
 using FluentValidation;
 using HostelFinder.Application.DTOs.Users;
 using HostelFinder.Application.DTOs.Users.Requests;
+using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -77,6 +78,12 @@ namespace HostelFinder.Application.Services
         {
             var users = await _userRepository.GetAllAsync();
             return _mapper.Map<IEnumerable<UserDto>>(users);
+        }
+
+        public async Task<UserProfileResponse> GetUserByIdAsync(Guid id)
+        {
+            var users = await _userRepository.GetByIdAsync(id);
+            return _mapper.Map<UserProfileResponse>(users);
         }
 
         public async Task<Response<UserDto>> UpdateUserAsync(Guid userId, UpdateUserRequestDto updateUserDto)
