@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Hostel.Responses;
+using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
 using HostelFinder.Application.DTOs.Users.Response;
+using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -161,4 +163,20 @@ public class PostService : IPostService
         return hostelResponseDto;
     }
 
+    public async Task<PagedResponse<List<ListPostResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request)
+    {
+        try
+        {
+            var posts = await _postRepository.GetAllMatchingAsync(request.SearchPhrase, request.PageSize, request.PageNumber, request.SortBy, request.SortDirection);
+
+            var postsDtos = _mapper.Map<List<ListPostResponseDto>>(posts.Data);
+
+            var pagedResponse = PaginationHelper.CreatePagedResponse(postsDtos,request.PageNumber, request.PageSize, posts.TotalRecords);
+            return pagedResponse;
+        }
+        catch (Exception ex)
+        {
+            return new PagedResponse<List<ListPostResponseDto>> { Succeeded = false, Errors = {ex.Message} };
+        }
+    }
 }
