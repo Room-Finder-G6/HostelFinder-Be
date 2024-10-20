@@ -20,7 +20,9 @@ public class HostelFinderDbContext : DbContext
     public DbSet<BlackListToken> BlackListTokens { get; set; }
     public DbSet<Wishlist> Wishlists { get; set; }
     public DbSet<WishlistRoom> WishlistRooms { get; set; }
-
+    public DbSet<Membership> Memberships { get; set; }
+    public DbSet<Membership_Services> MembershipServices { get; set; }
+    public DbSet<UserMembership> UserMemberships { get; set; }
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -160,13 +162,13 @@ public class HostelFinderDbContext : DbContext
             .HasOne(ra => ra.Post)
             .WithMany(r => r.RoomAmenities)
             .HasForeignKey(ra => ra.PostId)
-            .OnDelete(DeleteBehavior.Cascade); 
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<RoomAmenities>()
             .HasOne(ra => ra.Amenity)
             .WithMany(a => a.RoomAmenities)
             .HasForeignKey(ra => ra.AmenityId)
-            .OnDelete(DeleteBehavior.Restrict); 
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Service
         modelBuilder.Entity<Service>()
@@ -210,6 +212,38 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(i => i.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Many-to-Many relationship between User and Membership
+        modelBuilder.Entity<UserMembership>()
+            .HasKey(um => new { um.UserId, um.MembershipId });
+
+        modelBuilder.Entity<UserMembership>()
+              .HasOne(um => um.User)
+              .WithMany(u => u.UserMemberships)
+              .HasForeignKey(um => um.UserId)
+              .OnDelete(DeleteBehavior.Restrict);
+        
+
+        modelBuilder.Entity<UserMembership>()
+            .HasOne(um => um.Membership)
+            .WithMany(m => m.UserMemberships)
+            .HasForeignKey(um => um.MembershipId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        //Membership
+        modelBuilder.Entity<Membership>()
+               .HasMany(m => m.Membership_Services)
+               .WithOne(ms => ms.Membership)
+               .HasForeignKey(ms => ms.MembershipId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+
+        //Membership_Services
+        modelBuilder.Entity<Membership_Services>()
+               .HasMany(ms => ms.Posts)
+               .WithOne(p => p.Membership_Services)
+               .HasForeignKey(p => p.MembershipServiceId)
+               .OnDelete(DeleteBehavior.Restrict);
+
         // RoomDetails
         modelBuilder.Entity<RoomDetails>(entity =>
         {
@@ -223,5 +257,7 @@ public class HostelFinderDbContext : DbContext
             entity.Property(e => e.Cost)
                 .HasColumnType("decimal(18,2)");
         });
+
+
     }
 }

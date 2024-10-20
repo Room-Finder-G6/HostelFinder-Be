@@ -21,6 +21,7 @@ namespace HostelFinder.Domain.Entities
         public decimal MonthlyRentCost { get; set; }
         public bool IsAvailable { get; set; } = true;
         public DateTime DateAvailable { get; set; }
+        public Guid MembershipServiceId { get; set; }
         public virtual Hostel Hostel { get; set; }  
         public virtual ICollection<BookingRequest> BookingRequests { get; set; }
         public virtual RoomDetails RoomDetails { get; set; }
@@ -28,6 +29,6 @@ namespace HostelFinder.Domain.Entities
         public virtual ICollection<Image> Images { get; set; }
         public virtual ICollection<ServiceCost> ServiceCosts { get; set; }
         public virtual ICollection<WishlistRoom> WishlistRooms { get; set; }
-
+        public virtual Membership_Services Membership_Services { get; set; }
     }
 }
