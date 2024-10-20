@@ -102,7 +102,7 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId)
         {
-            var hostel = await _hostelRepository.GetByIdAsync(hostelId);
+            var hostel = await _hostelRepository.GetHostelByIdAsync(hostelId);
             if (hostel == null)
             {
                 return new Response<HostelResponseDto>("Hostel not found.");
