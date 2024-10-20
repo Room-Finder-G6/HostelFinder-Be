@@ -19,8 +19,7 @@ namespace HostelFinder.Domain.Entities
         [Required]
         public int NumberOfRooms { get; set; }
         public string? Coordinates { get; set; }
-        [Required]
-        public float Rating { get; set; }
+        public float? Rating { get; set; }
         public virtual ICollection<Service> Services { get; set; } 
         public virtual ICollection<Post> Posts { get; set; }
         public virtual ICollection<Review> Reviews { get; set; }

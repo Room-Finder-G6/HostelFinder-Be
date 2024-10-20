@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HostelFinder.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class RenameRoomEntityToPost : Migration
+    public partial class InitialDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -86,7 +86,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     Size = table.Column<float>(type: "real", maxLength: 255, nullable: false),
                     NumberOfRooms = table.Column<int>(type: "int", nullable: false),
                     Coordinates = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Rating = table.Column<float>(type: "real", nullable: false),
+                    Rating = table.Column<float>(type: "real", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),

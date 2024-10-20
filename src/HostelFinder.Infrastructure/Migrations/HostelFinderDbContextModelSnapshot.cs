@@ -214,7 +214,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<int>("NumberOfRooms")
                         .HasColumnType("int");
 
-                    b.Property<float>("Rating")
+                    b.Property<float?>("Rating")
                         .HasColumnType("real");
 
                     b.Property<byte[]>("RowVersion")
