@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    [Migration("20241015125653_RenameRoomEntityToPost")]
-    partial class RenameRoomEntityToPost
+    [Migration("20241020042846_Initial Db")]
+    partial class InitialDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -217,7 +217,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<int>("NumberOfRooms")
                         .HasColumnType("int");
 
-                    b.Property<float>("Rating")
+                    b.Property<float?>("Rating")
                         .HasColumnType("real");
 
                     b.Property<byte[]>("RowVersion")
