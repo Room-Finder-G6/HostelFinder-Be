@@ -63,7 +63,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
         return (Data : hostels, TotalRecords : totalRecords);
     }
 
-    public Task<Hostel> GetHostelWithReviewsByPostIdAsync(Guid postId)
+    public async Task<Hostel> GetHostelWithReviewsByPostIdAsync(Guid postId)
     {
         var post = await _dbContext.Posts
                             .Include(p => p.Hostel)
