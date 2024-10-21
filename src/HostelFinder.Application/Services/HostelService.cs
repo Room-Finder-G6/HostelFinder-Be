@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Hostel.Requests;
 using HostelFinder.Application.DTOs.Hostel.Responses;
+using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.Application.Services
 {
@@ -114,6 +116,23 @@ namespace HostelFinder.Application.Services
             hostelDto.Rating = averageRating;
 
             return new Response<HostelResponseDto>(hostelDto);
+        }
+
+        public async Task<PagedResponse<List<ListHostelResponseDto>>> GetAllHostelAsync(GetAllHostelQuery request)
+        {
+            try
+            {
+                var hostels = await _hostelRepository.GetAllMatchingAsync(request.SearchPhrase, request.PageSize, request.PageNumber, request.SortBy, request.SortDirection);
+
+                var hostelDtos = _mapper.Map<List<ListHostelResponseDto>>(hostels.Data);
+
+                var pagedResponse = PaginationHelper.CreatePagedResponse(hostelDtos, request.PageNumber, request.PageSize, hostels.TotalRecords);
+                return pagedResponse;
+            }
+            catch (Exception ex)
+            {
+                return new PagedResponse<List<ListHostelResponseDto>> { Succeeded  = false, Errors = {ex.Message} };
+            }
         }
     }
 

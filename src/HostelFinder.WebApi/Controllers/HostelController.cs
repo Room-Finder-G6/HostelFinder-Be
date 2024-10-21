@@ -65,5 +65,17 @@ namespace HostelFinder.WebApi.Controllers
             }
             return NotFound(result.Errors);
         }
+
+        [HttpPost]
+        [Route("get-all")]
+        public async Task<IActionResult> GetAll(GetAllHostelQuery request)
+        {
+            var response = await _hostelService.GetAllHostelAsync(request);
+            if (!response.Succeeded)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }
