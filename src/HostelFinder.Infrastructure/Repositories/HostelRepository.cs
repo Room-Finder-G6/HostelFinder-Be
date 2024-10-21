@@ -27,7 +27,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     }
     public async Task<IEnumerable<Hostel>> GetHostelsByLandlordIdAsync(Guid landlordId)
     {
-        return await _dbContext.Hostels.Where(h => h.LandlordId == landlordId).ToListAsync();
+        return await _dbContext.Hostels.Where(h => h.LandlordId == landlordId).Include(a => a.Address).ToListAsync();
     }
 
     public async Task<(IEnumerable<Hostel> Data, int TotalRecords)> GetAllMatchingAsync(string? searchPhrase, int pageSize, int pageNumber, string? sortBy, SortDirection sortDirection)
@@ -65,11 +65,18 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
 
     public Task<Hostel> GetHostelWithReviewsByPostIdAsync(Guid postId)
     {
-        throw new NotImplementedException();
+        var post = await _dbContext.Posts
+                            .Include(p => p.Hostel)
+                            .ThenInclude(h => h.Reviews)
+                            .FirstOrDefaultAsync(p => p.Id == postId);
+
+        return post?.Hostel;
     }
 
-    public Task<Hostel> GetHostelByIdAsync(Guid postId)
+    public async Task<Hostel> GetHostelByIdAsync(Guid hostelId)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Hostels
+                     .Include(h => h.Address)
+                     .FirstOrDefaultAsync(h => h.Id == hostelId);
     }
 }
