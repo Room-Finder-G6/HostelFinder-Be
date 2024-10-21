@@ -24,7 +24,7 @@ jobs:
         run: echo "${HOME}/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Restore dependencies
-        run: dotnet restore ./src/HostelFinder.API/AssetManagement.API.csproj
+        run: dotnet restore ./src/HostelFinder.API/HostelFinder.API.csproj
 
       - name: Build
-        run: dotnet build --configuration Release ./src/HostelFinder.API/AssetManagement.API.csproj
+        run: dotnet build --configuration Release ./src/HostelFinder.API/HostelFinder.API.csproj
