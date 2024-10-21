@@ -62,7 +62,19 @@ public class GeneralProfile : Profile
 
         // Hostel Mapping
         CreateMap<Hostel, HostelResponseDto>().ReverseMap();
-        CreateMap<Hostel, AddHostelRequestDto>().ReverseMap();
+        CreateMap<Hostel, AddHostelRequestDto>()
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+            .ReverseMap();
+        CreateMap<Hostel, HostelResponseDto>()
+           .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Reviews.Any() ? src.Reviews.Average(r => r.rating) : 0))
+           .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Images.ToString()));
+
+        CreateMap<Hostel, ListHostelResponseDto>()
+            .ForMember(dest => dest.LandlordUserName, opt => opt.MapFrom(src => src.Landlord.Username))
+            .ReverseMap();
+
+        // Address Mapping
+        CreateMap<Address, AddressDto>().ReverseMap();
         CreateMap<Hostel, UpdateHostelRequestDto>().ReverseMap();
 
         // RoomDetails Mapping
