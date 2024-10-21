@@ -17,6 +17,10 @@ using HostelFinder.Application.DTOs.Service.Response;
 using HostelFinder.Application.DTOs.Review.Request;
 using HostelFinder.Application.DTOs.Review.Response;
 using HostelFinder.Application.DTOs.Users.Response;
+using HostelFinder.Application.DTOs.Membership.Responses;
+using HostelFinder.Application.DTOs.Membership.Requests;
+using HostelFinder.Application.DTOs.MembershipService.Requests;
+using HostelFinder.Application.DTOs.MembershipService.Responses;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -116,5 +120,18 @@ public class GeneralProfile : Profile
         CreateMap<Review, ReviewResponseDto>();
         CreateMap<User, LandlordResponseDto>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Username));
+
+        //Membership
+        CreateMap<Membership, MembershipResponseDto>().ReverseMap();
+        CreateMap<MembershipServiceResponseDto, AddMembershipServiceReqDto>().ReverseMap();
+        CreateMap<AddMembershipRequestDto, Membership>().ReverseMap();
+        CreateMap<AddMembershipServiceReqDto, Membership_Services>()
+           .ForMember(dest => dest.Service_Name, opt => opt.MapFrom(src => src.ServiceName)).ReverseMap();
+        CreateMap<UpdateMembershipRequestDto, Membership>().ReverseMap();
+        CreateMap<Membership_Services, MembershipServiceResponseDto>()
+           .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service_Name)).ReverseMap();
+        CreateMap<Membership, MembershipResponseDto>()
+            .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.Membership_Services)).ReverseMap();
+
     }
 }
