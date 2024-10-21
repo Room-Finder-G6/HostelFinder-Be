@@ -6,11 +6,11 @@ namespace HostelFinder.Domain.Entities;
 
 public class ServiceCost : BaseEntity
 {
-    [ForeignKey("Room")] [Required] 
-    public Guid RoomId { get; set; }
+    [ForeignKey("Post")] [Required] 
+    public Guid PostId { get; set; }
     [Required] 
     public string ServiceName { get; set; }
     [Required] 
     public decimal Cost { get; set; }
-    public virtual Room Room { get; set; }
+    public virtual Post Post { get; set; }
 }

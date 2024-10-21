@@ -13,20 +13,44 @@ namespace HostelFinder.Application.Services
     public class HostelService : IHostelService
     {
         private readonly IHostelRepository _hostelRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
 
-        public HostelService(IHostelRepository hostelRepository, IMapper mapper)
+        public HostelService(IHostelRepository hostelRepository,IReviewRepository reviewRepository, IMapper mapper)
         {
             _hostelRepository = hostelRepository;
+            _reviewRepository = reviewRepository;
             _mapper = mapper;
         }
 
         public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto hostelDto)
         {
+            var isDuplicate = await _hostelRepository.CheckDuplicateHostelAsync(
+                hostelDto.HostelName,
+                hostelDto.Address.Province,
+                hostelDto.Address.District,
+                hostelDto.Address.Commune,
+                hostelDto.Address.DetailAddress
+            );
+
+            if (isDuplicate)
+            {
+                return new Response<HostelResponseDto>("Hostel đã tồn tại với cùng địa chỉ.");
+            }
+
             var hostel = _mapper.Map<Hostel>(hostelDto);
-            await _hostelRepository.AddAsync(hostel);
-            var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
-            return new Response<HostelResponseDto>(hostelResponseDto);
+            hostel.CreatedOn = DateTime.Now;
+            hostel.CreatedBy = "System";
+            try
+            {
+                await _hostelRepository.AddAsync(hostel);
+                var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
+                return new Response<HostelResponseDto> { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
+            }
+            catch (Exception ex)
+            {
+                return new Response<HostelResponseDto>(message: ex.Message);
+            }
         }
 
         public async Task<Response<HostelResponseDto>> UpdateHostelAsync(UpdateHostelRequestDto hostelDto)
@@ -37,11 +61,20 @@ namespace HostelFinder.Application.Services
                 return new Response<HostelResponseDto>("Hostel not found");
             }
 
-            _mapper.Map(hostelDto, existingHostel);  // Update the entity with the new values
-            await _hostelRepository.UpdateAsync(existingHostel);
+            try
+            {
+                _mapper.Map(hostelDto, existingHostel);
+                existingHostel.LastModifiedOn = DateTime.Now;
+                existingHostel.LastModifiedBy = "System";
+                await _hostelRepository.UpdateAsync(existingHostel);
 
-            var updatedHostelDto = _mapper.Map<HostelResponseDto>(existingHostel);
-            return new Response<HostelResponseDto>(updatedHostelDto);
+                var updatedHostelDto = _mapper.Map<HostelResponseDto>(existingHostel);
+                return new Response<HostelResponseDto>(updatedHostelDto, "Update successful.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<HostelResponseDto>(message: ex.Message);
+            }
         }
 
         public async Task<Response<bool>> DeleteHostelAsync(Guid hostelId)
@@ -52,8 +85,15 @@ namespace HostelFinder.Application.Services
                 return new Response<bool>(false, "Hostel not found");
             }
 
-            await _hostelRepository.DeleteAsync(hostel.Id);
-            return new Response<bool>(true);
+            try
+            {
+                await _hostelRepository.DeleteAsync(hostel.Id);
+                return new Response<bool>(true, "Delete successful.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(false, message: ex.Message);
+            }
         }
 
         public async Task<IEnumerable<HostelResponseDto>> GetHostelsByLandlordIdAsync(Guid landlordId)

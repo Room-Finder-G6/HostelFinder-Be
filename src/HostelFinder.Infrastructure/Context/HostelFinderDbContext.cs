@@ -9,15 +9,18 @@ public class HostelFinderDbContext : DbContext
     public DbSet<BookingRequest> BookingRequests { get; set; }
     public DbSet<Hostel> Hostels { get; set; }
     public DbSet<Review> Reviews { get; set; }
-    public DbSet<Room> Rooms { get; set; }
+    public DbSet<Post> Posts { get; set; }
     public DbSet<RoomDetails> RoomDetails { get; set; }
+    public DbSet<Amenity> Amenities { get; set; }
     public DbSet<RoomAmenities> RoomAmenities { get; set; }
     public DbSet<Service> Services { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<ServiceCost> ServiceCosts { get; set; }
-
     public DbSet<BlackListToken> BlackListTokens { get; set; }
+    public DbSet<Wishlist> Wishlists { get; set; }
+    public DbSet<WishlistRoom> WishlistRooms { get; set; }
+
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -54,7 +57,7 @@ public class HostelFinderDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Hostel>()
-            .HasMany(h => h.Rooms)
+            .HasMany(h => h.Posts)
             .WithOne(r => r.Hostel)
             .HasForeignKey(r => r.HostelId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -65,54 +68,60 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(r => r.HostelId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Room
-        modelBuilder.Entity<Room>()
-            .HasOne(r => r.Hostel)
-            .WithMany(h => h.Rooms)
-            .HasForeignKey(r => r.HostelId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Room>()
-            .HasMany(r => r.BookingRequests)
-            .WithOne(br => br.Room)
-            .HasForeignKey(br => br.RoomId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Room>()
-            .HasOne(r => r.RoomDetails)
-            .WithOne(rf => rf.Room)
-            .HasForeignKey<RoomDetails>(rf => rf.RoomId)
+        modelBuilder.Entity<Hostel>()
+            .HasOne(h => h.Address)
+            .WithOne(h => h.Hostel)
+            .HasForeignKey<Address>(h => h.HostelId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<Room>()
-            .HasOne(r => r.RoomAmenities)
-            .WithOne(ra => ra.Room)
-            .HasForeignKey<RoomAmenities>(ra => ra.RoomId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<Room>()
-            .HasMany(r => r.Images)
-            .WithOne(i => i.Room)
-            .HasForeignKey(i => i.RoomId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<Room>(entity =>
+        // Post
+        modelBuilder.Entity<Post>(entity =>
         {
+            entity.HasOne(r => r.Hostel)
+                .WithMany(h => h.Posts)
+                .HasForeignKey(r => r.HostelId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(r => r.BookingRequests)
+                .WithOne(br => br.Post)
+                .HasForeignKey(br => br.PostId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.RoomDetails)
+                .WithOne(rd => rd.Post)
+                .HasForeignKey<RoomDetails>(rd => rd.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(r => r.Images)
+                .WithOne(i => i.Post)
+                .HasForeignKey(i => i.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(r => r.ServiceCosts)
+                .WithOne(sc => sc.Post)
+                .HasForeignKey(sc => sc.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.Property(e => e.Size)
                 .HasColumnType("decimal(18,2)");
-        });
 
-        modelBuilder.Entity<Room>(entity =>
-        {
             entity.Property(e => e.MonthlyRentCost)
                 .HasColumnType("decimal(18,2)");
         });
 
-        modelBuilder.Entity<Room>()
-            .HasMany(r => r.ServiceCosts)
-            .WithOne(sc => sc.Room)
-            .HasForeignKey(sc => sc.RoomId)
-            .OnDelete(DeleteBehavior.Cascade);
+        //WishlistRoom
+        modelBuilder.Entity<WishlistRoom>()
+            .HasKey(wr => new { wr.PostId, wr.WishlistId });
+
+        modelBuilder.Entity<WishlistRoom>()
+            .HasOne(wr => wr.Post)
+            .WithMany(r => r.WishlistRooms)
+            .HasForeignKey(wr => wr.PostId);
+
+        modelBuilder.Entity<WishlistRoom>()
+            .HasOne(wr => wr.Wishlist)
+            .WithMany(w => w.WishlistRooms)
+            .HasForeignKey(wr => wr.WishlistId);
 
         // Review
         modelBuilder.Entity<Review>()
@@ -132,9 +141,9 @@ public class HostelFinderDbContext : DbContext
             .HasKey(br => br.RequestId);
 
         modelBuilder.Entity<BookingRequest>()
-            .HasOne(br => br.Room)
+            .HasOne(br => br.Post)
             .WithMany(r => r.BookingRequests)
-            .HasForeignKey(br => br.RoomId)
+            .HasForeignKey(br => br.PostId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<BookingRequest>()
@@ -142,6 +151,22 @@ public class HostelFinderDbContext : DbContext
             .WithMany(u => u.BookingRequests)
             .HasForeignKey(br => br.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // RoomAmenities configuration
+        modelBuilder.Entity<RoomAmenities>()
+            .HasKey(ra => new { ra.PostId, ra.AmenityId });
+
+        modelBuilder.Entity<RoomAmenities>()
+            .HasOne(ra => ra.Post)
+            .WithMany(r => r.RoomAmenities)
+            .HasForeignKey(ra => ra.PostId)
+            .OnDelete(DeleteBehavior.Cascade); 
+
+        modelBuilder.Entity<RoomAmenities>()
+            .HasOne(ra => ra.Amenity)
+            .WithMany(a => a.RoomAmenities)
+            .HasForeignKey(ra => ra.AmenityId)
+            .OnDelete(DeleteBehavior.Restrict); 
 
         // Service
         modelBuilder.Entity<Service>()
@@ -180,9 +205,9 @@ public class HostelFinderDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Image>()
-            .HasOne(i => i.Room)
+            .HasOne(i => i.Post)
             .WithMany(r => r.Images)
-            .HasForeignKey(i => i.RoomId)
+            .HasForeignKey(i => i.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // RoomDetails

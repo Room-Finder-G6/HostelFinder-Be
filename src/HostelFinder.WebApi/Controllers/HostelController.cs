@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/hostels")]
     [ApiController]
     public class HostelController : ControllerBase
     {
@@ -13,6 +13,13 @@ namespace HostelFinder.WebApi.Controllers
         public HostelController(IHostelService hostelService)
         {
             _hostelService = hostelService;
+        }
+
+        [HttpGet("{hostelId}")]
+        public async Task<IActionResult> GetHostelById(Guid hostelId)
+        {
+            var result = await _hostelService.GetHostelByIdAsync(hostelId);
+            return Ok(result);
         }
 
         // GET: api/Hostel/GetHostelsByLandlordId/{landlordId}
@@ -24,7 +31,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         // POST: api/Hostel/AddHostel
-        [HttpPost("AddHostel")]
+        [HttpPost()]
         public async Task<IActionResult> AddHostel([FromBody] AddHostelRequestDto hostelDto)
         {
             var result = await _hostelService.AddHostelAsync(hostelDto);
@@ -32,7 +39,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return Ok(result);
             }
-            return BadRequest(result.Errors);
+            return BadRequest(result);
         }
 
         // PUT: api/Hostel/hostelId

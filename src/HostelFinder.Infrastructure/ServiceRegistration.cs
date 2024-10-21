@@ -1,6 +1,9 @@
 using HostelFinder.Application.Interfaces.IRepositories;
+using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Services;
 using HostelFinder.Infrastructure.Context;
 using HostelFinder.Infrastructure.Repositories;
+using HostelFinder.Infrastructure.Seeders;
 using HostelFinder.Infrastructure.Services;
 using HostelFinder.Infrastructure.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +21,16 @@ public class ServiceRegistration
             options.UseSqlServer(connectionString));
 
         service.AddScoped<IHostelRepository, HostelRepository>();
-        service.AddScoped<IUserRepository, UserRepository>();   
-        service.AddScoped<IRoomRepository, RoomRepository>();
+        service.AddScoped<IUserRepository, UserRepository>();
+        service.AddScoped<IPostRepository, PostRepository>();
+        service.AddScoped<IAmenityRepository, AmenityRepository>();
+        service.AddScoped<IWishlistRepository, WishlistRepository>();
         service.AddScoped<IEmailService, EmailService>();
+        service.AddScoped<IAuthAccountService, AuthAccountService>();
+        service.AddScoped<IServiceRepository, ServiceRepository>();
+        service.AddScoped<IServiceCostRepository, ServiceCostRepository>();
+        service.AddScoped<IHostelSeeder, HostelSeeder>();
+        service.AddScoped<IReviewRepository, ReviewRepository>();
+
     }
 }

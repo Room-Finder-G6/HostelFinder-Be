@@ -1,9 +1,12 @@
 using HostelFinder.Infrastructure.Common;
+using HostelFinder.Infrastructure.Seeders;
+using HostelFinder.WebApi.Extensions;
+using HostelFinder.WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.AddPresentation();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -14,12 +17,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
-
 
 //builder.Services.AddSwaggerGen(options =>
 //{
@@ -46,12 +49,22 @@ builder.Services.AddCors(options =>
 //            });
 //});
 
-
 HostelFinder.Application.ServiceExtensions.ConfigureServices(builder.Services, builder.Configuration);
 HostelFinder.Infrastructure.ServiceRegistration.Configure(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
+var scope = app.Services.CreateScope();
+var seeder = scope.ServiceProvider.GetRequiredService<IHostelSeeder>();
+
+
+await seeder.Seed();
+
+app.UseCors("AllowAllOrigins");
+
+//app.UseMiddleware<TokenValidationMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RequestTimeLoggingMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

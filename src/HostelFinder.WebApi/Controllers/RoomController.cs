@@ -5,21 +5,21 @@ using Microsoft.AspNetCore.Mvc;
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/rooms")]
 public class RoomController : ControllerBase
 {
-    private readonly IRoomService _roomService;
+    private readonly IPostService _postService;
 
-    public RoomController(IRoomService roomService)
+    public RoomController(IPostService postService)
     {
-        _roomService = roomService;
+        _postService = postService;
     }
 
     [HttpGet]
-    [Route("GetAllRoomFeaturesByRoomId/{roomId}")]
+    [Route("{roomId}")]
     public async Task<IActionResult> GetAllRoomFeaturesByRoomId(Guid roomId)
     {
-        var result = await _roomService.GetAllRoomFeaturesByIdAsync(roomId);
+        var result = await _postService.GetAllRoomFeaturesByIdAsync(roomId);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -27,17 +27,16 @@ public class RoomController : ControllerBase
 
         return NotFound();
     }
-    
+
     [HttpPost]
-    [Route("AddRoom")]
-    public async Task<IActionResult> AddRoom([FromBody] AddRoomRequestDto roomDto)
+    public async Task<IActionResult> AddRoom([FromBody] AddPostRequestDto postDto)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState); 
+            return BadRequest(ModelState);
         }
-        
-        var result = await _roomService.AddRoomAsync(roomDto);
+
+        var result = await _postService.AddRoomAsync(postDto);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -45,17 +44,17 @@ public class RoomController : ControllerBase
 
         return BadRequest(result.Errors);
     }
-    
+
     [HttpPut]
-    [Route("UpdateRoom/{roomId}")]
-    public async Task<IActionResult> UpdateRoom([FromBody] UpdateRoomRequestDto roomDto, Guid roomId)
+    [Route("{roomId}")]
+    public async Task<IActionResult> UpdateRoom([FromBody] UpdatePostRequestDto postDto, Guid roomId)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState); 
+            return BadRequest(ModelState);
         }
-        
-        var result = await _roomService.UpdateRoomAsync(roomDto, roomId);
+
+        var result = await _postService.UpdateRoomAsync(postDto, roomId);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -63,17 +62,43 @@ public class RoomController : ControllerBase
 
         return BadRequest(result.Errors);
     }
-    
+
     [HttpDelete]
-    [Route("DeleteRoom/{roomId}")]
+    [Route("{roomId}")]
     public async Task<IActionResult> DeleteRoom(Guid roomId)
     {
-        var result = await _roomService.DeleteRoomAsync(roomId);
+        var result = await _postService.DeleteRoomAsync(roomId);
         if (result.Succeeded)
         {
             return Ok(result);
         }
 
         return NotFound();
+    }
+
+    [HttpGet("{postId}/landlord")]
+    public async Task<IActionResult> GetLandlordByPostId(Guid postId)
+    {
+        var landlord = await _postService.GetLandlordByPostIdAsync(postId);
+
+        if (landlord == null)
+        {
+            return NotFound("Post or associated landlord not found.");
+        }
+
+        return Ok(landlord);
+    }
+
+    [HttpGet("{postId}/hostel")]
+    public async Task<IActionResult> GetHostelByPostId(Guid postId)
+    {
+        var hostel = await _postService.GetHostelByPostIdAsync(postId);
+
+        if (hostel == null)
+        {
+            return NotFound("Hostel not found.");
+        }
+
+        return Ok(hostel);
     }
 }

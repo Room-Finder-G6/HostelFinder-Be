@@ -15,17 +15,17 @@ namespace HostelFinder.Domain.Entities
         public string? Description { get; set; } 
         [Required]
         [MaxLength(255)]
-        public string Address { get; set; } 
         public float? Size { get; set; }
         [Required]
         public int NumberOfRooms { get; set; }
         public string? Coordinates { get; set; }
-        [Required]
-        public float Rating { get; set; }
+        public float? Rating { get; set; }
         public virtual ICollection<Service> Services { get; set; } 
-        public virtual ICollection<Room> Rooms { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }
         public virtual ICollection<Review> Reviews { get; set; }
         public virtual ICollection<Image> Images { get; set; }
         public virtual User Landlord { get; set; } 
+        public virtual Address Address { get; set; } 
+
     }
 }

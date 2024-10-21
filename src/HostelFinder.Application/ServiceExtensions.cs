@@ -1,7 +1,9 @@
-﻿using HostelFinder.Application.Interfaces.IServices;
+﻿using FluentValidation;
+using HostelFinder.Application.DTOs.Users.Requests;
+using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Mappings;
 using HostelFinder.Application.Services;
-using HostelFinder.Domain.Entities;
+using HostelFinder.Application.Validations.Users;
 using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -20,8 +22,17 @@ namespace HostelFinder.Application
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAuthAccountService, AuthAccountService>();
-            services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<IPostService, PostService>();
             services.AddScoped<IHostelService, HostelService>();
+            services.AddScoped<IAmenityService, AmenityService>();
+            services.AddScoped<IWishlistService, WishlistService>();
+            services.AddScoped<IServiceService, ServiceService>();
+            services.AddScoped<IServiceCostService, ServiceCostService>();
+            services.AddScoped<IReviewService, ReviewService>();
+
+
+            //register validation 
+            services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();
 
 
 
@@ -31,34 +42,33 @@ namespace HostelFinder.Application
             //register jwt token
             var jwtSettings = services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
             services.AddSingleton(jwtSettings);
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //})
-            //    .AddJwtBearer(o =>
-            //    {
-            //        o.RequireHttpsMetadata = false;
-            //        o.SaveToken = true;
-            //        o.TokenValidationParameters = new TokenValidationParameters
-            //        {
-            //            ValidateIssuerSigningKey = true,
-            //            ValidateIssuer = true,
-            //            ValidateAudience = true,
-            //            ValidateLifetime = true,
-            //            ValidIssuer = configuration["JWTSettings:Issuer"],
-            //            ValidAudience = configuration["JWTSettings:Audience"],
-            //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"]))
-            //        };
-            //    });
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(o =>
+                {
+                    o.RequireHttpsMetadata = false;
+                    o.SaveToken = true;
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidIssuer = configuration["JWTSettings:Issuer"],
+                        ValidAudience = configuration["JWTSettings:Audience"],
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"]))
+                    };
+                });
 
-            //services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy($"{UserRole.Admin}", policy => policy.RequireRole("Admin"));
-            //    options.AddPolicy($"{UserRole.User}", policy => policy.RequireRole("User"));
-            //});
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy($"{UserRole.Admin}", policy => policy.RequireRole("Admin"));
+                options.AddPolicy($"{UserRole.User}", policy => policy.RequireRole("User"));
+            });
         }
-
-       
     }
 }
