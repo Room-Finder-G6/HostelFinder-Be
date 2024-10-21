@@ -62,4 +62,14 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
 
         return (Data : hostels, TotalRecords : totalRecords);
     }
+
+    public Task<Hostel> GetHostelWithReviewsByPostIdAsync(Guid postId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Hostel> GetHostelByIdAsync(Guid postId)
+    {
+        throw new NotImplementedException();
+    }
 }
