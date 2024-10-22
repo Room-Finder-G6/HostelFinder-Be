@@ -19,6 +19,10 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> GetHostelById(Guid hostelId)
         {
             var result = await _hostelService.GetHostelByIdAsync(hostelId);
+            if (!result.Succeeded || result.Data == null)
+            {
+                return NotFound(result);
+            }
             return Ok(result);
         }
 
@@ -27,7 +31,11 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId)
         {
             var hostels = await _hostelService.GetHostelsByLandlordIdAsync(landlordId);
-            return Ok(hostels);
+            if (hostels.Succeeded)
+            {
+                return Ok(hostels);
+            }
+            return NotFound(hostels.Errors);
         }
 
         // POST: api/Hostel/AddHostel
@@ -51,7 +59,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return Ok(result);
             }
-            return NotFound(result.Errors);
+            return NotFound(result);
         }
 
         // DELETE: api/Hostel/DeleteHostel/{id}
@@ -63,7 +71,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return Ok(result);
             }
-            return NotFound(result.Errors);
+            return NotFound(result);
         }
 
         [HttpPost]
@@ -73,7 +81,7 @@ namespace HostelFinder.WebApi.Controllers
             var response = await _hostelService.GetAllHostelAsync(request);
             if (!response.Succeeded)
             {
-                return BadRequest(response);
+                return NotFound(response);
             }
             return Ok(response);
         }
