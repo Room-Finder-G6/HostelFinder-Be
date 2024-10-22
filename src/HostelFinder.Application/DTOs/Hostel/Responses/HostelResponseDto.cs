@@ -12,7 +12,8 @@ namespace HostelFinder.Application.DTOs.Hostel.Responses
         public int NumberOfRooms { get; set; }
         public float Rating { get; set; }
         public string Image { get; set; }
-         
+        public string Coordinates { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
         //public List<ReviewResponseDto> Reviews { get; set; }
     }
 }

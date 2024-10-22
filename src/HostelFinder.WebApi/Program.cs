@@ -1,3 +1,4 @@
+using Amazon.S3;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Seeders;
 using HostelFinder.WebApi.Extensions;
@@ -11,6 +12,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
