@@ -234,7 +234,7 @@ public class HostelFinderDbContext : DbContext
                .HasMany(m => m.Membership_Services)
                .WithOne(ms => ms.Membership)
                .HasForeignKey(ms => ms.MembershipId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.Cascade);
 
 
         //Membership_Services
