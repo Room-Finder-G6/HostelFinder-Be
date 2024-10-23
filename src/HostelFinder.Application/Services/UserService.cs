@@ -77,13 +77,26 @@ namespace HostelFinder.Application.Services
         public async Task<Response<List<UserDto>>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllAsync();
-            return _mapper.Map<Response<List<UserDto>>>(users);
+            if (users == null || !users.Any())
+            {
+                return new Response<List<UserDto>> { Succeeded = false, Errors = new List<string> { "No users found." } };
+            }
+
+            var userDtos = _mapper.Map<List<UserDto>>(users);
+            return new Response<List<UserDto>> { Data = userDtos, Succeeded = true };
         }
 
         public async Task<Response<UserProfileResponse>> GetUserByIdAsync(Guid id)
         {
-            var users = await _userRepository.GetByIdAsync(id);
-            return _mapper.Map<Response<UserProfileResponse>>(users);
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+            {
+                return new Response<UserProfileResponse> { Succeeded = false, Errors = new List<string> { "User not found." } };
+            }
+
+            var userProfileResponse = _mapper.Map<UserProfileResponse>(user);
+
+            return new Response<UserProfileResponse> { Data = userProfileResponse, Succeeded = true };
         }
 
         public async Task<Response<UserDto>> UpdateUserAsync(Guid userId, UpdateUserRequestDto updateUserDto)

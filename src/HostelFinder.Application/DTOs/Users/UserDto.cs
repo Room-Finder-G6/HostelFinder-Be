@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HostelFinder.Application.DTOs.Users
 {
-    public class UserDto : BaseEntity
+    public class UserDto
     {
         [Required]
         [MaxLength(100)]
