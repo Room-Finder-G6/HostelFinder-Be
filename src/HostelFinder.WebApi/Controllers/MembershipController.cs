@@ -19,25 +19,36 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> GetListMembership()
         {
             var response = await _membershipService.GetAllMembershipWithMembershipService();
-            if (response.Succeeded)
+            if (!response.Succeeded || response.Data == null)
             {
-                return Ok(response);
+                return NotFound(response.Errors);
             }
-
-            return NotFound(response.Errors);
+            return Ok(response);
         }
 
         [HttpPost]
         [Route("AddMembership")]
         public async Task<IActionResult> AddMembership([FromBody] AddMembershipRequestDto membershipDto)
         {
-            var response = await _membershipService.AddMembershipAsync(membershipDto);
-            if (response.Succeeded)
+            try
             {
-                return Ok(response);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            return BadRequest(response.Errors);
+                var response = await _membershipService.AddMembershipAsync(membershipDto);
+                if (response.Data != null)
+                {
+                    return Ok(response);
+                }
+
+                return BadRequest(response.Errors);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An unexpected error occurred: " + ex.Message);
+            }
         }
 
         [HttpPut("EditMembership/{id}")]
