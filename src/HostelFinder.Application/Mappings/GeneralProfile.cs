@@ -144,6 +144,8 @@ public class GeneralProfile : Profile
            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service_Name)).ReverseMap();
         CreateMap<Membership, MembershipResponseDto>()
             .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.Membership_Services)).ReverseMap();
+        CreateMap<List<Membership>, Response<List<MembershipResponseDto>>>()
+           .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src));
 
     }
 }
