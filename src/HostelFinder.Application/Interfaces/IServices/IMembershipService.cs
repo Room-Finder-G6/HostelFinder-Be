@@ -6,7 +6,7 @@ namespace HostelFinder.Application.Interfaces.IServices
 {
     public interface IMembershipService
     {
-        Task<IEnumerable<MembershipResponseDto>> GetAllMembershipWithMembershipService();
+        Task<Response<List<MembershipResponseDto>>> GetAllMembershipWithMembershipService();
         Task<Response<MembershipResponseDto>> AddMembershipAsync(AddMembershipRequestDto membershipDto);
         Task<Response<MembershipResponseDto>> EditMembershipAsync(Guid id, UpdateMembershipRequestDto membershipDto);
         Task<Response<string>> DeleteMembershipAsync(Guid id);

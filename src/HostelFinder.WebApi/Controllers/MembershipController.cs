@@ -19,49 +19,60 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> GetListMembership()
         {
             var response = await _membershipService.GetAllMembershipWithMembershipService();
-            if (response != null)
+            if (!response.Succeeded || response.Data == null)
             {
-                return Ok(response);
+                return NotFound(response.Errors);
             }
-
-            return NotFound();
+            return Ok(response);
         }
 
         [HttpPost]
         [Route("AddMembership")]
         public async Task<IActionResult> AddMembership([FromBody] AddMembershipRequestDto membershipDto)
         {
-            var response = await _membershipService.AddMembershipAsync(membershipDto);
-            if (response.Data != null)
+            try
             {
-                return Ok(response);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            return BadRequest(response.Message);
+                var response = await _membershipService.AddMembershipAsync(membershipDto);
+                if (response.Data != null)
+                {
+                    return Ok(response);
+                }
+
+                return BadRequest(response.Errors);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An unexpected error occurred: " + ex.Message);
+            }
         }
 
         [HttpPut("EditMembership/{id}")]
         public async Task<IActionResult> EditMembership(Guid id, [FromBody] UpdateMembershipRequestDto membershipDto)
         {
             var response = await _membershipService.EditMembershipAsync(id, membershipDto);
-            if (response.Data != null)
+            if (response.Succeeded)
             {
                 return Ok(response);
             }
 
-            return BadRequest(response.Message);
+            return BadRequest(response.Errors);
         }
 
         [HttpDelete("DeleteMembership/{id}")]
         public async Task<IActionResult> DeleteMembership(Guid id)
         {
             var response = await _membershipService.DeleteMembershipAsync(id);
-            if (response.Data != null)
+            if (response.Succeeded)
             {
                 return Ok(response);
             }
 
-            return BadRequest(response.Message);
+            return BadRequest(response.Errors);
         }
     }
 }

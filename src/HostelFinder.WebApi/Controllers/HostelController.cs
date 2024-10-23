@@ -26,7 +26,6 @@ namespace HostelFinder.WebApi.Controllers
             return Ok(result);
         }
 
-        // GET: api/Hostel/GetHostelsByLandlordId/{landlordId}
         [HttpGet("GetHostelsByLandlordId/{landlordId}")]
         public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId)
         {
@@ -38,31 +37,57 @@ namespace HostelFinder.WebApi.Controllers
             return NotFound(hostels.Errors);
         }
 
-        // POST: api/Hostel/AddHostel
-        [HttpPost()]
+        [HttpPost]
         public async Task<IActionResult> AddHostel([FromBody] AddHostelRequestDto hostelDto)
         {
-            var result = await _hostelService.AddHostelAsync(hostelDto);
-            if (result.Succeeded)
+            if (!ModelState.IsValid)
             {
-                return Ok(result);
+                return BadRequest(ModelState);
             }
-            return BadRequest(result);
+
+            try
+            {
+                var result = await _hostelService.AddHostelAsync(hostelDto);
+                if (result.Succeeded)
+                {
+                    return CreatedAtAction(nameof(GetHostelById), new { hostelId = result.Data.Id }, result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
-        // PUT: api/Hostel/hostelId
+
         [HttpPut("UpdateHostel/{hostelId}")]
         public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromBody] UpdateHostelRequestDto hostelDto)
         {
-            var result = await _hostelService.UpdateHostelAsync(hostelDto);
-            if (result.Succeeded)
+            if (!ModelState.IsValid)
             {
-                return Ok(result);
+                return BadRequest(ModelState);
             }
-            return NotFound(result);
+
+            if (hostelDto.Id != hostelId)
+            {
+                return BadRequest("Hostel ID mismatch");
+            }
+
+            var result = await _hostelService.UpdateHostelAsync(hostelDto);
+
+            if (!result.Succeeded)
+            {
+                if (result.Errors.Contains("Hostel not found"))
+                {
+                    return NotFound(result.Errors); 
+                }
+                return BadRequest(result.Errors); 
+            }
+
+            return Ok(result);
         }
 
-        // DELETE: api/Hostel/DeleteHostel/{id}
         [HttpDelete("DeleteHostel/{id}")]
         public async Task<IActionResult> DeleteHostel(Guid id)
         {
@@ -74,9 +99,8 @@ namespace HostelFinder.WebApi.Controllers
             return NotFound(result);
         }
 
-        [HttpPost]
-        [Route("get-all")]
-        public async Task<IActionResult> GetAll(GetAllHostelQuery request)
+        [HttpPost("get-all")]
+        public async Task<IActionResult> GetAll([FromBody] GetAllHostelQuery request)
         {
             var response = await _hostelService.GetAllHostelAsync(request);
             if (!response.Succeeded)

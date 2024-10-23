@@ -99,8 +99,15 @@ namespace HostelFinder.Application.Services
         public async Task<Response<List<HostelResponseDto>>> GetHostelsByLandlordIdAsync(Guid landlordId)
         {
             var hostels = await _hostelRepository.GetHostelsByLandlordIdAsync(landlordId);
-            return _mapper.Map<Response<List<HostelResponseDto>>>(hostels);
+
+            var response = new Response<List<HostelResponseDto>>()
+            {
+                Data = _mapper.Map<List<HostelResponseDto>>(hostels)
+            };
+
+            return response;
         }
+
 
         public async Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId)
         {

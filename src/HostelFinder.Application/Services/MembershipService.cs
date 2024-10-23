@@ -21,15 +21,20 @@ namespace HostelFinder.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<MembershipResponseDto>> GetAllMembershipWithMembershipService()
+        public async Task<Response<List<MembershipResponseDto>>> GetAllMembershipWithMembershipService()
         {
             var memberships = await _membershipRepository.GetAllMembershipWithMembershipService();
             if (memberships == null || !memberships.Any())
             {
-                return new List<MembershipResponseDto>();
+                return new Response<List<MembershipResponseDto>>
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { "No memberships found." }
+                };
             }
-            return _mapper.Map<IEnumerable<MembershipResponseDto>>(memberships);
+            return _mapper.Map<Response<List<MembershipResponseDto>>>(memberships);
         }
+
 
         public async Task<Response<MembershipResponseDto>> AddMembershipAsync(AddMembershipRequestDto membershipDto)
         {
