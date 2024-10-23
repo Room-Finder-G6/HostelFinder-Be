@@ -74,16 +74,16 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        public async Task<Response<List<UserDto>>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<UserDto>>(users);
+            return _mapper.Map<Response<List<UserDto>>>(users);
         }
 
-        public async Task<UserProfileResponse> GetUserByIdAsync(Guid id)
+        public async Task<Response<UserProfileResponse>> GetUserByIdAsync(Guid id)
         {
             var users = await _userRepository.GetByIdAsync(id);
-            return _mapper.Map<UserProfileResponse>(users);
+            return _mapper.Map<Response<UserProfileResponse>>(users);
         }
 
         public async Task<Response<UserDto>> UpdateUserAsync(Guid userId, UpdateUserRequestDto updateUserDto)
