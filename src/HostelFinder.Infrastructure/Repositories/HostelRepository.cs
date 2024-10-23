@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.InkML;
-using HostelFinder.Application.Interfaces.IRepositories;
+﻿using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
@@ -33,8 +32,6 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     public async Task<(IEnumerable<Hostel> Data, int TotalRecords)> GetAllMatchingAsync(string? searchPhrase, int pageSize, int pageNumber, string? sortBy, SortDirection sortDirection)
     {
         var searchPhraseLower = searchPhrase?.ToLower();
-
-
         var baseQuery = _dbContext.Hostels.Include(h => h.Landlord)
             .Where(x => searchPhraseLower == null || (x.HostelName.ToLower().Contains(searchPhraseLower)
             || x.Landlord.Username.ToLower().Contains(searchPhraseLower)));
