@@ -128,8 +128,7 @@ public class GeneralProfile : Profile
         //Review Mapping
         CreateMap<AddReviewRequestDto, Review>();
         CreateMap<UpdateReviewRequestDto, Review>();
-        CreateMap<Review, ReviewResponseDto>();
-        CreateMap<Review, ReviewResponseDto>();
+        CreateMap<Review, ReviewResponseDto>().ReverseMap();
         CreateMap<User, LandlordResponseDto>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Username));
 
