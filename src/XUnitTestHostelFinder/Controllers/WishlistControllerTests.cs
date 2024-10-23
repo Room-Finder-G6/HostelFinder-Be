@@ -20,12 +20,12 @@ namespace HostelFinder.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddRoomToWishlist_ReturnsOkResult_WhenAdditionSucceeds()
+        public async Task AddPostToWishlist_ReturnsOkResult_WhenAdditionSucceeds()
         {
             // Arrange
-            var request = new AddRoomToWishlistRequestDto
+            var request = new AddPostToWishlistRequestDto
             {
-                RoomId = Guid.NewGuid(),
+                PostId = Guid.NewGuid(),
                 UserId = Guid.NewGuid()
             };
 
@@ -36,7 +36,7 @@ namespace HostelFinder.UnitTests.Controllers
             };
 
             _wishlistServiceMock
-                .Setup(service => service.AddRoomToWishlistAsync(request))
+                .Setup(service => service.AddPostToWishlistAsync(request))
                 .ReturnsAsync(mockResponse);
 
             // Act
@@ -52,9 +52,9 @@ namespace HostelFinder.UnitTests.Controllers
         public async Task AddRoomToWishlist_ReturnsBadRequest_WhenAdditionFails()
         {
             // Arrange
-            var request = new AddRoomToWishlistRequestDto
+            var request = new AddPostToWishlistRequestDto
             {
-                RoomId = Guid.NewGuid(),
+                PostId = Guid.NewGuid(),
                 UserId = Guid.NewGuid()
             };
 
@@ -65,7 +65,7 @@ namespace HostelFinder.UnitTests.Controllers
             };
 
             _wishlistServiceMock
-                .Setup(service => service.AddRoomToWishlistAsync(request))
+                .Setup(service => service.AddPostToWishlistAsync(request))
                 .ReturnsAsync(mockResponse);
 
             // Act
