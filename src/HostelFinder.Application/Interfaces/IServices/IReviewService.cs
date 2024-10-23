@@ -10,6 +10,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<ReviewResponseDto>> UpdateReviewAsync(Guid reviewId, UpdateReviewRequestDto reviewDto);
         Task<Response<bool>> DeleteReviewAsync(Guid reviewId);
         Task<Response<ReviewResponseDto>> GetReviewByIdAsync(Guid reviewId);
-        Task<IEnumerable<ReviewResponseDto>> GetReviewsForHostelAsync(Guid hostelId);
+        Task<Response<List<ReviewResponseDto>>> GetReviewsForHostelAsync(Guid hostelId);
     }
 }

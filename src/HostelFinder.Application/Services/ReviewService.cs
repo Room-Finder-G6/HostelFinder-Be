@@ -94,10 +94,10 @@ namespace HostelFinder.Application.Services
             return new Response<ReviewResponseDto>(reviewResponseDto);
         }
 
-        public async Task<IEnumerable<ReviewResponseDto>> GetReviewsForHostelAsync(Guid hostelId)
+        public async Task<Response<List<ReviewResponseDto>>> GetReviewsForHostelAsync(Guid hostelId)
         {
             var reviews = await _reviewRepository.GetReviewsByHostelIdAsync(hostelId);
-            return _mapper.Map<IEnumerable<ReviewResponseDto>>(reviews);
+            return _mapper.Map<Response<List<ReviewResponseDto>>>(reviews);
         }
 
     }

@@ -24,7 +24,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return BadRequest(result.Errors);
             }
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         [HttpPut("{reviewId}")]
@@ -33,9 +33,9 @@ namespace HostelFinder.WebApi.Controllers
             var result = await _reviewService.UpdateReviewAsync(reviewId, reviewDto);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                return NotFound(result.Errors);
             }
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         [HttpDelete("{reviewId}")]
@@ -44,15 +44,19 @@ namespace HostelFinder.WebApi.Controllers
             var result = await _reviewService.DeleteReviewAsync(reviewId);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                return NotFound(result.Errors);
             }
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         [HttpGet("{reviewId}")]
         public async Task<IActionResult> GetReviewById(Guid reviewId)
         {
             var result = await _reviewService.GetReviewByIdAsync(reviewId);
+            if (!result.Succeeded)
+            {
+                return NotFound(result.Errors);
+            }
             return Ok(result);
         }
 
@@ -60,6 +64,10 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> GetReviewsForHostel(Guid hostelId)
         {
             var result = await _reviewService.GetReviewsForHostelAsync(hostelId);
+            if (!result.Succeeded)
+            {
+                return NotFound(result.Errors);
+            }
             return Ok(result);
         }
     }
