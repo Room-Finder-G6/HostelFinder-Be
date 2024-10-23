@@ -19,12 +19,12 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> GetListMembership()
         {
             var response = await _membershipService.GetAllMembershipWithMembershipService();
-            if (response != null)
+            if (response.Succeeded)
             {
                 return Ok(response);
             }
 
-            return NotFound();
+            return NotFound(response.Errors);
         }
 
         [HttpPost]
@@ -32,36 +32,36 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> AddMembership([FromBody] AddMembershipRequestDto membershipDto)
         {
             var response = await _membershipService.AddMembershipAsync(membershipDto);
-            if (response.Data != null)
+            if (response.Succeeded)
             {
                 return Ok(response);
             }
 
-            return BadRequest(response.Message);
+            return BadRequest(response.Errors);
         }
 
         [HttpPut("EditMembership/{id}")]
         public async Task<IActionResult> EditMembership(Guid id, [FromBody] UpdateMembershipRequestDto membershipDto)
         {
             var response = await _membershipService.EditMembershipAsync(id, membershipDto);
-            if (response.Data != null)
+            if (response.Succeeded)
             {
                 return Ok(response);
             }
 
-            return BadRequest(response.Message);
+            return BadRequest(response.Errors);
         }
 
         [HttpDelete("DeleteMembership/{id}")]
         public async Task<IActionResult> DeleteMembership(Guid id)
         {
             var response = await _membershipService.DeleteMembershipAsync(id);
-            if (response.Data != null)
+            if (response.Succeeded)
             {
                 return Ok(response);
             }
 
-            return BadRequest(response.Message);
+            return BadRequest(response.Errors);
         }
     }
 }
