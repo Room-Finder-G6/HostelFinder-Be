@@ -24,6 +24,7 @@ namespace HostelFinder.Application.Services
         public async Task<Response<List<MembershipResponseDto>>> GetAllMembershipWithMembershipService()
         {
             var memberships = await _membershipRepository.GetAllMembershipWithMembershipService();
+
             if (memberships == null || !memberships.Any())
             {
                 return new Response<List<MembershipResponseDto>>
@@ -32,7 +33,14 @@ namespace HostelFinder.Application.Services
                     Errors = new List<string> { "No memberships found." }
                 };
             }
-            return _mapper.Map<Response<List<MembershipResponseDto>>>(memberships);
+
+            var response = new Response<List<MembershipResponseDto>>
+            {
+                Data = _mapper.Map<List<MembershipResponseDto>>(memberships),
+                Succeeded = true
+            };
+
+            return response;
         }
 
 
