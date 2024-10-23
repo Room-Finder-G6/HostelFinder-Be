@@ -20,6 +20,10 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> GetListUser()
         {
             var users = await _userService.GetAllUsersAsync();
+            if (!users.Succeeded)
+            {
+                return NotFound(users);
+            }
             return Ok(users);
         }
 
@@ -30,9 +34,9 @@ namespace HostelFinder.WebApi.Controllers
             var result = await _userService.UpdateUserAsync(userId, request);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                return NotFound(result);
             }
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         // PUT: api/User/UnActiveUser/{userId}
@@ -42,28 +46,20 @@ namespace HostelFinder.WebApi.Controllers
             var result = await _userService.UnActiveUserAsync(userId);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                return NotFound(result);
             }
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
-            try
-            {
                 var user = await _userService.GetUserByIdAsync(id);
                 if (user == null)
                 {
-                    return NotFound(new { message = "User not found." });
+                    return NotFound(user);
                 }
-
                 return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
         }
     }
 

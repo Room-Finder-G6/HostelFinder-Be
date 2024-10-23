@@ -29,6 +29,8 @@ namespace HostelFinder.Application
             services.AddScoped<IServiceService, ServiceService>();
             services.AddScoped<IServiceCostService, ServiceCostService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IMembershipService, MembershipService>();
+
 
 
             //register validation 

@@ -8,9 +8,8 @@ namespace HostelFinder.Application.Interfaces.IServices
     public interface IUserService
     {
         Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request);
-
-        Task<IEnumerable<UserDto>> GetAllUsersAsync();
-        Task<UserProfileResponse> GetUserByIdAsync(Guid id);
+        Task<Response<List<UserDto>>> GetAllUsersAsync();
+        Task <Response<UserProfileResponse>> GetUserByIdAsync(Guid id);
         Task<Response<UserDto>> UpdateUserAsync(Guid userId, UpdateUserRequestDto updateUserDto);
         Task<Response<bool>> UnActiveUserAsync(Guid userId);
     }
