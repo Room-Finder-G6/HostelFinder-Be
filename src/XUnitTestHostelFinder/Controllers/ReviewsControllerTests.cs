@@ -5,10 +5,6 @@ using HostelFinder.Application.Wrappers;
 using HostelFinder.WebApi.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace HostelFinder.UnitTests.Controllers
 {

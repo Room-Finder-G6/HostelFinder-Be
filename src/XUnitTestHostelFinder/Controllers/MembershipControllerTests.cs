@@ -3,8 +3,10 @@ using HostelFinder.Application.DTOs.Membership.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.WebApi.Controllers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 
 namespace HostelFinder.UnitTests.Controllers
 {
@@ -54,7 +56,7 @@ namespace HostelFinder.UnitTests.Controllers
             {
                 Data = null,
                 Succeeded = false,
-                Errors = new List<string> { "No memberships found." } 
+                Errors = new List<string> { "No memberships found." }
             };
 
             _membershipServiceMock
@@ -67,7 +69,41 @@ namespace HostelFinder.UnitTests.Controllers
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             var returnValue = Assert.IsType<List<string>>(notFoundResult.Value);
-            Assert.Contains("No memberships found.", returnValue); 
+            Assert.Contains("No memberships found.", returnValue);
+        }
+
+        [Fact]
+        public async Task AddMembership_ReturnsInternalServerError_WhenUnexpectedErrorOccurs()
+        {
+            // Arrange
+            _membershipServiceMock
+                .Setup(service => service.AddMembershipAsync(It.IsAny<AddMembershipRequestDto>()))
+                .ThrowsAsync(new Exception("Unexpected error"));
+
+            var membershipDto = new AddMembershipRequestDto { Name = "Basic" };
+
+            // Act
+            var result = await _controller.AddMembership(membershipDto);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode); // HTTP 500
+        }
+
+        [Fact]
+        public async Task AddMembership_ReturnsBadRequest_WhenModelStateIsInvalid()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError("Name", "Required");
+
+            var membershipDto = new AddMembershipRequestDto(); // Dữ liệu không hợp lệ
+
+            // Act
+            var result = await _controller.AddMembership(membershipDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<SerializableError>(badRequestResult.Value); // Kiểm tra lỗi từ ModelState
         }
 
 
@@ -126,6 +162,56 @@ namespace HostelFinder.UnitTests.Controllers
             var returnValue = Assert.IsType<List<string>>(badRequestResult.Value);
             Assert.Contains("Addition failed", returnValue);
         }
+
+        [Theory]
+        [InlineData("Membership A", "Description A", true)] // Thí dụ hợp lệ
+        [InlineData("", "Description B", false)] // Tên thành viên trống
+        [InlineData("Membership C", "", false)] // Mô tả thành viên trống
+        public async Task AddMembership_WithDifferentData_ReturnsExpectedResult(string membershipName, string description, bool isExpectedSuccess)
+        {
+            // Arrange
+            var membershipDto = new AddMembershipRequestDto
+            {
+                Name = membershipName,
+                Description = description
+            };
+
+            var mockResponse = isExpectedSuccess
+                ? new Response<MembershipResponseDto>
+                {
+                    Data = new MembershipResponseDto { Name = membershipName },
+                    Succeeded = true
+                }
+                : new Response<MembershipResponseDto>
+                {
+                    Data = null,
+                    Succeeded = false,
+                    Errors = new List<string> { "Invalid membership data" }
+                };
+
+            _membershipServiceMock
+                .Setup(service => service.AddMembershipAsync(It.IsAny<AddMembershipRequestDto>()))
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller.AddMembership(membershipDto);
+
+            // Assert
+            if (isExpectedSuccess)
+            {
+                var okResult = Assert.IsType<OkObjectResult>(result);
+                var returnValue = Assert.IsType<Response<MembershipResponseDto>>(okResult.Value);
+                Assert.True(returnValue.Succeeded);
+                Assert.Equal(membershipName, returnValue.Data.Name);
+            }
+            else
+            {
+                var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+                var returnValue = Assert.IsType<List<string>>(badRequestResult.Value);
+                Assert.Contains("Invalid membership data", returnValue);
+            }
+        }
+
 
         [Fact]
         public async Task EditMembership_ReturnsOkResult_WhenUpdateSucceeds()
