@@ -6,7 +6,7 @@ namespace HostelFinder.Application.Interfaces.IServices
 {
     public interface IWishlistService
     {
-        Task<Response<bool>> AddRoomToWishlistAsync(AddRoomToWishlistRequestDto request);
+        Task<Response<bool>> AddPostToWishlistAsync(AddPostToWishlistRequestDto request);
         Task<Response<WishlistResponseDto>> GetWishlistByUserIdAsync(Guid userId);
         Task<Response<bool>> DeleteRoomFromWishlistAsync(Guid id);
     }

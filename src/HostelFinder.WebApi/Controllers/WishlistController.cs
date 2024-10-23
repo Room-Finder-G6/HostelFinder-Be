@@ -17,9 +17,9 @@ namespace HostelFinder.WebApi.Controllers
 
         // POST: api/Wishlist/AddRoomToWishlist
         [HttpPost("AddRoomToWishlist")]
-        public async Task<IActionResult> AddRoomToWishlist([FromBody] AddRoomToWishlistRequestDto request)
+        public async Task<IActionResult> AddRoomToWishlist([FromBody] AddPostToWishlistRequestDto request)
         {
-            var result = await _wishlistService.AddRoomToWishlistAsync(request);
+            var result = await _wishlistService.AddPostToWishlistAsync(request);
             if (result.Succeeded)
             {
                 return Ok(result);
