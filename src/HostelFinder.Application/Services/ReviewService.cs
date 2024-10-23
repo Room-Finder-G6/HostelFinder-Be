@@ -97,7 +97,24 @@ namespace HostelFinder.Application.Services
         public async Task<Response<List<ReviewResponseDto>>> GetReviewsForHostelAsync(Guid hostelId)
         {
             var reviews = await _reviewRepository.GetReviewsByHostelIdAsync(hostelId);
-            return _mapper.Map<Response<List<ReviewResponseDto>>>(reviews);
+            if (reviews == null || !reviews.Any())
+            {
+                return new Response<List<ReviewResponseDto>>
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { "No reviews found for this hostel." }
+                };
+            }
+
+            // Map List<Review> to List<ReviewResponseDto>
+            var reviewResponseDtos = _mapper.Map<List<ReviewResponseDto>>(reviews);
+
+            // Create and return Response
+            return new Response<List<ReviewResponseDto>>
+            {
+                Data = reviewResponseDtos,
+                Succeeded = true
+            };
         }
 
     }
