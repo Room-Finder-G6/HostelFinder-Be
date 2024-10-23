@@ -85,8 +85,7 @@ public class GeneralProfile : Profile
         CreateMap<Hostel, HostelResponseDto>()
            .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Reviews.Any() ? src.Reviews.Average(r => r.rating) : 0))
            .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Images.ToString()));
-        CreateMap<List<Hostel>, Response<List<HostelResponseDto>>>()
-           .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src));
+
         CreateMap<Hostel, ListHostelResponseDto>()
             .ForMember(dest => dest.LandlordUserName, opt => opt.MapFrom(src => src.Landlord.Username))
             .ReverseMap();
@@ -110,9 +109,16 @@ public class GeneralProfile : Profile
         CreateMap<UpdateServiceCostDto, ServiceCost>();
 
         //Map User
-        CreateMap<UserDto, User>().ReverseMap();
+        CreateMap<User, UserDto>().ReverseMap();
         CreateMap<UserProfileResponse, User>().ReverseMap();
         CreateMap<CreateUserRequestDto, User>().ReverseMap();
+        
+        CreateMap<UserProfileResponse, Response<UserProfileResponse>>()
+           .ConstructUsing(src => new Response<UserProfileResponse>
+           {
+               Data = src,
+               Succeeded = true
+           });
 
         //Service Mapping
         CreateMap<ServiceCreateRequestDTO, Service>();
@@ -138,8 +144,6 @@ public class GeneralProfile : Profile
            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service_Name)).ReverseMap();
         CreateMap<Membership, MembershipResponseDto>()
             .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.Membership_Services)).ReverseMap();
-        CreateMap<List<Membership>, Response<List<MembershipResponseDto>>>()
-           .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src));
 
     }
 }
