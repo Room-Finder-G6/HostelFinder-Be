@@ -21,6 +21,7 @@ using HostelFinder.Application.DTOs.Membership.Responses;
 using HostelFinder.Application.DTOs.Membership.Requests;
 using HostelFinder.Application.DTOs.MembershipService.Requests;
 using HostelFinder.Application.DTOs.MembershipService.Responses;
+using HostelFinder.Application.Wrappers;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -84,7 +85,8 @@ public class GeneralProfile : Profile
         CreateMap<Hostel, HostelResponseDto>()
            .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Reviews.Any() ? src.Reviews.Average(r => r.rating) : 0))
            .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Images.ToString()));
-
+        CreateMap<List<Hostel>, Response<List<HostelResponseDto>>>()
+           .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src));
         CreateMap<Hostel, ListHostelResponseDto>()
             .ForMember(dest => dest.LandlordUserName, opt => opt.MapFrom(src => src.Landlord.Username))
             .ReverseMap();
