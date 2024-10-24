@@ -18,12 +18,6 @@ namespace HostelFinder.WebApi.Controllers
         [HttpPost("AddRoomToWishlist")]
         public async Task<IActionResult> AddRoomToWishlist([FromBody] AddPostToWishlistRequestDto request)
         {
-            // Check ModelState first
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState); 
-            }
-
             try
             {
                 var result = await _wishlistService.AddPostToWishlistAsync(request);

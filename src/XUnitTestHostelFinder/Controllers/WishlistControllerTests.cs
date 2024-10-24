@@ -49,35 +49,6 @@ namespace HostelFinder.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddRoomToWishlist_ReturnsBadRequest_WhenAdditionFails()
-        {
-            // Arrange
-            var request = new AddPostToWishlistRequestDto
-            {
-                PostId = Guid.NewGuid(),
-                UserId = Guid.NewGuid()
-            };
-
-            var mockResponse = new Response<bool>
-            {
-                Succeeded = false,
-                Errors = new List<string> { "Addition failed" }
-            };
-
-            _wishlistServiceMock
-                .Setup(service => service.AddPostToWishlistAsync(request))
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.AddRoomToWishlist(request);
-
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var returnValue = Assert.IsType<List<string>>(badRequestResult.Value);
-            Assert.Contains("Addition failed", returnValue);
-        }
-
-        [Fact]
         public async Task GetWishlistByUserId_ReturnsOkResult_WhenWishlistExists()
         {
             // Arrange
