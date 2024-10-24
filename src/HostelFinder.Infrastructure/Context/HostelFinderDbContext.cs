@@ -7,7 +7,7 @@ namespace HostelFinder.Infrastructure.Context;
 public class HostelFinderDbContext : DbContext
 {
     public DbSet<BookingRequest> BookingRequests { get; set; }
-    public DbSet<Hostel> Hostels { get; set; }
+    public DbSet<Hostel?> Hostels { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<RoomDetails> RoomDetails { get; set; }

@@ -4,8 +4,8 @@ namespace HostelFinder.Application.DTOs.Hostel.Requests
 {
     public class UpdateHostelRequestDto
     {
-        public Guid Id { get; set; }
-        public Guid? LandlordId { get; set; }
+        /*public Guid Id { get; set; }
+        public Guid? LandlordId { get; set; }*/
         public string HostelName { get; set; }
         public string? Description { get; set; }
         public AddressDto Address { get; set; }
