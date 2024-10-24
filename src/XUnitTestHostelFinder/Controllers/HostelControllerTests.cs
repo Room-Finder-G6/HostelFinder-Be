@@ -1,6 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.Address;
 using HostelFinder.Application.DTOs.Hostel.Requests;
 using HostelFinder.Application.DTOs.Hostel.Responses;
+using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.WebApi.Controllers;
@@ -43,7 +44,14 @@ namespace XUnitTestHostelFinder.Controllers
                     },
                     NumberOfRooms = 10,
                     Rating = 4.5f,
-                    Image = "image_url",
+                    Image = new List<ImageResponseDto> 
+                    {
+                        new ImageResponseDto
+                        {
+                            Url = "image_url",
+                            Description = "A description for the image."
+                        }
+                    },
                     Coordinates = "10.762622,106.660172",
                     CreatedOn = DateTimeOffset.Now
                 },
