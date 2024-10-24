@@ -20,6 +20,15 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<bool>> AddPostToWishlistAsync(AddPostToWishlistRequestDto request)
         {
+            if (request.PostId == Guid.Empty || request.UserId == Guid.Empty)
+            {
+                return new Response<bool>
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { "Invalid Post ID or User ID." }
+                };
+            }
+
             var wishlist = await _wishlistRepository.GetWishlistByUserIdAsync(request.UserId);
             if (wishlist == null)
             {
@@ -41,6 +50,8 @@ namespace HostelFinder.Application.Services
 
             return new Response<bool>(true);
         }
+
+
 
         public async Task<Response<WishlistResponseDto>> GetWishlistByUserIdAsync(Guid userId)
         {

@@ -284,5 +284,87 @@ namespace HostelFinder.UnitTests.Controllers
             var returnValue = Assert.IsType<List<string>>(notFoundResult.Value);
             Assert.Contains("No reviews found for this hostel", returnValue);
         }
+
+        [Fact]
+        public async Task AddReview_ReturnsBadRequest_WhenModelStateIsInvalid()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError("Rating", "Required");
+
+            var reviewDto = new AddReviewRequestDto
+            {
+                HostelId = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                Rating = 0, // Invalid Rating
+                Comment = "Great place!"
+            };
+
+            // Act
+            var result = await _controller.AddReview(reviewDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<SerializableError>(badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task AddReview_ReturnsInternalServerError_WhenExceptionThrown()
+        {
+            // Arrange
+            var reviewDto = new AddReviewRequestDto
+            {
+                HostelId = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                Rating = 5,
+                Comment = "Great place!"
+            };
+
+            _reviewServiceMock
+                .Setup(service => service.AddReviewAsync(reviewDto))
+                .ThrowsAsync(new Exception("Something went wrong!"));
+
+            // Act
+            var result = await _controller.AddReview(reviewDto);
+
+            // Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, internalServerErrorResult.StatusCode);
+            Assert.Equal("Something went wrong!", internalServerErrorResult.Value);
+        }
+
+        [Theory]
+        [InlineData(5, "Excellent place!")]
+        [InlineData(3, "Average place")]
+        [InlineData(1, "Bad experience")]
+        public async Task AddReview_ReturnsOkResult_WithDifferentRatingsAndComments(int rating, string comment)
+        {
+            // Arrange
+            var reviewDto = new AddReviewRequestDto
+            {
+                HostelId = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                Rating = rating,
+                Comment = comment
+            };
+
+            var mockResponse = new Response<ReviewResponseDto>
+            {
+                Data = new ReviewResponseDto { /* populate with necessary data */ },
+                Succeeded = true
+            };
+
+            _reviewServiceMock
+                .Setup(service => service.AddReviewAsync(reviewDto))
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller.AddReview(reviewDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnValue = Assert.IsType<Response<ReviewResponseDto>>(okResult.Value);
+            Assert.True(returnValue.Succeeded);
+        }
+
     }
 }
