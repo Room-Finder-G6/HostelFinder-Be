@@ -53,7 +53,7 @@ namespace HostelFinder.Application.Services
             var response = new WishlistResponseDto
             {
                 WishlistId = wishlist.Id,
-                Rooms = wishlist.WishlistRooms.Select(wr => new PostResponseDto
+                Posts = wishlist.WishlistRooms.Select(wr => new PostResponseDto
                 {
                     Id = wr.Post.Id,
                     Title = wr.Post.Title,
