@@ -15,7 +15,6 @@ public class AddPostRequestDto
     [Required]
     [MaxLength(255)]
     public string Description { get; set; }
-    public string PrimaryImageUrl { get; set; }
     public RoomType RoomType { get; set; }
     public ICollection<string> ImagesUrls{ get; set; }
     public decimal Size { get; set; }

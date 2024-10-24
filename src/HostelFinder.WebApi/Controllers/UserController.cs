@@ -19,30 +19,50 @@ namespace HostelFinder.WebApi.Controllers
         [HttpGet("GetListUser")]
         public async Task<IActionResult> GetListUser()
         {
-            var users = await _userService.GetAllUsersAsync();
-            if (!users.Succeeded)
+            try
             {
-                return NotFound(users);
+                var users = await _userService.GetAllUsersAsync();
+                if (!users.Succeeded)
+                {
+                    return NotFound(users);
+                }
+                return Ok(users);
             }
-            return Ok(users);
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Something went wrong!");
+            }
+
         }
 
         // PUT: api/User/UpdateUser/{userId}
         [HttpPut("UpdateUser/{userId}")]
         public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserRequestDto request)
         {
-            var result = await _userService.UpdateUserAsync(userId, request);
-            if (!result.Succeeded)
+            try
             {
-                return NotFound(result);
+                var result = await _userService.UpdateUserAsync(userId, request);
+                if (!result.Succeeded)
+                {
+                    return NotFound(result);
+                }
+                return Ok(result);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Something went wrong!");
+            }
+
         }
 
         // PUT: api/User/UnActiveUser/{userId}
         [HttpPut("UnActiveUser/{userId}")]
         public async Task<IActionResult> UnActiveUser(Guid userId)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var result = await _userService.UnActiveUserAsync(userId);
             if (!result.Succeeded)
             {
@@ -54,12 +74,16 @@ namespace HostelFinder.WebApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
-                var user = await _userService.GetUserByIdAsync(id);
-                if (user == null)
-                {
-                    return NotFound(user);
-                }
-                return Ok(user);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound(user);
+            }
+            return Ok(user);
         }
     }
 

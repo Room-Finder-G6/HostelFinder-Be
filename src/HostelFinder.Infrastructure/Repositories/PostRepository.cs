@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.Interfaces.IRepositories;
+﻿using DocumentFormat.OpenXml.InkML;
+using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
@@ -100,4 +101,12 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
         return (Data : posts,TotalRecords : totalCount);
     }
+
+    public async Task<List<Post>> GetPostsByUserIdAsync(Guid userId)
+    {
+        return await _dbContext.Posts
+            .Where(p => p.Id == userId)
+            .ToListAsync();
+    }
+
 }

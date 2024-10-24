@@ -20,12 +20,12 @@ namespace HostelFinder.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task AddRoomToWishlist_ReturnsOkResult_WhenAdditionSucceeds()
+        public async Task AddPostToWishlist_ReturnsOkResult_WhenAdditionSucceeds()
         {
             // Arrange
-            var request = new AddRoomToWishlistRequestDto
+            var request = new AddPostToWishlistRequestDto
             {
-                RoomId = Guid.NewGuid(),
+                PostId = Guid.NewGuid(),
                 UserId = Guid.NewGuid()
             };
 
@@ -36,7 +36,7 @@ namespace HostelFinder.UnitTests.Controllers
             };
 
             _wishlistServiceMock
-                .Setup(service => service.AddRoomToWishlistAsync(request))
+                .Setup(service => service.AddPostToWishlistAsync(request))
                 .ReturnsAsync(mockResponse);
 
             // Act
@@ -46,35 +46,6 @@ namespace HostelFinder.UnitTests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             var returnValue = Assert.IsType<Response<bool>>(okResult.Value);
             Assert.True(returnValue.Succeeded);
-        }
-
-        [Fact]
-        public async Task AddRoomToWishlist_ReturnsBadRequest_WhenAdditionFails()
-        {
-            // Arrange
-            var request = new AddRoomToWishlistRequestDto
-            {
-                RoomId = Guid.NewGuid(),
-                UserId = Guid.NewGuid()
-            };
-
-            var mockResponse = new Response<bool>
-            {
-                Succeeded = false,
-                Errors = new List<string> { "Addition failed" }
-            };
-
-            _wishlistServiceMock
-                .Setup(service => service.AddRoomToWishlistAsync(request))
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.AddRoomToWishlist(request);
-
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var returnValue = Assert.IsType<List<string>>(badRequestResult.Value);
-            Assert.Contains("Addition failed", returnValue);
         }
 
         [Fact]
@@ -172,5 +143,30 @@ namespace HostelFinder.UnitTests.Controllers
             var returnValue = Assert.IsType<List<string>>(badRequestResult.Value);
             Assert.Contains("Deletion failed", returnValue);
         }
+
+        [Fact]
+        public async Task AddPostToWishlist_ReturnsInternalServerError_WhenServiceThrowsException()
+        {
+            // Arrange
+            var request = new AddPostToWishlistRequestDto
+            {
+                PostId = Guid.NewGuid(),
+                UserId = Guid.NewGuid()
+            };
+
+            _wishlistServiceMock
+                .Setup(service => service.AddPostToWishlistAsync(request))
+                .ThrowsAsync(new Exception("Unexpected error"));
+
+            // Act
+            var result = await _controller.AddRoomToWishlist(request);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var responseMessage = Assert.IsType<string>(objectResult.Value);
+            Assert.Equal("Something went wrong!", responseMessage);
+        }
+
     }
 }

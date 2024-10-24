@@ -18,8 +18,17 @@ namespace HostelFinder.Application.Services
             _wishlistRepository = wishlistRepository;
         }
 
-        public async Task<Response<bool>> AddRoomToWishlistAsync(AddRoomToWishlistRequestDto request)
+        public async Task<Response<bool>> AddPostToWishlistAsync(AddPostToWishlistRequestDto request)
         {
+            if (request.PostId == Guid.Empty || request.UserId == Guid.Empty)
+            {
+                return new Response<bool>
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { "Invalid Post ID or User ID." }
+                };
+            }
+
             var wishlist = await _wishlistRepository.GetWishlistByUserIdAsync(request.UserId);
             if (wishlist == null)
             {
@@ -34,13 +43,15 @@ namespace HostelFinder.Application.Services
             var wishlistRoom = new WishlistRoom
             {
                 WishlistId = wishlist.Id,
-                PostId = request.RoomId
+                PostId = request.PostId
             };
 
             await _wishlistRepository.AddRoomToWishlistAsync(wishlistRoom);
 
             return new Response<bool>(true);
         }
+
+
 
         public async Task<Response<WishlistResponseDto>> GetWishlistByUserIdAsync(Guid userId)
         {
@@ -53,7 +64,7 @@ namespace HostelFinder.Application.Services
             var response = new WishlistResponseDto
             {
                 WishlistId = wishlist.Id,
-                Rooms = wishlist.WishlistRooms.Select(wr => new PostResponseDto
+                Posts = wishlist.WishlistRooms.Select(wr => new PostResponseDto
                 {
                     Id = wr.Post.Id,
                     Title = wr.Post.Title,

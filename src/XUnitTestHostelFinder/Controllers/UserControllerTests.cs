@@ -243,6 +243,75 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Contains("User deactivation failed", returnValue.Errors);
         }
 
+        [Fact]
+        public async Task GetListUser_ReturnsInternalServerError_WhenExceptionThrown()
+        {
+            // Arrange
+            _userServiceMock
+                .Setup(service => service.GetAllUsersAsync())
+                .ThrowsAsync(new Exception("Something went wrong!"));
+
+            // Act
+            var result = await _controller.GetListUser();
+
+            // Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, internalServerErrorResult.StatusCode);
+            Assert.Equal("Something went wrong!", internalServerErrorResult.Value);
+        }
+
+        [Fact]
+        public async Task GetUserById_ReturnsBadRequest_WhenModelStateIsInvalid()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError("Id", "Invalid user ID");
+
+            // Act
+            var result = await _controller.GetUserById(Guid.Empty); // Simulate an invalid Guid
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<SerializableError>(badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ReturnsInternalServerError_WhenExceptionThrown()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var updateUserDto = new UpdateUserRequestDto
+            {
+                Username = "updatedUser",
+                Email = "updated@example.com",
+                Phone = "123456789"
+            };
+
+            _userServiceMock
+                .Setup(service => service.UpdateUserAsync(userId, updateUserDto))
+                .ThrowsAsync(new Exception("Something went wrong!"));
+
+            // Act
+            var result = await _controller.UpdateUser(userId, updateUserDto);
+
+            // Assert
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, internalServerErrorResult.StatusCode);
+            Assert.Equal("Something went wrong!", internalServerErrorResult.Value);
+        }
+
+        [Fact]
+        public async Task UnActiveUser_ReturnsBadRequest_WhenModelStateIsInvalid()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError("Id", "Invalid user ID");
+
+            // Act
+            var result = await _controller.UnActiveUser(Guid.Empty); // Simulate an invalid Guid
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<SerializableError>(badRequestResult.Value);
+        }
 
     }
 }
