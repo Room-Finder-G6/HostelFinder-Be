@@ -172,5 +172,30 @@ namespace HostelFinder.UnitTests.Controllers
             var returnValue = Assert.IsType<List<string>>(badRequestResult.Value);
             Assert.Contains("Deletion failed", returnValue);
         }
+
+        [Fact]
+        public async Task AddPostToWishlist_ReturnsInternalServerError_WhenServiceThrowsException()
+        {
+            // Arrange
+            var request = new AddPostToWishlistRequestDto
+            {
+                PostId = Guid.NewGuid(),
+                UserId = Guid.NewGuid()
+            };
+
+            _wishlistServiceMock
+                .Setup(service => service.AddPostToWishlistAsync(request))
+                .ThrowsAsync(new Exception("Unexpected error"));
+
+            // Act
+            var result = await _controller.AddRoomToWishlist(request);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var responseMessage = Assert.IsType<string>(objectResult.Value);
+            Assert.Equal("Something went wrong!", responseMessage);
+        }
+
     }
 }

@@ -19,12 +19,24 @@ namespace HostelFinder.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> AddReview([FromBody] AddReviewRequestDto reviewDto)
         {
-            var result = await _reviewService.AddReviewAsync(reviewDto);
-            if (!result.Succeeded)
+            try
             {
-                return BadRequest(result.Errors);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var result = await _reviewService.AddReviewAsync(reviewDto);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+                return Ok(result);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message); 
+            }
         }
 
         [HttpPut("{reviewId}")]

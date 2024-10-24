@@ -15,17 +15,32 @@ namespace HostelFinder.WebApi.Controllers
             _wishlistService = wishlistService;
         }
 
-        // POST: api/Wishlist/AddRoomToWishlist
         [HttpPost("AddRoomToWishlist")]
         public async Task<IActionResult> AddRoomToWishlist([FromBody] AddPostToWishlistRequestDto request)
         {
-            var result = await _wishlistService.AddPostToWishlistAsync(request);
-            if (result.Succeeded)
+            // Check ModelState first
+            if (!ModelState.IsValid)
             {
+                return BadRequest(ModelState); 
+            }
+
+            try
+            {
+                var result = await _wishlistService.AddPostToWishlistAsync(request);
+
+                if (!result.Succeeded)
+                {
+                    return BadRequest(new { Errors = result.Errors });
+                }
+
                 return Ok(result);
             }
-            return BadRequest(result.Errors);
+            catch (Exception)
+            {
+                return StatusCode(500, "Something went wrong!");
+            }
         }
+
 
         // GET: api/Wishlist/GetWishlistByUserId/{userId}
         [HttpGet("GetWishlistByUserId/{userId}")]
