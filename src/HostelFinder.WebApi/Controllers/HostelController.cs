@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.DTOs.Hostel.Requests;
+﻿using System.Security.Claims;
+using HostelFinder.Application.DTOs.Hostel.Requests;
 using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,17 +24,19 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return NotFound(result);
             }
+
             return Ok(result);
         }
 
         [HttpGet("GetHostelsByLandlordId/{landlordId}")]
         public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId)
         {
-            var hostels = await _hostelService.GetHostelsByLandlordIdAsync(landlordId);
+            var hostels = await _hostelService.GetHostelsByUserIdAsync(landlordId);
             if (hostels.Succeeded)
             {
                 return Ok(hostels);
             }
+
             return NotFound(hostels.Errors);
         }
 
@@ -52,9 +55,10 @@ namespace HostelFinder.WebApi.Controllers
                 {
                     return CreatedAtAction(nameof(GetHostelById), new { hostelId = result.Data.Id }, result);
                 }
+
                 return BadRequest(result);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
@@ -69,23 +73,22 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (hostelDto.Id != hostelId)
+            var userIdClaim = User.FindFirst("UserId");
+            if (userIdClaim == null)
             {
-                return BadRequest("Hostel ID mismatch");
+                return Unauthorized("User ID claim not found in token.");
             }
 
-            var result = await _hostelService.UpdateHostelAsync(hostelDto);
+            var userId = Guid.Parse(userIdClaim.Value);
 
-            if (!result.Succeeded)
+
+            var result = await _hostelService.UpdateHostelAsync(hostelId, userId, hostelDto);
+            if (result.Succeeded)
             {
-                if (result.Errors.Contains("Hostel not found"))
-                {
-                    return NotFound(result.Errors); 
-                }
-                return BadRequest(result.Errors); 
+                return Ok(result);
             }
 
-            return Ok(result);
+            return NotFound(new { message = "Hostel not found or update failed.", errors = result.Errors });
         }
 
         [HttpDelete("DeleteHostel/{id}")]
@@ -96,6 +99,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return Ok(result);
             }
+
             return NotFound(result);
         }
 
@@ -107,6 +111,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return NotFound(response);
             }
+
             return Ok(response);
         }
     }

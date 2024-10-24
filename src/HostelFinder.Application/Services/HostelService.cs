@@ -16,7 +16,7 @@ namespace HostelFinder.Application.Services
         private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
 
-        public HostelService(IHostelRepository hostelRepository,IReviewRepository reviewRepository, IMapper mapper)
+        public HostelService(IHostelRepository hostelRepository, IReviewRepository reviewRepository, IMapper mapper)
         {
             _hostelRepository = hostelRepository;
             _reviewRepository = reviewRepository;
@@ -45,7 +45,8 @@ namespace HostelFinder.Application.Services
             {
                 await _hostelRepository.AddAsync(hostel);
                 var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
-                return new Response<HostelResponseDto> { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
+                return new Response<HostelResponseDto>
+                    { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
             }
             catch (Exception ex)
             {
@@ -53,22 +54,23 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(UpdateHostelRequestDto hostelDto)
+        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, Guid userId,
+            UpdateHostelRequestDto hostelDto)
         {
-            var existingHostel = await _hostelRepository.GetByIdAsync(hostelDto.Id);
-            if (existingHostel == null)
+            var hostel = await _hostelRepository.GetHostelByIdAndUserIdAsync(hostelId, userId);
+            if (hostel == null)
             {
                 return new Response<HostelResponseDto>("Hostel not found");
             }
 
             try
             {
-                _mapper.Map(hostelDto, existingHostel);
-                existingHostel.LastModifiedOn = DateTime.Now;
-                existingHostel.LastModifiedBy = "System";
-                await _hostelRepository.UpdateAsync(existingHostel);
+                _mapper.Map(hostelDto, hostel);
+                hostel.LastModifiedOn = DateTime.Now;
+                hostel.LastModifiedBy = "System";
+                await _hostelRepository.UpdateAsync(hostel);
 
-                var updatedHostelDto = _mapper.Map<HostelResponseDto>(existingHostel);
+                var updatedHostelDto = _mapper.Map<HostelResponseDto>(hostel);
                 return new Response<HostelResponseDto>(updatedHostelDto, "Update successful.");
             }
             catch (Exception ex)
@@ -96,9 +98,9 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<List<HostelResponseDto>>> GetHostelsByLandlordIdAsync(Guid landlordId)
+        public async Task<Response<List<HostelResponseDto>>> GetHostelsByUserIdAsync(Guid landlordId)
         {
-            var hostels = await _hostelRepository.GetHostelsByLandlordIdAsync(landlordId);
+            var hostels = await _hostelRepository.GetHostelsByUserIdAsync(landlordId);
 
             var response = new Response<List<HostelResponseDto>>()
             {
@@ -129,18 +131,19 @@ namespace HostelFinder.Application.Services
         {
             try
             {
-                var hostels = await _hostelRepository.GetAllMatchingAsync(request.SearchPhrase, request.PageSize, request.PageNumber, request.SortBy, request.SortDirection);
+                var hostels = await _hostelRepository.GetAllMatchingAsync(request.SearchPhrase, request.PageSize,
+                    request.PageNumber, request.SortBy, request.SortDirection);
 
                 var hostelDtos = _mapper.Map<List<ListHostelResponseDto>>(hostels.Data);
 
-                var pagedResponse = PaginationHelper.CreatePagedResponse(hostelDtos, request.PageNumber, request.PageSize, hostels.TotalRecords);
+                var pagedResponse = PaginationHelper.CreatePagedResponse(hostelDtos, request.PageNumber,
+                    request.PageSize, hostels.TotalRecords);
                 return pagedResponse;
             }
             catch (Exception ex)
             {
-                return new PagedResponse<List<ListHostelResponseDto>> { Succeeded  = false, Errors = {ex.Message} };
+                return new PagedResponse<List<ListHostelResponseDto>> { Succeeded = false, Errors = { ex.Message } };
             }
         }
     }
-
 }
