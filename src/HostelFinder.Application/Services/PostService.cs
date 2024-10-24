@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Hostel.Responses;
+using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.RoomDetails.Response;
@@ -155,9 +156,9 @@ public class PostService : IPostService
 
         hostelResponseDto.Rating = averageRating;
 
-        if (hostel.Images != null)
+        if (hostel.Images != null && hostel.Images.Any())
         {
-            hostelResponseDto.Image = string.Join(", ", hostel.Images); 
+            hostelResponseDto.Image = _mapper.Map<List<ImageResponseDto>>(hostel.Images);
         }
 
         return hostelResponseDto;
@@ -179,4 +180,26 @@ public class PostService : IPostService
             return new PagedResponse<List<ListPostResponseDto>> { Succeeded = false, Errors = {ex.Message} };
         }
     }
+
+    public async Task<Response<List<ListPostResponseDto>>> GetPostsByUserIdAsync(Guid userId)
+    {
+        var posts = await _postRepository.GetPostsByUserIdAsync(userId);
+
+        if (posts == null || !posts.Any())
+        {
+            return new Response<List<ListPostResponseDto>>
+            {
+                Succeeded = false,
+                Errors = new List<string> { "No posts found for this user." }
+            };
+        }
+
+        var postDtos = _mapper.Map<List<ListPostResponseDto>>(posts);
+        return new Response<List<ListPostResponseDto>>
+        {
+            Data = postDtos,
+            Succeeded = true
+        };
+    }
+
 }

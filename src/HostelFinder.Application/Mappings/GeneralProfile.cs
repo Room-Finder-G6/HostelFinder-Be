@@ -22,6 +22,7 @@ using HostelFinder.Application.DTOs.Membership.Requests;
 using HostelFinder.Application.DTOs.MembershipService.Requests;
 using HostelFinder.Application.DTOs.MembershipService.Responses;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Application.DTOs.Image.Responses;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -69,12 +70,12 @@ public class GeneralProfile : Profile
                 opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.Address,
                 opt => opt.MapFrom(src => src.Hostel.Address))
-            .ForMember(dest => dest.Size,
-                opt => opt.MapFrom(src => src.Size))
-            .ForMember(dest => dest.PrimaryImageUrl,
-                opt => opt.MapFrom(src => src.PrimaryImageUrl))
             .ForMember(dest => dest.MonthlyRentCost,
                 opt => opt.MapFrom(src => src.MonthlyRentCost))
+            .ForMember(dest => dest.Size,
+                opt => opt.MapFrom(src => src.Size))
+            .ForMember(dest => dest.Image,
+                opt => opt.MapFrom(src => src.Images))
             .ReverseMap();
 
         // Hostel Mapping
@@ -146,5 +147,8 @@ public class GeneralProfile : Profile
         CreateMap<List<Membership>, Response<List<MembershipResponseDto>>>()
            .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src));
 
+
+        //Image
+        CreateMap<Image, ImageResponseDto>().ReverseMap();
     }
 }

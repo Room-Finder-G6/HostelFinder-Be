@@ -129,4 +129,17 @@ public class PostController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
+
+    [HttpGet("user/{userId}")]
+    public async Task<IActionResult> GetPostByUserId(Guid userId)
+    {
+        var result = await _postService.GetPostsByUserIdAsync(userId);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return NotFound(result.Errors);
+    }
+
 }
