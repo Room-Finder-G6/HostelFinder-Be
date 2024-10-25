@@ -1,5 +1,4 @@
 ﻿using HostelFinder.Application.DTOs.Image.Responses;
-using System.ComponentModel.DataAnnotations;
 
 namespace HostelFinder.Application.DTOs.Hostel.Responses
 {
@@ -10,7 +9,6 @@ namespace HostelFinder.Application.DTOs.Hostel.Responses
         public string? Description { get; set; }
         public float? Size { get; set; }
         public int NumberOfRooms { get; set; }
-        public float Rating { get; set; }
         public List<ImageResponseDto> Image { get; set; }
     }
 }

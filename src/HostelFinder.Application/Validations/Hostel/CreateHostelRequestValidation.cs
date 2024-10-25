@@ -32,9 +32,6 @@ namespace HostelFinder.Application.Validations.Hostel
 
             RuleFor(x => x.Coordinates)
                 .NotEmpty().WithMessage("Tọa độ không được để trống.");
-
-            RuleFor(x => x.Rating)
-                .InclusiveBetween(1, 5).WithMessage("Đánh giá phải nằm trong khoảng từ 1 đến 5.");
         }
     }
 }

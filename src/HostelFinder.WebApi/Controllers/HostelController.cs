@@ -74,6 +74,7 @@ namespace HostelFinder.WebApi.Controllers
             }
 
             var userIdClaim = User.FindFirst("UserId");
+
             if (userIdClaim == null)
             {
                 return Unauthorized("User ID claim not found in token.");

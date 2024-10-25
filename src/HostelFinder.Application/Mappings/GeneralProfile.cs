@@ -78,6 +78,7 @@ public class GeneralProfile : Profile
         // Amenities Mapping
         CreateMap<Amenity, AmenityResponse>().ReverseMap();
         CreateMap<RoomAmenities, AddRoomAmenityDto>().ReverseMap();
+        CreateMap<AddAmenityDto, Amenity>().ReverseMap();
 
         // Service Cost Mapping
         CreateMap<ServiceCost, ServiceCostResponseDto>().ReverseMap();
