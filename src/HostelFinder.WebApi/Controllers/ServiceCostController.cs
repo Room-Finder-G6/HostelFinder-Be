@@ -28,9 +28,9 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateServiceCost(Guid id, UpdateServiceCostDto dto)
+        public async Task<IActionResult> UpdateServiceCost(Guid serviceId, UpdateServiceCostDto dto)
         {
-            var result = await _serviceCostService.UpdateServiceCostAsync(id, dto);
+            var result = await _serviceCostService.UpdateServiceCostAsync(serviceId, dto);
             if (!result.Succeeded)
             {
                 return BadRequest(result.Message);
@@ -51,12 +51,6 @@ namespace HostelFinder.WebApi.Controllers
             return Ok(result.Message);
         }
 
-        [HttpGet("post/{postId}")]
-        public async Task<IActionResult> GetServiceCostByPostId(Guid postId)
-        {
-            var serviceCosts = await _serviceCostService.GetServiceCostsByPostIdAsync(postId);
-            return Ok(serviceCosts);
-        }
     }
 
 }
