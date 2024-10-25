@@ -64,7 +64,7 @@ namespace HostelFinder.Application.Services
             {
                 _mapper.Map(hostelDto, hostel);
                 hostel.LastModifiedOn = DateTime.Now;
-                hostel.LastModifiedBy = "System";
+                hostel.LastModifiedBy = userId.ToString();
                 await _hostelRepository.UpdateAsync(hostel);
 
                 var updatedHostelDto = _mapper.Map<HostelResponseDto>(hostel);

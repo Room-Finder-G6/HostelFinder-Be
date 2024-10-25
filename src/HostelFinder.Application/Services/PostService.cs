@@ -3,8 +3,6 @@ using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Room.Requests;
-using HostelFinder.Application.DTOs.RoomDetails.Response;
-using HostelFinder.Application.DTOs.ServiceCost.Responses;
 using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -55,16 +53,11 @@ public class PostService : IPostService
 
             foreach (var amenityDto in postDto.AddRoomAmenity)
             {
-                if (amenityDto.IsSelected)
+                var roomAmenity = new RoomAmenities
                 {
-                    var roomAmenity = new RoomAmenities
-                    {
-                        AmenityId = amenityDto.Id
-                    };
-
-                    // Thêm tiện nghi vào phòng
-                    await _postRepository.AddRoomAmenitiesAsync(roomAmenity);
-                }
+                    AmenityId = amenityDto.Id
+                };
+                await _postRepository.AddRoomAmenitiesAsync(roomAmenity);
             }
 
             var roomResponseDto = _mapper.Map<AddPostRequestDto>(roomDomain);
@@ -119,7 +112,7 @@ public class PostService : IPostService
 
         if (hostel == null || hostel.Landlord == null)
         {
-            return null; 
+            return null;
         }
         var landlordDto = _mapper.Map<LandlordResponseDto>(hostel.Landlord);
 
@@ -153,12 +146,12 @@ public class PostService : IPostService
 
             var postsDtos = _mapper.Map<List<ListPostResponseDto>>(posts.Data);
 
-            var pagedResponse = PaginationHelper.CreatePagedResponse(postsDtos,request.PageNumber, request.PageSize, posts.TotalRecords);
+            var pagedResponse = PaginationHelper.CreatePagedResponse(postsDtos, request.PageNumber, request.PageSize, posts.TotalRecords);
             return pagedResponse;
         }
         catch (Exception ex)
         {
-            return new PagedResponse<List<ListPostResponseDto>> { Succeeded = false, Errors = {ex.Message} };
+            return new PagedResponse<List<ListPostResponseDto>> { Succeeded = false, Errors = { ex.Message } };
         }
     }
 

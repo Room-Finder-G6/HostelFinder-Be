@@ -18,6 +18,5 @@ namespace HostelFinder.Application.DTOs.Hostel.Requests
         [Range(0, int.MaxValue)]
         public int NumberOfRooms { get; set; }
         public string? Coordinates { get; set; }
-        public float? Rating { get; set; }
     }
 }

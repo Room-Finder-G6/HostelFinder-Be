@@ -54,7 +54,6 @@ public class AmenityController : ControllerBase
         {
             return Ok(result);
         }
-
         return NotFound("Amenity not found");
     }
 }
