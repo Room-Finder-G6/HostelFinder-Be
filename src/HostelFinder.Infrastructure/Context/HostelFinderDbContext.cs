@@ -6,9 +6,7 @@ namespace HostelFinder.Infrastructure.Context;
 
 public class HostelFinderDbContext : DbContext
 {
-    public DbSet<BookingRequest> BookingRequests { get; set; }
     public DbSet<Hostel?> Hostels { get; set; }
-    public DbSet<Review> Reviews { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<RoomDetails> RoomDetails { get; set; }
     public DbSet<Amenity> Amenities { get; set; }
@@ -19,10 +17,16 @@ public class HostelFinderDbContext : DbContext
     public DbSet<ServiceCost> ServiceCosts { get; set; }
     public DbSet<BlackListToken> BlackListTokens { get; set; }
     public DbSet<Wishlist> Wishlists { get; set; }
-    public DbSet<WishlistRoom> WishlistRooms { get; set; }
+    public DbSet<WishlistPost> WishlistPosts { get; set; }
     public DbSet<Membership> Memberships { get; set; }
-    public DbSet<Membership_Services> MembershipServices { get; set; }
+    public DbSet<MembershipServices> MembershipServices { get; set; }
     public DbSet<UserMembership> UserMemberships { get; set; }
+    public DbSet<Invoice> InVoices { get; set; }
+    public DbSet<Room> Rooms { get; set; }
+    public DbSet<Address> Addresses { get; set; }
+
+
+
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -45,7 +49,20 @@ public class HostelFinderDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Hostel
+        // Configure Address entity
+        modelBuilder.Entity<Address>()
+            .HasKey(a => a.HostelId);
+        modelBuilder.Entity<Address>()
+            .HasOne(a => a.Hostel)
+            .WithOne(h => h.Address)
+            .HasForeignKey<Address>(a => a.HostelId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Amenity entity
+        modelBuilder.Entity<Amenity>()
+            .HasKey(a => a.Id);
+
+        // Configure Hostel entity
         modelBuilder.Entity<Hostel>()
             .HasOne(h => h.Landlord)
             .WithMany(u => u.Hostels)
@@ -60,203 +77,178 @@ public class HostelFinderDbContext : DbContext
 
         modelBuilder.Entity<Hostel>()
             .HasMany(h => h.Posts)
+            .WithOne(p => p.Hostel)
+            .HasForeignKey(p => p.HostelId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Hostel>()
+            .HasMany(h => h.Images)
+            .WithOne(i => i.Hostel)
+            .HasForeignKey(i => i.HostelId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Hostel>()
+            .HasMany(h => h.Rooms)
             .WithOne(r => r.Hostel)
             .HasForeignKey(r => r.HostelId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<Hostel>()
-            .HasMany(h => h.Reviews)
-            .WithOne(r => r.Hostel)
-            .HasForeignKey(r => r.HostelId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Hostel>()
-            .HasOne(h => h.Address)
-            .WithOne(h => h.Hostel)
-            .HasForeignKey<Address>(h => h.HostelId)
+        // Configure Image entity
+        modelBuilder.Entity<Image>()
+            .HasKey(i => i.Id);
+        modelBuilder.Entity<Image>()
+            .HasOne(i => i.Hostel)
+            .WithMany(h => h.Images)
+            .HasForeignKey(i => i.HostelId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // Post
-        modelBuilder.Entity<Post>(entity =>
-        {
-            entity.HasOne(r => r.Hostel)
-                .WithMany(h => h.Posts)
-                .HasForeignKey(r => r.HostelId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasMany(r => r.BookingRequests)
-                .WithOne(br => br.Post)
-                .HasForeignKey(br => br.PostId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(r => r.RoomDetails)
-                .WithOne(rd => rd.Post)
-                .HasForeignKey<RoomDetails>(rd => rd.PostId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasMany(r => r.Images)
-                .WithOne(i => i.Post)
-                .HasForeignKey(i => i.PostId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasMany(r => r.ServiceCosts)
-                .WithOne(sc => sc.Post)
-                .HasForeignKey(sc => sc.PostId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.Property(e => e.Size)
-                .HasColumnType("decimal(18,2)");
-
-            entity.Property(e => e.MonthlyRentCost)
-                .HasColumnType("decimal(18,2)");
-        });
-
-        //WishlistRoom
-        modelBuilder.Entity<WishlistRoom>()
-            .HasKey(wr => new { wr.PostId, wr.WishlistId });
-
-        modelBuilder.Entity<WishlistRoom>()
-            .HasOne(wr => wr.Post)
-            .WithMany(r => r.WishlistRooms)
-            .HasForeignKey(wr => wr.PostId);
-
-        modelBuilder.Entity<WishlistRoom>()
-            .HasOne(wr => wr.Wishlist)
-            .WithMany(w => w.WishlistRooms)
-            .HasForeignKey(wr => wr.WishlistId);
-
-        // Review
-        modelBuilder.Entity<Review>()
-            .HasOne(r => r.User)
-            .WithMany(u => u.Reviews)
-            .HasForeignKey(r => r.UserId)
+        modelBuilder.Entity<Image>()
+            .HasOne(i => i.Post)
+            .WithMany(p => p.Images)
+            .HasForeignKey(i => i.PostId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<Review>()
+        // Configure Membership entity
+        modelBuilder.Entity<Membership>()
+            .HasKey(m => m.Id);
+
+        // Configure MembershipServices entity
+        modelBuilder.Entity<MembershipServices>()
+            .HasKey(ms => ms.Id);
+        modelBuilder.Entity<MembershipServices>()
+            .HasMany(ms => ms.Posts)
+            .WithOne(p => p.MembershipServices)
+            .HasForeignKey(p => p.MembershipServiceId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure Post entity
+        modelBuilder.Entity<Post>()
+            .HasKey(p => p.Id);
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.Hostel)
+            .WithMany(h => h.Posts)
+            .HasForeignKey(p => p.HostelId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.Room)
+            .WithMany(r => r.Posts)
+            .HasForeignKey(p => p.RoomId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure Room entity
+        modelBuilder.Entity<Room>()
+            .HasKey(r => r.Id);
+        modelBuilder.Entity<Room>()
+            .HasMany(r => r.RoomAmenities)
+            .WithOne(ra => ra.Room)
+            .HasForeignKey(ra => ra.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Room>()
+            .HasMany(r => r.Posts)
+            .WithOne(p => p.Room)
+            .HasForeignKey(p => p.RoomId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Room>()
             .HasOne(r => r.Hostel)
-            .WithMany(h => h.Reviews)
+            .WithMany(h => h.Rooms)
             .HasForeignKey(r => r.HostelId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // BookingRequest
-        modelBuilder.Entity<BookingRequest>()
-            .HasKey(br => br.RequestId);
-
-        modelBuilder.Entity<BookingRequest>()
-            .HasOne(br => br.Post)
-            .WithMany(r => r.BookingRequests)
-            .HasForeignKey(br => br.PostId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<BookingRequest>()
-            .HasOne(br => br.User)
-            .WithMany(u => u.BookingRequests)
-            .HasForeignKey(br => br.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // RoomAmenities configuration
-        modelBuilder.Entity<RoomAmenities>()
-            .HasKey(ra => new { ra.PostId, ra.AmenityId });
-
-        modelBuilder.Entity<RoomAmenities>()
-            .HasOne(ra => ra.Post)
-            .WithMany(r => r.RoomAmenities)
-            .HasForeignKey(ra => ra.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Configure RoomAmenities entity
+        modelBuilder.Entity<RoomAmenities>()
+            .HasKey(ra => new { ra.RoomId, ra.AmenityId });
+        modelBuilder.Entity<RoomAmenities>()
+            .HasOne(ra => ra.Room)
+            .WithMany(r => r.RoomAmenities)
+            .HasForeignKey(ra => ra.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<RoomAmenities>()
             .HasOne(ra => ra.Amenity)
             .WithMany(a => a.RoomAmenities)
             .HasForeignKey(ra => ra.AmenityId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Service
+        // Configure RoomDetails entity
+        modelBuilder.Entity<RoomDetails>()
+            .HasKey(rd => rd.PostId);
+        modelBuilder.Entity<RoomDetails>()
+            .HasOne(rd => rd.Room)
+            .WithOne(r => r.RoomDetails)
+            .HasForeignKey<RoomDetails>(rd => rd.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Service entity
+        modelBuilder.Entity<Service>()
+            .HasKey(s => s.Id);
         modelBuilder.Entity<Service>()
             .HasOne(s => s.Hostel)
             .WithMany(h => h.Services)
             .HasForeignKey(s => s.HostelId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // User
+        // Configure ServiceCost entity
+        modelBuilder.Entity<ServiceCost>()
+            .HasKey(sc => sc.Id);
+        modelBuilder.Entity<ServiceCost>()
+            .HasOne(sc => sc.Room)
+            .WithMany(r => r.ServiceCost)
+            .HasForeignKey(sc => sc.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure User entity
         modelBuilder.Entity<User>()
             .HasKey(u => u.Id);
-
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.BookingRequests)
-            .WithOne(br => br.User)
-            .HasForeignKey(br => br.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Reviews)
-            .WithOne(r => r.User)
-            .HasForeignKey(r => r.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         modelBuilder.Entity<User>()
             .HasMany(u => u.Hostels)
             .WithOne(h => h.Landlord)
             .HasForeignKey(h => h.LandlordId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        // Image
-        modelBuilder.Entity<Image>()
-            .HasOne(i => i.Hostel)
-            .WithMany(h => h.Images)
-            .HasForeignKey(i => i.HostelId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<Image>()
-            .HasOne(i => i.Post)
-            .WithMany(r => r.Images)
-            .HasForeignKey(i => i.PostId)
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.UserMemberships)
+            .WithOne(um => um.User)
+            .HasForeignKey(um => um.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Wishlists)
+            .WithOne(w => w.User)
+            .HasForeignKey<Wishlist>(w => w.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Many-to-Many relationship between User and Membership
+        // Configure UserMembership entity
         modelBuilder.Entity<UserMembership>()
             .HasKey(um => new { um.UserId, um.MembershipId });
-
         modelBuilder.Entity<UserMembership>()
-              .HasOne(um => um.User)
-              .WithMany(u => u.UserMemberships)
-              .HasForeignKey(um => um.UserId)
-              .OnDelete(DeleteBehavior.Restrict);
-        
-
+            .HasOne(um => um.User)
+            .WithMany(u => u.UserMemberships)
+            .HasForeignKey(um => um.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<UserMembership>()
             .HasOne(um => um.Membership)
             .WithMany(m => m.UserMemberships)
             .HasForeignKey(um => um.MembershipId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
-        //Membership
-        modelBuilder.Entity<Membership>()
-               .HasMany(m => m.Membership_Services)
-               .WithOne(ms => ms.Membership)
-               .HasForeignKey(ms => ms.MembershipId)
-               .OnDelete(DeleteBehavior.Cascade);
+        // Configure Wishlist entity
+        modelBuilder.Entity<Wishlist>()
+            .HasKey(w => w.Id);
+        modelBuilder.Entity<Wishlist>()
+            .HasMany(w => w.WishlistPosts)
+            .WithOne(wp => wp.Wishlist)
+            .HasForeignKey(wp => wp.WishlistId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-
-        //Membership_Services
-        modelBuilder.Entity<Membership_Services>()
-               .HasMany(ms => ms.Posts)
-               .WithOne(p => p.Membership_Services)
-               .HasForeignKey(p => p.MembershipServiceId)
-               .OnDelete(DeleteBehavior.Restrict);
-
-        // RoomDetails
-        modelBuilder.Entity<RoomDetails>(entity =>
-        {
-            entity.Property(e => e.Size)
-                .HasColumnType("decimal(18,2)");
-        });
-
-        // ServiceCost
-        modelBuilder.Entity<ServiceCost>(entity =>
-        {
-            entity.Property(e => e.Cost)
-                .HasColumnType("decimal(18,2)");
-        });
+        // Configure WishlistPost entity
+        modelBuilder.Entity<WishlistPost>()
+            .HasKey(wp => new { wp.WishlistId, wp.PostId });
+        modelBuilder.Entity<WishlistPost>()
+            .HasOne(wp => wp.Wishlist)
+            .WithMany(w => w.WishlistPosts)
+            .HasForeignKey(wp => wp.WishlistId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<WishlistPost>()
+            .HasOne(wp => wp.Post)
+            .WithMany(p => p.WishlistPosts)
+            .HasForeignKey(wp => wp.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
 
 
     }

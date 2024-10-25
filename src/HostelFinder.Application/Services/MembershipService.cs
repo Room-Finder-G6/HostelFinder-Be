@@ -58,7 +58,7 @@ namespace HostelFinder.Application.Services
                 await _membershipRepository.AddMembershipWithServicesAsync(membership, membershipServiceRequests);
 
                 var membershipResponseDto = _mapper.Map<MembershipResponseDto>(membership);
-                membershipResponseDto.MembershipServices = _mapper.Map<List<MembershipServiceResponseDto>>(membership.Membership_Services);
+                membershipResponseDto.MembershipServices = _mapper.Map<List<MembershipServiceResponseDto>>(membership.MembershipServices);
 
                 return new Response<MembershipResponseDto>
                 {
@@ -86,7 +86,7 @@ namespace HostelFinder.Application.Services
 
             if (membershipDto.MembershipServices != null && membershipDto.MembershipServices.Any())
             {
-                var existingServices = membership.Membership_Services.ToList();
+                var existingServices = membership.MembershipServices.ToList();
 
                 foreach (var newServiceDto in membershipDto.MembershipServices)
                 {
@@ -100,7 +100,7 @@ namespace HostelFinder.Application.Services
 
                     if (existingService != null)
                     {
-                        existingService.Service_Name = newServiceDto.ServiceName;
+                        existingService.ServiceName = newServiceDto.ServiceName;
                         existingService.LastModifiedOn = DateTime.Now;
                         existingService.LastModifiedBy = "System";
 
@@ -108,14 +108,14 @@ namespace HostelFinder.Application.Services
                     }
                     else
                     {
-                        var newService = new Membership_Services
+                        var newService = new MembershipServices
                         {
-                            Service_Name = newServiceDto.ServiceName,
+                            ServiceName = newServiceDto.ServiceName,
                             Membership = membership,
                             CreatedOn = DateTime.Now,
                             CreatedBy = "System"
                         };
-                        membership.Membership_Services.Add(newService);
+                        membership.MembershipServices.Add(newService);
                         await _membershipRepository.Add(newService); 
                     }
                 }

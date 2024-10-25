@@ -38,9 +38,6 @@ public class PostService : IPostService
         }
 
         var roomDto = _mapper.Map<PostResponseDto>(room);
-        roomDto.RoomDetailsDto = _mapper.Map<RoomDetailsResponseDto>(room.RoomDetails);
-        roomDto.ServiceCostsDto = _mapper.Map<List<ServiceCostResponseDto>>(room.ServiceCosts);
-
         var response = new Response<PostResponseDto>(roomDto);
         return response;
     }
@@ -51,8 +48,6 @@ public class PostService : IPostService
         {
             var roomDomain = _mapper.Map<Post>(postDto);
 
-            roomDomain.RoomDetails = _mapper.Map<RoomDetails>(postDto.RoomDetails);
-            roomDomain.ServiceCosts = _mapper.Map<List<ServiceCost>>(postDto.ServiceCosts);
             roomDomain.CreatedOn = DateTime.Now;
             roomDomain.CreatedBy = "System";
 
@@ -64,7 +59,6 @@ public class PostService : IPostService
                 {
                     var roomAmenity = new RoomAmenities
                     {
-                        PostId = roomDomain.Id,
                         AmenityId = amenityDto.Id
                     };
 
@@ -92,15 +86,6 @@ public class PostService : IPostService
         }
 
         _mapper.Map(postDto, existingRoom);
-
-        if (existingRoom.RoomDetails == null)
-        {
-            existingRoom.RoomDetails = new RoomDetails { PostId = roomId };
-        }
-
-        _mapper.Map(postDto.UpdateRoomDetailsDto, existingRoom.RoomDetails);
-
-        _mapper.Map(postDto.AddRoomAmenityDto, existingRoom.RoomAmenities);
 
         /*if (postDto.ServiceCosts != null)
         {
@@ -150,11 +135,7 @@ public class PostService : IPostService
             throw new NullReferenceException("Hostel not found for the provided Post ID.");
         }
 
-        float averageRating = (float)(hostel.Reviews.Any() ? hostel.Reviews.Average(r => r.rating) : 0);
-
         var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
-
-        hostelResponseDto.Rating = averageRating;
 
         if (hostel.Images != null && hostel.Images.Any())
         {

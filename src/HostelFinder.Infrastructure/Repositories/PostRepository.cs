@@ -19,10 +19,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     public async Task<Post?> GetAllRoomFeaturesByRoomId(Guid roomId)
     {
         var room = await _dbContext.Posts
-            .Include(x => x.RoomDetails)
-            .Include(x => x.RoomAmenities)
-            .ThenInclude(x => x.Amenity)
-            .Include(x => x.ServiceCosts)
+            .Include(x => x.Room)
             .Include(x => x.Images)
             .FirstOrDefaultAsync(x => x.Id == roomId);
         return room;
@@ -32,16 +29,6 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
         var query = _dbContext.Posts.AsQueryable();
 
-        if (minPrice.HasValue)
-        {
-            query = query.Where(x => x.MonthlyRentCost >= minPrice.Value);
-        }
-
-        if (maxPrice.HasValue)
-        {
-            query = query.Where(x => x.MonthlyRentCost <= maxPrice.Value);
-        }
-
         if (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice)
         {
             throw new ArgumentException("Minimum price cannot be greater than maximum price");
@@ -50,11 +37,6 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         if (!string.IsNullOrEmpty(location))
         {
             query = query.Where(x => x.Hostel.Address.Province.Contains(location));
-        }
-
-        if (roomType.HasValue)
-        {
-            query = query.Where(x => x.RoomType == roomType.Value);
         }
 
         return await query.ToListAsync();
@@ -84,7 +66,6 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             {
                 {nameof(Post.Title), r => r.Title },
                 {nameof(Post.Description), r => r.Description },
-                {nameof(Post.Size), r => r.Size },
             };
 
             var selectedColumn = columnsSelector[sortBy];

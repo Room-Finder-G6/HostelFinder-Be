@@ -12,10 +12,10 @@ namespace HostelFinder.Infrastructure.Repositories
         {
         }
 
-        public async Task<bool> CheckDuplicateServiceCostAsync(Guid postId, string serviceName, Guid? excludeId = null)
+        public async Task<bool> CheckDuplicateServiceCostAsync(Guid roomId, string serviceName, Guid? excludeId = null)
         {
             var query = _dbContext.ServiceCosts.Where(sc =>
-                sc.PostId == postId &&
+                sc.RoomId == roomId &&
                 sc.ServiceName == serviceName);
 
             if (excludeId.HasValue)
@@ -28,7 +28,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<IEnumerable<ServiceCost>> GetServiceCostsByPostIdAsync(Guid postId)
         {
-            return await _dbContext.ServiceCosts.Where(sc => sc.PostId == postId).ToListAsync();
+            return await _dbContext.ServiceCosts.Where(sc => sc.RoomId == postId).ToListAsync();
         }
     }
 }
