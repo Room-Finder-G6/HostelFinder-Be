@@ -21,16 +21,10 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<ServiceCostResponseDto>> AddServiceCostAsync(AddServiceCostDto dto)
         {
-            var isDuplicate = await _serviceCostRepository.CheckDuplicateServiceCostAsync(dto.PostId, dto.ServiceName);
-            if (isDuplicate)
-            {
-                return new Response<ServiceCostResponseDto>("Chi phí dịch vụ này đã tồn tại trong bài đăng này!");
-            }
 
             var serviceCost = _mapper.Map<ServiceCost>(dto);
             serviceCost.CreatedOn = DateTime.Now;
             serviceCost.CreatedBy = "System";
-
             try
             {
                 await _serviceCostRepository.AddAsync(serviceCost);
@@ -49,12 +43,6 @@ namespace HostelFinder.Application.Services
             if (existingServiceCost == null)
             {
                 return new Response<ServiceCostResponseDto>("Không tìm thấy chi phí dịch vụ cần cập nhật!");
-            }
-
-            var isDuplicate = await _serviceCostRepository.CheckDuplicateServiceCostAsync(dto.PostId, dto.ServiceName, id);
-            if (isDuplicate)
-            {
-                return new Response<ServiceCostResponseDto>("Đã tồn tại một chi phí dịch vụ này trong bài đăng!");
             }
 
             try
@@ -92,10 +80,5 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<IEnumerable<ServiceCostResponseDto>> GetServiceCostsByPostIdAsync(Guid postId)
-        {
-            var serviceCosts = await _serviceCostRepository.GetServiceCostsByPostIdAsync(postId);
-            return _mapper.Map<IEnumerable<ServiceCostResponseDto>>(serviceCosts);
-        }
     }
 }
