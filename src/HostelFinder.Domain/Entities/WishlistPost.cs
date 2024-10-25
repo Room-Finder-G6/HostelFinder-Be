@@ -1,7 +1,7 @@
 ﻿
 namespace HostelFinder.Domain.Entities
 {
-    public class WishlistRoom
+    public class WishlistPost
     {
         public Guid WishlistId { get; set; }
         public Wishlist Wishlist { get; set; }

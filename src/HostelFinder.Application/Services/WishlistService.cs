@@ -35,12 +35,12 @@ namespace HostelFinder.Application.Services
                 wishlist = new Wishlist
                 {
                     UserId = request.UserId,
-                    WishlistRooms = new List<WishlistRoom>()
+                    WishlistPosts = new List<WishlistPost>()
                 };
                 await _wishlistRepository.AddAsync(wishlist);
             }
 
-            var wishlistRoom = new WishlistRoom
+            var wishlistRoom = new WishlistPost
             {
                 WishlistId = wishlist.Id,
                 PostId = request.PostId
@@ -64,7 +64,7 @@ namespace HostelFinder.Application.Services
             var response = new WishlistResponseDto
             {
                 WishlistId = wishlist.Id,
-                Posts = wishlist.WishlistRooms.Select(wr => new PostResponseDto
+                Posts = wishlist.WishlistPosts.Select(wr => new PostResponseDto
                 {
                     Id = wr.Post.Id,
                     Title = wr.Post.Title,

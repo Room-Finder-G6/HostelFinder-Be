@@ -46,8 +46,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
         {
             var columnsSelector = new Dictionary<string, Expression<Func<Hostel, object>>>
             {
-                { nameof(Hostel.HostelName), x => x.HostelName },
-                { nameof(Hostel.Rating), x => x.Rating }
+                { nameof(Hostel.HostelName), x => x.HostelName }
             };
 
             var selectedColumn = columnsSelector[sortBy];
@@ -75,7 +74,6 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     {
         var post = await _dbContext.Posts
             .Include(p => p.Hostel)
-            .ThenInclude(h => h.Reviews)
             .FirstOrDefaultAsync(p => p.Id == postId);
 
         return post?.Hostel;

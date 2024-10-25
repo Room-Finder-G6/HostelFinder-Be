@@ -6,20 +6,17 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.Application.Services
 {
     public class HostelService : IHostelService
     {
         private readonly IHostelRepository _hostelRepository;
-        private readonly IReviewRepository _reviewRepository;
         private readonly IMapper _mapper;
 
-        public HostelService(IHostelRepository hostelRepository, IReviewRepository reviewRepository, IMapper mapper)
+        public HostelService(IHostelRepository hostelRepository , IMapper mapper)
         {
             _hostelRepository = hostelRepository;
-            _reviewRepository = reviewRepository;
             _mapper = mapper;
         }
 
@@ -120,9 +117,6 @@ namespace HostelFinder.Application.Services
             }
 
             var hostelDto = _mapper.Map<HostelResponseDto>(hostel);
-
-            var averageRating = await _reviewRepository.GetAverageRatingForHostelAsync(hostelId);
-            hostelDto.Rating = averageRating;
 
             return new Response<HostelResponseDto>(hostelDto);
         }

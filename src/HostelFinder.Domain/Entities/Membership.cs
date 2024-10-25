@@ -7,7 +7,7 @@ namespace HostelFinder.Domain.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public int Duration { get; set; }
-        public virtual ICollection<Membership_Services> Membership_Services { get; set; }
+        public virtual ICollection<MembershipServices> MembershipServices { get; set; }
         public virtual ICollection<UserMembership> UserMemberships { get; set; }
     }
 }

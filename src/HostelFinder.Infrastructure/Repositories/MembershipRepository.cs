@@ -18,15 +18,15 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<IEnumerable<Membership>> GetAllMembershipWithMembershipService()
         {
             return await _dbContext.Memberships.
-                    Include(mb => mb.Membership_Services).ToListAsync();
+                    Include(mb => mb.MembershipServices).ToListAsync();
         }
 
         public async Task AddMembershipWithServicesAsync(Membership membership, List<AddMembershipServiceReqDto> membershipServices)
         {
-            membership.Membership_Services = membershipServices
-                .Select(ms => new Membership_Services
+            membership.MembershipServices = membershipServices
+                .Select(ms => new MembershipServices
                 {
-                    Service_Name = ms.ServiceName,
+                    ServiceName = ms.ServiceName,
                     Membership = membership,
                     CreatedOn = DateTime.Now,
                     CreatedBy = "System"
@@ -45,14 +45,14 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<Membership> GetMembershipWithServicesAsync(Guid id)
         {
             var membership = await _dbContext.Memberships
-                .Include(m => m.Membership_Services) 
+                .Include(m => m.MembershipServices) 
                 .FirstOrDefaultAsync(m => m.Id == id);
             return membership;
         }
 
-        public void Update(Membership_Services entity)
+        public void Update(MembershipServices entity)
         {
-            _dbContext.Set<Membership_Services>().Update(entity);
+            _dbContext.Set<MembershipServices>().Update(entity);
         }
 
         public async Task UpdateAsync(Membership entity)
@@ -60,13 +60,13 @@ namespace HostelFinder.Infrastructure.Repositories
             _dbContext.Set<Membership>().Update(entity);
             await _dbContext.SaveChangesAsync();
         }
-        public async Task Add(Membership_Services entity)
+        public async Task Add(MembershipServices entity)
         {
-            await _dbContext.Set<Membership_Services>().AddAsync(entity);
+            await _dbContext.Set<MembershipServices>().AddAsync(entity);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<Membership_Services>> GetMembershipServicesByMembershipIdAsync(Guid membershipId)
+        public async Task<List<MembershipServices>> GetMembershipServicesByMembershipIdAsync(Guid membershipId)
         {
             return await _dbContext.MembershipServices
                 .Where(ms => ms.MembershipId == membershipId)

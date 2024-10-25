@@ -6,7 +6,7 @@ namespace HostelFinder.Application.Interfaces.IRepositories
     public interface IWishlistRepository : IBaseGenericRepository<Wishlist>
     {
         Task<Wishlist> GetWishlistByUserIdAsync(Guid userId);
-        Task AddRoomToWishlistAsync(WishlistRoom wishlistRoom);
-        Task RemoveRoomFromWishlistAsync(WishlistRoom wishlistRoom);
+        Task AddRoomToWishlistAsync(WishlistPost wishlistRoom);
+        Task RemoveRoomFromWishlistAsync(WishlistPost wishlistRoom);
     }
 }

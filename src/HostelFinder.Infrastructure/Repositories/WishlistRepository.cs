@@ -15,20 +15,20 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<Wishlist> GetWishlistByUserIdAsync(Guid userId)
         {
             return await _dbContext.Wishlists
-                .Include(w => w.WishlistRooms)
+                .Include(w => w.WishlistPosts)
                 .ThenInclude(wr => wr.Post)
                 .FirstOrDefaultAsync(w => w.UserId == userId);
         }
 
-        public async Task AddRoomToWishlistAsync(WishlistRoom wishlistRoom)
+        public async Task AddRoomToWishlistAsync(WishlistPost wishlistRoom)
         {
-            await _dbContext.WishlistRooms.AddAsync(wishlistRoom);
+            await _dbContext.WishlistPosts.AddAsync(wishlistRoom);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task RemoveRoomFromWishlistAsync(WishlistRoom wishlistRoom)
+        public async Task RemoveRoomFromWishlistAsync(WishlistPost wishlistRoom)
         {
-            _dbContext.Set<WishlistRoom>().Remove(wishlistRoom);
+            _dbContext.Set<WishlistPost>().Remove(wishlistRoom);
             await _dbContext.SaveChangesAsync();
         }
     }
