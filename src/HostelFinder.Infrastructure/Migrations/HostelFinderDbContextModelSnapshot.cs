@@ -380,7 +380,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<Guid>("HostelId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsAvailable")
+                    b.Property<bool>("Status")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")

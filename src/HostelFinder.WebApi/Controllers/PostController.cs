@@ -1,5 +1,4 @@
 using HostelFinder.Application.DTOs.Post.Requests;
-using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,19 +17,6 @@ public class PostController : ControllerBase
         _s3Service = s3Service;
     }
 
-    [HttpGet]
-    [Route("{postId}")]
-    public async Task<IActionResult> GetAllPostFeaturesByPostId(Guid roomId)
-    {
-        var result = await _postService.GetAllRoomFeaturesByIdAsync(roomId);
-        if (result.Succeeded)
-        {
-            return Ok(result);
-        }
-
-        return NotFound();
-    }
-
     [HttpPost]
     public async Task<IActionResult> AddPost([FromBody] AddPostRequestDto postDto)
     {
@@ -39,14 +25,11 @@ public class PostController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var result = await _postService.AddRoomAsync(postDto);
-        if (result.Succeeded)
-        {
-            return Ok(result);
-        }
-
-        return BadRequest(result.Errors);
+        var result = await _postService.AddPostAsync(postDto);
+        return Ok(result);
     }
+    
+    /*
 
     [HttpPut]
     [Route("{postId}")]
@@ -140,6 +123,6 @@ public class PostController : ControllerBase
         }
 
         return NotFound(result.Errors);
-    }
+    }*/
 
 }

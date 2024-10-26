@@ -25,7 +25,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         return room;
     }
 
-    public async Task<IEnumerable<Post>> GetFilteredRooms(decimal? minPrice, decimal? maxPrice, string? location, RoomType? roomType)
+    public async Task<IEnumerable<Post>> GetFilteredPosts(decimal? minPrice, decimal? maxPrice, string? location, RoomType? roomType)
     {
         var query = _dbContext.Posts.AsQueryable();
 
@@ -41,13 +41,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
         return await query.ToListAsync();
     }
-
-    public async Task<RoomAmenities> AddRoomAmenitiesAsync(RoomAmenities roomAmenity)
-    {
-        await _dbContext.RoomAmenities.AddAsync(roomAmenity);
-        await _dbContext.SaveChangesAsync();
-        return roomAmenity;
-    }
+    
 
     public async Task<(IEnumerable<Post> Data, int TotalRecords)> GetAllMatchingAsync(string? searchPhrase, int pageSize, int pageNumber, string? sortBy, SortDirection sortDirection)
     {
