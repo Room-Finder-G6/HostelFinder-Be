@@ -34,8 +34,6 @@ public class GeneralProfile : Profile
     {
         // Post Mapping
         CreateMap<AddPostRequestDto, Post>()
-            .ForMember(dest => dest.Images, opt => opt.MapFrom(src =>
-                src.ImageUrls.Select(url => new Image { Url = url })))
             .ReverseMap();
 
         // Hostel Mapping

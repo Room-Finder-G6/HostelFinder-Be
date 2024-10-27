@@ -1,6 +1,4 @@
-﻿using HostelFinder.Application.DTOs.Amenity.Request;
-using HostelFinder.Application.DTOs.RoomDetails.Request;
-using HostelFinder.Application.DTOs.ServiceCost.Request;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace HostelFinder.Application.DTOs.Post.Requests;
@@ -18,9 +16,6 @@ public class AddPostRequestDto
     public bool Status { get; set; } = true;
     [Required]
     public DateTime DateAvailable { get; set; }
-    public List<AddRoomAmenityDto> AddRoomAmenity { get; set; }
-    public AddRoomDetailsDto RoomDetails { get; set; }
-    public List<AddServiceCostDto> ServiceCosts { get; set; } 
     public Guid MembershipServiceId { get; set; }
-    public List<string> ImageUrls { get; set; } = new();
+    public List<IFormFile> Image { get; set; } = new();
 }
