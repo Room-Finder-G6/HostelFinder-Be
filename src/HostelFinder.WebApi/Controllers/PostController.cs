@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]/")]
+[Route("api/posts/")]
 public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
@@ -32,7 +32,7 @@ public class PostController : ControllerBase
     }*/
 
     [HttpPost]
-    public async Task<IActionResult> AddPost([FromForm] AddPostRequestDto postDto)
+    public async Task<IActionResult> AddPost([FromForm] AddPostRequestDto postDto, [FromForm] List<IFormFile> images)
     {
         if (!ModelState.IsValid)
         {
@@ -43,9 +43,9 @@ public class PostController : ControllerBase
 
         var imageUrls = new List<String>();
 
-        if (postDto.Image != null && postDto.Image.Count > 0)
+        if (images != null && images.Count > 0)
         {
-            foreach (var image in postDto.Image)
+            foreach (var image in images)
             {
                 var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
                 var imageUrl = uploadToAWS3;
