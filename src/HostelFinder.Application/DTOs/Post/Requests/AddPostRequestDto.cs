@@ -24,5 +24,5 @@ public class AddPostRequestDto
     public DateTime DateAvailable { get; set; }
     public List<AddRoomAmenityDto> AddRoomAmenity { get; set; }
     public AddRoomDetailsDto RoomDetails { get; set; }
-    public ICollection<AddServiceCostDto> ServiceCosts { get; set; } = new List<AddServiceCostDto>();
+    public List<AddServiceCostDto> ServiceCosts { get; set; } 
 }
