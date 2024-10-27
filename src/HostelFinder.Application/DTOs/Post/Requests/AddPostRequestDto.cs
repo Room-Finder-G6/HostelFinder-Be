@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HostelFinder.Application.DTOs.Amenity.Request;
+using HostelFinder.Application.DTOs.RoomDetails.Request;
+using HostelFinder.Application.DTOs.ServiceCost.Request;
+using System.ComponentModel.DataAnnotations;
 
 namespace HostelFinder.Application.DTOs.Post.Requests;
 
