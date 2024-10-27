@@ -34,5 +34,6 @@ public class ServiceRegistration
         service.AddScoped<IS3Service, S3Service>();
         service.AddScoped<IInVoiceRepository, InVoiceRepository>();
         service.AddScoped<IServiceCostRepository, ServiceCostRepository>();
+        service.AddScoped<IRoomRepository, RoomRepository>();
     }
 }

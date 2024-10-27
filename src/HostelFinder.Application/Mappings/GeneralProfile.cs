@@ -23,6 +23,7 @@ using HostelFinder.Application.Wrappers;
 using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.DTOs.InVoice.Requests;
+using HostelFinder.Application.DTOs.Room.Responses;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -126,5 +127,10 @@ public class GeneralProfile : Profile
         CreateMap<Invoice, InvoiceResponseDto>().ReverseMap();
         CreateMap<UpdateInvoiceRequestDto, Invoice>().ReverseMap();
         CreateMap<AddInVoiceRequestDto, Invoice>().ReverseMap();
+
+        //Room
+        CreateMap<Room, RoomResponseDto>().ReverseMap();
+        CreateMap<UpdateRoomRequestDto, Room>().ReverseMap();
+        CreateMap<AddRoomRequestDto, Room>().ReverseMap();
     }
 }
