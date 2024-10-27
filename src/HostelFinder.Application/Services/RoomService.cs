@@ -38,6 +38,11 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<RoomResponseDto>> CreateAsync(AddRoomRequestDto roomDto)
         {
+            bool roomExists = await _roomRepository.RoomExistsAsync(roomDto.RoomName, roomDto.HostelId);
+            if (roomExists)
+            {
+                return new Response<RoomResponseDto>("A room with the same name already exists in this hostel.");
+            }
             var room = _mapper.Map<Room>(roomDto);
             room = await _roomRepository.AddAsync(room);
 
