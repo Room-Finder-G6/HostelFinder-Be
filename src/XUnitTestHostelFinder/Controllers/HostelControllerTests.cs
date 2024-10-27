@@ -5,8 +5,10 @@ using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.WebApi.Controllers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 
 namespace XUnitTestHostelFinder.Controllers
 {
@@ -41,7 +43,7 @@ namespace XUnitTestHostelFinder.Controllers
                         DetailAddress = "123 Test Street"
                     },
                     NumberOfRooms = 10,
-                    Image = new List<ImageResponseDto> 
+                    Image = new List<ImageResponseDto>
                     {
                         new ImageResponseDto
                         {
@@ -211,7 +213,7 @@ namespace XUnitTestHostelFinder.Controllers
             var hostelDto = new AddHostelRequestDto
             {
                 HostelName = "New Hostel",
-                LandlordId = Guid.NewGuid(), 
+                LandlordId = Guid.NewGuid(),
                 Description = "A description of the hostel.",
                 Address = new AddressDto
                 {
@@ -252,6 +254,8 @@ namespace XUnitTestHostelFinder.Controllers
         {
             // Arrange
             var hostelId = Guid.NewGuid();
+            var userId = Guid.NewGuid(); // Mock user ID
+
             var hostelDto = new UpdateHostelRequestDto
             {
                 HostelName = "Updated Hostel",
@@ -282,9 +286,16 @@ namespace XUnitTestHostelFinder.Controllers
                 Succeeded = true
             };
 
-            //_hostelServiceMock
-            //    .Setup(service => service.UpdateHostelAsync(hostelId, hostelDto))
-            //    .ReturnsAsync(mockResponse);
+            _hostelServiceMock
+                .Setup(service => service.UpdateHostelAsync(hostelId, userId, hostelDto))
+                .ReturnsAsync(mockResponse);
+
+            // Simulate User ID claim
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+            _controller.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("UserId", userId.ToString()) }));
 
             // Act
             var result = await _controller.UpdateHostel(hostelId, hostelDto);
@@ -300,11 +311,14 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
 
+
         [Fact]
         public async Task UpdateHostel_ReturnsNotFound_WhenUpdateFails()
         {
             // Arrange
             var hostelId = Guid.NewGuid();
+            var userId = Guid.NewGuid(); // Mock user ID
+
             var hostelDto = new UpdateHostelRequestDto
             {
                 HostelName = "Updated Hostel",
@@ -328,18 +342,32 @@ namespace XUnitTestHostelFinder.Controllers
                 Errors = new List<string> { "Hostel not found" }
             };
 
-            //_hostelServiceMock
-            //    .Setup(service => service.UpdateHostelAsync(hostelDto))
-            //    .ReturnsAsync(mockResponse);
+            _hostelServiceMock
+                .Setup(service => service.UpdateHostelAsync(hostelId, userId, hostelDto))
+                .ReturnsAsync(mockResponse);
+
+            // Simulate User ID claim
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+            _controller.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+        new Claim("UserId", userId.ToString())
+    }));
 
             // Act
             var result = await _controller.UpdateHostel(hostelId, hostelDto);
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var returnValue = Assert.IsType<List<string>>(notFoundResult.Value); // Adjusted type
-            Assert.Contains("Hostel not found", returnValue);
+            var returnValue = Assert.IsAssignableFrom<IDictionary<string, object>>(notFoundResult.Value);
+
+            Assert.Equal("Hostel not found or update failed.", returnValue["message"]);
+            Assert.Contains("Hostel not found", (List<string>)returnValue["errors"]);
         }
+
+
 
 
         [Fact]
