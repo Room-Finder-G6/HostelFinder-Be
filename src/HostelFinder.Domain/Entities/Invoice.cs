@@ -7,7 +7,7 @@ namespace HostelFinder.Domain.Entities
         public Guid ServiceCostId { get; set; }
         public decimal TotalAmount { get; set; }
         public bool Status { get; set; }
-        public DateOnly DueDate {  get; set; }
+        public DateTime DueDate {  get; set; }
         public virtual ICollection<ServiceCost> ServiceCost { get; set; }
     }
 }

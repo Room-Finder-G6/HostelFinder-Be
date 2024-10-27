@@ -19,65 +19,53 @@ namespace HostelFinder.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<Response<ServiceCostResponseDto>> AddServiceCostAsync(AddServiceCostDto dto)
+        public async Task<Response<List<ServiceCostResponseDto>>> GetAllAsync()
         {
-
-            var serviceCost = _mapper.Map<ServiceCost>(dto);
-            serviceCost.CreatedOn = DateTime.Now;
-            serviceCost.CreatedBy = "System";
-            try
-            {
-                await _serviceCostRepository.AddAsync(serviceCost);
-                var serviceCostResponse = _mapper.Map<ServiceCostResponseDto>(serviceCost);
-                return new Response<ServiceCostResponseDto>(serviceCostResponse, "Chi phí dịch vụ tạo thành công!");
-            }
-            catch (Exception ex)
-            {
-                return new Response<ServiceCostResponseDto>(message: ex.Message);
-            }
+            var serviceCosts = await _serviceCostRepository.ListAllAsync();
+            var result = _mapper.Map<List<ServiceCostResponseDto>>(serviceCosts);
+            return new Response<List<ServiceCostResponseDto>>(result);
         }
 
-        public async Task<Response<ServiceCostResponseDto>> UpdateServiceCostAsync(Guid id, UpdateServiceCostDto dto)
-        {
-            var existingServiceCost = await _serviceCostRepository.GetByIdAsync(id);
-            if (existingServiceCost == null)
-            {
-                return new Response<ServiceCostResponseDto>("Không tìm thấy chi phí dịch vụ cần cập nhật!");
-            }
-
-            try
-            {
-                _mapper.Map(dto, existingServiceCost);
-                existingServiceCost.LastModifiedOn = DateTime.Now;
-                existingServiceCost.LastModifiedBy = "System";
-
-                await _serviceCostRepository.UpdateAsync(existingServiceCost);
-                var updatedServiceCostDto = _mapper.Map<ServiceCostResponseDto>(existingServiceCost);
-                return new Response<ServiceCostResponseDto>(updatedServiceCostDto, "Chi phí dịch vụ cập nhật thành công!");
-            }
-            catch (Exception ex)
-            {
-                return new Response<ServiceCostResponseDto>(message: ex.Message);
-            }
-        }
-
-        public async Task<Response<bool>> DeleteServiceCostAsync(Guid id)
+        public async Task<Response<ServiceCostResponseDto>> GetByIdAsync(Guid id)
         {
             var serviceCost = await _serviceCostRepository.GetByIdAsync(id);
             if (serviceCost == null)
-            {
-                return new Response<bool>(false, "Không tìm thấy chi phí dịch vụ cần xóa!");
-            }
+                return new Response<ServiceCostResponseDto>("Service cost not found.");
 
-            try
-            {
-                await _serviceCostRepository.DeletePermanentAsync(serviceCost.Id);
-                return new Response<bool>(true, "Chi phí dịch vụ xóa thành công!");
-            }
-            catch (Exception ex)
-            {
-                return new Response<bool>(false, message: ex.Message);
-            }
+            var result = _mapper.Map<ServiceCostResponseDto>(serviceCost);
+            return new Response<ServiceCostResponseDto>(result);
+        }
+
+        public async Task<Response<ServiceCostResponseDto>> CreateAsync(AddServiceCostDto serviceCostDto)
+        {
+            var serviceCost = _mapper.Map<ServiceCost>(serviceCostDto);
+            serviceCost = await _serviceCostRepository.AddAsync(serviceCost);
+
+            var result = _mapper.Map<ServiceCostResponseDto>(serviceCost);
+            return new Response<ServiceCostResponseDto>(result, "Service cost created successfully.");
+        }
+
+        public async Task<Response<ServiceCostResponseDto>> UpdateAsync(Guid id, UpdateServiceCostDto serviceCostDto)
+        {
+            var serviceCost = await _serviceCostRepository.GetByIdAsync(id);
+            if (serviceCost == null)
+                return new Response<ServiceCostResponseDto>("Service cost not found.");
+
+            _mapper.Map(serviceCostDto, serviceCost);
+            serviceCost = await _serviceCostRepository.UpdateAsync(serviceCost);
+
+            var result = _mapper.Map<ServiceCostResponseDto>(serviceCost);
+            return new Response<ServiceCostResponseDto>(result, "Service cost updated successfully.");
+        }
+
+        public async Task<Response<bool>> DeleteAsync(Guid id)
+        {
+            var serviceCost = await _serviceCostRepository.GetByIdAsync(id);
+            if (serviceCost == null)
+                return new Response<bool>("Service cost not found.");
+
+            await _serviceCostRepository.DeletePermanentAsync(id);
+            return new Response<bool>(true, "Service cost deleted successfully.");
         }
 
     }

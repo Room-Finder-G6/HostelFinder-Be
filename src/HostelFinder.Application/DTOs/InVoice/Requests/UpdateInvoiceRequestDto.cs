@@ -1,6 +1,6 @@
 ﻿namespace HostelFinder.Application.DTOs.InVoice.Requests
 {
-    public class AddInVoiceRequestDto
+    public class UpdateInvoiceRequestDto
     {
         public decimal TotalAmount { get; set; }
         public bool Status { get; set; }

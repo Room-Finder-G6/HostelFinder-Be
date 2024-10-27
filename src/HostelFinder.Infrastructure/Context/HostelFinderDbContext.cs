@@ -193,6 +193,12 @@ public class HostelFinderDbContext : DbContext
             .WithMany(r => r.ServiceCost)
             .HasForeignKey(sc => sc.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ServiceCost>()
+            .HasOne(sc => sc.Invoice)
+            .WithMany(i => i.ServiceCost)
+            .HasForeignKey(sc => sc.InVoiceId)
+            .OnDelete(DeleteBehavior.Restrict); // or Cascade if deletion should propagate
+
 
         // Configure User entity
         modelBuilder.Entity<User>()

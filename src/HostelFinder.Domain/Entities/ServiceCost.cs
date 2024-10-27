@@ -9,6 +9,7 @@ public class ServiceCost : BaseEntity
     [ForeignKey("Room")] 
     [Required] 
     public Guid RoomId { get; set; }
+    public Guid InVoiceId { get; set; }
     [Required] 
     public string ServiceName { get; set; }
     public decimal unitCost { get; set; }

@@ -32,5 +32,7 @@ public class ServiceRegistration
         service.AddScoped<IHostelSeeder, HostelSeeder>();
         service.AddScoped<IMembershipRepository, MembershipRepository>();
         service.AddScoped<IS3Service, S3Service>();
+        service.AddScoped<IInVoiceRepository, InVoiceRepository>();
+        service.AddScoped<IServiceCostRepository, ServiceCostRepository>();
     }
 }
