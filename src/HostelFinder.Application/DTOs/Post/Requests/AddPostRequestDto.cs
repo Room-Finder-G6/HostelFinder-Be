@@ -15,7 +15,9 @@ public class AddPostRequestDto
     public bool Status { get; set; } = true;
     [Required]
     public DateTime DateAvailable { get; set; }
+    public List<AddRoomAmenityDto> AddRoomAmenity { get; set; }
+    public AddRoomDetailsDto RoomDetails { get; set; }
+    public List<AddServiceCostDto> ServiceCosts { get; set; } 
     public Guid MembershipServiceId { get; set; }
-    // Để tạm thời, sau này sẽ là kiểu FormFile
     public List<string> ImageUrls { get; set; } = new();
 }

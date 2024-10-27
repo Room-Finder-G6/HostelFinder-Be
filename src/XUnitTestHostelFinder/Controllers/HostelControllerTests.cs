@@ -5,10 +5,8 @@ using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.WebApi.Controllers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Security.Claims;
 
 namespace XUnitTestHostelFinder.Controllers
 {
@@ -249,14 +247,13 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Contains("Add failed", returnValue.Errors);
         }
 
-        /*[Fact]
+        [Fact]
         public async Task UpdateHostel_ReturnsOkResult_WhenUpdateSucceeds()
         {
             // Arrange
             var hostelId = Guid.NewGuid();
             var hostelDto = new UpdateHostelRequestDto
             {
-                Id = hostelId, // Ensure the ID matches
                 HostelName = "Updated Hostel",
                 Description = "A cozy hostel in the city center",
                 Address = new AddressDto
@@ -269,7 +266,6 @@ namespace XUnitTestHostelFinder.Controllers
                 Size = 150.5f,
                 NumberOfRooms = 10,
                 Coordinates = "21.0285, 105.8542",
-                Rating = 4.5f
             };
 
             var mockResponse = new Response<HostelResponseDto>
@@ -282,14 +278,13 @@ namespace XUnitTestHostelFinder.Controllers
                     Address = hostelDto.Address,
                     NumberOfRooms = hostelDto.NumberOfRooms,
                     Coordinates = hostelDto.Coordinates,
-                    Rating = hostelDto.Rating
                 },
                 Succeeded = true
             };
 
-            _hostelServiceMock
-                .Setup(service => service.UpdateHostelAsync(hostelDto))
-                .ReturnsAsync(mockResponse);
+            //_hostelServiceMock
+            //    .Setup(service => service.UpdateHostelAsync(hostelId, hostelDto))
+            //    .ReturnsAsync(mockResponse);
 
             // Act
             var result = await _controller.UpdateHostel(hostelId, hostelDto);
@@ -302,18 +297,16 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Equal("A cozy hostel in the city center", returnValue.Data.Description);
             Assert.Equal(10, returnValue.Data.NumberOfRooms);
             Assert.Equal("21.0285, 105.8542", returnValue.Data.Coordinates);
-            Assert.Equal(4.5f, returnValue.Data.Rating);
-        }*/
+        }
 
 
-        /*[Fact]
+        [Fact]
         public async Task UpdateHostel_ReturnsNotFound_WhenUpdateFails()
         {
             // Arrange
             var hostelId = Guid.NewGuid();
             var hostelDto = new UpdateHostelRequestDto
             {
-                Id = hostelId, // Ensure this matches the hostelId parameter
                 HostelName = "Updated Hostel",
                 Description = "A cozy hostel in the city center",
                 Address = new AddressDto
@@ -326,7 +319,6 @@ namespace XUnitTestHostelFinder.Controllers
                 Size = 150.5f,
                 NumberOfRooms = 10,
                 Coordinates = "21.0285, 105.8542",
-                Rating = 4.5f
             };
 
             var mockResponse = new Response<HostelResponseDto>
@@ -336,9 +328,9 @@ namespace XUnitTestHostelFinder.Controllers
                 Errors = new List<string> { "Hostel not found" }
             };
 
-            _hostelServiceMock
-                .Setup(service => service.UpdateHostelAsync(hostelDto))
-                .ReturnsAsync(mockResponse);
+            //_hostelServiceMock
+            //    .Setup(service => service.UpdateHostelAsync(hostelDto))
+            //    .ReturnsAsync(mockResponse);
 
             // Act
             var result = await _controller.UpdateHostel(hostelId, hostelDto);
@@ -347,7 +339,7 @@ namespace XUnitTestHostelFinder.Controllers
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             var returnValue = Assert.IsType<List<string>>(notFoundResult.Value); // Adjusted type
             Assert.Contains("Hostel not found", returnValue);
-        }*/
+        }
 
 
         [Fact]
@@ -506,6 +498,8 @@ namespace XUnitTestHostelFinder.Controllers
             {
                 Data = new List<ListHostelResponseDto>
         {
+            new ListHostelResponseDto { HostelName = "Hostel A"},
+            new ListHostelResponseDto { HostelName = "Hostel B"}
         },
                 Succeeded = true
             };
