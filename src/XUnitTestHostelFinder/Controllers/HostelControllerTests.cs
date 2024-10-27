@@ -43,7 +43,6 @@ namespace XUnitTestHostelFinder.Controllers
                         DetailAddress = "123 Test Street"
                     },
                     NumberOfRooms = 10,
-                    Rating = 4.5f,
                     Image = new List<ImageResponseDto> 
                     {
                         new ImageResponseDto
@@ -176,7 +175,6 @@ namespace XUnitTestHostelFinder.Controllers
                 Size = 100.0f,
                 NumberOfRooms = 10,
                 Coordinates = "Some Coordinates",
-                Rating = 4.5f
             };
 
             var mockHostelResponse = new HostelResponseDto
@@ -227,7 +225,6 @@ namespace XUnitTestHostelFinder.Controllers
                 Size = 100.0f,
                 NumberOfRooms = 10,
                 Coordinates = "Some Coordinates",
-                Rating = 4.5f
             };
 
             var mockResponse = new Response<HostelResponseDto>
@@ -509,8 +506,6 @@ namespace XUnitTestHostelFinder.Controllers
             {
                 Data = new List<ListHostelResponseDto>
         {
-            new ListHostelResponseDto { HostelName = "Hostel A", Rating = 4.5f },
-            new ListHostelResponseDto { HostelName = "Hostel B", Rating = 4.0f }
         },
                 Succeeded = true
             };

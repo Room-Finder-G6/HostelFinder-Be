@@ -18,7 +18,7 @@ public class PostController : ControllerBase
         _s3Service = s3Service;
     }
 
-    [HttpGet]
+    /*[HttpGet]
     [Route("{postId}")]
     public async Task<IActionResult> GetAllPostFeaturesByPostId(Guid roomId)
     {
@@ -29,7 +29,7 @@ public class PostController : ControllerBase
         }
 
         return NotFound();
-    }
+    }*/
 
     [HttpPost]
     public async Task<IActionResult> AddPost([FromBody] AddPostRequestDto postDto)
@@ -39,7 +39,7 @@ public class PostController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var result = await _postService.AddRoomAsync(postDto);
+        var result = await _postService.AddPostAsync(postDto);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -48,7 +48,7 @@ public class PostController : ControllerBase
         return BadRequest(result.Errors);
     }
 
-    [HttpPut]
+    /*[HttpPut]
     [Route("{postId}")]
     public async Task<IActionResult> UpdatePost([FromBody] UpdatePostRequestDto postDto, Guid roomId)
     {
@@ -64,9 +64,9 @@ public class PostController : ControllerBase
         }
 
         return BadRequest(result.Errors);
-    }
+    }*/
 
-    [HttpDelete]
+    /*[HttpDelete]
     [Route("{postId}")]
     public async Task<IActionResult> DeletePost(Guid roomId)
     {
@@ -77,9 +77,9 @@ public class PostController : ControllerBase
         }
 
         return NotFound();
-    }
+    }*/
 
-    [HttpGet("{postId}/landlord")]
+    /*[HttpGet("{postId}/landlord")]
     public async Task<IActionResult> GetLandlordByPostId(Guid postId)
     {
         var landlord = await _postService.GetLandlordByPostIdAsync(postId);
@@ -90,9 +90,9 @@ public class PostController : ControllerBase
         }
 
         return Ok(landlord);
-    }
+    }*/
 
-    [HttpGet("{postId}/hostel")]
+    /*[HttpGet("{postId}/hostel")]
     public async Task<IActionResult> GetHostelByPostId(Guid postId)
     {
         var hostel = await _postService.GetHostelByPostIdAsync(postId);
@@ -103,9 +103,9 @@ public class PostController : ControllerBase
         }
 
         return Ok(hostel);
-    }
+    }*/
     
-    [HttpPost("get-all")]
+    /*[HttpPost("get-all")]
     public async Task<IActionResult> Get(GetAllPostsQuery request)
     {
         var response = await _postService.GetAllPostAysnc(request);
@@ -114,7 +114,7 @@ public class PostController : ControllerBase
             return BadRequest(response);
         }
         return Ok(response);
-    }
+    }*/
     
     [HttpPost("test-upload-file")]
     public async Task<IActionResult> TestUploadFile(IFormFile file)
@@ -130,7 +130,7 @@ public class PostController : ControllerBase
         }
     }
 
-    [HttpGet("user/{userId}")]
+    /*[HttpGet("user/{userId}")]
     public async Task<IActionResult> GetPostByUserId(Guid userId)
     {
         var result = await _postService.GetPostsByUserIdAsync(userId);
@@ -140,6 +140,6 @@ public class PostController : ControllerBase
         }
 
         return NotFound(result.Errors);
-    }
+    }*/
 
 }
