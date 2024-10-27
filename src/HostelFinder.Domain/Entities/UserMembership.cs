@@ -1,6 +1,8 @@
-﻿namespace HostelFinder.Domain.Entities
+﻿using RoomFinder.Domain.Common;
+
+namespace HostelFinder.Domain.Entities
 {
-    public class UserMembership
+    public class UserMembership : BaseEntity
     {
         public Guid UserId { get; set; }
         public User User { get; set; }
