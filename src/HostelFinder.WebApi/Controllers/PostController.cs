@@ -54,20 +54,6 @@ public class PostController : ControllerBase
             }
         }
 
-        //Upload image to AWS and collect Url response
-
-        var imageUrls = new List<String>();
-
-        if (images != null && images.Count > 0)
-        {
-            foreach (var image in images)
-            {
-                var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
-                var imageUrl = uploadToAWS3;
-                imageUrls.Add(imageUrl);
-            }
-        }
-
         var result = await _postService.AddPostAsync(postDto, imageUrls);
         if (result.Succeeded)
         {
