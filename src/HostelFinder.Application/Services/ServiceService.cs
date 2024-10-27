@@ -19,11 +19,11 @@ namespace HostelFinder.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<Response<IEnumerable<ServiceResponseDTO>>> GetAllServicesAsync()
+        public async Task<Response<List<ServiceResponseDTO>>> GetAllServicesAsync()
         {
             var services = await _serviceRepository.ListAllAsync();
-            var serviceResponseDtos = _mapper.Map<IEnumerable<ServiceResponseDTO>>(services);
-            return new Response<IEnumerable<ServiceResponseDTO>> { Succeeded = true, Data = serviceResponseDtos };
+            var serviceResponseDtos = _mapper.Map<List<ServiceResponseDTO>>(services);
+            return new Response<List<ServiceResponseDTO>> { Succeeded = true, Data = serviceResponseDtos };
         }
 
         public async Task<Response<ServiceResponseDTO>> GetServiceByIdAsync(Guid id)
