@@ -8,6 +8,7 @@ namespace HostelFinder.Domain.Entities
     {
         [ForeignKey("Hostel")]
         public Guid HostelId { get; set; }
+        [ForeignKey("Room")]
         public Guid RoomId { get; set; }
         [Required]
         [MaxLength(50)]
