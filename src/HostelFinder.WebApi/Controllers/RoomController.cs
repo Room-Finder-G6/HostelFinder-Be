@@ -46,7 +46,7 @@ namespace HostelFinder.WebApi.Controllers
             if (!response.Succeeded)
                 return BadRequest(response.Message);
 
-            return CreatedAtAction(nameof(GetRoom), new { id = response.Data.Id }, response.Data);
+            return Ok(response.Data);
         }
 
         [HttpPut("{id}")]
@@ -69,7 +69,7 @@ namespace HostelFinder.WebApi.Controllers
             if (!response.Succeeded)
                 return NotFound(response.Message);
 
-            return NoContent();
+            return Ok(response);
         }
     }
 }
