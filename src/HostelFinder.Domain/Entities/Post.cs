@@ -16,7 +16,7 @@ namespace HostelFinder.Domain.Entities
         [MaxLength(255)]
         public string Description { get; set; }
         public bool IsAvailable { get; set; } = true;
-        public DateOnly DateAvailable { get; set; }
+        public DateTime DateAvailable { get; set; }
         public Guid MembershipServiceId { get; set; }
         public virtual Hostel Hostel { get; set; }  
         public virtual Room Room { get; set; }

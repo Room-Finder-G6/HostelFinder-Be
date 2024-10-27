@@ -6,8 +6,10 @@ namespace HostelFinder.Application.Interfaces.IServices
 {
     public interface IServiceCostService
     {
-        Task<Response<ServiceCostResponseDto>> AddServiceCostAsync(AddServiceCostDto dto);
-        Task<Response<ServiceCostResponseDto>> UpdateServiceCostAsync(Guid serviceId, UpdateServiceCostDto dto);
-        Task<Response<bool>> DeleteServiceCostAsync(Guid id);
+        Task<Response<List<ServiceCostResponseDto>>> GetAllAsync();
+        Task<Response<ServiceCostResponseDto>> GetByIdAsync(Guid id);
+        Task<Response<ServiceCostResponseDto>> CreateAsync(AddServiceCostDto serviceCostDto);
+        Task<Response<ServiceCostResponseDto>> UpdateAsync(Guid id, UpdateServiceCostDto serviceCostDto);
+        Task<Response<bool>> DeleteAsync(Guid id);
     }
 }

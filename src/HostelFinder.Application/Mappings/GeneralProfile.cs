@@ -21,6 +21,8 @@ using HostelFinder.Application.DTOs.MembershipService.Requests;
 using HostelFinder.Application.DTOs.MembershipService.Responses;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Application.DTOs.Image.Responses;
+using HostelFinder.Application.DTOs.InVoice.Responses;
+using HostelFinder.Application.DTOs.InVoice.Requests;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -119,5 +121,10 @@ public class GeneralProfile : Profile
 
         //Image
         CreateMap<Image, ImageResponseDto>().ReverseMap();
+
+        //InVoice
+        CreateMap<Invoice, InvoiceResponseDto>().ReverseMap();
+        CreateMap<UpdateInvoiceRequestDto, Invoice>().ReverseMap();
+        CreateMap<AddInVoiceRequestDto, Invoice>().ReverseMap();
     }
 }

@@ -15,40 +15,60 @@ namespace HostelFinder.WebApi.Controllers
             _serviceCostService = serviceCostService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateServiceCost(AddServiceCostDto dto)
+        [HttpGet]
+        public async Task<IActionResult> GetServiceCosts()
         {
-            var result = await _serviceCostService.AddServiceCostAsync(dto);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Message);
-            }
+            var response = await _serviceCostService.GetAllAsync();
+            if (!response.Succeeded)
+                return BadRequest(response.Message);
 
-            return Ok(result.Message);
+            return Ok(response.Data);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetServiceCost(Guid id)
+        {
+            var response = await _serviceCostService.GetByIdAsync(id);
+            if (!response.Succeeded)
+                return NotFound(response.Message);
+
+            return Ok(response.Data);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateServiceCost([FromBody] AddServiceCostDto serviceCostDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _serviceCostService.CreateAsync(serviceCostDto);
+            if (!response.Succeeded)
+                return BadRequest(response.Message);
+
+            return CreatedAtAction(nameof(GetServiceCost), new { id = response.Data.Id }, response.Data);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateServiceCost(Guid serviceId, UpdateServiceCostDto dto)
+        public async Task<IActionResult> UpdateServiceCost(Guid id, [FromBody] UpdateServiceCostDto serviceCostDto)
         {
-            var result = await _serviceCostService.UpdateServiceCostAsync(serviceId, dto);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Message);
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            return Ok(result.Message);
+            var response = await _serviceCostService.UpdateAsync(id, serviceCostDto);
+            if (!response.Succeeded)
+                return NotFound(response.Message);
+
+            return Ok(response.Data);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteServiceCost(Guid id)
         {
-            var result = await _serviceCostService.DeleteServiceCostAsync(id);
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Message);
-            }
+            var response = await _serviceCostService.DeleteAsync(id);
+            if (!response.Succeeded)
+                return NotFound(response.Message);
 
-            return Ok(result.Message);
+            return NoContent();
         }
 
     }
