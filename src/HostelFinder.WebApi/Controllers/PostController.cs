@@ -32,20 +32,34 @@ public class PostController : ControllerBase
     }*/
 
     [HttpPost]
-    public async Task<IActionResult> AddPost([FromBody] AddPostRequestDto postDto)
+    public async Task<IActionResult> AddPost([FromForm] AddPostRequestDto postDto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _postService.AddPostAsync(postDto);
+        //Upload image to AWS and collect Url response
+
+        var imageUrls = new List<String>();
+
+        if (postDto.Image != null && postDto.Image.Count > 0)
+        {
+            foreach (var image in postDto.Image)
+            {
+                var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
+                var imageUrl = uploadToAWS3;
+                imageUrls.Add(imageUrl);
+            }
+        }
+
+        var result = await _postService.AddPostAsync(postDto, imageUrls);
         if (result.Succeeded)
         {
             return Ok(result);
         }
 
-        return BadRequest(result.Errors);
+        return BadRequest(result);
     }
 
     /*[HttpPut]
@@ -104,7 +118,7 @@ public class PostController : ControllerBase
 
         return Ok(hostel);
     }*/
-    
+
     /*[HttpPost("get-all")]
     public async Task<IActionResult> Get(GetAllPostsQuery request)
     {
@@ -115,7 +129,7 @@ public class PostController : ControllerBase
         }
         return Ok(response);
     }*/
-    
+
     [HttpPost("test-upload-file")]
     public async Task<IActionResult> TestUploadFile(IFormFile file)
     {

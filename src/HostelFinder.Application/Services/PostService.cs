@@ -18,22 +18,38 @@ public class PostService : IPostService
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
     private readonly IHostelRepository _hostelRepository;
+    private readonly IImageRepository _imageRepository;
 
     public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository,
-        IHostelRepository hostelRepository)
+        IHostelRepository hostelRepository, IImageRepository imageRepository)
     {
         _mapper = mapper;
         _postRepository = postRepository;
         _userRepository = userRepository;
         _hostelRepository = hostelRepository;
+        _imageRepository = imageRepository;
     }
 
-    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request)
+    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls)
     {
+        //map to Domain Post
         var post = _mapper.Map<Post>(request);
+
         try
         {
             await _postRepository.AddAsync(post);
+            foreach (var imageUrl in imageUrls)
+            {
+                await _imageRepository.AddAsync(new Image
+                {
+                    PostId = post.Id,
+                    HostelId = post.HostelId,
+                    Url = imageUrl,
+                    CreatedOn = DateTime.Now,
+                });
+            }
+
+            //map to Dtos Post
             var postResponseDto = _mapper.Map<AddPostRequestDto>(post);
             return new Response<AddPostRequestDto>
             {

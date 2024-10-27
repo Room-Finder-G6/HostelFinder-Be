@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace HostelFinder.Application.DTOs.Post.Requests;
 
@@ -16,6 +17,5 @@ public class AddPostRequestDto
     [Required]
     public DateTime DateAvailable { get; set; }
     public Guid MembershipServiceId { get; set; }
-    // Để tạm thời, sau này sẽ là kiểu FormFile
-    public List<string> ImageUrls { get; set; } = new();
+    public List<IFormFile> Image { get; set; } = new();
 }
