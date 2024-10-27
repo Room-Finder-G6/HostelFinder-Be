@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HostelFinder.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddNewPropertyToHostel : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,6 @@ namespace HostelFinder.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AmenityName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsSelected = table.Column<bool>(type: "bit", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -56,7 +55,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     ServiceCostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<bool>(type: "bit", nullable: false),
-                    DueDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -302,8 +301,8 @@ namespace HostelFinder.Infrastructure.Migrations
                     RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
-                    DateAvailable = table.Column<DateOnly>(type: "date", nullable: false),
+                    Status = table.Column<bool>(type: "bit", nullable: false),
+                    DateAvailable = table.Column<DateTime>(type: "datetime2", nullable: false),
                     MembershipServiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -367,7 +366,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     BedRooms = table.Column<int>(type: "int", nullable: false),
                     BathRooms = table.Column<int>(type: "int", nullable: false),
                     Kitchen = table.Column<int>(type: "int", nullable: false),
-                    Size = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Size = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<bool>(type: "bit", nullable: false),
                     OtherDetails = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
@@ -388,12 +387,12 @@ namespace HostelFinder.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    InVoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ServiceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     unitCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Cost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PreviousReading = table.Column<int>(type: "int", nullable: false),
                     CurrentReading = table.Column<int>(type: "int", nullable: false),
-                    InvoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -405,11 +404,11 @@ namespace HostelFinder.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_ServiceCosts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ServiceCosts_InVoices_InvoiceId",
-                        column: x => x.InvoiceId,
+                        name: "FK_ServiceCosts_InVoices_InVoiceId",
+                        column: x => x.InVoiceId,
                         principalTable: "InVoices",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ServiceCosts_Rooms_RoomId",
                         column: x => x.RoomId,
@@ -426,7 +425,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     Url = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     HostelId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -521,9 +519,9 @@ namespace HostelFinder.Infrastructure.Migrations
                 column: "HostelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ServiceCosts_InvoiceId",
+                name: "IX_ServiceCosts_InVoiceId",
                 table: "ServiceCosts",
-                column: "InvoiceId");
+                column: "InVoiceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceCosts_RoomId",
