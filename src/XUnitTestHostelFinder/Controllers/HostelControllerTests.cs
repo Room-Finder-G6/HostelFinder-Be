@@ -48,7 +48,6 @@ namespace XUnitTestHostelFinder.Controllers
                         new ImageResponseDto
                         {
                             Url = "image_url",
-                            Description = "A description for the image."
                         }
                     },
                     Coordinates = "10.762622,106.660172",

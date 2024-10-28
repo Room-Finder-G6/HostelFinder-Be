@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.InkML;
-using HostelFinder.Application.Interfaces.IRepositories;
+﻿using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
@@ -7,6 +6,7 @@ using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using HostelFinder.Application.DTOs.Post.Responses;
 
 namespace HostelFinder.Infrastructure.Repositories;
 
@@ -14,15 +14,6 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 {
     public PostRepository(HostelFinderDbContext dbContext) : base(dbContext)
     {
-    }
-
-    public async Task<Post?> GetAllRoomFeaturesByRoomId(Guid roomId)
-    {
-        var room = await _dbContext.Posts
-            .Include(x => x.Room)
-            .Include(x => x.Images)
-            .FirstOrDefaultAsync(x => x.Id == roomId);
-        return room;
     }
 
     public async Task<IEnumerable<Post>> GetFilteredPosts(decimal? minPrice, decimal? maxPrice, string? location, RoomType? roomType)
@@ -76,11 +67,10 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         return (Data : posts,TotalRecords : totalCount);
     }
 
-    public async Task<List<Post>> GetPostsByUserIdAsync(Guid userId)
+    public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(Guid userId)
     {
-        return await _dbContext.Posts
-            .Where(p => p.Id == userId)
-            .ToListAsync();
+        var posts = await _dbContext.Posts.Where(x => x.Hostel.LandlordId == userId).ToListAsync();
+        return posts;
     }
 
 }
