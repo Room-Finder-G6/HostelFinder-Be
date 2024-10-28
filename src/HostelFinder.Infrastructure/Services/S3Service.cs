@@ -1,4 +1,5 @@
-﻿using Amazon.S3;
+﻿using Amazon.Runtime;
+using Amazon.S3;
 using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -12,12 +13,20 @@ public class S3Service : IS3Service
 
     public S3Service(IAmazonS3 s3Client, IConfiguration configuration)
     {
-        _s3Client = s3Client;
+        var awsAccessKey = configuration["AWS:AccessKey"];
+        var awsSecretKey = configuration["AWS:SecretKey"];
+        var region = configuration["AWS:Region"];
         _bucketName = configuration["AWS:BucketName"];
+
+        var awsCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey);
+        _s3Client = new AmazonS3Client(awsCredentials, Amazon.RegionEndpoint.GetBySystemName(region));
     }
 
     public async Task<string> UploadFileAsync(IFormFile file)
     {
+        if (file == null || file.Length == 0)
+            throw new ArgumentException("File không hợp lệ.");
+
         var fileName =
             $"{Path.GetFileNameWithoutExtension(file.FileName)}-{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
 

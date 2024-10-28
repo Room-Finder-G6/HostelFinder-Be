@@ -18,92 +18,54 @@ public class PostService : IPostService
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
     private readonly IHostelRepository _hostelRepository;
+    private readonly IImageRepository _imageRepository;
 
-    public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository, IHostelRepository hostelRepository)
+    public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository,
+        IHostelRepository hostelRepository, IImageRepository imageRepository)
     {
         _mapper = mapper;
         _postRepository = postRepository;
         _userRepository = userRepository;
         _hostelRepository = hostelRepository;
+        _imageRepository = imageRepository;
     }
 
-    public async Task<Response<PostResponseDto>> GetAllRoomFeaturesByIdAsync(Guid roomId)
+    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls)
     {
-        var room = await _postRepository.GetAllRoomFeaturesByRoomId(roomId);
-        if (room == null)
-        {
-            return new Response<PostResponseDto>("Post not found");
-        }
+        //map to Domain Post
+        var post = _mapper.Map<Post>(request);
 
-        var roomDto = _mapper.Map<PostResponseDto>(room);
-        var response = new Response<PostResponseDto>(roomDto);
-        return response;
-    }
-
-    public async Task<Response<AddPostRequestDto>> AddRoomAsync(AddPostRequestDto postDto)
-    {
         try
         {
-            var roomDomain = _mapper.Map<Post>(postDto);
-
-            roomDomain.CreatedOn = DateTime.Now;
-            roomDomain.CreatedBy = "System";
-
-            roomDomain = await _postRepository.AddAsync(roomDomain);
-
-            foreach (var amenityDto in postDto.AddRoomAmenity)
+            await _postRepository.AddAsync(post);
+            foreach (var imageUrl in imageUrls)
             {
-                var roomAmenity = new RoomAmenities
+                await _imageRepository.AddAsync(new Image
                 {
-                    AmenityId = amenityDto.Id
-                };
-                await _postRepository.AddRoomAmenitiesAsync(roomAmenity);
+                    PostId = post.Id,
+                    HostelId = post.HostelId,
+                    Url = imageUrl,
+                    CreatedOn = DateTime.Now,
+                });
             }
 
-            var roomResponseDto = _mapper.Map<AddPostRequestDto>(roomDomain);
-            return new Response<AddPostRequestDto>(roomResponseDto);
+            //map to Dtos Post
+            var postResponseDto = _mapper.Map<AddPostRequestDto>(post);
+            return new Response<AddPostRequestDto>
+            {
+                Data = postResponseDto,
+                Succeeded = true,
+                Message = "Add Post Successfully"
+            };
         }
         catch (Exception ex)
         {
-            throw new Exception("Error while adding room", ex);
+            return new Response<AddPostRequestDto>
+            {
+                Succeeded = false,
+                Message = ex.Message
+            };
         }
-    }
-
-    public async Task<Response<UpdatePostRequestDto>> UpdateRoomAsync(UpdatePostRequestDto postDto, Guid roomId)
-    {
-        var existingRoom = await _postRepository.GetAllRoomFeaturesByRoomId(roomId);
-
-        if (existingRoom == null)
-        {
-            return new Response<UpdatePostRequestDto>("Post not found");
-        }
-
-        _mapper.Map(postDto, existingRoom);
-
-        /*if (postDto.ServiceCosts != null)
-        {
-            existingRoom.ServiceCosts = _mapper.Map<List<ServiceCost>>(postDto.ServiceCosts);
-        }*/
-
-        existingRoom.LastModifiedOn = DateTime.Now;
-        existingRoom.LastModifiedBy = "System";
-
-        await _postRepository.UpdateAsync(existingRoom);
-        var roomResponseDto = _mapper.Map<UpdatePostRequestDto>(existingRoom);
-        return new Response<UpdatePostRequestDto>(roomResponseDto);
-    }
-
-    public async Task<Response<bool>> DeleteRoomAsync(Guid roomId)
-    {
-        var room = await _postRepository.GetByIdAsync(roomId);
-        if (room == null)
-        {
-            return new Response<bool> { Succeeded = false, Message = "Post not found" };
-        }
-
-        await _postRepository.DeleteAsync(room.Id);
-
-        return new Response<bool> { Succeeded = true, Message = "Delete Post Successfully" };
     }
 
     public async Task<LandlordResponseDto> GetLandlordByPostIdAsync(Guid postId)
@@ -114,6 +76,7 @@ public class PostService : IPostService
         {
             return null;
         }
+
         var landlordDto = _mapper.Map<LandlordResponseDto>(hostel.Landlord);
 
         return landlordDto;
@@ -142,11 +105,13 @@ public class PostService : IPostService
     {
         try
         {
-            var posts = await _postRepository.GetAllMatchingAsync(request.SearchPhrase, request.PageSize, request.PageNumber, request.SortBy, request.SortDirection);
+            var posts = await _postRepository.GetAllMatchingAsync(request.SearchPhrase, request.PageSize,
+                request.PageNumber, request.SortBy, request.SortDirection);
 
             var postsDtos = _mapper.Map<List<ListPostResponseDto>>(posts.Data);
 
-            var pagedResponse = PaginationHelper.CreatePagedResponse(postsDtos, request.PageNumber, request.PageSize, posts.TotalRecords);
+            var pagedResponse = PaginationHelper.CreatePagedResponse(postsDtos, request.PageNumber, request.PageSize,
+                posts.TotalRecords);
             return pagedResponse;
         }
         catch (Exception ex)
@@ -175,5 +140,4 @@ public class PostService : IPostService
             Succeeded = true
         };
     }
-
 }

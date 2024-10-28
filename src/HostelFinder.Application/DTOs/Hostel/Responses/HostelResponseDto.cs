@@ -9,6 +9,7 @@ namespace HostelFinder.Application.DTOs.Hostel.Responses
         public string HostelName { get; set; }
         public string? Description { get; set; }
         public AddressDto Address { get; set; }
+        public int Size { get; set; }
         public int NumberOfRooms { get; set; }
         public List<ImageResponseDto> Image { get; set; }
         public string Coordinates { get; set; }

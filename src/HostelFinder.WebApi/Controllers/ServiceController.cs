@@ -38,9 +38,9 @@ namespace HostelFinder.WebApi.Controllers
             var response = await _serviceService.AddServiceAsync(serviceCreateRequestDTO);
             if (response.Succeeded)
             {
-                return CreatedAtAction(nameof(GetServiceById), new { id = serviceCreateRequestDTO.HostelId }, response.Data);
+                return Ok(response); 
             }
-            return BadRequest(response.Message);
+            return BadRequest(response.Message); 
         }
 
         [HttpPut("UpdateService/{id}")]

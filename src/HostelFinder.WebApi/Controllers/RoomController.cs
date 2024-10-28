@@ -41,12 +41,18 @@ namespace HostelFinder.WebApi.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            try
+            {
+                var response = await _roomService.CreateAsync(roomDto);
+                if (!response.Succeeded)
+                    return BadRequest(response.Message);
 
-            var response = await _roomService.CreateAsync(roomDto);
-            if (!response.Succeeded)
-                return BadRequest(response.Message);
-
-            return CreatedAtAction(nameof(GetRoom), new { id = response.Data.Id }, response.Data);
+                return Ok(response.Data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
@@ -54,22 +60,30 @@ namespace HostelFinder.WebApi.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            try
+            {
+                var response = await _roomService.UpdateAsync(id, roomDto);
+                if (!response.Succeeded)
+                    return NotFound(response.Message);
 
-            var response = await _roomService.UpdateAsync(id, roomDto);
-            if (!response.Succeeded)
-                return NotFound(response.Message);
-
-            return Ok(response.Data);
+                return Ok(response.Data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoom(Guid id)
         {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid room ID");
             var response = await _roomService.DeleteAsync(id);
             if (!response.Succeeded)
                 return NotFound(response.Message);
 
-            return NoContent();
+            return Ok(response);
         }
     }
 }

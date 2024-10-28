@@ -8,6 +8,7 @@ namespace HostelFinder.Domain.Entities
     {
         [ForeignKey("Hostel")]
         public Guid HostelId { get; set; }
+        [ForeignKey("Room")]
         public Guid RoomId { get; set; }
         [Required]
         [MaxLength(50)]
@@ -15,7 +16,7 @@ namespace HostelFinder.Domain.Entities
         [Required]
         [MaxLength(255)]
         public string Description { get; set; }
-        public bool IsAvailable { get; set; } = true;
+        public bool Status { get; set; } = true;
         public DateTime DateAvailable { get; set; }
         public Guid MembershipServiceId { get; set; }
         public virtual Hostel Hostel { get; set; }  
