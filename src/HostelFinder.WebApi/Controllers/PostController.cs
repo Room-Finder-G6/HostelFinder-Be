@@ -39,9 +39,7 @@ public class PostController : ControllerBase
             return BadRequest(ModelState);
         }
 
-
         //Upload image to AWS and collect Url response
-
         var imageUrls = new List<string>();
 
         if (images != null && images.Count > 0)
@@ -60,7 +58,7 @@ public class PostController : ControllerBase
             return Ok(result);
         }
 
-        return BadRequest(result);
+        return BadRequest(result.Errors);
     }
 
     /*[HttpPut]
@@ -81,18 +79,18 @@ public class PostController : ControllerBase
         return BadRequest(result.Errors);
     }*/
 
-    /*[HttpDelete]
+    [HttpDelete]
     [Route("{postId}")]
-    public async Task<IActionResult> DeletePost(Guid roomId)
+    public async Task<IActionResult> DeletePost(Guid postId)
     {
-        var result = await _postService.DeleteRoomAsync(roomId);
+        var result = await _postService.DeletePostAsync(postId);
         if (result.Succeeded)
         {
             return Ok(result);
         }
 
-        return NotFound();
-    }*/
+        return NotFound(result.Errors);
+    }
 
     /*[HttpGet("{postId}/landlord")]
     public async Task<IActionResult> GetLandlordByPostId(Guid postId)
@@ -120,16 +118,16 @@ public class PostController : ControllerBase
         return Ok(hostel);
     }*/
 
-    /*[HttpPost("get-all")]
+    [HttpPost("get-all")]
     public async Task<IActionResult> Get(GetAllPostsQuery request)
     {
         var response = await _postService.GetAllPostAysnc(request);
         if (response.Succeeded)
         {
-            return BadRequest(response);
+            return BadRequest(response.Errors);
         }
         return Ok(response);
-    }*/
+    }
 
     [HttpPost("test-upload-file")]
     public async Task<IActionResult> TestUploadFile(IFormFile file)
@@ -145,7 +143,7 @@ public class PostController : ControllerBase
         }
     }
 
-    /*[HttpGet("user/{userId}")]
+    [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetPostByUserId(Guid userId)
     {
         var result = await _postService.GetPostsByUserIdAsync(userId);
@@ -155,6 +153,6 @@ public class PostController : ControllerBase
         }
 
         return NotFound(result.Errors);
-    }*/
+    }
 
 }

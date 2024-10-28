@@ -24,6 +24,7 @@ using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.DTOs.InVoice.Requests;
 using HostelFinder.Application.DTOs.Post.Requests;
+using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Responses;
 
 namespace HostelFinder.Application.Mappings;
@@ -35,15 +36,36 @@ public class GeneralProfile : Profile
         // Post Mapping
         CreateMap<AddPostRequestDto, Post>()
             .ReverseMap();
+        
+        CreateMap<PostResponseDto, Post>()
+            .ForPath(dest => dest.MembershipServices.Membership.Id, opt =>
+                opt.MapFrom(src => src.MembershipId))
+            .ReverseMap();
 
+        CreateMap<Post, ListPostsResponseDto>()
+            .ForMember(dest => dest.Address, opt =>
+                opt.MapFrom(src => src.Hostel.Address))
+            .ForMember(dest => dest.MonthlyRentCost, opt =>
+                opt.MapFrom(src => src.Room.MonthlyRentCost))
+            .ForMember(dest => dest.Size, opt =>
+                opt.MapFrom(src => src.Room.RoomDetails.Size))
+            .ForMember(dest => dest.FirstImage, opt =>
+                opt.MapFrom(src => src.Images.Any()
+                    ? src.Images.First().Url
+                    : null))
+            .ReverseMap();
+        
+        
         // Hostel Mapping
         CreateMap<Hostel, HostelResponseDto>().ReverseMap();
         CreateMap<Hostel, AddHostelRequestDto>()
-            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+            .ForMember(dest => dest.Address, opt => 
+                opt.MapFrom(src => src.Address))
             .ReverseMap();
 
         CreateMap<Hostel, ListHostelResponseDto>()
-            .ForMember(dest => dest.LandlordUserName, opt => opt.MapFrom(src => src.Landlord.Username))
+            .ForMember(dest => dest.LandlordUserName, opt => 
+                opt.MapFrom(src => src.Landlord.Username))
             .ReverseMap();
 
         // Address Mapping
