@@ -41,7 +41,6 @@ namespace HostelFinder.WebApi.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-
             try
             {
                 var response = await _roomService.CreateAsync(roomDto);
@@ -61,7 +60,6 @@ namespace HostelFinder.WebApi.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-
             try
             {
                 var response = await _roomService.UpdateAsync(id, roomDto);
