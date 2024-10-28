@@ -6,7 +6,7 @@ namespace HostelFinder.Application.Interfaces.IServices;
 
 public interface IAmenityService
 {
-    public Task<AmenityResponse> AddAmenityAsync(AddAmenityDto addAmenityDto);
-    public Task<Response<bool>> DeleteAmenityAsync(Guid amenityId);
-    public Task<List<AmenityResponse>> GetAllAmenitiesAsync();
+    Task<Response<AmenityResponse>> AddAmenityAsync(AddAmenityDto addAmenityDto);
+    Task<Response<bool>> DeleteAmenityAsync(Guid amenityId);
+    Task<Response<List<AmenityResponse>>> GetAllAmenitiesAsync();
 }
