@@ -256,6 +256,21 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(wp => wp.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Specify precision for decimal properties
+        modelBuilder.Entity<Invoice>()
+            .Property(i => i.TotalAmount)
+            .HasColumnType("decimal(18,2)");
 
+        modelBuilder.Entity<Room>()
+            .Property(r => r.MonthlyRentCost)
+            .HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<ServiceCost>()
+            .Property(sc => sc.Cost)
+            .HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<ServiceCost>()
+            .Property(sc => sc.unitCost)
+            .HasColumnType("decimal(18,2)");
     }
 }
