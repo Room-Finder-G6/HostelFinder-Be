@@ -1,9 +1,4 @@
-﻿using HostelFinder.Application.DTOs.Amenity.Response;
-using HostelFinder.Application.DTOs.RoomDetails.Response;
-using HostelFinder.Application.DTOs.ServiceCost.Responses;
-using HostelFinder.Domain.Enums;
-
-namespace HostelFinder.Application.DTOs.Room.Requests;
+﻿namespace HostelFinder.Application.DTOs.Post.Responses;
 
 public class PostResponseDto
 {

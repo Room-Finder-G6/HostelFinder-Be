@@ -15,4 +15,5 @@ public interface IPostService
     Task<Response<List<ListPostsResponseDto>>> GetPostsByUserIdAsync(Guid userId);
     Task<Response<bool>> DeletePostAsync(Guid postId);
     Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request);
+    Task<Response<PostResponseDto>> GetPostByIdAsync(Guid postId);
 }

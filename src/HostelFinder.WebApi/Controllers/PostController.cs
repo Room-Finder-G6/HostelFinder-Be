@@ -155,4 +155,15 @@ public class PostController : ControllerBase
         return NotFound(result.Errors);
     }
 
+    [HttpGet("{postId}")]
+    public async Task<IActionResult> GetPostById(Guid postId)
+    {
+        var result = await _postService.GetPostByIdAsync(postId);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return NotFound();
+    }
 }

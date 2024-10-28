@@ -137,6 +137,27 @@ public class PostService : IPostService
         }
     }
 
+    public async Task<Response<PostResponseDto>> GetPostByIdAsync(Guid postId)
+    {
+            var post = await _postRepository.GetPostByIdAsync(postId);
+            
+            if(post == null)
+            {
+                return new Response<PostResponseDto>
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { "Bài đăng không tồn tại." }
+                };
+            }
+            
+            var postDto = _mapper.Map<PostResponseDto>(post);
+            return new Response<PostResponseDto>()
+            {
+                Data = postDto,
+                Succeeded = true,
+            };
+    }
+
     public async Task<Response<List<ListPostsResponseDto>>> GetPostsByUserIdAsync(Guid userId)
     {
         var posts = await _postRepository.GetPostsByUserIdAsync(userId);
