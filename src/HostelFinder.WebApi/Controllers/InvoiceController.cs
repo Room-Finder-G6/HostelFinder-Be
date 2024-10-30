@@ -72,11 +72,8 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> DeleteInvoice(Guid id)
         {
             var response = await _invoiceService.DeleteAsync(id);
-            if (response.Message?.Contains("Forbidden") == true)
-                return StatusCode(403, response.Message);
             if (!response.Succeeded)
                 return NotFound(response.Message);
-
             return Ok(response);
         }
     }
