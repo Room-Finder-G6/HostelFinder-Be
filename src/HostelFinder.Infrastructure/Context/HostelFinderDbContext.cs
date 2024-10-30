@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 
 namespace HostelFinder.Infrastructure.Context;
@@ -26,7 +27,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Address> Addresses { get; set; }
 
 
-
+    public DbSet<HostelService> HostelServices { get; set; }
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -70,7 +71,7 @@ public class HostelFinderDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Hostel>()
-            .HasMany(h => h.Services)
+            .HasMany(h => h.HostelServices)
             .WithOne(s => s.Hostel)
             .HasForeignKey(s => s.HostelId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -180,9 +181,9 @@ public class HostelFinderDbContext : DbContext
         modelBuilder.Entity<Service>()
             .HasKey(s => s.Id);
         modelBuilder.Entity<Service>()
-            .HasOne(s => s.Hostel)
-            .WithMany(h => h.Services)
-            .HasForeignKey(s => s.HostelId)
+            .HasMany(s => s.HostelServices)
+            .WithOne(h => h.Services)
+            .HasForeignKey(s => s.ServiceId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure ServiceCost entity

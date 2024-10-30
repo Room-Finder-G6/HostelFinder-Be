@@ -3,8 +3,9 @@ using RoomFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {
-    public class WishlistPost : BaseEntity
+    public class WishlistPost 
     {
+        public Guid Id { get; set; }
         public Guid WishlistId { get; set; }
         public Wishlist Wishlist { get; set; }
 
