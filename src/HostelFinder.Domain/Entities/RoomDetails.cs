@@ -11,8 +11,5 @@ public class RoomDetails : BaseEntity
     public int BathRooms { get; set; }
     public int Kitchen { get; set; }
     public int Size { get; set; }
-    public bool Status { get; set; }
-    [MaxLength(255)]
-    public string? OtherDetails { get; set; }
     public virtual Room Room { get; set; } = default!;
 }

@@ -12,6 +12,14 @@ namespace HostelFinder.Infrastructure.Repositories
         {
         }
 
+        public async Task<IEnumerable<Room>> ListAllWithDetailsAsync()
+        {
+            return await _dbContext.Rooms
+                          .Include(r => r.ServiceCost)
+                          .Include(r => r.RoomDetails)   
+                          .ToListAsync();
+        }
+
         public async Task<bool> RoomExistsAsync(string roomName, Guid hostelId)
         {
             return await _dbContext.Rooms.AnyAsync(r => r.RoomName == roomName && r.HostelId == hostelId);

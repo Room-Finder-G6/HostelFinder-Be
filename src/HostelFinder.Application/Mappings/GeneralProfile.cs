@@ -52,7 +52,7 @@ public class GeneralProfile : Profile
 
         // RoomDetails Mapping
         CreateMap<RoomDetails, RoomDetailsResponseDto>().ReverseMap();
-        CreateMap<RoomDetails, AddRoomDetailsDto>().ReverseMap();
+        CreateMap<RoomDetails, AddRoomDetailRequestDto>().ReverseMap();
         CreateMap<RoomDetails, UpdateRoomDetailsDto>().ReverseMap();
 
         // Amenities Mapping
@@ -63,7 +63,7 @@ public class GeneralProfile : Profile
         // Service Cost Mapping
         CreateMap<ServiceCost, ServiceCostResponseDto>().ReverseMap();
         CreateMap<ServiceCost, AddServiceCostDto>().ReverseMap();
-        CreateMap<UpdateServiceCostDto, ServiceCost>();
+        CreateMap<UpdateServiceCostDto, ServiceCost>().ReverseMap();
 
         //Map User
         CreateMap<User, UserDto>().ReverseMap();
@@ -109,5 +109,15 @@ public class GeneralProfile : Profile
         CreateMap<Room, RoomResponseDto>().ReverseMap();
         CreateMap<UpdateRoomRequestDto, Room>().ReverseMap();
         CreateMap<AddRoomRequestDto, Room>().ReverseMap();
+        CreateMap<Room, RoomResponseDto>()
+            .ForMember(dest => dest.AddServiceCostDtos, opt => opt.MapFrom(src => src.ServiceCost))
+            .ForMember(dest => dest.RoomDetailRequestDto, opt => opt.MapFrom(src => src.RoomDetails))
+            .ReverseMap();
+        CreateMap<AddRoomRequestDto, Room>()
+            .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.AddServiceCostDtos))
+            .ForMember(dest => dest.RoomDetails, opt => opt.MapFrom(src => src.RoomDetailRequestDto));
+        CreateMap<UpdateRoomRequestDto, Room>()
+            .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.UpdateServiceCostDtos))
+            .ForMember(dest => dest.RoomDetails, opt => opt.MapFrom(src => src.UpdateRoomDetailsDto));
     }
 }
