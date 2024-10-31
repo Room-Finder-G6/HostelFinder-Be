@@ -168,11 +168,11 @@ public class HostelFinderDbContext : DbContext
 
         // Configure RoomDetails entity
         modelBuilder.Entity<RoomDetails>()
-            .HasKey(rd => rd.PostId);
+            .HasKey(rd => rd.RoomId);
         modelBuilder.Entity<RoomDetails>()
             .HasOne(rd => rd.Room)
             .WithOne(r => r.RoomDetails)
-            .HasForeignKey<RoomDetails>(rd => rd.PostId)
+            .HasForeignKey<RoomDetails>(rd => rd.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure Service entity

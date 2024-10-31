@@ -1,4 +1,6 @@
-﻿using HostelFinder.Application.Interfaces.IRepositories;
+﻿using DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using DocumentFormat.OpenXml.InkML;
+using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
@@ -10,6 +12,14 @@ namespace HostelFinder.Infrastructure.Repositories
     {
         public RoomRepository(HostelFinderDbContext dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<Room> GetRoomWithDetailsAndServiceCostsByIdAsync(Guid roomId)
+        {
+            return await _dbContext.Rooms
+             .Include(r => r.RoomDetails)  
+            .Include(r => r.ServiceCost)  
+             .FirstOrDefaultAsync(r => r.Id == roomId);  
         }
 
         public async Task<IEnumerable<Room>> ListAllWithDetailsAsync()
