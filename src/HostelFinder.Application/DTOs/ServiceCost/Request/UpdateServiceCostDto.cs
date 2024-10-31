@@ -2,6 +2,7 @@
 
 public class UpdateServiceCostDto
 {
+    public Guid ServiceCostId { get; set; }
     public string ServiceName { get; set; }
     public decimal UnitCost { get; set; }
     public decimal Cost { get; set; }
