@@ -7,5 +7,5 @@ public class UpdateServiceCostDto
     public decimal Cost { get; set; }
     public int PreviousReading { get; set; }
     public int CurrentReading { get; set; }
-    public Guid InVoiceId { get; set; }
+    public Guid? InVoiceId { get; set; }
 }

@@ -21,7 +21,7 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<List<RoomResponseDto>>> GetAllAsync()
         {
-            var rooms = await _roomRepository.ListAllAsync();
+            var rooms = await _roomRepository.ListAllWithDetailsAsync();
             var result = _mapper.Map<List<RoomResponseDto>>(rooms);
             return new Response<List<RoomResponseDto>>(result);
         }
@@ -43,7 +43,30 @@ namespace HostelFinder.Application.Services
             {
                 return new Response<RoomResponseDto>("A room with the same name already exists in this hostel.");
             }
+
             var room = _mapper.Map<Room>(roomDto);
+
+            // Add list of ServiceCost entities if provided
+            if (roomDto.AddServiceCostDtos != null && roomDto.AddServiceCostDtos.Any())
+            {
+                room.ServiceCost = _mapper.Map<List<ServiceCost>>(roomDto.AddServiceCostDtos);
+                foreach (var serviceCost in room.ServiceCost)
+                {
+                    serviceCost.Room = room;
+                    serviceCost.CreatedOn = DateTime.UtcNow;
+                    serviceCost.CreatedBy = room.CreatedBy;
+                }
+            }
+
+            // Add RoomDetail entity if provided
+            if (roomDto.RoomDetailRequestDto != null)
+            {
+                room.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetailRequestDto);
+                room.RoomDetails.Room = room;
+                room.RoomDetails.CreatedOn = DateTime.UtcNow;
+                room.RoomDetails.CreatedBy = room.CreatedBy;
+            }
+
             room = await _roomRepository.AddAsync(room);
 
             var result = _mapper.Map<RoomResponseDto>(room);

@@ -25,8 +25,6 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Invoice> InVoices { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Address> Addresses { get; set; }
-
-
     public DbSet<HostelService> HostelServices { get; set; }
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
@@ -198,7 +196,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(sc => sc.Invoice)
             .WithMany(i => i.ServiceCost)
             .HasForeignKey(sc => sc.InVoiceId)
-            .OnDelete(DeleteBehavior.Restrict); // or Cascade if deletion should propagate
+            .OnDelete(DeleteBehavior.Restrict); 
 
 
         // Configure User entity
