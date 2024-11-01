@@ -8,5 +8,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<bool> RoomExistsAsync(string roomName, Guid hostelId);
         Task<IEnumerable<Room>> ListAllWithDetailsAsync();
         Task<Room> GetRoomWithDetailsAndServiceCostsByIdAsync(Guid roomId);
+        Task<List<Room>> GetRoomsByHostelIdAsync(Guid hostelId);
     }
 }

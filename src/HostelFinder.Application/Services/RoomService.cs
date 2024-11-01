@@ -128,5 +128,16 @@ namespace HostelFinder.Application.Services
             await _roomRepository.DeletePermanentAsync(id);
             return new Response<bool>(true, "Room deleted successfully.");
         }
+
+        public async Task<Response<List<RoomResponseDto>>> GetRoomsByHostelIdAsync(Guid hostelId)
+        {
+            var rooms = await _roomRepository.GetRoomsByHostelIdAsync(hostelId);
+
+            if (rooms == null || !rooms.Any())
+                return new Response<List<RoomResponseDto>>("No rooms found for this hostel.");
+
+            var result = _mapper.Map<List<RoomResponseDto>>(rooms);
+            return new Response<List<RoomResponseDto>>(result);
+        }
     }
 }

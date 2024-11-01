@@ -30,6 +30,15 @@ namespace HostelFinder.Infrastructure.Repositories
                           .ToListAsync();
         }
 
+        public async Task<List<Room>> GetRoomsByHostelIdAsync(Guid hostelId)
+        {
+            return await _dbContext.Rooms
+                .Include(r => r.RoomDetails)
+                .Include(r => r.ServiceCost)
+                .Where(r => r.HostelId == hostelId)
+                .ToListAsync();
+        }
+
         public async Task<bool> RoomExistsAsync(string roomName, Guid hostelId)
         {
             return await _dbContext.Rooms.AnyAsync(r => r.RoomName == roomName && r.HostelId == hostelId);
