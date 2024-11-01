@@ -45,8 +45,9 @@ namespace HostelFinder.Application.Services
             }
 
             var room = _mapper.Map<Room>(roomDto);
+            room.CreatedBy = "Hệ Thống";
+            room.CreatedOn = DateTime.Now;
 
-            // Add list of ServiceCost entities if provided
             if (roomDto.AddServiceCostDtos != null && roomDto.AddServiceCostDtos.Any())
             {
                 room.ServiceCost = _mapper.Map<List<ServiceCost>>(roomDto.AddServiceCostDtos);
@@ -58,7 +59,6 @@ namespace HostelFinder.Application.Services
                 }
             }
 
-            // Add RoomDetail entity if provided
             if (roomDto.RoomDetailRequestDto != null)
             {
                 room.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetailRequestDto);
@@ -75,72 +75,49 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<RoomResponseDto>> UpdateAsync(Guid id, UpdateRoomRequestDto roomDto)
         {
-            // Fetch the room along with its details and service costs
             var room = await _roomRepository.GetRoomWithDetailsAndServiceCostsByIdAsync(id);
             if (room == null)
                 return new Response<RoomResponseDto>("Room not found.");
 
-            // Update room's main properties
-            _mapper.Map(roomDto, room);
+            room.RoomName = roomDto.RoomName;
+            room.Status = roomDto.Status;
+            room.MonthlyRentCost = roomDto.MonthlyRentCost;
+            room.RoomType = roomDto.RoomType;
+            room.LastModifiedBy = room.LastModifiedBy;
+            room.LastModifiedOn = DateTime.UtcNow;
 
-            // Update or add RoomDetail
-            if (roomDto.UpdateRoomDetailsDto != null)
+            if (roomDto.UpdateRoomDetailsDto != null && room.RoomDetails != null)
             {
-                if (room.RoomDetails != null)
-                {
-                    // Update existing RoomDetail
-                    _mapper.Map(roomDto.UpdateRoomDetailsDto, room.RoomDetails);
-                    room.RoomDetails.LastModifiedBy = room.LastModifiedBy;
-                    room.RoomDetails.LastModifiedOn = DateTime.UtcNow;
-                }
-                else
-                {
-                    // Add new RoomDetail
-                    var newRoomDetail = _mapper.Map<RoomDetails>(roomDto.UpdateRoomDetailsDto);
-                    newRoomDetail.RoomId = room.Id;
-                    room.RoomDetails = newRoomDetail;
-                    newRoomDetail.CreatedBy = room.CreatedBy;
-                    newRoomDetail.CreatedOn = DateTime.UtcNow;
-                }
+                _mapper.Map(roomDto.UpdateRoomDetailsDto, room.RoomDetails);
+                room.RoomDetails.LastModifiedBy = room.LastModifiedBy;
+                room.RoomDetails.LastModifiedOn = DateTime.UtcNow;
             }
-
-            // Update ServiceCosts
             if (roomDto.UpdateServiceCostDtos != null)
             {
-                // Map ServiceCostDtos to a dictionary by Id for easier access
-                var incomingServiceCosts = roomDto.UpdateServiceCostDtos.ToDictionary(sc => sc.ServiceCostId);
+                var incomingServiceCosts = roomDto.UpdateServiceCostDtos
+                    .Where(dto => dto.ServiceCostId != Guid.Empty)
+                    .ToDictionary(sc => sc.ServiceCostId);
 
-                // Update existing ServiceCosts or remove if not in incoming list
-                //room.ServiceCost.RemoveAll(sc =>
-                //{
-                //    if (!incomingServiceCosts.TryGetValue(sc.Id, out var updateDto))
-                //        return true; // Remove ServiceCost not in incoming list
-
-                //    // Update existing ServiceCost
-                //    _mapper.Map(updateDto, sc);
-                //    sc.LastModifiedBy = room.LastModifiedBy;
-                //    sc.LastModifiedOn = DateTime.UtcNow;
-                //    incomingServiceCosts.Remove(sc.Id);
-                //    return false;
-                //});
-
-                // Add new ServiceCosts from remaining items in the incoming dictionary
-                foreach (var newServiceCostDto in incomingServiceCosts.Values)
+                foreach (var serviceCost in room.ServiceCost)
                 {
-                    var newServiceCost = _mapper.Map<ServiceCost>(newServiceCostDto);
-                    newServiceCost.RoomId = room.Id;
-                    newServiceCost.CreatedBy = room.CreatedBy;
-                    newServiceCost.CreatedOn = DateTime.UtcNow;
-                    room.ServiceCost.Add(newServiceCost);
+                    if (incomingServiceCosts.TryGetValue(serviceCost.Id, out var updateDto))
+                    {
+                        _mapper.Map(updateDto, serviceCost);
+                        serviceCost.LastModifiedBy = room.LastModifiedBy;
+                        serviceCost.LastModifiedOn = DateTime.UtcNow;
+                        incomingServiceCosts.Remove(serviceCost.Id);
+                    }
+                    else
+                    {
+                        Console.WriteLine("No matching ServiceCost ID found for: " + serviceCost.Id);
+                    }
                 }
-            }
 
-            // Save updates to the repository
+            }
             room = await _roomRepository.UpdateAsync(room);
             var result = _mapper.Map<RoomResponseDto>(room);
             return new Response<RoomResponseDto>(result, "Room updated successfully.");
         }
-
 
         public async Task<Response<bool>> DeleteAsync(Guid id)
         {
