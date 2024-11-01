@@ -11,5 +11,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<RoomResponseDto>> CreateAsync(AddRoomRequestDto roomDto);
         Task<Response<RoomResponseDto>> UpdateAsync(Guid id, UpdateRoomRequestDto roomDto);
         Task<Response<bool>> DeleteAsync(Guid id);
+        Task<Response<List<RoomResponseDto>>> GetRoomsByHostelIdAsync(Guid hostelId);
     }
 }
