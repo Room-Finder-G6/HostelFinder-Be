@@ -72,6 +72,11 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         return _dbContext.Posts.FirstOrDefaultAsync(x => x.Id == postId);
     }
 
+    public Task<Post?> GetPostByIdWithHostelAsync(Guid postId)
+    {
+        return _dbContext.Posts.Include(p => p.Hostel).FirstOrDefaultAsync(x => x.Id == postId);
+    }
+
     public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(Guid userId)
     {
         var posts = await _dbContext.Posts.Where(x => x.Hostel.LandlordId == userId).ToListAsync();

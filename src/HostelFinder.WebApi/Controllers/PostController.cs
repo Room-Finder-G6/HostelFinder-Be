@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
@@ -83,13 +84,20 @@ public class PostController : ControllerBase
     [Route("{postId}")]
     public async Task<IActionResult> DeletePost(Guid postId)
     {
-        var result = await _postService.DeletePostAsync(postId);
-        if (result.Succeeded)
+        var userIdClaim = User.FindFirst("UserId");
+        if(userIdClaim == null)
         {
-            return Ok(result);
+            return Unauthorized("Người dùng chưa được xác thực.");
         }
 
-        return NotFound(result.Errors);
+        var currentUserId = Guid.Parse(userIdClaim.Value);
+        var response = await _postService.DeletePostAsync(postId, currentUserId);
+        if (!response.Succeeded)
+        {
+            return BadRequest(response.Errors);
+        }
+
+        return Ok(response.Message);
     }
 
     /*[HttpGet("{postId}/landlord")]
@@ -126,6 +134,7 @@ public class PostController : ControllerBase
         {
             return BadRequest(response.Errors);
         }
+
         return Ok(response);
     }
 

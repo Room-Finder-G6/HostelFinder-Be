@@ -85,7 +85,7 @@ public class HostelFinderDbContext : DbContext
             .HasMany(h => h.Images)
             .WithOne(i => i.Hostel)
             .HasForeignKey(i => i.HostelId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Hostel>()
             .HasMany(h => h.Rooms)
@@ -105,7 +105,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(i => i.Post)
             .WithMany(p => p.Images)
             .HasForeignKey(i => i.PostId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Configure Membership entity
         modelBuilder.Entity<Membership>()
@@ -127,7 +127,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(p => p.Hostel)
             .WithMany(h => h.Posts)
             .HasForeignKey(p => p.HostelId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Post>()
             .HasOne(p => p.Room)
             .WithMany(r => r.Posts)

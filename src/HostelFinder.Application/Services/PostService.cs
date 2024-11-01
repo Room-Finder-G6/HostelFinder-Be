@@ -3,7 +3,6 @@ using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
-using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -69,20 +68,29 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<Response<bool>> DeletePostAsync(Guid postId)
+    public async Task<Response<bool>> DeletePostAsync(Guid postId, Guid userId)
     {
-        var post = await _postRepository.GetByIdAsync(postId);
+        var post = await _postRepository.GetPostByIdWithHostelAsync(postId);
         if (post == null)
         {
             return new Response<bool>
             {
                 Succeeded = false,
-                Errors = new List<string> { "Post not found." }
+                Errors = ["Bài đăng không tồn tại."]
+            };
+        }
+
+        if (post.Hostel == null || post.Hostel.LandlordId != userId)
+        {
+            return new Response<bool>
+            {
+                Succeeded = false,
+                Errors = ["Bạn không có quyền xóa bài đăng này."]
             };
         }
 
         await _postRepository.DeletePermanentAsync(postId);
-        return new Response<bool>{Succeeded = true, Message = "Xóa bài đăng thành công."};
+        return new Response<bool> { Succeeded = true, Message = "Xóa bài đăng thành công." };
     }
 
     public async Task<LandlordResponseDto> GetLandlordByPostIdAsync(Guid postId)
@@ -139,23 +147,23 @@ public class PostService : IPostService
 
     public async Task<Response<PostResponseDto>> GetPostByIdAsync(Guid postId)
     {
-            var post = await _postRepository.GetPostByIdAsync(postId);
-            
-            if(post == null)
+        var post = await _postRepository.GetPostByIdAsync(postId);
+
+        if (post == null)
+        {
+            return new Response<PostResponseDto>
             {
-                return new Response<PostResponseDto>
-                {
-                    Succeeded = false,
-                    Errors = new List<string> { "Bài đăng không tồn tại." }
-                };
-            }
-            
-            var postDto = _mapper.Map<PostResponseDto>(post);
-            return new Response<PostResponseDto>()
-            {
-                Data = postDto,
-                Succeeded = true,
+                Succeeded = false,
+                Errors = new List<string> { "Bài đăng không tồn tại." }
             };
+        }
+
+        var postDto = _mapper.Map<PostResponseDto>(post);
+        return new Response<PostResponseDto>
+        {
+            Data = postDto,
+            Succeeded = true,
+        };
     }
 
     public async Task<Response<List<ListPostsResponseDto>>> GetPostsByUserIdAsync(Guid userId)
