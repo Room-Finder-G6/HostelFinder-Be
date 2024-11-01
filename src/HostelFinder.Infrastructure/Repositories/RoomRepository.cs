@@ -17,9 +17,9 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<Room> GetRoomWithDetailsAndServiceCostsByIdAsync(Guid roomId)
         {
             return await _dbContext.Rooms
-             .Include(r => r.RoomDetails)  
-            .Include(r => r.ServiceCost)  
-             .FirstOrDefaultAsync(r => r.Id == roomId);  
+                    .Include(r => r.RoomDetails)  
+                    .Include(r => r.ServiceCost)  
+                    .FirstOrDefaultAsync(r => r.Id == roomId);  
         }
 
         public async Task<IEnumerable<Room>> ListAllWithDetailsAsync()
