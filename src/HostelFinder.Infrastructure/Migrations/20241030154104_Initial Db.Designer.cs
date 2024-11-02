@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    partial class HostelFinderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241030154104_Initial Db")]
+    partial class InitialDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -507,7 +510,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.RoomDetails", b =>
                 {
-                    b.Property<Guid>("RoomId")
+                    b.Property<Guid>("PostId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("BathRooms")
@@ -537,6 +540,10 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LastModifiedOn")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("OtherDetails")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -546,7 +553,10 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<int>("Size")
                         .HasColumnType("int");
 
-                    b.HasKey("RoomId");
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.HasKey("PostId");
 
                     b.ToTable("RoomDetails");
                 });
@@ -605,7 +615,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<int>("CurrentReading")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("InVoiceId")
+                    b.Property<Guid>("InVoiceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -863,7 +873,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasOne("HostelFinder.Domain.Entities.Post", "Post")
                         .WithMany("Images")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Hostel");
 
@@ -886,7 +896,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasOne("HostelFinder.Domain.Entities.Hostel", "Hostel")
                         .WithMany("Posts")
                         .HasForeignKey("HostelId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HostelFinder.Domain.Entities.MembershipServices", "MembershipServices")
@@ -942,7 +952,7 @@ namespace HostelFinder.Infrastructure.Migrations
                 {
                     b.HasOne("HostelFinder.Domain.Entities.Room", "Room")
                         .WithOne("RoomDetails")
-                        .HasForeignKey("HostelFinder.Domain.Entities.RoomDetails", "RoomId")
+                        .HasForeignKey("HostelFinder.Domain.Entities.RoomDetails", "PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -954,7 +964,8 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasOne("HostelFinder.Domain.Entities.Invoice", "Invoice")
                         .WithMany("ServiceCost")
                         .HasForeignKey("InVoiceId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("HostelFinder.Domain.Entities.Room", "Room")
                         .WithMany("ServiceCost")

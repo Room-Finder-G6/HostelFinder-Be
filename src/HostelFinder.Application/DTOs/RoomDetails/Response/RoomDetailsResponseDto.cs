@@ -6,6 +6,4 @@ public class RoomDetailsResponseDto
     public int BathRooms { get; set; }
     public int Kitchen { get; set; }
     public decimal Size { get; set; }
-    public bool Status { get; set; }
-    public string? OtherDetails { get; set; }
 }
