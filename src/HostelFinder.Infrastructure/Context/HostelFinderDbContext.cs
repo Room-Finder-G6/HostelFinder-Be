@@ -25,6 +25,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Invoice> InVoices { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Address> Addresses { get; set; }
+    public DbSet<HostelService> HostelServices { get; set; }
 
 
     public DbSet<HostelService> HostelServices { get; set; }
@@ -86,7 +87,7 @@ public class HostelFinderDbContext : DbContext
             .HasMany(h => h.Images)
             .WithOne(i => i.Hostel)
             .HasForeignKey(i => i.HostelId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Hostel>()
             .HasMany(h => h.Rooms)
@@ -106,7 +107,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(i => i.Post)
             .WithMany(p => p.Images)
             .HasForeignKey(i => i.PostId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Configure Membership entity
         modelBuilder.Entity<Membership>()
@@ -128,7 +129,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(p => p.Hostel)
             .WithMany(h => h.Posts)
             .HasForeignKey(p => p.HostelId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Post>()
             .HasOne(p => p.Room)
             .WithMany(r => r.Posts)
@@ -170,11 +171,11 @@ public class HostelFinderDbContext : DbContext
 
         // Configure RoomDetails entity
         modelBuilder.Entity<RoomDetails>()
-            .HasKey(rd => rd.PostId);
+            .HasKey(rd => rd.RoomId);
         modelBuilder.Entity<RoomDetails>()
             .HasOne(rd => rd.Room)
             .WithOne(r => r.RoomDetails)
-            .HasForeignKey<RoomDetails>(rd => rd.PostId)
+            .HasForeignKey<RoomDetails>(rd => rd.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure Service entity
@@ -198,7 +199,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(sc => sc.Invoice)
             .WithMany(i => i.ServiceCost)
             .HasForeignKey(sc => sc.InVoiceId)
-            .OnDelete(DeleteBehavior.Restrict); // or Cascade if deletion should propagate
+            .OnDelete(DeleteBehavior.Restrict); 
 
 
         // Configure User entity

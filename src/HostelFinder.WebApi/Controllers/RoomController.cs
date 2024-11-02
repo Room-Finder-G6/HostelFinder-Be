@@ -23,7 +23,7 @@ namespace HostelFinder.WebApi.Controllers
             if (!response.Succeeded)
                 return BadRequest(response.Message);
 
-            return Ok(response.Data);
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
@@ -33,7 +33,7 @@ namespace HostelFinder.WebApi.Controllers
             if (!response.Succeeded)
                 return NotFound(response.Message);
 
-            return Ok(response.Data);
+            return Ok(response);
         }
 
         [HttpPost]
@@ -47,7 +47,7 @@ namespace HostelFinder.WebApi.Controllers
                 if (!response.Succeeded)
                     return BadRequest(response.Message);
 
-                return Ok(response.Data);
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -66,7 +66,7 @@ namespace HostelFinder.WebApi.Controllers
                 if (!response.Succeeded)
                     return NotFound(response.Message);
 
-                return Ok(response.Data);
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -85,5 +85,16 @@ namespace HostelFinder.WebApi.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("hostels/{hostelId}/rooms")]
+        public async Task<IActionResult> GetRoomsByHostelId(Guid hostelId)
+        {
+            var response = await _roomService.GetRoomsByHostelIdAsync(hostelId);
+            if (!response.Succeeded)
+                return NotFound(response.Message);
+
+            return Ok(response);
+        }
+
     }
 }

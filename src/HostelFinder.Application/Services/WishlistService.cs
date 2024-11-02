@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.DTOs.Room.Requests;
+﻿using HostelFinder.Application.DTOs.Post.Responses;
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Wishlist.Request;
 using HostelFinder.Application.DTOs.Wishlist.Response;
 using HostelFinder.Application.Interfaces.IRepositories;

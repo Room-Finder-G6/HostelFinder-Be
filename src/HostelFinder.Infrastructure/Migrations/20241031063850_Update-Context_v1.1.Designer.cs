@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    partial class HostelFinderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241031063850_Update-Context_v1.1")]
+    partial class UpdateContext_v11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -507,7 +510,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.RoomDetails", b =>
                 {
-                    b.Property<Guid>("RoomId")
+                    b.Property<Guid>("PostId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("BathRooms")
@@ -546,7 +549,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<int>("Size")
                         .HasColumnType("int");
 
-                    b.HasKey("RoomId");
+                    b.HasKey("PostId");
 
                     b.ToTable("RoomDetails");
                 });
@@ -863,7 +866,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasOne("HostelFinder.Domain.Entities.Post", "Post")
                         .WithMany("Images")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Hostel");
 
@@ -886,7 +889,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasOne("HostelFinder.Domain.Entities.Hostel", "Hostel")
                         .WithMany("Posts")
                         .HasForeignKey("HostelId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HostelFinder.Domain.Entities.MembershipServices", "MembershipServices")
@@ -942,7 +945,7 @@ namespace HostelFinder.Infrastructure.Migrations
                 {
                     b.HasOne("HostelFinder.Domain.Entities.Room", "Room")
                         .WithOne("RoomDetails")
-                        .HasForeignKey("HostelFinder.Domain.Entities.RoomDetails", "RoomId")
+                        .HasForeignKey("HostelFinder.Domain.Entities.RoomDetails", "PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

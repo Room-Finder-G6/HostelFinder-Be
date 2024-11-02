@@ -90,11 +90,10 @@ namespace HostelFinder.WebApi.Controllers
             }
 
             return NotFound(new Dictionary<string, object>
-                            {
-                                { "message", "Hostel not found or update failed." },
-                                { "errors", result.Errors }
-                            });
-
+            {
+                { "message", "Hostel not found or update failed." },
+                { "errors", result.Errors }
+            });
         }
 
         [HttpDelete("DeleteHostel/{id}")]

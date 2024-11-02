@@ -2,7 +2,7 @@
 using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.Post.Requests;
-using HostelFinder.Application.DTOs.Room.Requests;
+using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -68,6 +68,31 @@ public class PostService : IPostService
         }
     }
 
+    public async Task<Response<bool>> DeletePostAsync(Guid postId, Guid userId)
+    {
+        var post = await _postRepository.GetPostByIdWithHostelAsync(postId);
+        if (post == null)
+        {
+            return new Response<bool>
+            {
+                Succeeded = false,
+                Errors = ["Bài đăng không tồn tại."]
+            };
+        }
+
+        if (post.Hostel == null || post.Hostel.LandlordId != userId)
+        {
+            return new Response<bool>
+            {
+                Succeeded = false,
+                Errors = ["Bạn không có quyền xóa bài đăng này."]
+            };
+        }
+
+        await _postRepository.DeletePermanentAsync(postId);
+        return new Response<bool> { Succeeded = true, Message = "Xóa bài đăng thành công." };
+    }
+
     public async Task<LandlordResponseDto> GetLandlordByPostIdAsync(Guid postId)
     {
         var hostel = await _userRepository.GetHostelByPostIdAsync(postId);
@@ -101,14 +126,14 @@ public class PostService : IPostService
         return hostelResponseDto;
     }
 
-    public async Task<PagedResponse<List<ListPostResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request)
+    public async Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request)
     {
         try
         {
             var posts = await _postRepository.GetAllMatchingAsync(request.SearchPhrase, request.PageSize,
                 request.PageNumber, request.SortBy, request.SortDirection);
 
-            var postsDtos = _mapper.Map<List<ListPostResponseDto>>(posts.Data);
+            var postsDtos = _mapper.Map<List<ListPostsResponseDto>>(posts.Data);
 
             var pagedResponse = PaginationHelper.CreatePagedResponse(postsDtos, request.PageNumber, request.PageSize,
                 posts.TotalRecords);
@@ -116,25 +141,46 @@ public class PostService : IPostService
         }
         catch (Exception ex)
         {
-            return new PagedResponse<List<ListPostResponseDto>> { Succeeded = false, Errors = { ex.Message } };
+            return new PagedResponse<List<ListPostsResponseDto>> { Succeeded = false, Errors = { ex.Message } };
         }
     }
 
-    public async Task<Response<List<ListPostResponseDto>>> GetPostsByUserIdAsync(Guid userId)
+    public async Task<Response<PostResponseDto>> GetPostByIdAsync(Guid postId)
+    {
+        var post = await _postRepository.GetPostByIdAsync(postId);
+
+        if (post == null)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Errors = new List<string> { "Bài đăng không tồn tại." }
+            };
+        }
+
+        var postDto = _mapper.Map<PostResponseDto>(post);
+        return new Response<PostResponseDto>
+        {
+            Data = postDto,
+            Succeeded = true,
+        };
+    }
+
+    public async Task<Response<List<ListPostsResponseDto>>> GetPostsByUserIdAsync(Guid userId)
     {
         var posts = await _postRepository.GetPostsByUserIdAsync(userId);
 
         if (posts == null || !posts.Any())
         {
-            return new Response<List<ListPostResponseDto>>
+            return new Response<List<ListPostsResponseDto>>
             {
                 Succeeded = false,
-                Errors = new List<string> { "No posts found for this user." }
+                Errors = new List<string> { "Bạn chưa có bài đăng nào." }
             };
         }
 
-        var postDtos = _mapper.Map<List<ListPostResponseDto>>(posts);
-        return new Response<List<ListPostResponseDto>>
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts);
+        return new Response<List<ListPostsResponseDto>>
         {
             Data = postDtos,
             Succeeded = true

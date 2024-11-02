@@ -3,6 +3,7 @@ using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Seeders;
 using HostelFinder.WebApi.Extensions;
 using HostelFinder.WebApi.Middlewares;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

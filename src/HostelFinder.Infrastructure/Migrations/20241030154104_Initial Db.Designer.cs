@@ -12,8 +12,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
+<<<<<<<< HEAD:src/HostelFinder.Infrastructure/Migrations/20241030154104_Initial Db.Designer.cs
     [Migration("20241030154104_Initial Db")]
     partial class InitialDb
+========
+    [Migration("20241101181119_ChangelDeleteBehavior")]
+    partial class ChangelDeleteBehavior
+>>>>>>>> 3de86def19438cdbff2cc904707b05fe9e78d6f2:src/HostelFinder.Infrastructure/Migrations/20241101181119_ChangelDeleteBehavior.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -873,7 +878,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasOne("HostelFinder.Domain.Entities.Post", "Post")
                         .WithMany("Images")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Hostel");
 
@@ -896,7 +901,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasOne("HostelFinder.Domain.Entities.Hostel", "Hostel")
                         .WithMany("Posts")
                         .HasForeignKey("HostelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HostelFinder.Domain.Entities.MembershipServices", "MembershipServices")
