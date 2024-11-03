@@ -13,21 +13,23 @@ namespace HostelFinder.Application.Services
     {
         private readonly IHostelRepository _hostelRepository;
         private readonly IMapper _mapper;
+        private readonly IHostelServiceRepository _hostelServiceRepository;
 
-        public HostelService(IHostelRepository hostelRepository , IMapper mapper)
+        public HostelService(IHostelRepository hostelRepository , IMapper mapper, IHostelServiceRepository hostelServiceRepository)
         {
             _hostelRepository = hostelRepository;
             _mapper = mapper;
+            _hostelServiceRepository = hostelServiceRepository;
         }
 
-        public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto hostelDto)
+        public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request)
         {
             var isDuplicate = await _hostelRepository.CheckDuplicateHostelAsync(
-                hostelDto.HostelName,
-                hostelDto.Address.Province,
-                hostelDto.Address.District,
-                hostelDto.Address.Commune,
-                hostelDto.Address.DetailAddress
+                request.HostelName,
+                request.Address.Province,
+                request.Address.District,
+                request.Address.Commune,
+                request.Address.DetailAddress
             );
 
             if (isDuplicate)
@@ -35,13 +37,29 @@ namespace HostelFinder.Application.Services
                 return new Response<HostelResponseDto>("Hostel đã tồn tại với cùng địa chỉ.");
             }
 
-            var hostel = _mapper.Map<Hostel>(hostelDto);
+            var hostel = _mapper.Map<Hostel>(request);
             hostel.CreatedOn = DateTime.Now;
-            hostel.CreatedBy = "System";
+            hostel.CreatedBy = request.LandlordId.ToString();
             try
             {
-                await _hostelRepository.AddAsync(hostel);
+                var hostelAdded = await _hostelRepository.AddAsync(hostel);
+
+                foreach(var serviceId in request.ServiceId)
+                {
+                    HostelServices hostelServices = new HostelServices
+                    {
+                        ServiceId = serviceId ?? Guid.Empty,
+                        HostelId = hostelAdded.Id,
+                        CreatedBy = hostelAdded.LandlordId.ToString(),
+                        CreatedOn = DateTime.Now,
+                        IsDeleted = false,
+                    };
+                    await _hostelServiceRepository.AddAsync(hostelServices);
+                }
+
+                //map domain to Dtos
                 var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
+
                 return new Response<HostelResponseDto>
                     { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
             }

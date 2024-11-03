@@ -1,9 +1,9 @@
-﻿namespace HostelFinder.Domain.Entities
-{
-    public class HostelService
-    {
-        public Guid Id { get; set; }
+﻿using RoomFinder.Domain.Common;
 
+namespace HostelFinder.Domain.Entities
+{
+    public class HostelServices : BaseEntity
+    {
         public Guid ServiceId { get; set; }
         
         public Guid HostelId { get; set; }
