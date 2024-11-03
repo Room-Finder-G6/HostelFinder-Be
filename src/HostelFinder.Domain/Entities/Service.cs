@@ -10,6 +10,6 @@ namespace HostelFinder.Domain.Entities
         //public Guid HostelId { get; set; }
         //public int Price { get; set; }
         //public virtual Hostel Hostel { get; set; }
-        public ICollection<HostelService> HostelServices { get; set; }
+        public ICollection<HostelServices> HostelServices { get; set; }
     }
 }

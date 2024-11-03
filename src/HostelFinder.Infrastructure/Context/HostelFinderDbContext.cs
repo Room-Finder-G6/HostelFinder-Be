@@ -25,7 +25,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Invoice> InVoices { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Address> Addresses { get; set; }
-    public DbSet<HostelService> HostelServices { get; set; }
+    public DbSet<HostelServices> HostelServices { get; set; }
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)

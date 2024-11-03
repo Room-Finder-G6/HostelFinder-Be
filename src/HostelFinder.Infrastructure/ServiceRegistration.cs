@@ -36,5 +36,6 @@ public class ServiceRegistration
         service.AddScoped<IServiceCostRepository, ServiceCostRepository>();
         service.AddScoped<IRoomRepository, RoomRepository>();
         service.AddScoped<IImageRepository, ImageRepository>();
+        service.AddScoped<IHostelServiceRepository, HostelServiceRepository>();
     }
 }
