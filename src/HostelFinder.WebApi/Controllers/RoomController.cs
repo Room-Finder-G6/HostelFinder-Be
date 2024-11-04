@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/rooms")]
     [ApiController]
     public class RoomController : ControllerBase
     {
@@ -37,13 +37,14 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateRoom([FromBody] AddRoomRequestDto roomDto)
+        public async Task<IActionResult> CreateRoom([FromForm] AddRoomRequestDto roomDto, [FromForm] List<IFormFile> roomImages)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             try
             {
-                var response = await _roomService.CreateAsync(roomDto);
+                //map to Domain Room 
+                var response = await _roomService.CreateRoomAsync(roomDto, roomImages);
                 if (!response.Succeeded)
                     return BadRequest(response.Message);
 
