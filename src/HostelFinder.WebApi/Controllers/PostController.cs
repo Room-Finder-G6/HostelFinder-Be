@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]/")]
+[Route("api/posts/")]
 public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
@@ -32,14 +33,27 @@ public class PostController : ControllerBase
     }*/
 
     [HttpPost]
-    public async Task<IActionResult> AddPost([FromBody] AddPostRequestDto postDto)
+    public async Task<IActionResult> AddPost([FromForm] AddPostRequestDto postDto, [FromForm] List<IFormFile> images)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _postService.AddPostAsync(postDto);
+        //Upload image to AWS and collect Url response
+        var imageUrls = new List<string>();
+
+        if (images != null && images.Count > 0)
+        {
+            foreach (var image in images)
+            {
+                var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
+                var imageUrl = uploadToAWS3;
+                imageUrls.Add(imageUrl);
+            }
+        }
+
+        var result = await _postService.AddPostAsync(postDto, imageUrls);
         if (result.Succeeded)
         {
             return Ok(result);
@@ -66,18 +80,25 @@ public class PostController : ControllerBase
         return BadRequest(result.Errors);
     }*/
 
-    /*[HttpDelete]
+    [HttpDelete]
     [Route("{postId}")]
-    public async Task<IActionResult> DeletePost(Guid roomId)
+    public async Task<IActionResult> DeletePost(Guid postId)
     {
-        var result = await _postService.DeleteRoomAsync(roomId);
-        if (result.Succeeded)
+        var userIdClaim = User.FindFirst("UserId");
+        if(userIdClaim == null)
         {
-            return Ok(result);
+            return Unauthorized("Người dùng chưa được xác thực.");
         }
 
-        return NotFound();
-    }*/
+        var currentUserId = Guid.Parse(userIdClaim.Value);
+        var response = await _postService.DeletePostAsync(postId, currentUserId);
+        if (!response.Succeeded)
+        {
+            return BadRequest(response.Errors);
+        }
+
+        return Ok(response.Message);
+    }
 
     /*[HttpGet("{postId}/landlord")]
     public async Task<IActionResult> GetLandlordByPostId(Guid postId)
@@ -104,18 +125,19 @@ public class PostController : ControllerBase
 
         return Ok(hostel);
     }*/
-    
-    /*[HttpPost("get-all")]
+
+    [HttpPost("get-all")]
     public async Task<IActionResult> Get(GetAllPostsQuery request)
     {
         var response = await _postService.GetAllPostAysnc(request);
         if (response.Succeeded)
         {
-            return BadRequest(response);
+            return BadRequest(response.Errors);
         }
+
         return Ok(response);
-    }*/
-    
+    }
+
     [HttpPost("test-upload-file")]
     public async Task<IActionResult> TestUploadFile(IFormFile file)
     {
@@ -130,7 +152,7 @@ public class PostController : ControllerBase
         }
     }
 
-    /*[HttpGet("user/{userId}")]
+    [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetPostByUserId(Guid userId)
     {
         var result = await _postService.GetPostsByUserIdAsync(userId);
@@ -140,6 +162,17 @@ public class PostController : ControllerBase
         }
 
         return NotFound(result.Errors);
-    }*/
+    }
 
+    [HttpGet("{postId}")]
+    public async Task<IActionResult> GetPostById(Guid postId)
+    {
+        var result = await _postService.GetPostByIdAsync(postId);
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return NotFound();
+    }
 }

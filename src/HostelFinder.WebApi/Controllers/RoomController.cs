@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/rooms")]
     [ApiController]
     public class RoomController : ControllerBase
     {
@@ -23,7 +23,7 @@ namespace HostelFinder.WebApi.Controllers
             if (!response.Succeeded)
                 return BadRequest(response.Message);
 
-            return Ok(response.Data);
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
@@ -33,20 +33,27 @@ namespace HostelFinder.WebApi.Controllers
             if (!response.Succeeded)
                 return NotFound(response.Message);
 
-            return Ok(response.Data);
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateRoom([FromBody] AddRoomRequestDto roomDto)
+        public async Task<IActionResult> CreateRoom([FromForm] AddRoomRequestDto roomDto, [FromForm] List<IFormFile> roomImages)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            try
+            {
+                //map to Domain Room 
+                var response = await _roomService.CreateRoomAsync(roomDto, roomImages);
+                if (!response.Succeeded)
+                    return BadRequest(response.Message);
 
-            var response = await _roomService.CreateAsync(roomDto);
-            if (!response.Succeeded)
-                return BadRequest(response.Message);
-
-            return CreatedAtAction(nameof(GetRoom), new { id = response.Data.Id }, response.Data);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
@@ -54,22 +61,41 @@ namespace HostelFinder.WebApi.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            try
+            {
+                var response = await _roomService.UpdateAsync(id, roomDto);
+                if (!response.Succeeded)
+                    return NotFound(response.Message);
 
-            var response = await _roomService.UpdateAsync(id, roomDto);
-            if (!response.Succeeded)
-                return NotFound(response.Message);
-
-            return Ok(response.Data);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoom(Guid id)
         {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid room ID");
             var response = await _roomService.DeleteAsync(id);
             if (!response.Succeeded)
                 return NotFound(response.Message);
 
-            return NoContent();
+            return Ok(response);
         }
+
+        [HttpGet("hostels/{hostelId}/rooms")]
+        public async Task<IActionResult> GetRoomsByHostelId(Guid hostelId)
+        {
+            var response = await _roomService.GetRoomsByHostelIdAsync(hostelId);
+            if (!response.Succeeded)
+                return NotFound(response.Message);
+
+            return Ok(response);
+        }
+
     }
 }

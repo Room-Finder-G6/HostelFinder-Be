@@ -1,5 +1,4 @@
-﻿using HostelFinder.Application.DTOs.Amenity.Request;
-using HostelFinder.Application.DTOs.RoomDetails.Request;
+﻿using HostelFinder.Application.DTOs.RoomDetails.Request;
 using HostelFinder.Application.DTOs.ServiceCost.Request;
 using HostelFinder.Domain.Enums;
 
@@ -10,7 +9,11 @@ namespace HostelFinder.Application.DTOs.Room.Requests
         public Guid HostelId { get; set; }
         public string RoomName { get; set; }
         public bool Status { get; set; }
+        public decimal Deposit { get; set; }
         public decimal MonthlyRentCost { get; set; }
+
+        public float Size { get; set; }
         public RoomType RoomType { get; set; }
+        public List<Guid> AmenityId{ get; set; }
     }
 }

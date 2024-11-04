@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 
 namespace HostelFinder.Infrastructure.Context;
@@ -24,9 +25,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Invoice> InVoices { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Address> Addresses { get; set; }
-
-
-
+    public DbSet<HostelServices> HostelServices { get; set; }
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -70,7 +69,7 @@ public class HostelFinderDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Hostel>()
-            .HasMany(h => h.Services)
+            .HasMany(h => h.HostelServices)
             .WithOne(s => s.Hostel)
             .HasForeignKey(s => s.HostelId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -85,7 +84,7 @@ public class HostelFinderDbContext : DbContext
             .HasMany(h => h.Images)
             .WithOne(i => i.Hostel)
             .HasForeignKey(i => i.HostelId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Hostel>()
             .HasMany(h => h.Rooms)
@@ -105,7 +104,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(i => i.Post)
             .WithMany(p => p.Images)
             .HasForeignKey(i => i.PostId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Configure Membership entity
         modelBuilder.Entity<Membership>()
@@ -127,7 +126,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(p => p.Hostel)
             .WithMany(h => h.Posts)
             .HasForeignKey(p => p.HostelId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Post>()
             .HasOne(p => p.Room)
             .WithMany(r => r.Posts)
@@ -169,20 +168,20 @@ public class HostelFinderDbContext : DbContext
 
         // Configure RoomDetails entity
         modelBuilder.Entity<RoomDetails>()
-            .HasKey(rd => rd.PostId);
+            .HasKey(rd => rd.RoomId);
         modelBuilder.Entity<RoomDetails>()
             .HasOne(rd => rd.Room)
             .WithOne(r => r.RoomDetails)
-            .HasForeignKey<RoomDetails>(rd => rd.PostId)
+            .HasForeignKey<RoomDetails>(rd => rd.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure Service entity
         modelBuilder.Entity<Service>()
             .HasKey(s => s.Id);
         modelBuilder.Entity<Service>()
-            .HasOne(s => s.Hostel)
-            .WithMany(h => h.Services)
-            .HasForeignKey(s => s.HostelId)
+            .HasMany(s => s.HostelServices)
+            .WithOne(h => h.Services)
+            .HasForeignKey(s => s.ServiceId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure ServiceCost entity
@@ -197,7 +196,7 @@ public class HostelFinderDbContext : DbContext
             .HasOne(sc => sc.Invoice)
             .WithMany(i => i.ServiceCost)
             .HasForeignKey(sc => sc.InVoiceId)
-            .OnDelete(DeleteBehavior.Restrict); // or Cascade if deletion should propagate
+            .OnDelete(DeleteBehavior.Restrict); 
 
 
         // Configure User entity
@@ -256,6 +255,21 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(wp => wp.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Specify precision for decimal properties
+        modelBuilder.Entity<Invoice>()
+            .Property(i => i.TotalAmount)
+            .HasColumnType("decimal(18,2)");
 
+        modelBuilder.Entity<Room>()
+            .Property(r => r.MonthlyRentCost)
+            .HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<ServiceCost>()
+            .Property(sc => sc.Cost)
+            .HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<ServiceCost>()
+            .Property(sc => sc.UnitCost)
+            .HasColumnType("decimal(18,2)");
     }
 }

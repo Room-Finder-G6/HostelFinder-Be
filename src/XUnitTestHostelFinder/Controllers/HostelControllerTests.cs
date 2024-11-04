@@ -43,12 +43,11 @@ namespace XUnitTestHostelFinder.Controllers
                         DetailAddress = "123 Test Street"
                     },
                     NumberOfRooms = 10,
-                    Image = new List<ImageResponseDto> 
+                    Image = new List<ImageResponseDto>
                     {
                         new ImageResponseDto
                         {
                             Url = "image_url",
-                            Description = "A description for the image."
                         }
                     },
                     Coordinates = "10.762622,106.660172",
@@ -213,7 +212,7 @@ namespace XUnitTestHostelFinder.Controllers
             var hostelDto = new AddHostelRequestDto
             {
                 HostelName = "New Hostel",
-                LandlordId = Guid.NewGuid(), 
+                LandlordId = Guid.NewGuid(),
                 Description = "A description of the hostel.",
                 Address = new AddressDto
                 {
@@ -249,14 +248,15 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Contains("Add failed", returnValue.Errors);
         }
 
-        /*[Fact]
+        [Fact]
         public async Task UpdateHostel_ReturnsOkResult_WhenUpdateSucceeds()
         {
             // Arrange
             var hostelId = Guid.NewGuid();
+            var userId = Guid.NewGuid(); // Mock user ID
+
             var hostelDto = new UpdateHostelRequestDto
             {
-                Id = hostelId, // Ensure the ID matches
                 HostelName = "Updated Hostel",
                 Description = "A cozy hostel in the city center",
                 Address = new AddressDto
@@ -269,7 +269,6 @@ namespace XUnitTestHostelFinder.Controllers
                 Size = 150.5f,
                 NumberOfRooms = 10,
                 Coordinates = "21.0285, 105.8542",
-                Rating = 4.5f
             };
 
             var mockResponse = new Response<HostelResponseDto>
@@ -282,14 +281,20 @@ namespace XUnitTestHostelFinder.Controllers
                     Address = hostelDto.Address,
                     NumberOfRooms = hostelDto.NumberOfRooms,
                     Coordinates = hostelDto.Coordinates,
-                    Rating = hostelDto.Rating
                 },
                 Succeeded = true
             };
 
             _hostelServiceMock
-                .Setup(service => service.UpdateHostelAsync(hostelDto))
+                .Setup(service => service.UpdateHostelAsync(hostelId, userId, hostelDto))
                 .ReturnsAsync(mockResponse);
+
+            // Simulate User ID claim
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+            _controller.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("UserId", userId.ToString()) }));
 
             // Act
             var result = await _controller.UpdateHostel(hostelId, hostelDto);
@@ -302,18 +307,19 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Equal("A cozy hostel in the city center", returnValue.Data.Description);
             Assert.Equal(10, returnValue.Data.NumberOfRooms);
             Assert.Equal("21.0285, 105.8542", returnValue.Data.Coordinates);
-            Assert.Equal(4.5f, returnValue.Data.Rating);
-        }*/
+        }
 
 
-        /*[Fact]
+
+        [Fact]
         public async Task UpdateHostel_ReturnsNotFound_WhenUpdateFails()
         {
             // Arrange
             var hostelId = Guid.NewGuid();
+            var userId = Guid.NewGuid(); // Mock user ID
+
             var hostelDto = new UpdateHostelRequestDto
             {
-                Id = hostelId, // Ensure this matches the hostelId parameter
                 HostelName = "Updated Hostel",
                 Description = "A cozy hostel in the city center",
                 Address = new AddressDto
@@ -326,7 +332,6 @@ namespace XUnitTestHostelFinder.Controllers
                 Size = 150.5f,
                 NumberOfRooms = 10,
                 Coordinates = "21.0285, 105.8542",
-                Rating = 4.5f
             };
 
             var mockResponse = new Response<HostelResponseDto>
@@ -337,17 +342,31 @@ namespace XUnitTestHostelFinder.Controllers
             };
 
             _hostelServiceMock
-                .Setup(service => service.UpdateHostelAsync(hostelDto))
+                .Setup(service => service.UpdateHostelAsync(hostelId, userId, hostelDto))
                 .ReturnsAsync(mockResponse);
+
+            // Simulate User ID claim
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+            _controller.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+        new Claim("UserId", userId.ToString())
+    }));
 
             // Act
             var result = await _controller.UpdateHostel(hostelId, hostelDto);
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var returnValue = Assert.IsType<List<string>>(notFoundResult.Value); // Adjusted type
-            Assert.Contains("Hostel not found", returnValue);
-        }*/
+            var returnValue = Assert.IsAssignableFrom<IDictionary<string, object>>(notFoundResult.Value);
+
+            Assert.Equal("Hostel not found or update failed.", returnValue["message"]);
+            Assert.Contains("Hostel not found", (List<string>)returnValue["errors"]);
+        }
+
+
 
 
         [Fact]
@@ -506,6 +525,8 @@ namespace XUnitTestHostelFinder.Controllers
             {
                 Data = new List<ListHostelResponseDto>
         {
+            new ListHostelResponseDto { HostelName = "Hostel A"},
+            new ListHostelResponseDto { HostelName = "Hostel B"}
         },
                 Succeeded = true
             };

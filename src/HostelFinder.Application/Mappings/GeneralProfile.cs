@@ -24,6 +24,7 @@ using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.DTOs.InVoice.Requests;
 using HostelFinder.Application.DTOs.Post.Requests;
+using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Responses;
 
 namespace HostelFinder.Application.Mappings;
@@ -34,18 +35,37 @@ public class GeneralProfile : Profile
     {
         // Post Mapping
         CreateMap<AddPostRequestDto, Post>()
-            .ForMember(dest => dest.Images, opt => opt.MapFrom(src =>
-                src.ImageUrls.Select(url => new Image { Url = url })))
+            .ReverseMap();
+        
+        CreateMap<PostResponseDto, Post>()
+            .ForPath(dest => dest.MembershipServices.Membership.Id, opt =>
+                opt.MapFrom(src => src.MembershipId))
             .ReverseMap();
 
+        CreateMap<Post, ListPostsResponseDto>()
+            .ForMember(dest => dest.Address, opt =>
+                opt.MapFrom(src => src.Hostel.Address))
+            .ForMember(dest => dest.MonthlyRentCost, opt =>
+                opt.MapFrom(src => src.Room.MonthlyRentCost))
+            .ForMember(dest => dest.Size, opt =>
+                opt.MapFrom(src => src.Room.RoomDetails.Size))
+            .ForMember(dest => dest.FirstImage, opt =>
+                opt.MapFrom(src => src.Images.Any()
+                    ? src.Images.First().Url
+                    : null))
+            .ReverseMap();
+        
+        
         // Hostel Mapping
         CreateMap<Hostel, HostelResponseDto>().ReverseMap();
         CreateMap<Hostel, AddHostelRequestDto>()
-            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+            .ForMember(dest => dest.Address, opt => 
+                opt.MapFrom(src => src.Address))
             .ReverseMap();
 
         CreateMap<Hostel, ListHostelResponseDto>()
-            .ForMember(dest => dest.LandlordUserName, opt => opt.MapFrom(src => src.Landlord.Username))
+            .ForMember(dest => dest.LandlordUserName, opt => 
+                opt.MapFrom(src => src.Landlord.Username))
             .ReverseMap();
 
         // Address Mapping
@@ -54,7 +74,7 @@ public class GeneralProfile : Profile
 
         // RoomDetails Mapping
         CreateMap<RoomDetails, RoomDetailsResponseDto>().ReverseMap();
-        CreateMap<RoomDetails, AddRoomDetailsDto>().ReverseMap();
+        CreateMap<RoomDetails, AddRoomDetailRequestDto>().ReverseMap();
         CreateMap<RoomDetails, UpdateRoomDetailsDto>().ReverseMap();
 
         // Amenities Mapping
@@ -65,7 +85,7 @@ public class GeneralProfile : Profile
         // Service Cost Mapping
         CreateMap<ServiceCost, ServiceCostResponseDto>().ReverseMap();
         CreateMap<ServiceCost, AddServiceCostDto>().ReverseMap();
-        CreateMap<UpdateServiceCostDto, ServiceCost>();
+        CreateMap<UpdateServiceCostDto, ServiceCost>().ReverseMap();
 
         //Map User
         CreateMap<User, UserDto>().ReverseMap();
@@ -109,7 +129,17 @@ public class GeneralProfile : Profile
 
         //Room
         CreateMap<Room, RoomResponseDto>().ReverseMap();
-        CreateMap<UpdateRoomRequestDto, Room>().ReverseMap();
+        CreateMap<UpdateRoomRequestDto, Room>();
         CreateMap<AddRoomRequestDto, Room>().ReverseMap();
+        CreateMap<Room, RoomResponseDto>()
+            .ForMember(dest => dest.AddServiceCostDtos, opt => opt.MapFrom(src => src.ServiceCost))
+            .ForMember(dest => dest.RoomDetailRequestDto, opt => opt.MapFrom(src => src.RoomDetails))
+            .ReverseMap();
+        CreateMap<AddRoomRequestDto, Room>()
+            .ReverseMap();
+        CreateMap<UpdateRoomRequestDto, Room>()
+            .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.UpdateServiceCostDtos))
+            .ForMember(dest => dest.RoomDetails, opt => opt.MapFrom(src => src.UpdateRoomDetailsDto));
+            
     }
 }

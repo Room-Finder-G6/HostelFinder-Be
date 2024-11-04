@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HostelFinder.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -86,6 +86,24 @@ namespace HostelFinder.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Memberships", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Services",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ServiceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Services", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -174,7 +192,14 @@ namespace HostelFinder.Infrastructure.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MembershipId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    MembershipId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -239,6 +264,31 @@ namespace HostelFinder.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "HostelServices",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ServiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    HostelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HostelServices", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_HostelServices_Hostels_HostelId",
+                        column: x => x.HostelId,
+                        principalTable: "Hostels",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_HostelServices_Services_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Services",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Rooms",
                 columns: table => new
                 {
@@ -260,32 +310,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     table.PrimaryKey("PK_Rooms", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Rooms_Hostels_HostelId",
-                        column: x => x.HostelId,
-                        principalTable: "Hostels",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Services",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ServiceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    HostelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Price = table.Column<int>(type: "int", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastModifiedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Services", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Services_Hostels_HostelId",
                         column: x => x.HostelId,
                         principalTable: "Hostels",
                         principalColumn: "Id",
@@ -319,7 +343,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         column: x => x.HostelId,
                         principalTable: "Hostels",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Posts_MembershipServices_MembershipServiceId",
                         column: x => x.MembershipServiceId,
@@ -339,7 +363,8 @@ namespace HostelFinder.Infrastructure.Migrations
                 columns: table => new
                 {
                     RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AmenityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    AmenityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -362,20 +387,25 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "RoomDetails",
                 columns: table => new
                 {
-                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BedRooms = table.Column<int>(type: "int", nullable: false),
                     BathRooms = table.Column<int>(type: "int", nullable: false),
                     Kitchen = table.Column<int>(type: "int", nullable: false),
                     Size = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<bool>(type: "bit", nullable: false),
-                    OtherDetails = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoomDetails", x => x.PostId);
+                    table.PrimaryKey("PK_RoomDetails", x => x.RoomId);
                     table.ForeignKey(
-                        name: "FK_RoomDetails_Rooms_PostId",
-                        column: x => x.PostId,
+                        name: "FK_RoomDetails_Rooms_RoomId",
+                        column: x => x.RoomId,
                         principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -387,7 +417,7 @@ namespace HostelFinder.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    InVoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    InVoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ServiceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     unitCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Cost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -446,7 +476,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         column: x => x.PostId,
                         principalTable: "Posts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -454,7 +484,8 @@ namespace HostelFinder.Infrastructure.Migrations
                 columns: table => new
                 {
                     WishlistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -477,6 +508,16 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "IX_Hostels_LandlordId",
                 table: "Hostels",
                 column: "LandlordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HostelServices_HostelId",
+                table: "HostelServices",
+                column: "HostelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HostelServices_ServiceId",
+                table: "HostelServices",
+                column: "ServiceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Images_HostelId",
@@ -529,11 +570,6 @@ namespace HostelFinder.Infrastructure.Migrations
                 column: "RoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Services_HostelId",
-                table: "Services",
-                column: "HostelId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserMemberships_MembershipId",
                 table: "UserMemberships",
                 column: "MembershipId");
@@ -560,6 +596,9 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "BlackListTokens");
 
             migrationBuilder.DropTable(
+                name: "HostelServices");
+
+            migrationBuilder.DropTable(
                 name: "Images");
 
             migrationBuilder.DropTable(
@@ -572,13 +611,13 @@ namespace HostelFinder.Infrastructure.Migrations
                 name: "ServiceCosts");
 
             migrationBuilder.DropTable(
-                name: "Services");
-
-            migrationBuilder.DropTable(
                 name: "UserMemberships");
 
             migrationBuilder.DropTable(
                 name: "WishlistPosts");
+
+            migrationBuilder.DropTable(
+                name: "Services");
 
             migrationBuilder.DropTable(
                 name: "Amenities");

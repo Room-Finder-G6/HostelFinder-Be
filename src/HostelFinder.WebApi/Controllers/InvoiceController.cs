@@ -41,11 +41,18 @@ namespace HostelFinder.WebApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var response = await _invoiceService.CreateAsync(invoiceDto);
-            if (!response.Succeeded)
-                return BadRequest(response.Message);
+            try
+            {
+                var response = await _invoiceService.CreateAsync(invoiceDto);
+                if (!response.Succeeded)
+                    return BadRequest(response.Message);
 
-            return CreatedAtAction(nameof(GetInvoice), new { id = response.Data.Id }, response.Data);
+                return Ok(response.Data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
@@ -67,8 +74,7 @@ namespace HostelFinder.WebApi.Controllers
             var response = await _invoiceService.DeleteAsync(id);
             if (!response.Succeeded)
                 return NotFound(response.Message);
-
-            return NoContent();
+            return Ok(response);
         }
     }
 }

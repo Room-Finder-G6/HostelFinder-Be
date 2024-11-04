@@ -1,59 +1,69 @@
 using HostelFinder.Application.DTOs.Amenity.Request;
+using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]/")]
+[Route("api/amentities")]
 public class AmenityController : ControllerBase
 {
     private readonly IAmenityService _amenityService;
-    
+
     public AmenityController(IAmenityService amenityService)
     {
         _amenityService = amenityService;
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> AddAmenity([FromBody] AddAmenityDto addAmenityDto)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(new Response<AmenityResponse>("Invalid model state"));
         }
-
         try
         {
-            var amenity = await _amenityService.AddAmenityAsync(addAmenityDto);
-            return Ok(amenity);
+            var response = await _amenityService.AddAmenityAsync(addAmenityDto);
+            if (response.Succeeded)
+            {
+                return Ok(response);
+            }
+
+            return BadRequest(response);
         }
         catch (Exception ex)
         {
             return StatusCode(500, ex.Message);
         }
+
     }
-    
+
     [HttpGet]
-    [Route("amenities")]
     public async Task<IActionResult> GetAllAmenities()
     {
-        var amenities = await _amenityService.GetAllAmenitiesAsync();
-        if(amenities == null)
+        var response = await _amenityService.GetAllAmenitiesAsync();
+        if (!response.Succeeded || response.Data == null || !response.Data.Any())
         {
-            return NotFound("No amenities found");
+            return NotFound(new Response<List<AmenityResponse>>("No amenities found"));
         }
-        return Ok(amenities);
+
+        return Ok(response);
     }
-    
-    [HttpDelete("amenityId")]
+
+    [HttpDelete("{amenityId}")]
     public async Task<IActionResult> DeleteAmenity(Guid amenityId)
     {
-        var result = await _amenityService.DeleteAmenityAsync(amenityId);
-        if (result.Succeeded)
+        var response = await _amenityService.DeleteAmenityAsync(amenityId);
+
+        if (!response.Succeeded)
         {
-            return Ok(result);
+            return NotFound(response);
         }
-        return NotFound("Amenity not found");
+        return Ok(response);
     }
+
+
 }

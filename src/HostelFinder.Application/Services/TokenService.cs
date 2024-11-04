@@ -25,25 +25,28 @@ namespace HostelFinder.Application.Services
 
         public string GenerateJwtToken(User user, UserRole role)
         {
-            var claims = new List<Claim>()
+            var claims = new List<Claim>
             {
-                new Claim ("UserId" , user.Id.ToString()),
-                new Claim (ClaimTypes.Name, user.Username),
-                new Claim (ClaimTypes.Email, user.Email),
-                new Claim (ClaimTypes.Role, role.ToString()),
-                new Claim("Time", DateTime.Now.AddMinutes(_jwtSettings.ExpiryInMinutes).ToString())
+                new ("UserId", user.Id.ToString()),
+                new (ClaimTypes.Name, user.Username),
+                new (ClaimTypes.Email, user.Email),
+                new (ClaimTypes.Role, role.ToString())
             };
 
+            // Generate signing credentials
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            // Create JWT token
             var token = new JwtSecurityToken(
-                    _jwtSettings.Issuer,
-                    _jwtSettings.Audience,
-                    claims,
-                    expires: DateTime.Now.AddMinutes(_jwtSettings.ExpiryInMinutes),
-                    signingCredentials: credentials
-                    );
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
+                signingCredentials: credentials
+            );
+
+            // Return serialized JWT
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
@@ -54,6 +57,7 @@ namespace HostelFinder.Application.Services
             {
                 rng.GetBytes(tokenBytes);
             }
+
             var token = Convert.ToBase64String(tokenBytes);
 
             user.PasswordResetToken = token;
@@ -69,6 +73,7 @@ namespace HostelFinder.Application.Services
             {
                 return Task.FromResult(false);
             }
+
             return Task.FromResult(user.PasswordResetToken == token && user.PasswordResetTokenExpires > DateTime.Now);
         }
 
@@ -78,6 +83,7 @@ namespace HostelFinder.Application.Services
             {
                 return null;
             }
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
             try

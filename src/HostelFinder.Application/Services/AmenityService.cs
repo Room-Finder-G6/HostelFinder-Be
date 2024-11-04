@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Amenity.Request;
 using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -19,33 +19,34 @@ public class AmenityService : IAmenityService
         _amenityRepository = amenityRepository;
         _mapper = mapper;
     }
-    
-    public async Task<AmenityResponse> AddAmenityAsync(AddAmenityDto addAmenityDto)
+
+    public async Task<Response<AmenityResponse>> AddAmenityAsync(AddAmenityDto addAmenityDto)
     {
         if (await _amenityRepository.ExistsByNameAsync(addAmenityDto.AmenityName))
         {
-            throw new InvalidOperationException("An amenity with the same name already exists.");
+            return new Response<AmenityResponse>("An amenity with the same name already exists.");
         }
+
         var amenity = _mapper.Map<Amenity>(addAmenityDto);
         var addedAmenity = await _amenityRepository.AddAsync(amenity);
-        return _mapper.Map<AmenityResponse>(addedAmenity);
+        var response = _mapper.Map<AmenityResponse>(addedAmenity);
+        return new Response<AmenityResponse>(response, "Amenity added successfully");
     }
 
     public async Task<Response<bool>> DeleteAmenityAsync(Guid amenityId)
     {
         var amenity = await _amenityRepository.GetByIdAsync(amenityId);
         if (amenity == null)
-        {
             return new Response<bool>(false, "Amenity not found");
-        }
+
         await _amenityRepository.DeletePermanentAsync(amenityId);
         return new Response<bool>(true, "Amenity deleted successfully");
     }
 
-    public async Task<List<AmenityResponse>> GetAllAmenitiesAsync()
+    public async Task<Response<List<AmenityResponse>>> GetAllAmenitiesAsync()
     {
         var amenities = await _amenityRepository.ListAllAsync();
         var amenityResponses = _mapper.Map<List<AmenityResponse>>(amenities);
-        return amenityResponses;
+        return new Response<List<AmenityResponse>>(amenityResponses, "Danh sách tiện ích");
     }
 }
