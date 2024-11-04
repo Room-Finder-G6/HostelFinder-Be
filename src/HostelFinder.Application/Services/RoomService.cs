@@ -5,18 +5,28 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace HostelFinder.Application.Services
 {
     public class RoomService : IRoomService
     {
         private readonly IRoomRepository _roomRepository;
+        private readonly IRoomAmentityRepository _roomAmentityRepository;
+        private readonly IS3Service _s3Service;
         private readonly IMapper _mapper;
-
-        public RoomService(IRoomRepository roomRepository, IMapper mapper)
+        private readonly IImageRepository _imageRepository;
+        public RoomService(IRoomRepository roomRepository, 
+            IMapper mapper, 
+            IRoomAmentityRepository roomAmentityRepository
+            , IS3Service s3Service,
+            IImageRepository imageRepository)
         {
             _roomRepository = roomRepository;
             _mapper = mapper;
+            _roomAmentityRepository = roomAmentityRepository;
+            _s3Service = s3Service;
+            _imageRepository = imageRepository;
         }
 
         public async Task<Response<List<RoomResponseDto>>> GetAllAsync()
@@ -36,41 +46,72 @@ namespace HostelFinder.Application.Services
             return new Response<RoomResponseDto>(result);
         }
 
-        public async Task<Response<RoomResponseDto>> CreateAsync(AddRoomRequestDto roomDto)
+        public async Task<Response<RoomResponseDto>> CreateRoomAsync(AddRoomRequestDto roomDto, List<IFormFile> roomImages)
         {
             bool roomExists = await _roomRepository.RoomExistsAsync(roomDto.RoomName, roomDto.HostelId);
             if (roomExists)
             {
-                return new Response<RoomResponseDto>("A room with the same name already exists in this hostel.");
+                return new Response<RoomResponseDto>("Tên phòng đã tồn tại trong trọ.");
             }
-
+            //map to Domain 
             var room = _mapper.Map<Room>(roomDto);
-            room.CreatedBy = "Hệ Thống";
+            room.CreatedBy = room.HostelId.ToString();
             room.CreatedOn = DateTime.Now;
+            room.IsDeleted = false;
 
-            if (roomDto.AddServiceCostDtos != null && roomDto.AddServiceCostDtos.Any())
+            //add to db
+            var roomAdded = await _roomRepository.AddAsync(room);
+
+            //upload image to AWS and collect return Url response
+
+            var imageUrls = new List<string>();
+
+            if (roomImages != null && roomImages.Count > 0)
             {
-                room.ServiceCost = _mapper.Map<List<ServiceCost>>(roomDto.AddServiceCostDtos);
-                foreach (var serviceCost in room.ServiceCost)
+                foreach (var image in roomImages)
                 {
-                    serviceCost.Room = room;
-                    serviceCost.CreatedOn = DateTime.UtcNow;
-                    serviceCost.CreatedBy = room.CreatedBy;
+                    var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
+                    var imageUrl = uploadToAWS3;
+                    imageUrls.Add(imageUrl);
                 }
             }
 
-            if (roomDto.RoomDetailRequestDto != null)
+            //add image to db
+            foreach(var imageUrl in imageUrls)
             {
-                room.RoomDetails = _mapper.Map<RoomDetails>(roomDto.RoomDetailRequestDto);
-                room.RoomDetails.Room = room;
-                room.RoomDetails.CreatedOn = DateTime.UtcNow;
-                room.RoomDetails.CreatedBy = room.CreatedBy;
+                await _imageRepository.AddAsync(new Image
+                {
+                    RoomId = roomAdded.Id,
+                    Url = imageUrl,
+                    CreatedOn = DateTime.Now,
+                    CreatedBy = roomAdded.HostelId.ToString(),
+                    HostelId = roomAdded.HostelId
+                });
             }
 
-            room = await _roomRepository.AddAsync(room);
 
-            var result = _mapper.Map<RoomResponseDto>(room);
-            return new Response<RoomResponseDto>(result, "Room created successfully.");
+            List<Guid> amentityIds = roomDto.AmenityId.ToList();
+
+            //add amentityRoom to db
+            foreach(var amentityId in amentityIds)
+            {
+                await _roomAmentityRepository.AddAsync(new RoomAmenities
+                {
+                    AmenityId = amentityId,
+                    RoomId = roomAdded.Id,
+                    CreatedOn = DateTime.Now,
+                    CreatedBy = roomAdded.HostelId.ToString(),
+                    IsDeleted = false
+                });
+            }
+
+
+
+            return new Response<RoomResponseDto>
+            {
+                 Succeeded = true,
+                 Message = "Thêm phòng trọ thành công"
+            };
         }
 
         public async Task<Response<RoomResponseDto>> UpdateAsync(Guid id, UpdateRoomRequestDto roomDto)

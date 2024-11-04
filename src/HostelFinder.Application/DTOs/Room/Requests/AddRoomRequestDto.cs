@@ -9,9 +9,11 @@ namespace HostelFinder.Application.DTOs.Room.Requests
         public Guid HostelId { get; set; }
         public string RoomName { get; set; }
         public bool Status { get; set; }
+        public decimal Deposit { get; set; }
         public decimal MonthlyRentCost { get; set; }
+
+        public float Size { get; set; }
         public RoomType RoomType { get; set; }
-        public List<AddServiceCostDto> AddServiceCostDtos { get; set; }
-        public AddRoomDetailRequestDto RoomDetailRequestDto { get; set; }
+        public List<Guid> AmenityId{ get; set; }
     }
 }

@@ -5,11 +5,10 @@ using HostelFinder.Infrastructure.Context;
 
 namespace HostelFinder.Infrastructure.Repositories
 {
-    public class ImageRepository : BaseGenericRepository<Image>, IImageRepository
+    public class RoomAmentityRepository : BaseGenericRepository<RoomAmenities>, IRoomAmentityRepository
     {
-        public ImageRepository(HostelFinderDbContext dbContext) : base(dbContext)
+        public RoomAmentityRepository(HostelFinderDbContext dbContext) : base(dbContext)
         {
         }
-
     }
 }

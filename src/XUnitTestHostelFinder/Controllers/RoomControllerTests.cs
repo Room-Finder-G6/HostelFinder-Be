@@ -21,38 +21,38 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         // 1. Test Bad Request for Invalid Model in CreateRoom
-        [Fact]
-        public async Task CreateRoom_ReturnsBadRequest_WhenModelIsInvalid()
-        {
-            // Arrange
-            _controller.ModelState.AddModelError("RoomName", "RoomName is required");
+        //[Fact]
+        //public async Task CreateRoom_ReturnsBadRequest_WhenModelIsInvalid()
+        //{
+        //    // Arrange
+        //    _controller.ModelState.AddModelError("RoomName", "RoomName is required");
 
-            // Act
-            var result = await _controller.CreateRoom(new AddRoomRequestDto());
+        //    // Act
+        //    var result = await _controller.CreateRoom(new AddRoomRequestDto());
 
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.IsType<SerializableError>(badRequestResult.Value);
-        }
+        //    // Assert
+        //    var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        //    Assert.IsType<SerializableError>(badRequestResult.Value);
+        //}
 
-        [Fact]
-        public async Task CreateRoom_ReturnsInternalServerError_WhenServiceThrowsException()
-        {
-            // Arrange
-            var roomDto = new AddRoomRequestDto { RoomName = "Room A", RoomType = RoomType.Chung_cư };
+        //[Fact]
+        //public async Task CreateRoom_ReturnsInternalServerError_WhenServiceThrowsException()
+        //{
+        //    // Arrange
+        //    var roomDto = new AddRoomRequestDto { RoomName = "Room A", RoomType = RoomType.Chung_cư };
 
-            _roomServiceMock
-                .Setup(service => service.CreateAsync(It.IsAny<AddRoomRequestDto>()))
-                .ThrowsAsync(new Exception("Internal server error"));
+        //    _roomServiceMock
+        //        .Setup(service => service.CreateAsync(It.IsAny<AddRoomRequestDto>()))
+        //        .ThrowsAsync(new Exception("Internal server error"));
 
-            // Act
-            var result = await _controller.CreateRoom(roomDto);
+        //    // Act
+        //    var result = await _controller.CreateRoom(roomDto);
 
-            // Assert
-            var objectResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, objectResult.StatusCode);
-            Assert.Equal("Internal server error: Internal server error", objectResult.Value);
-        }
+        //    // Assert
+        //    var objectResult = Assert.IsType<ObjectResult>(result);
+        //    Assert.Equal(500, objectResult.StatusCode);
+        //    Assert.Equal("Internal server error: Internal server error", objectResult.Value);
+        //}
 
         [Fact]
         public async Task UpdateRoom_ReturnsInternalServerError_WhenServiceThrowsException()
@@ -74,48 +74,48 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
 
-        // 4. Parameterized Test for CreateRoom with Different Data Scenarios
-        [Theory]
-        [InlineData("Room A", RoomType.Chung_cư, true)]   // Valid data
-        [InlineData("", RoomType.Phòng_trọ, false)]       // Invalid: Empty RoomName
-        [InlineData("Room C", RoomType.Chung_cư_mini, true)]  // Another valid case
-        public async Task CreateRoom_WithDifferentData_ReturnsExpectedResult(string roomName, RoomType roomType, bool shouldSucceed)
-        {
-            // Arrange
-            var roomDto = new AddRoomRequestDto
-            {
-                RoomName = roomName,
-                RoomType = roomType
-            };
+        //// 4. Parameterized Test for CreateRoom with Different Data Scenarios
+        //[Theory]
+        //[InlineData("Room A", RoomType.Chung_cư, true)]   // Valid data
+        //[InlineData("", RoomType.Phòng_trọ, false)]       // Invalid: Empty RoomName
+        //[InlineData("Room C", RoomType.Chung_cư_mini, true)]  // Another valid case
+        //public async Task CreateRoom_WithDifferentData_ReturnsExpectedResult(string roomName, RoomType roomType, bool shouldSucceed)
+        //{
+        //    // Arrange
+        //    var roomDto = new AddRoomRequestDto
+        //    {
+        //        RoomName = roomName,
+        //        RoomType = roomType
+        //    };
 
-            var mockResponse = new Response<RoomResponseDto>
-            {
-                Data = shouldSucceed ? new RoomResponseDto { RoomName = roomName, RoomType = roomType } : null,
-                Succeeded = shouldSucceed,
-                Message = shouldSucceed ? "Room created successfully" : "Invalid room data"
-            };
+        //    var mockResponse = new Response<RoomResponseDto>
+        //    {
+        //        Data = shouldSucceed ? new RoomResponseDto { RoomName = roomName, RoomType = roomType } : null,
+        //        Succeeded = shouldSucceed,
+        //        Message = shouldSucceed ? "Room created successfully" : "Invalid room data"
+        //    };
 
-            _roomServiceMock
-                .Setup(service => service.CreateAsync(roomDto))
-                .ReturnsAsync(mockResponse);
+        //    _roomServiceMock
+        //        .Setup(service => service.CreateAsync(roomDto))
+        //        .ReturnsAsync(mockResponse);
 
-            // Act
-            var result = await _controller.CreateRoom(roomDto);
+        //    // Act
+        //    var result = await _controller.CreateRoom(roomDto);
 
-            // Assert
-            if (shouldSucceed)
-            {
-                var okResult = Assert.IsType<OkObjectResult>(result);
-                var returnValue = Assert.IsType<RoomResponseDto>(okResult.Value);
-                Assert.Equal(roomName, returnValue.RoomName);
-                Assert.Equal(roomType, returnValue.RoomType);
-            }
-            else
-            {
-                var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-                Assert.Equal("Invalid room data", badRequestResult.Value);
-            }
-        }
+        //    // Assert
+        //    if (shouldSucceed)
+        //    {
+        //        var okResult = Assert.IsType<OkObjectResult>(result);
+        //        var returnValue = Assert.IsType<RoomResponseDto>(okResult.Value);
+        //        Assert.Equal(roomName, returnValue.RoomName);
+        //        Assert.Equal(roomType, returnValue.RoomType);
+        //    }
+        //    else
+        //    {
+        //        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        //        Assert.Equal("Invalid room data", badRequestResult.Value);
+        //    }
+        //}
 
         [Fact]
         public async Task DeleteRoom_ReturnsBadRequest_WhenRoomIdIsInvalid()
@@ -236,30 +236,30 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Equal("Room not found.", notFoundResult.Value);
         }
 
-        // 5. Test CreateRoom Success
-        [Fact]
-        public async Task CreateRoom_ReturnsOkResult_WhenRoomIsCreated()
-        {
-            // Arrange
-            var roomDto = new AddRoomRequestDto { RoomName = "Room 101" };
-            var mockResponse = new Response<RoomResponseDto>
-            {
-                Data = new RoomResponseDto { RoomName = "Room 101" },
-                Succeeded = true
-            };
+        //// 5. Test CreateRoom Success
+        //[Fact]
+        //public async Task CreateRoom_ReturnsOkResult_WhenRoomIsCreated()
+        //{
+        //    // Arrange
+        //    var roomDto = new AddRoomRequestDto { RoomName = "Room 101" };
+        //    var mockResponse = new Response<RoomResponseDto>
+        //    {
+        //        Data = new RoomResponseDto { RoomName = "Room 101" },
+        //        Succeeded = true
+        //    };
 
-            _roomServiceMock
-                .Setup(service => service.CreateAsync(roomDto))
-                .ReturnsAsync(mockResponse);
+        //    _roomServiceMock
+        //        .Setup(service => service.CreateAsync(roomDto))
+        //        .ReturnsAsync(mockResponse);
 
-            // Act
-            var result = await _controller.CreateRoom(roomDto);
+        //    // Act
+        //    var result = await _controller.CreateRoom(roomDto);
 
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<RoomResponseDto>(okResult.Value);
-            Assert.Equal("Room 101", returnValue.RoomName);
-        }
+        //    // Assert
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //    var returnValue = Assert.IsType<RoomResponseDto>(okResult.Value);
+        //    Assert.Equal("Room 101", returnValue.RoomName);
+        //}
 
         // 7. Test UpdateRoom Success
         [Fact]

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]/")]
+[Route("api/amentities")]
 public class AmenityController : ControllerBase
 {
     private readonly IAmenityService _amenityService;
@@ -41,7 +41,7 @@ public class AmenityController : ControllerBase
 
     }
 
-    [HttpGet("amenities")]
+    [HttpGet]
     public async Task<IActionResult> GetAllAmenities()
     {
         var response = await _amenityService.GetAllAmenitiesAsync();

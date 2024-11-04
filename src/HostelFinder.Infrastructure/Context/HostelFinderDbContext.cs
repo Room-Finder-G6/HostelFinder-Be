@@ -269,7 +269,7 @@ public class HostelFinderDbContext : DbContext
             .HasColumnType("decimal(18,2)");
 
         modelBuilder.Entity<ServiceCost>()
-            .Property(sc => sc.unitCost)
+            .Property(sc => sc.UnitCost)
             .HasColumnType("decimal(18,2)");
     }
 }

@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Amenity.Request;
 using HostelFinder.Application.DTOs.Amenity.Response;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -47,6 +47,6 @@ public class AmenityService : IAmenityService
     {
         var amenities = await _amenityRepository.ListAllAsync();
         var amenityResponses = _mapper.Map<List<AmenityResponse>>(amenities);
-        return new Response<List<AmenityResponse>>(amenityResponses, "Amenities retrieved successfully");
+        return new Response<List<AmenityResponse>>(amenityResponses, "Danh sách tiện ích");
     }
 }

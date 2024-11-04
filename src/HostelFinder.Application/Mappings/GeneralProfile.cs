@@ -136,8 +136,7 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.RoomDetailRequestDto, opt => opt.MapFrom(src => src.RoomDetails))
             .ReverseMap();
         CreateMap<AddRoomRequestDto, Room>()
-            .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.AddServiceCostDtos))
-            .ForMember(dest => dest.RoomDetails, opt => opt.MapFrom(src => src.RoomDetailRequestDto));
+            .ReverseMap();
         CreateMap<UpdateRoomRequestDto, Room>()
             .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.UpdateServiceCostDtos))
             .ForMember(dest => dest.RoomDetails, opt => opt.MapFrom(src => src.UpdateRoomDetailsDto));
