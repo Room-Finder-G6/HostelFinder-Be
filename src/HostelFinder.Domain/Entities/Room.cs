@@ -7,6 +7,8 @@ namespace HostelFinder.Domain.Entities
     {
         public Guid HostelId { get; set; }
         public string? RoomName {  get; set; }
+        public int? Floor { get; set; } 
+        public int MaxRenters { get; set; }
         public float Size { get; set; }
         public bool Status {  get; set; }
         public decimal MonthlyRentCost { get; set; }
@@ -17,5 +19,8 @@ namespace HostelFinder.Domain.Entities
         public virtual ICollection<RoomAmenities> RoomAmenities { get; set; }
         public virtual RoomDetails RoomDetails { get; set; }
         public virtual ICollection<ServiceCost> ServiceCost { get; set; }
+
+        public virtual ICollection<Image>? Images { get; set; }
+
     }
 }

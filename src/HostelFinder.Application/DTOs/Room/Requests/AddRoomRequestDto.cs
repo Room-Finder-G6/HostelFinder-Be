@@ -8,6 +8,8 @@ namespace HostelFinder.Application.DTOs.Room.Requests
     {
         public Guid HostelId { get; set; }
         public string RoomName { get; set; }
+        public int? Floor { get; set; }
+        public int MaxRenters { get; set; }
         public bool Status { get; set; }
         public decimal Deposit { get; set; }
         public decimal MonthlyRentCost { get; set; }

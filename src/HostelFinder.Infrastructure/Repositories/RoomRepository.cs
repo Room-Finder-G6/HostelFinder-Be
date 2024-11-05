@@ -33,6 +33,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<List<Room>> GetRoomsByHostelIdAsync(Guid hostelId)
         {
             return await _dbContext.Rooms
+                .Include(x => x.Hostel)
                 .Include(r => r.RoomDetails)
                 .Include(r => r.ServiceCost)
                 .Where(r => r.HostelId == hostelId)

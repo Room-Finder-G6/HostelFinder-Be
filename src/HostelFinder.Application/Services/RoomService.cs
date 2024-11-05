@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Wordprocessing;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -177,7 +178,15 @@ namespace HostelFinder.Application.Services
             if (rooms == null || !rooms.Any())
                 return new Response<List<RoomResponseDto>>("No rooms found for this hostel.");
 
+
             var result = _mapper.Map<List<RoomResponseDto>>(rooms);
+
+           
+            foreach(var room in result)
+            {
+                var imageRoom = await _imageRepository.GetImageUrlByRoomId(room.Id);
+                room.ImageRoom = imageRoom.Url ?? "";
+            }
             return new Response<List<RoomResponseDto>>(result);
         }
     }
