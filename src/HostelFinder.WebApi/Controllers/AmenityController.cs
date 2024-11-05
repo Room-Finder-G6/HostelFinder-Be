@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HostelFinder.WebApi.Controllers;
 
 [ApiController]
-[Route("api/amentities")]
+[Route("api/amenities")]
 public class AmenityController : ControllerBase
 {
     private readonly IAmenityService _amenityService;

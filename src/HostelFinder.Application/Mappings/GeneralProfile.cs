@@ -132,8 +132,7 @@ public class GeneralProfile : Profile
         CreateMap<UpdateRoomRequestDto, Room>();
         CreateMap<AddRoomRequestDto, Room>().ReverseMap();
         CreateMap<Room, RoomResponseDto>()
-            .ForMember(dest => dest.AddServiceCostDtos, opt => opt.MapFrom(src => src.ServiceCost))
-            .ForMember(dest => dest.RoomDetailRequestDto, opt => opt.MapFrom(src => src.RoomDetails))
+            .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
             .ReverseMap();
         CreateMap<AddRoomRequestDto, Room>()
             .ReverseMap();
