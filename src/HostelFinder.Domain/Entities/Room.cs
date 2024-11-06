@@ -1,4 +1,5 @@
-﻿using HostelFinder.Domain.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using HostelFinder.Domain.Enums;
 using RoomFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
@@ -6,7 +7,8 @@ namespace HostelFinder.Domain.Entities
     public class Room : BaseEntity
     {
         public Guid HostelId { get; set; }
-        public string? RoomName {  get; set; }
+        [MaxLength(50)]
+        public string RoomName {  get; set; }
         public int? Floor { get; set; } 
         public int MaxRenters { get; set; }
         public float Size { get; set; }
