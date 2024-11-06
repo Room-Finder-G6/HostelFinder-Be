@@ -183,7 +183,7 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey<RoomDetails>(rd => rd.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Configure Service entity
+        // Configure Service-Hostel entity
         modelBuilder.Entity<Service>()
             .HasKey(s => s.Id);
         modelBuilder.Entity<Service>()
@@ -194,18 +194,14 @@ public class HostelFinderDbContext : DbContext
 
         // Configure ServiceCost entity
         modelBuilder.Entity<ServiceCost>()
-            .HasKey(sc => sc.Id);
-        modelBuilder.Entity<ServiceCost>()
             .HasOne(sc => sc.Room)
-            .WithMany(r => r.ServiceCost)
-            .HasForeignKey(sc => sc.RoomId)
-            .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<ServiceCost>()
-            .HasOne(sc => sc.Invoice)
-            .WithMany(i => i.ServiceCost)
-            .HasForeignKey(sc => sc.InVoiceId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .WithMany(r => r.ServiceCosts)
+            .HasForeignKey(sc => sc.RoomId);
 
+        modelBuilder.Entity<ServiceCost>()
+            .HasOne(sc => sc.Service)
+            .WithMany(s => s.ServiceCosts)
+            .HasForeignKey(sc => sc.ServiceId);
 
         // Configure User entity
         modelBuilder.Entity<User>()
@@ -263,21 +259,22 @@ public class HostelFinderDbContext : DbContext
             .HasForeignKey(wp => wp.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Specify precision for decimal properties
+
+        //config Room-Invoice
         modelBuilder.Entity<Invoice>()
-            .Property(i => i.TotalAmount)
-            .HasColumnType("decimal(18,2)");
+         .HasOne(i => i.Room)
+         .WithMany(r => r.Invoices)
+         .HasForeignKey(i => i.RoomId);
 
-        modelBuilder.Entity<Room>()
-            .Property(r => r.MonthlyRentCost)
-            .HasColumnType("decimal(18,2)");
+        //config invoice - invoiceDetails
+        modelBuilder.Entity<InvoiceDetail>()
+            .HasOne(id => id.Invoice)
+            .WithMany(i => i.InvoiceDetails)
+            .HasForeignKey(id => id.InvoiceId);
 
-        modelBuilder.Entity<ServiceCost>()
-            .Property(sc => sc.Cost)
-            .HasColumnType("decimal(18,2)");
-
-        modelBuilder.Entity<ServiceCost>()
-            .Property(sc => sc.UnitCost)
-            .HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<InvoiceDetail>()
+            .HasOne(id => id.Service)
+            .WithMany(s => s.InvoiceDetails)
+            .HasForeignKey(id => id.ServiceId);
     }
 }

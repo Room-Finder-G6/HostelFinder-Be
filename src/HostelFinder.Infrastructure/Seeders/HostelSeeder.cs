@@ -51,13 +51,8 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Bảo vệ",
-                    CreatedBy = "Hệ thống",
-                    CreatedOn = DateTime.Now,
-                    IsDeleted = false,
-                },
-                new () {
-                    Id = Guid.NewGuid(),
-                    ServiceName = "Camera",
+                    IsBillable = false,
+                    IsUsageBased = false,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -65,6 +60,8 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Bãi để xe",
+                    IsBillable = false,
+                    IsUsageBased = false,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -72,6 +69,8 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Thang máy",
+                    IsBillable = false,
+                    IsUsageBased = false,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -79,13 +78,8 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Internet",
-                    CreatedBy = "Hệ thống",
-                    CreatedOn = DateTime.Now,
-                    IsDeleted = false,
-                },
-                new () {
-                    Id = Guid.NewGuid(),
-                    ServiceName = "Wifi",
+                    IsBillable = true,
+                    IsUsageBased = false,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -93,13 +87,35 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Giặt là",
+                    IsBillable = true,
+                    IsUsageBased = true,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
                 },
                 new () {
                     Id = Guid.NewGuid(),
-                    ServiceName = "WC",
+                    ServiceName = "Tiền vệ sinh chung",
+                    IsBillable = true,
+                    IsUsageBased = false,
+                    CreatedBy = "Hệ thống",
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false
+                },
+                new () {
+                    Id = Guid.NewGuid(),
+                    ServiceName = "Tiền điện",
+                    IsBillable = true,
+                    IsUsageBased = true,
+                    CreatedBy = "Hệ thống",
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false
+                },
+                new () {
+                    Id = Guid.NewGuid(),
+                    ServiceName = "Tiền nước",
+                    IsBillable = true,
+                    IsUsageBased = true,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false
