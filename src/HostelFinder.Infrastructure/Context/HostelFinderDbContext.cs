@@ -151,6 +151,14 @@ public class HostelFinderDbContext : DbContext
             .WithMany(h => h.Rooms)
             .HasForeignKey(r => r.HostelId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Room>(entity =>
+        {
+            entity.Property(r => r.Deposit)
+                .HasPrecision(18, 2); 
+
+            entity.Property(r => r.MonthlyRentCost)
+                .HasPrecision(18, 2); 
+        });
 
         // Configure RoomAmenities entity
         modelBuilder.Entity<RoomAmenities>()
