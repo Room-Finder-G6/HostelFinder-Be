@@ -1,13 +1,32 @@
 ﻿using RoomFinder.Domain.Common;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace HostelFinder.Domain.Entities
 {
     public class Invoice : BaseEntity
     {
-        public Guid ServiceCostId { get; set; }
-        public decimal TotalAmount { get; set; }
-        public bool Status { get; set; }
-        public DateTime DueDate {  get; set; }
-        public virtual ICollection<ServiceCost> ServiceCost { get; set; }
+        [ForeignKey("Room")]
+        [Required]
+        public Guid RoomId { get; set; }
+
+        [Required]
+        public int BillingMonth { get; set; }
+
+        [Required]
+
+        public int BillingYear { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalAmount{ get; set; }
+
+        public bool IsPaid { get; set; } = false;
+        
+        //Navigation
+        public virtual Room Room { get; set; }
+        public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>();
+
+
     }
 }

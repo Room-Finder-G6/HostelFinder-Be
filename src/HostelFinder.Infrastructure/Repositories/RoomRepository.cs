@@ -18,14 +18,14 @@ namespace HostelFinder.Infrastructure.Repositories
         {
             return await _dbContext.Rooms
                     .Include(r => r.RoomDetails)  
-                    .Include(r => r.ServiceCost)  
+                    .Include(r => r.ServiceCosts)  
                     .FirstOrDefaultAsync(r => r.Id == roomId);  
         }
 
         public async Task<IEnumerable<Room>> ListAllWithDetailsAsync()
         {
             return await _dbContext.Rooms
-                          .Include(r => r.ServiceCost)
+                          .Include(r => r.ServiceCosts)
                           .Include(r => r.RoomDetails)   
                           .ToListAsync();
         }
@@ -35,7 +35,7 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.Rooms
                 .Include(x => x.Hostel)
                 .Include(r => r.RoomDetails)
-                .Include(r => r.ServiceCost)
+                .Include(r => r.ServiceCosts)
                 .Where(r => r.HostelId == hostelId)
                 .ToListAsync();
         }
