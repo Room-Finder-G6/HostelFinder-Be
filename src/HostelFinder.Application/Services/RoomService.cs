@@ -122,7 +122,7 @@ namespace HostelFinder.Application.Services
                 return new Response<RoomResponseDto>("Room not found.");
 
             room.RoomName = roomDto.RoomName;
-            room.Status = roomDto.Status;
+            room.IsAvailable = roomDto.IsAvailable;
             room.MonthlyRentCost = roomDto.MonthlyRentCost;
             room.RoomType = roomDto.RoomType;
             room.LastModifiedBy = room.LastModifiedBy;
@@ -140,7 +140,7 @@ namespace HostelFinder.Application.Services
                     .Where(dto => dto.ServiceCostId != Guid.Empty)
                     .ToDictionary(sc => sc.ServiceCostId);
 
-                foreach (var serviceCost in room.ServiceCost)
+                foreach (var serviceCost in room.ServiceCosts)
                 {
                     if (incomingServiceCosts.TryGetValue(serviceCost.Id, out var updateDto))
                     {
