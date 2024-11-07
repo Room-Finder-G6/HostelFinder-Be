@@ -7,7 +7,8 @@ namespace HostelFinder.Domain.Entities
     public class Room : BaseEntity
     {
         public Guid HostelId { get; set; }
-        public string? RoomName {  get; set; }
+        [MaxLength(50)]
+        public string RoomName {  get; set; }
         [MaxLength(500)]
         public string? Description { get; set; }
         public int? Floor { get; set; } 

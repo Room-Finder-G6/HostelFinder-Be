@@ -8,4 +8,5 @@ public class ListPostsResponseDto
     public decimal MonthlyRentCost { get; set; }
     public decimal Size { get; set; }
     public string FirstImage { get; set; }
+    public DateTime CreatedOn { get; set; }
 }

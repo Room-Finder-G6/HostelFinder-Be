@@ -153,7 +153,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetPostByUserId(Guid userId)
+    public async Task<IActionResult> GetPostsByUserId(Guid userId)
     {
         var result = await _postService.GetPostsByUserIdAsync(userId);
         if (result.Succeeded)
