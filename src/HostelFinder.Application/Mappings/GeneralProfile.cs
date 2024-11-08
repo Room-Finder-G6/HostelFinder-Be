@@ -63,6 +63,10 @@ public class GeneralProfile : Profile
         CreateMap<Hostel, ListHostelResponseDto>()
             .ForMember(dest => dest.LandlordUserName, opt => 
                 opt.MapFrom(src => src.Landlord.Username))
+            .ForMember(dest => dest.ImageUrl, opt =>
+                opt.MapFrom(src => src.Images.Any()
+                    ? src.Images.First().Url
+                    : null))
             .ReverseMap();
 
         // Address Mapping

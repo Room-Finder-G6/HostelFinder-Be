@@ -1,6 +1,4 @@
-using System.Security.Claims;
 using HostelFinder.Application.DTOs.Post.Requests;
-using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 

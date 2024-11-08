@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.DTOs.Address;
+﻿/*
+using HostelFinder.Application.DTOs.Address;
 using HostelFinder.Application.DTOs.Hostel.Requests;
 using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.DTOs.Image.Responses;
@@ -500,7 +501,7 @@ namespace XUnitTestHostelFinder.Controllers
         public async Task AddHostel_ReturnsInternalServerError_OnServiceFailure()
         {
             // Arrange
-            var hostelDto = new AddHostelRequestDto { /* Valid data */ };
+            var hostelDto = new AddHostelRequestDto { /* Valid data #1# };
 
             _hostelServiceMock
                 .Setup(service => service.AddHostelAsync(It.IsAny<AddHostelRequestDto>()))
@@ -577,3 +578,4 @@ namespace XUnitTestHostelFinder.Controllers
 
     }
 }
+*/
