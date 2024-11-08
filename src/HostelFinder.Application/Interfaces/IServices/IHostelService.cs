@@ -9,7 +9,7 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto hostelDto, List<string> imageUrls);
         Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, Guid userId, UpdateHostelRequestDto hostelDto);
         Task<Response<bool>> DeleteHostelAsync(Guid hostelId);
-        Task<Response<List<HostelResponseDto>>> GetHostelsByUserIdAsync(Guid landlordId);
+        Task<Response<List<ListHostelResponseDto>>> GetHostelsByUserIdAsync(Guid landlordId);
         Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId);
         Task<PagedResponse<List<ListHostelResponseDto>>> GetAllHostelAsync(GetAllHostelQuery request);
     }

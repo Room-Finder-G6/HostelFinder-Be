@@ -28,7 +28,9 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
 
     public async Task<IEnumerable<Hostel>> GetHostelsByUserIdAsync(Guid landlordId)
     {
-        return await _dbContext.Hostels.Where(h => h.LandlordId == landlordId && !h.IsDeleted).Include(a => a.Address)
+        return await _dbContext.Hostels.Where(h => h.LandlordId == landlordId && !h.IsDeleted)
+            .Include(a => a.Address)
+            .Include(i => i.Images)
             .ToListAsync();
     }
 
