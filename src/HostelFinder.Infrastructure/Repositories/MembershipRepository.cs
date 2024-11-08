@@ -27,6 +27,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Select(ms => new MembershipServices
                 {
                     ServiceName = ms.ServiceName,
+                    MaxPostsAllowed = ms.MaxPostsAllowed,
                     Membership = membership,
                     CreatedOn = DateTime.Now,
                     CreatedBy = "System"

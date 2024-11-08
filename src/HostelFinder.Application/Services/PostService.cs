@@ -19,53 +19,17 @@ public class PostService : IPostService
     private readonly IUserRepository _userRepository;
     private readonly IHostelRepository _hostelRepository;
     private readonly IImageRepository _imageRepository;
+    private readonly IMembershipService _membershipService;
 
     public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository,
-        IHostelRepository hostelRepository, IImageRepository imageRepository)
+        IHostelRepository hostelRepository, IImageRepository imageRepository, IMembershipService membershipService)
     {
         _mapper = mapper;
         _postRepository = postRepository;
         _userRepository = userRepository;
         _hostelRepository = hostelRepository;
         _imageRepository = imageRepository;
-    }
-
-    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls)
-    {
-        //map to Domain Post
-        var post = _mapper.Map<Post>(request);
-
-        try
-        {
-            await _postRepository.AddAsync(post);
-            foreach (var imageUrl in imageUrls)
-            {
-                await _imageRepository.AddAsync(new Image
-                {
-                    PostId = post.Id,
-                    HostelId = post.HostelId,
-                    Url = imageUrl,
-                    CreatedOn = DateTime.Now,
-                });
-            }
-
-            //map to Dtos Post
-            var postResponseDto = _mapper.Map<AddPostRequestDto>(post);
-            return new Response<AddPostRequestDto>
-            {
-                Data = postResponseDto,
-                Succeeded = true,
-                Message = "Add Post Successfully"
-            };
-        }
-        catch (Exception ex)
-        {
-            return new Response<AddPostRequestDto>
-            {
-                Succeeded = false,
-                Message = ex.Message
-            };
-        }
+        _membershipService = membershipService;
     }
 
     public async Task<Response<bool>> DeletePostAsync(Guid postId, Guid userId)
@@ -186,4 +150,68 @@ public class PostService : IPostService
             Succeeded = true
         };
     }
+
+    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls, Guid userId)
+    {
+        if (_membershipService == null)
+        {
+            return new Response<AddPostRequestDto>
+            {
+                Succeeded = false,
+                Message = "Membership service not initialized."
+            };
+        }
+
+        var postCountResponse = await _membershipService.UpdatePostCountAsync(userId);
+
+        if (!postCountResponse.Succeeded)
+        {
+            return new Response<AddPostRequestDto>
+            {
+                Succeeded = false,
+                Message = postCountResponse.Message
+            };
+        }
+
+        var post = _mapper.Map<Post>(request);
+
+        try
+        {
+            using (var transaction = await _postRepository.BeginTransactionAsync())
+            {
+                await _postRepository.AddAsync(post);
+
+                foreach (var imageUrl in imageUrls)
+                {
+                    await _imageRepository.AddAsync(new Image
+                    {
+                        PostId = post.Id,
+                        HostelId = post.HostelId,
+                        Url = imageUrl,
+                        CreatedOn = DateTime.Now,
+                    });
+                }
+
+                // Since we've already called UpdatePostCountAsync before, there's no need to call it again here.
+                await transaction.CommitAsync();
+            }
+
+            var postResponseDto = _mapper.Map<AddPostRequestDto>(post);
+            return new Response<AddPostRequestDto>
+            {
+                Data = postResponseDto,
+                Succeeded = true,
+                Message = "Post added successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<AddPostRequestDto>
+            {
+                Succeeded = false,
+                Message = ex.Message
+            };
+        }
+    }
+
 }
