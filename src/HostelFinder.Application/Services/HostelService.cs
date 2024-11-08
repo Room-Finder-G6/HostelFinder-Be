@@ -14,15 +14,19 @@ namespace HostelFinder.Application.Services
         private readonly IHostelRepository _hostelRepository;
         private readonly IMapper _mapper;
         private readonly IHostelServiceRepository _hostelServiceRepository;
+        private readonly IImageRepository _imageRepository;
 
-        public HostelService(IHostelRepository hostelRepository , IMapper mapper, IHostelServiceRepository hostelServiceRepository)
+        public HostelService(IHostelRepository hostelRepository, IMapper mapper,
+            IHostelServiceRepository hostelServiceRepository, IImageRepository imageRepository)
         {
             _hostelRepository = hostelRepository;
             _mapper = mapper;
             _hostelServiceRepository = hostelServiceRepository;
+            _imageRepository = imageRepository;
         }
 
-        public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request)
+        public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request,
+            List<string> imageUrls)
         {
             var isDuplicate = await _hostelRepository.CheckDuplicateHostelAsync(
                 request.HostelName,
@@ -44,7 +48,7 @@ namespace HostelFinder.Application.Services
             {
                 var hostelAdded = await _hostelRepository.AddAsync(hostel);
 
-                foreach(var serviceId in request.ServiceId)
+                foreach (var serviceId in request.ServiceId)
                 {
                     HostelServices hostelServices = new HostelServices
                     {
@@ -55,6 +59,16 @@ namespace HostelFinder.Application.Services
                         IsDeleted = false,
                     };
                     await _hostelServiceRepository.AddAsync(hostelServices);
+                }
+
+                foreach (var imageUrl in imageUrls)
+                {
+                    await _imageRepository.AddAsync(new Image
+                    {
+                        HostelId = hostelAdded.Id,
+                        Url = imageUrl
+
+                    });
                 }
 
                 //map domain to Dtos
@@ -69,7 +83,8 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, Guid userId, UpdateHostelRequestDto hostelDto)
+        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, Guid userId,
+            UpdateHostelRequestDto hostelDto)
         {
             var hostel = await _hostelRepository.GetHostelByIdAndUserIdAsync(hostelId, userId);
             if (hostel == null)
