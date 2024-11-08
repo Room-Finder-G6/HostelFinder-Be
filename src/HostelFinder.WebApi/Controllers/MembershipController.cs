@@ -74,5 +74,23 @@ namespace HostelFinder.WebApi.Controllers
 
             return BadRequest(response.Errors);
         }
+
+        [HttpPost("AddUserMembership")]
+        public async Task<IActionResult> AddUserMembership([FromBody] AddUserMembershipRequestDto userMembershipDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _membershipService.AddUserMembershipAsync(userMembershipDto);
+            if (response.Succeeded)
+            {
+                return Ok(response);
+            }
+
+            return BadRequest(response.Errors);
+        }
+
     }
 }

@@ -31,33 +31,33 @@ public class PostController : ControllerBase
     }*/
 
     [HttpPost]
-    public async Task<IActionResult> AddPost([FromForm] AddPostRequestDto postDto, [FromForm] List<IFormFile> images)
+    public async Task<IActionResult> AddPost(Guid userId, [FromForm] AddPostRequestDto postDto, [FromForm] List<IFormFile> images)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        //Upload image to AWS and collect Url response
+        // Upload image to AWS and collect Url response
         var imageUrls = new List<string>();
 
         if (images != null && images.Count > 0)
         {
             foreach (var image in images)
             {
-                var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
-                var imageUrl = uploadToAWS3;
+                var imageUrl = await _s3Service.UploadFileAsync(image);
                 imageUrls.Add(imageUrl);
             }
         }
 
-        var result = await _postService.AddPostAsync(postDto, imageUrls);
+        // Pass userId directly to the AddPostAsync method
+        var result = await _postService.AddPostAsync(postDto, imageUrls, userId);
+
         if (result.Succeeded)
         {
             return Ok(result);
         }
-
-        return BadRequest(result.Errors);
+        return BadRequest(result.Message);
     }
 
     /*[HttpPut]

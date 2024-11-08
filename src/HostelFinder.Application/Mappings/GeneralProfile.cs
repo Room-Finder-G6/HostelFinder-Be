@@ -34,14 +34,11 @@ public class GeneralProfile : Profile
     public GeneralProfile()
     {
         // Post Mapping
-        CreateMap<AddPostRequestDto, Post>()
-            .ReverseMap();
-        
+        CreateMap<AddPostRequestDto, Post>().ReverseMap();
         CreateMap<PostResponseDto, Post>()
             .ForPath(dest => dest.MembershipServices.Membership.Id, opt =>
                 opt.MapFrom(src => src.MembershipId))
             .ReverseMap();
-
         CreateMap<Post, ListPostsResponseDto>()
             .ForMember(dest => dest.Address, opt =>
                 opt.MapFrom(src => src.Hostel.Address))
@@ -108,20 +105,23 @@ public class GeneralProfile : Profile
         CreateMap<ServiceUpdateRequestDTO, Service>();
         CreateMap<Service, ServiceResponseDTO>();
 
-        //Membership
-        CreateMap<Membership, MembershipResponseDto>().ReverseMap();
-        CreateMap<MembershipServiceResponseDto, AddMembershipServiceReqDto>().ReverseMap();
-        CreateMap<AddMembershipRequestDto, Membership>().ReverseMap();
-        CreateMap<AddMembershipServiceReqDto, MembershipServices>()
-            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName)).ReverseMap();
-        CreateMap<UpdateMembershipRequestDto, Membership>().ReverseMap();
-        CreateMap<MembershipServices, MembershipServiceResponseDto>()
-            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName)).ReverseMap();
+        // Membership mappings
         CreateMap<Membership, MembershipResponseDto>()
-            .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices)).ReverseMap();
-        CreateMap<List<Membership>, Response<List<MembershipResponseDto>>>()
-            .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src));
-
+            .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices))
+            .ReverseMap();
+        CreateMap<AddMembershipRequestDto, Membership>().ReverseMap()
+            .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices));
+        CreateMap<UpdateMembershipRequestDto, Membership>().ReverseMap();
+        // MembershipServices mappings
+        CreateMap<MembershipServices, MembershipServiceResponseDto>()
+            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
+            .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
+            .ReverseMap();
+        CreateMap<AddMembershipServiceReqDto, MembershipServices>()
+            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
+            .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
+            .ReverseMap();
+        CreateMap<MembershipServiceResponseDto, AddMembershipServiceReqDto>().ReverseMap();
 
         //Image
         CreateMap<Image, ImageResponseDto>().ReverseMap();

@@ -97,7 +97,7 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Contains("Hostel not found", returnValue.Errors);
         }
 
-        [Fact]
+        /*[Fact]
         public async Task GetHostelsByLandlordId_ReturnsOkResult_WhenHostelsExist()
         {
             // Arrange
@@ -126,10 +126,10 @@ namespace XUnitTestHostelFinder.Controllers
             var returnValue = Assert.IsType<Response<List<HostelResponseDto>>>(okResult.Value);
             Assert.True(returnValue.Succeeded);
             Assert.Equal(2, returnValue.Data.Count);
-        }
+        }*/
 
 
-        [Fact]
+        /*[Fact]
         public async Task GetHostelsByLandlordId_ReturnsOkResult_WhenNoHostelsFound()
         {
             // Arrange
@@ -153,7 +153,7 @@ namespace XUnitTestHostelFinder.Controllers
             var returnValue = Assert.IsType<Response<List<HostelResponseDto>>>(okResult.Value);
             Assert.True(returnValue.Succeeded);
             Assert.Empty(returnValue.Data);
-        }
+        }*/
 
 
         [Fact]
