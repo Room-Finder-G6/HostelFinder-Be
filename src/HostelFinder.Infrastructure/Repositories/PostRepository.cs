@@ -7,6 +7,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using HostelFinder.Application.DTOs.Post.Responses;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace HostelFinder.Infrastructure.Repositories;
 
@@ -81,6 +82,11 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
         var posts = await _dbContext.Posts.Where(x => x.Hostel.LandlordId == userId).ToListAsync();
         return posts;
+    }
+
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return await _dbContext.Database.BeginTransactionAsync();
     }
 
 }

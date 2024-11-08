@@ -6,7 +6,7 @@ namespace HostelFinder.Application.Interfaces.IServices;
 
 public interface IPostService
 {
-    Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls);
+    Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls, Guid userId);
     /*Task<LandlordResponseDto> GetLandlordByPostIdAsync(Guid hostelId);
     Task<HostelResponseDto> GetHostelByPostIdAsync(Guid postId);*/
     Task<Response<List<ListPostsResponseDto>>> GetPostsByUserIdAsync(Guid userId);
