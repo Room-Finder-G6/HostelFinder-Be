@@ -39,7 +39,7 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<RoomResponseDto>> GetByIdAsync(Guid id)
         {
-            var room = await _roomRepository.GetByIdAsync(id);
+            var room = await _roomRepository.GetRoomByIdAsync(id);
             if (room == null)
                 return new Response<RoomResponseDto>("Room not found.");
 
@@ -171,9 +171,9 @@ namespace HostelFinder.Application.Services
             return new Response<bool>(true, "Room deleted successfully.");
         }
 
-        public async Task<Response<List<RoomResponseDto>>> GetRoomsByHostelIdAsync(Guid hostelId)
+        public async Task<Response<List<RoomResponseDto>>> GetRoomsByHostelIdAsync(Guid hostelId, int? floor)
         {
-            var rooms = await _roomRepository.GetRoomsByHostelIdAsync(hostelId);
+            var rooms = await _roomRepository.GetRoomsByHostelIdAsync(hostelId, floor);
 
             if (rooms == null || !rooms.Any())
                 return new Response<List<RoomResponseDto>>("No rooms found for this hostel.");

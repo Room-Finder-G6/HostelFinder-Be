@@ -100,9 +100,7 @@ namespace XUnitTestHostelFinder.Controllers
             // Arrange
             var serviceCostDto = new AddServiceCostDto
             {
-                ServiceName = "New Service",
                 UnitCost = 100,
-                Cost = 200
             };
 
             var mockResponse = new Response<ServiceCostResponseDto>
@@ -130,9 +128,7 @@ namespace XUnitTestHostelFinder.Controllers
             // Arrange
             var serviceCostDto = new AddServiceCostDto
             {
-                ServiceName = "New Service",
                 UnitCost = 100,
-                Cost = 200
             };
 
             var mockResponse = new Response<ServiceCostResponseDto>
@@ -286,8 +282,7 @@ namespace XUnitTestHostelFinder.Controllers
             // Arrange
             var serviceCostDto = new AddServiceCostDto
             {
-                ServiceName = "Test Service",
-                Cost = 200
+                UnitCost = 200
             };
 
             _serviceCostServiceMock
@@ -312,9 +307,6 @@ namespace XUnitTestHostelFinder.Controllers
             // Arrange
             var serviceCostDto = new AddServiceCostDto
             {
-                ServiceName = serviceName,
-                Cost = cost,
-                CurrentReading = currentReading
             };
 
             Response<ServiceCostResponseDto> mockResponse;

@@ -33,7 +33,7 @@ namespace HostelFinder.Application
             services.AddScoped<IServiceCostService, ServiceCostService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IHostelService, HostelService>();
-
+            services.AddScoped<IMeterReadingService, MeterReadingService>();
             //register validation 
             services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();
 

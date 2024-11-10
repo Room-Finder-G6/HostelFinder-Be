@@ -1,6 +1,8 @@
+using HostelFinder.Application.Common;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Services;
+using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using HostelFinder.Infrastructure.Repositories;
 using HostelFinder.Infrastructure.Seeders;
@@ -19,7 +21,7 @@ public class ServiceRegistration
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         service.AddDbContext<HostelFinderDbContext>(options =>
             options.UseSqlServer(connectionString));
-
+        service.AddScoped(typeof(IBaseGenericRepository<>), typeof(BaseGenericRepository<>));
         service.AddScoped<IHostelRepository, HostelRepository>();
         service.AddScoped<IUserRepository, UserRepository>();
         service.AddScoped<IPostRepository, PostRepository>();
@@ -38,6 +40,7 @@ public class ServiceRegistration
         service.AddScoped<IImageRepository, ImageRepository>();
         service.AddScoped<IHostelServiceRepository, HostelServiceRepository>();
         service.AddScoped<IRoomAmentityRepository, RoomAmentityRepository>();
+        service.AddScoped<IMeterReadingRepository, MeterReadingRepository>();
         service.AddScoped<IUserMembershipRepository, UserMembershipRepository>();
     }
 }
