@@ -39,6 +39,10 @@ namespace HostelFinder.Infrastructure.Repositories
                 mr.ServiceId == serviceId &&
                 mr.BillingMonth == previousMonth
                 && mr.BillingYear == previousYear);
+            if (meterReading == null)
+            {
+                throw new NotFoundException($"Không tìm thấy số điện và số nước ở phòng {roomId} ");
+            }
 
             return meterReading;
 

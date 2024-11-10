@@ -643,7 +643,6 @@ namespace HostelFinder.Infrastructure.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<decimal>("Size")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -1062,6 +1061,17 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Navigation("Hostel");
 
                     b.Navigation("Post");
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("HostelFinder.Domain.Entities.Invoice", b =>
+                {
+                    b.HasOne("HostelFinder.Domain.Entities.Room", "Room")
+                        .WithMany("Invoices")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Room");
                 });
