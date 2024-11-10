@@ -6,7 +6,7 @@ namespace HostelFinder.Application.DTOs.Invoice.Responses
     public class InvoiceDetailResponseDto
     {
         public Guid InvoiceId { get; set; }
-        public string ServiceName { get; set; }
+        public string? ServiceName { get; set; }
 
         public decimal UnitCost { get; set; }
 
@@ -15,7 +15,10 @@ namespace HostelFinder.Application.DTOs.Invoice.Responses
         public int? NumberOfCustomer { get; set; }
 
         public int PreviousReading { get; set; }
+
         public int CurrentReading { get; set; }
+
+        public bool IsRentRoom { get; set; }
 
         public DateTime BillingDate { get; set; }
 

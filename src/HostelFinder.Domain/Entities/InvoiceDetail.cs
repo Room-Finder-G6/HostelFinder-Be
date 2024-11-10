@@ -11,8 +11,7 @@ namespace HostelFinder.Domain.Entities
         public Guid InvoiceId { get; set; }
 
         [ForeignKey("Service")]
-        [Required]
-        public Guid ServiceId { get; set; }
+        public Guid? ServiceId { get; set; }
 
 
         /// <summary>
@@ -34,6 +33,8 @@ namespace HostelFinder.Domain.Entities
         public int PreviousReading { get; set; }
         public int CurrentReading { get; set; }
 
+
+        public bool IsRentRoom { get; set; }
         /// <summary>
         /// Ngày phát sinh hóa đơn
         /// </summary>
@@ -42,6 +43,6 @@ namespace HostelFinder.Domain.Entities
 
         // Navigation
         public virtual Invoice Invoice { get; set; }
-        public virtual Service Service { get; set; }
+        public virtual Service? Service { get; set; }
     }
 }
