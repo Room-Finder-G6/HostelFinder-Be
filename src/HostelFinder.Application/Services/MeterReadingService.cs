@@ -56,6 +56,27 @@ namespace HostelFinder.Application.Services
                 {
                     return new Response<string> { Message = "Đã có số liệu đọc cho phòng dịch và dịch vụ trong tháng này", Succeeded = false };
                 }
+                var previousMeterReading = await _meterReadingRepository.GetPreviousMeterReadingAsync(roomId, serviceId, billingMonth, billingYear);
+                if(previousMeterReading == null)
+                {
+                    var newPreviousMeterReading = new MeterReading
+                    {
+                        RoomId = roomId,
+                        ServiceId = serviceId,
+                        Reading = 0,
+                        BillingMonth = billingMonth == 1 ? 12 : billingMonth - 1,
+                        BillingYear = billingMonth == 1 ? billingYear - 1 : billingYear,
+                        CreatedOn = DateTime.Now,
+                        IsDeleted = false
+                    };
+                    await _meterReadingRepository.AddAsync(newPreviousMeterReading);
+
+                }
+                //nếu không có số liệu tháng trước thì sẽ mặc định là 0
+                if ((previousMeterReading?.Reading ?? 0)  > reading)
+                {
+                    return new Response<string> { Message = $"Số liệu tháng {billingMonth} phải lớn hơn hoặc bằng số liệu tháng {billingMonth - 1}", Succeeded = false };
+                }
                 var meterReading = new MeterReading
                 {
                     Id = Guid.NewGuid(),
