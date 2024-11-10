@@ -159,6 +159,11 @@ public class HostelFinderDbContext : DbContext
             entity.Property(r => r.MonthlyRentCost)
                 .HasPrecision(18, 2); 
         });
+        modelBuilder.Entity<Room>(entity =>
+        {
+            entity.Property(e => e.Size)
+                .HasPrecision(18, 2);
+        });
 
         // Configure RoomAmenities entity
         modelBuilder.Entity<RoomAmenities>()

@@ -41,5 +41,6 @@ public class ServiceRegistration
         service.AddScoped<IHostelServiceRepository, HostelServiceRepository>();
         service.AddScoped<IRoomAmentityRepository, RoomAmentityRepository>();
         service.AddScoped<IMeterReadingRepository, MeterReadingRepository>();
+        service.AddScoped<IUserMembershipRepository, UserMembershipRepository>();
     }
 }

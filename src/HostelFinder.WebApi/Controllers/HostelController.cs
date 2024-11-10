@@ -10,10 +10,12 @@ namespace HostelFinder.WebApi.Controllers
     public class HostelController : ControllerBase
     {
         private readonly IHostelService _hostelService;
-
-        public HostelController(IHostelService hostelService)
+        private readonly IS3Service _s3Service;
+        
+        public HostelController(IHostelService hostelService, IS3Service s3Service)
         {
             _hostelService = hostelService;
+            _s3Service = s3Service;
         }
 
         [HttpGet("{hostelId}")]
@@ -41,16 +43,28 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddHostel([FromBody] AddHostelRequestDto hostelDto)
+        public async Task<IActionResult> AddHostel([FromForm] AddHostelRequestDto hostelDto, [FromForm] List<IFormFile> images)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            var imageUrls = new List<string>();
+
+            if (images != null && images.Count > 0)
+            {
+                foreach (var image in images)
+                {
+                    var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
+                    var imageUrl = uploadToAWS3;
+                    imageUrls.Add(imageUrl);
+                }
+            }
+            
             try
             {
-                var result = await _hostelService.AddHostelAsync(hostelDto);
+                var result = await _hostelService.AddHostelAsync(hostelDto, imageUrls);
                 if (result.Succeeded)
                 {
                     return CreatedAtAction(nameof(GetHostelById), new { hostelId = result.Data.Id }, result);

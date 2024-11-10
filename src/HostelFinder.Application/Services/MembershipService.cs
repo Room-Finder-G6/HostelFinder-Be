@@ -13,12 +13,14 @@ namespace HostelFinder.Application.Services
     public class MembershipService : IMembershipService
     {
         private readonly IMembershipRepository _membershipRepository;
+        private readonly IUserMembershipRepository _userMembershipRepository;
         private readonly IMapper _mapper;
 
-        public MembershipService(IMembershipRepository membershipRepository, IMapper mapper)
+        public MembershipService(IMembershipRepository membershipRepository, IMapper mapper, IUserMembershipRepository userMembershipRepository)
         {
             _membershipRepository = membershipRepository;
             _mapper = mapper;
+            _userMembershipRepository = userMembershipRepository;
         }
 
         public async Task<Response<List<MembershipResponseDto>>> GetAllMembershipWithMembershipService()
@@ -159,6 +161,73 @@ namespace HostelFinder.Application.Services
 
             await _membershipRepository.DeletePermanentAsync(membership.Id);
             return new Response<string> { Data = "Gói thành viên đã xóa thành công!" };
+        }
+
+
+        public async Task<Response<string>> UpdatePostCountAsync(Guid userId)
+        {
+            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
+            if (userMembership != null && userMembership.Membership != null)
+            {
+                var membershipService = userMembership.Membership.MembershipServices
+                    .FirstOrDefault(ms => ms.MaxPostsAllowed > userMembership.PostsUsed);
+
+                if (membershipService != null && userMembership.PostsUsed < membershipService.MaxPostsAllowed)
+                {
+                    userMembership.PostsUsed++;
+                    await _userMembershipRepository.UpdateAsync(userMembership);
+
+                    return new Response<string>
+                    {
+                        Succeeded = true,
+                        Message = "Post count updated successfully."
+                    };
+                }
+                else
+                {
+                    return new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "You have reached the maximum number of posts allowed for your membership."
+                    };
+                }
+            }
+
+            return new Response<string>
+            {
+                Succeeded = false,
+                Message = "User membership not found."
+            };
+        }
+
+        public async Task<Response<string>> AddUserMembershipAsync(AddUserMembershipRequestDto userMembershipDto)
+        {
+            var existingUserMembership = await _userMembershipRepository.GetByUserIdAsync(userMembershipDto.UserId);
+            if (existingUserMembership != null && existingUserMembership.MembershipId == userMembershipDto.MembershipId)
+            {
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "User is already assigned to this membership."
+                };
+            }
+
+            var userMembership = new UserMembership
+            {
+                UserId = userMembershipDto.UserId,
+                MembershipId = userMembershipDto.MembershipId,
+                PostsUsed = 0,
+                CreatedBy = "System",
+                CreatedOn = DateTime.Now
+            };
+
+            await _userMembershipRepository.AddAsync(userMembership);
+
+            return new Response<string>
+            {
+                Succeeded = true,
+                Data = "User membership added successfully."
+            };
         }
 
     }

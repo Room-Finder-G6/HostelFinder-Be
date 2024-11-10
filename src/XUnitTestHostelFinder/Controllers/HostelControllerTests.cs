@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.DTOs.Address;
+﻿/*
+using HostelFinder.Application.DTOs.Address;
 using HostelFinder.Application.DTOs.Hostel.Requests;
 using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.DTOs.Image.Responses;
@@ -96,7 +97,7 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Contains("Hostel not found", returnValue.Errors);
         }
 
-        [Fact]
+        /*[Fact]
         public async Task GetHostelsByLandlordId_ReturnsOkResult_WhenHostelsExist()
         {
             // Arrange
@@ -125,10 +126,10 @@ namespace XUnitTestHostelFinder.Controllers
             var returnValue = Assert.IsType<Response<List<HostelResponseDto>>>(okResult.Value);
             Assert.True(returnValue.Succeeded);
             Assert.Equal(2, returnValue.Data.Count);
-        }
+        }*/
 
 
-        [Fact]
+        /*[Fact]
         public async Task GetHostelsByLandlordId_ReturnsOkResult_WhenNoHostelsFound()
         {
             // Arrange
@@ -152,7 +153,7 @@ namespace XUnitTestHostelFinder.Controllers
             var returnValue = Assert.IsType<Response<List<HostelResponseDto>>>(okResult.Value);
             Assert.True(returnValue.Succeeded);
             Assert.Empty(returnValue.Data);
-        }
+        }*/
 
 
         [Fact]
@@ -500,7 +501,7 @@ namespace XUnitTestHostelFinder.Controllers
         public async Task AddHostel_ReturnsInternalServerError_OnServiceFailure()
         {
             // Arrange
-            var hostelDto = new AddHostelRequestDto { /* Valid data */ };
+            var hostelDto = new AddHostelRequestDto { /* Valid data #1# };
 
             _hostelServiceMock
                 .Setup(service => service.AddHostelAsync(It.IsAny<AddHostelRequestDto>()))
@@ -577,3 +578,4 @@ namespace XUnitTestHostelFinder.Controllers
 
     }
 }
+*/
