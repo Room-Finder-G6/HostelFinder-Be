@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HostelFinder.Application.DTOs.Invoice.Responses;
 using HostelFinder.Application.DTOs.InVoice.Requests;
 using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -11,11 +12,18 @@ namespace HostelFinder.Application.Services
     public class InvoiceService : IInvoiceService
     {
         private readonly IInVoiceRepository _invoiceRepository;
+        private readonly IRoomRepository _roomRepository;
+        private readonly IMeterReadingRepository _meterReadingRepository;
         private readonly IMapper _mapper;
 
-        public InvoiceService(IInVoiceRepository invoiceRepository, IMapper mapper)
+        public InvoiceService(IInVoiceRepository invoiceRepository,
+            IRoomRepository roomRepository,
+            IMeterReadingRepository meterReadingRepository,
+            IMapper mapper)
         {
             _invoiceRepository = invoiceRepository;
+            _roomRepository = roomRepository;
+            _meterReadingRepository = meterReadingRepository;
             _mapper = mapper;
         }
 
@@ -66,6 +74,114 @@ namespace HostelFinder.Application.Services
 
             await _invoiceRepository.DeleteAsync(id);
             return new Response<bool>(true, "Invoice deleted successfully.");
+        }
+
+        public async Task<Response<InvoiceResponseDto>> GenerateMonthlyInvoicesAsync(Guid roomId, int billingMonth, int billingYear)
+        {
+
+            var room = await _roomRepository.GetRoomByIdAsync(roomId);
+            if (room == null)
+            {
+                return new Response<InvoiceResponseDto> { Message = "Phòng không tồn tại!", Succeeded = false };
+            }
+            if (room.IsAvailable)
+            {
+                return new Response<InvoiceResponseDto> { Message = "Phòng đang trống không cần lập hóa đơn", Succeeded = false };
+            }
+            var existingInvoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear);
+
+            if (existingInvoice != null)
+            {
+                return new Response<InvoiceResponseDto> { Message = "Đã có hóa đơn cho tháng này", Succeeded = false };
+            }
+            using var transaction = await _invoiceRepository.BeginTransactionAsync();
+            try
+            {
+
+                //Tạo hóa đơn mới
+
+                var invoice = new Invoice
+                {
+                    RoomId = roomId,
+                    BillingMonth = billingMonth,
+                    BillingYear = billingYear,
+                    TotalAmount = 0,
+                    IsPaid = false,
+                    InvoiceDetails = new List<InvoiceDetail>()
+                };
+
+                var serviceCosts = room.ServiceCosts.ToList();
+
+                foreach (var serviceCost in serviceCosts)
+                {
+                    var service = serviceCost.Service;
+                    var invoiceDetail = new InvoiceDetail
+                    {
+                        InvoiceId = invoice.Id,
+                        ServiceId = service.Id,
+                        UnitCost = serviceCost.UnitCost,
+                        ActualCost = 0,
+                        NumberOfCustomer = room.MaxRenters,
+                        BillingDate = DateTime.Now,
+                    };
+
+                    if (service.IsUsageBased)
+                    {
+                        var previousReading = await _meterReadingRepository.GetPreviousMeterReadingAsync(roomId, service.Id, billingMonth, billingYear);
+                        var currentReading = await _meterReadingRepository.GetCurrentMeterReadingAsync(room.Id, service.Id, billingMonth, billingYear);
+                        if (previousReading == null || currentReading == null)
+                        {
+                            return new Response<InvoiceResponseDto> { Message = $"Thiếu số liệu đọc cho dịch vụ {service.ServiceName}.", Succeeded = false };
+                        }
+
+                        if (currentReading.Reading < previousReading.Reading)
+                        {
+                            return new Response<InvoiceResponseDto> { Message = $"Số đọc hiện tại không thể nhỏ hơn số đọc trước cho dịch vụ {service.ServiceName}.", Succeeded = false };
+                        }
+
+                        invoiceDetail.PreviousReading = previousReading.Reading;
+                        invoiceDetail.CurrentReading = currentReading.Reading;
+
+
+                        invoice.InvoiceDetails.Add(invoiceDetail);
+
+                        invoice.TotalAmount += (invoiceDetail.UnitCost * (invoiceDetail.CurrentReading - invoiceDetail.PreviousReading)) + (invoiceDetail.ActualCost * invoiceDetail.NumberOfCustomer) ?? 0;
+
+                    }
+                }
+                invoice.TotalAmount += room.MonthlyRentCost;
+                var invoiceCreated = await _invoiceRepository.AddAsync(invoice);
+
+                await transaction.CommitAsync();
+
+                //map to Dtos
+                var invoiceCreatedDto = new InvoiceResponseDto
+                {
+                    RoomName = room.RoomName,
+                    BillingMonth = invoiceCreated.BillingMonth,
+                    BillingYear = invoiceCreated.BillingYear,
+                    IsPaid = invoiceCreated.IsPaid,
+                    TotalAmount = invoiceCreated.TotalAmount,
+                    InvoiceDetails = invoiceCreated.InvoiceDetails.Select(details => new InvoiceDetailResponseDto
+                    {
+                        ActualCost = details.ActualCost,
+                        BillingDate = details.BillingDate,
+                        CurrentReading = details.CurrentReading,
+                        PreviousReading = details.PreviousReading,
+                        InvoiceId = details.InvoiceId,
+                        NumberOfCustomer = details.NumberOfCustomer,
+                        ServiceName = details.Service.ServiceName,
+                        UnitCost = details.UnitCost
+                    }).ToList()
+
+                };
+                return new Response<InvoiceResponseDto> { Data = invoiceCreatedDto, Message = $"Tạo hóa đơn thành công cho phòng {room.RoomName} vào ngày {DateTime.Now}", Succeeded = true };
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return new Response<InvoiceResponseDto> { Message = "Xảy ra lỗi trong quá trình tạo hóa đơn" };
+            }
         }
     }
 }

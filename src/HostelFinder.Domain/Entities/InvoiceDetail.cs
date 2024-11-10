@@ -14,10 +14,17 @@ namespace HostelFinder.Domain.Entities
         [Required]
         public Guid ServiceId { get; set; }
 
+
+        /// <summary>
+        /// Giá tại thời điểm lập hóa đơn 
+        /// </summary>
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal UnitCost { get; set; } 
 
+        /// <summary>
+        /// tổng chi phí cho dịch vụ
+        /// </summary>
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal ActualCost { get; set; }
@@ -27,6 +34,9 @@ namespace HostelFinder.Domain.Entities
         public int PreviousReading { get; set; }
         public int CurrentReading { get; set; }
 
+        /// <summary>
+        /// Ngày phát sinh hóa đơn
+        /// </summary>
         [Required]
         public DateTime BillingDate { get; set; } 
 

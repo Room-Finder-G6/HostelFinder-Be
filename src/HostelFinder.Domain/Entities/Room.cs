@@ -21,13 +21,15 @@ namespace HostelFinder.Domain.Entities
         //Navigation
         public virtual Hostel Hostel { get; set; }
         public virtual ICollection<Post>? Posts { get; set; }
-        public virtual ICollection<RoomAmenities> RoomAmenities { get; set; } = new HashSet<RoomAmenities>();
+        public virtual ICollection<RoomAmenities> RoomAmenities { get; set; } 
         public virtual RoomDetails RoomDetails { get; set; }
-        public virtual ICollection<ServiceCost> ServiceCosts { get; set; } = new HashSet<ServiceCost>();
+        public virtual ICollection<ServiceCost> ServiceCosts { get; set; } 
 
         public virtual ICollection<Image>? Images { get; set; }
 
-        public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+        public virtual ICollection<Invoice> Invoices { get; set; } 
+
+        public virtual ICollection<MeterReading> MeterReadings { get; set; }  
 
     }
 }

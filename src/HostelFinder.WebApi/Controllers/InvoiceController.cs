@@ -36,6 +36,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
+        [Route("monthly-invoice")]
         public async Task<IActionResult> CreateInvoice([FromBody] AddInVoiceRequestDto invoiceDto)
         {
             if (!ModelState.IsValid)
@@ -43,11 +44,11 @@ namespace HostelFinder.WebApi.Controllers
 
             try
             {
-                var response = await _invoiceService.CreateAsync(invoiceDto);
+                var response = await _invoiceService.GenerateMonthlyInvoicesAsync(invoiceDto.roomId, invoiceDto.billingMonth,invoiceDto.billingYear);
                 if (!response.Succeeded)
-                    return BadRequest(response.Message);
+                    return BadRequest(response);
 
-                return Ok(response.Data);
+                return Ok(response);
             }
             catch (Exception ex)
             {

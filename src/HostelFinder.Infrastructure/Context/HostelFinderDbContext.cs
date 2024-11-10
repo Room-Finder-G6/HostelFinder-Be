@@ -7,7 +7,7 @@ namespace HostelFinder.Infrastructure.Context;
 
 public class HostelFinderDbContext : DbContext
 {
-    public DbSet<Hostel?> Hostels { get; set; }
+    public DbSet<Hostel> Hostels { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<RoomDetails> RoomDetails { get; set; }
     public DbSet<Amenity> Amenities { get; set; }
@@ -26,7 +26,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<HostelServices> HostelServices { get; set; }
-
+    public DbSet<MeterReading> MeterReadings { get; set; }
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
     {
@@ -276,5 +276,22 @@ public class HostelFinderDbContext : DbContext
             .HasOne(id => id.Service)
             .WithMany(s => s.InvoiceDetails)
             .HasForeignKey(id => id.ServiceId);
+
+        //config meterReading - Room
+
+        modelBuilder.Entity<MeterReading>()
+             .HasOne(m => m.Room)
+             .WithMany(r => r.MeterReadings)
+             .HasForeignKey(m => m.RoomId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+        //config MeterReading - Service
+        modelBuilder.Entity<MeterReading>()
+         .HasOne(m => m.Service)
+         .WithMany(s => s.MeterReadings)
+         .HasForeignKey(m => m.ServiceId)
+         .OnDelete(DeleteBehavior.Cascade);
+
+
     }
 }

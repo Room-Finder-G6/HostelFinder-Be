@@ -11,8 +11,16 @@ namespace HostelFinder.Domain.Entities
         public string? Description { get; set; }
         public bool IsBillable { get; set; }
         public bool IsUsageBased { get; set; }
-        public ICollection<HostelServices> HostelServices { get; set; } = new List<HostelServices>();
-        public virtual ICollection<ServiceCost> ServiceCosts { get; set; } = new List<ServiceCost>();
-        public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>();
+
+        //Navigation
+        public ICollection<HostelServices> HostelServices { get; set; } 
+
+        public virtual ICollection<ServiceCost> ServiceCosts { get; set; } 
+
+        public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } 
+
+        public virtual ICollection<MeterReading> MeterReadings { get; set; } 
+
+
     }
 }

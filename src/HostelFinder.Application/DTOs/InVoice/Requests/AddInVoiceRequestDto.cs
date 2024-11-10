@@ -2,8 +2,8 @@
 {
     public class AddInVoiceRequestDto
     {
-        public decimal TotalAmount { get; set; }
-        public bool Status { get; set; }
-        public DateTime DueDate { get; set; }
+        public Guid roomId { get; set; }
+        public int billingMonth { get; set; }
+        public int billingYear { get; set; }
     }
 }

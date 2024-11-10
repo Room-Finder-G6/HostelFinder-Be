@@ -20,6 +20,6 @@ public class ServiceCost : BaseEntity
 
 
     //navigation
-    public virtual Room Room { get; set; }
+    public virtual Room Room { get; set; }  
     public virtual Service Service { get; set; }
 }
