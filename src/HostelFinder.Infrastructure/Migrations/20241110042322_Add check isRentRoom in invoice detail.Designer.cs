@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    partial class HostelFinderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241110042322_Add check isRentRoom in invoice detail")]
+    partial class AddcheckisRentRoomininvoicedetail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -369,7 +372,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<Guid?>("ServiceId")
+                    b.Property<Guid>("ServiceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("UnitCost")
@@ -1087,7 +1090,9 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasOne("HostelFinder.Domain.Entities.Service", "Service")
                         .WithMany("InvoiceDetails")
-                        .HasForeignKey("ServiceId");
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Invoice");
 

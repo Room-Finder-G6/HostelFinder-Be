@@ -6,6 +6,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace HostelFinder.Application.Services
 {
@@ -15,16 +16,19 @@ namespace HostelFinder.Application.Services
         private readonly IRoomRepository _roomRepository;
         private readonly IMeterReadingRepository _meterReadingRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<InvoiceService> _logger;   
 
         public InvoiceService(IInVoiceRepository invoiceRepository,
             IRoomRepository roomRepository,
             IMeterReadingRepository meterReadingRepository,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger<InvoiceService> logger)
         {
             _invoiceRepository = invoiceRepository;
             _roomRepository = roomRepository;
             _meterReadingRepository = meterReadingRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<Response<List<InvoiceResponseDto>>> GetAllAsync()
@@ -121,10 +125,13 @@ namespace HostelFinder.Application.Services
                         ServiceId = service.Id,
                         UnitCost = serviceCost.UnitCost,
                         ActualCost = 0,
+                        //tạm thời tính là max of renters
                         NumberOfCustomer = room.MaxRenters,
                         BillingDate = DateTime.Now,
+                        CreatedOn = DateTime.Now,
+                        IsRentRoom = false,
                     };
-
+                    // tạo hóa đơn chi tiết cho dịch vụ thu phí như điện, nước
                     if (service.IsUsageBased)
                     {
                         var previousReading = await _meterReadingRepository.GetPreviousMeterReadingAsync(roomId, service.Id, billingMonth, billingYear);
@@ -149,7 +156,22 @@ namespace HostelFinder.Application.Services
 
                     }
                 }
-                invoice.TotalAmount += room.MonthlyRentCost;
+                //tạo hóa đơn tiền phòng
+                var rentInvoiceDetail = new InvoiceDetail
+                {
+                    InvoiceId = invoice.Id,
+                    Service = null,
+                    UnitCost = 0,
+                    ActualCost = room.MonthlyRentCost,
+                    NumberOfCustomer = room.MaxRenters,
+                    BillingDate = DateTime.Now,
+                    IsRentRoom = true,
+                    CreatedOn = DateTime.Now,
+                    CurrentReading = 0,
+                    PreviousReading = 0,
+                };
+                invoice.InvoiceDetails.Add(rentInvoiceDetail);
+                invoice.TotalAmount += rentInvoiceDetail.ActualCost;
                 var invoiceCreated = await _invoiceRepository.AddAsync(invoice);
 
                 await transaction.CommitAsync();
@@ -157,7 +179,7 @@ namespace HostelFinder.Application.Services
                 //map to Dtos
                 var invoiceCreatedDto = new InvoiceResponseDto
                 {
-                    RoomName = room.RoomName,
+                    RoomName = room.RoomName ?? string.Empty,
                     BillingMonth = invoiceCreated.BillingMonth,
                     BillingYear = invoiceCreated.BillingYear,
                     IsPaid = invoiceCreated.IsPaid,
@@ -170,16 +192,17 @@ namespace HostelFinder.Application.Services
                         PreviousReading = details.PreviousReading,
                         InvoiceId = details.InvoiceId,
                         NumberOfCustomer = details.NumberOfCustomer,
-                        ServiceName = details.Service.ServiceName,
-                        UnitCost = details.UnitCost
+                        ServiceName = details.Service?.ServiceName ?? (details.IsRentRoom ? "Tiền thuê phòng" : "Không xác định") ,
+                        UnitCost = details.UnitCost,
                     }).ToList()
 
                 };
                 return new Response<InvoiceResponseDto> { Data = invoiceCreatedDto, Message = $"Tạo hóa đơn thành công cho phòng {room.RoomName} vào ngày {DateTime.Now}", Succeeded = true };
             }
-            catch
+            catch(Exception ex) 
             {
                 await transaction.RollbackAsync();
+                _logger.LogError(ex, "Xảy ra trong quá tình tạo hóa đơn phòng");
                 return new Response<InvoiceResponseDto> { Message = "Xảy ra lỗi trong quá trình tạo hóa đơn" };
             }
         }
