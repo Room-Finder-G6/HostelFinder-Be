@@ -70,7 +70,9 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
     public Task<Post?> GetPostByIdAsync(Guid postId)
     {
-        return _dbContext.Posts.FirstOrDefaultAsync(x => x.Id == postId);
+        return _dbContext.Posts
+            .Include(x => x.Images)
+            .FirstOrDefaultAsync(x => x.Id == postId);
     }
 
     public Task<Post?> GetPostByIdWithHostelAsync(Guid postId)
@@ -80,7 +82,8 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
     public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(Guid userId)
     {
-        var posts = await _dbContext.Posts.Where(x => x.Hostel.LandlordId == userId).ToListAsync();
+        var posts = await _dbContext.Posts.Where(x => x.Hostel.LandlordId == userId)
+            .ToListAsync();
         return posts;
     }
 

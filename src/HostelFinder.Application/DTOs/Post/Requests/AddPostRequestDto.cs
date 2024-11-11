@@ -17,5 +17,4 @@ public class AddPostRequestDto
     [Required]
     public DateTime DateAvailable { get; set; }
     public Guid MembershipServiceId { get; set; }
-    //public List<IFormFile> Images { get; set; } = new();
 }

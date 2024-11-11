@@ -35,10 +35,15 @@ public class GeneralProfile : Profile
     {
         // Post Mapping
         CreateMap<AddPostRequestDto, Post>().ReverseMap();
-        CreateMap<PostResponseDto, Post>()
-            .ForPath(dest => dest.MembershipServices.Membership.Id, opt =>
-                opt.MapFrom(src => src.MembershipId))
-            .ReverseMap();
+        
+        CreateMap<Post, PostResponseDto>()
+            .ForMember(dest => dest.MembershipServiceId, opt =>
+                opt.MapFrom(src => src.MembershipServiceId))
+            .ForMember(dest => dest.ImageUrls, opt =>
+                opt.MapFrom(src => src.Images.Select(image => image.Url).ToList()))
+            .ReverseMap()
+            .ForMember(dest => dest.Images, opt => opt.Ignore()); 
+        
         CreateMap<Post, ListPostsResponseDto>()
             .ForMember(dest => dest.Address, opt =>
                 opt.MapFrom(src => src.Hostel.Address))

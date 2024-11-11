@@ -6,14 +6,10 @@ namespace HostelFinder.Application.DTOs.Room.Requests;
 
 public class UpdatePostRequestDto
 {
+    public Guid HostelId { get; set; }
+    public Guid RoomId { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
-    public string PrimaryImageUrl { get; set; }
-    public virtual RoomType RoomType { get; set; } 
-    public decimal? Size { get; set; }
-    public decimal MonthlyRentCost { get; set; }
-    public bool IsAvailable { get; set; } = true;
+    public bool Status { get; set; } = true;
     public DateTime DateAvailable { get; set; }
-    public AddRoomAmenityDto AddRoomAmenityDto { get; set; }
-    public UpdateRoomDetailsDto UpdateRoomDetailsDto { get; set; }
 }
