@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Wrappers;
 
 namespace HostelFinder.Application.Interfaces.IServices;
@@ -13,4 +14,5 @@ public interface IPostService
     Task<Response<bool>> DeletePostAsync(Guid postId, Guid userId);
     Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request);
     Task<Response<PostResponseDto>> GetPostByIdAsync(Guid postId);
+    Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request);
 }

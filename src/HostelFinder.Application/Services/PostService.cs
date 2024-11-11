@@ -3,6 +3,7 @@ using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -130,6 +131,29 @@ public class PostService : IPostService
         };
     }
 
+    public async Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request)
+    {
+        var post = await _postRepository.GetByIdAsync(postId);
+        if (post == null)
+        {
+            return new Response<PostResponseDto>("Không tìm thấy bài đăng");
+        }
+
+        try
+        {
+            _mapper.Map(request, post);
+            post.LastModifiedOn = DateTime.Now;
+            await _postRepository.UpdateAsync(post);
+            
+            var updatedPostDto = _mapper.Map<PostResponseDto>(post);
+            return new Response<PostResponseDto>(updatedPostDto,"Cập nhật bài đăng thành công");
+        }
+        catch (Exception e)
+        {
+            return new Response<PostResponseDto>(message: e.Message);
+        }
+    }
+
     public async Task<Response<List<ListPostsResponseDto>>> GetPostsByUserIdAsync(Guid userId)
     {
         var posts = await _postRepository.GetPostsByUserIdAsync(userId);
@@ -151,7 +175,8 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls, Guid userId)
+    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls,
+        Guid userId)
     {
         if (_membershipService == null)
         {
@@ -213,5 +238,4 @@ public class PostService : IPostService
             };
         }
     }
-
 }
