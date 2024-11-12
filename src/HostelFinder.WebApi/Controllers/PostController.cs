@@ -176,4 +176,18 @@ public class PostController : ControllerBase
 
         return NotFound();
     }
+
+    [HttpPost("filter")]
+    public async Task<IActionResult> FilterPosts([FromBody] FilterPostsRequestDto filter)
+    {
+        var result = await _postService.FilterPostsAsync(filter);
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result.Errors);
+    }
+
 }

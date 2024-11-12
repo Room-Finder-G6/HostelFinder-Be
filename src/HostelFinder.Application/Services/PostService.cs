@@ -238,4 +238,22 @@ public class PostService : IPostService
             };
         }
     }
+
+    public async Task<Response<List<PostResponseDto>>> FilterPostsAsync(FilterPostsRequestDto filter)
+    {
+        var posts = await _postRepository.FilterPostsAsync(
+            filter.Province,
+            filter.District,
+            filter.Commune,
+            filter.Size,
+            filter.RoomType
+        );
+
+        var postDtos = _mapper.Map<List<PostResponseDto>>(posts);
+        return new Response<List<PostResponseDto>>
+        {
+            Data = postDtos,
+            Succeeded = true
+        };
+    }
 }
