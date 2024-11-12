@@ -190,4 +190,19 @@ public class PostController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    [HttpPatch]
+    [Route("{postId}/push")]
+    public async Task<IActionResult> PushPost(Guid postId, Guid userId)
+    {
+        var result = await _postService.PushPostOnTopAsync(postId, DateTime.Now, userId);
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(new { Message = result.Message });
+    }
+
+
 }

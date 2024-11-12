@@ -256,4 +256,72 @@ public class PostService : IPostService
             Succeeded = true
         };
     }
+
+    public async Task<Response<PostResponseDto>> PushPostOnTopAsync(Guid postId, DateTime newDate, Guid userId)
+    {
+        // Ensure the MembershipService is initialized
+        if (_membershipService == null)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = "Membership service not initialized."
+            };
+        }
+
+        // Check if the user can push a post to the top
+        var pushCountResponse = await _membershipService.UpdatePushTopCountAsync(userId);
+        if (!pushCountResponse.Succeeded)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = pushCountResponse.Message
+            };
+        }
+
+        // Retrieve the post to be pushed
+        var post = await _postRepository.GetByIdAsync(postId);
+        if (post == null)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = "Post not found."
+            };
+        }
+
+        try
+        {
+            // Begin a transaction to ensure atomic updates
+            using (var transaction = await _postRepository.BeginTransactionAsync())
+            {
+                // Update the post's dates to push it to the top
+                post.CreatedOn = newDate;
+                post.LastModifiedOn = newDate;
+                await _postRepository.UpdateAsync(post);
+
+                // Commit transaction
+                await transaction.CommitAsync();
+            }
+
+            // Map the updated post to the response DTO
+            var postResponseDto = _mapper.Map<PostResponseDto>(post);
+            return new Response<PostResponseDto>
+            {
+                Succeeded = true,
+                Message = "Post pushed to the top successfully.",
+                Data = postResponseDto
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = ex.Message
+            };
+        }
+    }
+
 }
