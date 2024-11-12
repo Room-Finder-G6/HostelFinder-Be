@@ -117,4 +117,15 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
         return await query.ToListAsync();
     }
+
+    public async Task<List<Post>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync()
+    {
+        return await _dbContext.Posts
+            .Include(p => p.MembershipServices)
+                .ThenInclude(ms => ms.Membership)
+            .OrderByDescending(p => p.MembershipServices.Membership.Price)
+            .ThenByDescending(p => p.CreatedOn)
+            .ToListAsync();
+    }
+
 }

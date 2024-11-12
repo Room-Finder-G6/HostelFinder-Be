@@ -324,4 +324,16 @@ public class PostService : IPostService
         }
     }
 
+    public async Task<Response<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync()
+    {
+        var posts = await _postRepository.GetPostsOrderedByMembershipPriceAndCreatedOnAsync();
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts);
+
+        return new Response<List<ListPostsResponseDto>>
+        {
+            Data = postDtos,
+            Succeeded = true
+        };
+    }
+
 }
