@@ -43,6 +43,12 @@ namespace HostelFinder.Infrastructure.Seeders
                     dbContext.Amenities.AddRange(amenities);
                     await dbContext.SaveChangesAsync();
                 }
+                if (!await dbContext.Memberships.AnyAsync())
+                {
+                    var memberships = GetMemberships();
+                    await dbContext.Memberships.AddRangeAsync(memberships);
+                    await dbContext.SaveChangesAsync();
+                }
             }
         }
         private IEnumerable<Service> GetServices()
@@ -212,6 +218,63 @@ namespace HostelFinder.Infrastructure.Seeders
                 },
                 ];
             return amenities;
+        }
+
+        private IEnumerable<Membership> GetMemberships()
+        {
+            var memberships = new List<Membership>
+            {
+                new Membership
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Gói Bạc",
+                    Description = "Gói người dùng cơ bản.",
+                    Price = 100000,
+                    Duration = 30,
+                    CreatedBy = "Hệ Thống",
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false,
+                    MembershipServices = new List<MembershipServices>
+                    {
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 10, MaxPushTopAllowed = 5, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
+                    }
+                },
+                new Membership
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Gói Vàng",
+                    Description = "Số bài đăng & đẩy được tăng lên.",
+                    Price = 150000,
+                    Duration = 30,
+                    CreatedBy = "Hệ Thống",
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false,
+                    MembershipServices = new List<MembershipServices>
+                    {
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 20, MaxPushTopAllowed = 10, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
+                    }
+                },
+                new Membership
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Gói Kim Cương",
+                    Description = "Số bài đăng được tăng lên.",
+                    Price = 200000,
+                    Duration = 30,
+                    CreatedBy = "Hệ Thống",
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false,
+                    MembershipServices = new List<MembershipServices>
+                    {
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 35, MaxPushTopAllowed = 15, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
+                    }
+                }
+            };
+
+            return memberships;
         }
     }
 

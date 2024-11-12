@@ -109,10 +109,15 @@ public class HostelFinderDbContext : DbContext
         // Configure Membership entity
         modelBuilder.Entity<Membership>()
             .HasKey(m => m.Id);
+        modelBuilder.Entity<Membership>(entity =>
+        {
+            entity.Property(r => r.Price)
+                .HasPrecision(18, 2);
+        });
 
         // Configure MembershipServices entity
         modelBuilder.Entity<MembershipServices>()
-            .HasKey(ms => ms.Id);
+        .HasKey(ms => ms.Id);
         modelBuilder.Entity<MembershipServices>()
             .HasMany(ms => ms.Posts)
             .WithOne(p => p.MembershipServices)
@@ -154,10 +159,10 @@ public class HostelFinderDbContext : DbContext
         modelBuilder.Entity<Room>(entity =>
         {
             entity.Property(r => r.Deposit)
-                .HasPrecision(18, 2); 
+                .HasPrecision(18, 2);
 
             entity.Property(r => r.MonthlyRentCost)
-                .HasPrecision(18, 2); 
+                .HasPrecision(18, 2);
         });
         modelBuilder.Entity<Room>(entity =>
         {

@@ -7,20 +7,23 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.Services
 {
     public class MembershipService : IMembershipService
     {
         private readonly IMembershipRepository _membershipRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUserMembershipRepository _userMembershipRepository;
         private readonly IMapper _mapper;
 
-        public MembershipService(IMembershipRepository membershipRepository, IMapper mapper, IUserMembershipRepository userMembershipRepository)
+        public MembershipService(IMembershipRepository membershipRepository, IMapper mapper, IUserMembershipRepository userMembershipRepository, IUserRepository userRepository)
         {
             _membershipRepository = membershipRepository;
             _mapper = mapper;
             _userMembershipRepository = userMembershipRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<Response<List<MembershipResponseDto>>> GetAllMembershipWithMembershipService()
@@ -200,6 +203,44 @@ namespace HostelFinder.Application.Services
             };
         }
 
+        public async Task<Response<string>> UpdatePushTopCountAsync(Guid userId)
+        {
+            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
+            if (userMembership != null && userMembership.Membership != null)
+            {
+                // Find the membership service that supports push-to-top functionality
+                var membershipService = userMembership.Membership.MembershipServices
+                    .FirstOrDefault(ms => ms.MaxPushTopAllowed.HasValue && ms.MaxPushTopAllowed > userMembership.PushTopUsed);
+
+                if (membershipService != null && userMembership.PushTopUsed < membershipService.MaxPushTopAllowed)
+                {
+                    // Increment the push count for the user
+                    userMembership.PushTopUsed++;
+                    await _userMembershipRepository.UpdateAsync(userMembership);
+
+                    return new Response<string>
+                    {
+                        Succeeded = true,
+                        Message = "Push-to-top count updated successfully."
+                    };
+                }
+                else
+                {
+                    return new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "You have reached the maximum number of push-to-top actions allowed for your membership."
+                    };
+                }
+            }
+
+            return new Response<string>
+            {
+                Succeeded = false,
+                Message = "User membership not found."
+            };
+        }
+
         public async Task<Response<string>> AddUserMembershipAsync(AddUserMembershipRequestDto userMembershipDto)
         {
             var existingUserMembership = await _userMembershipRepository.GetByUserIdAsync(userMembershipDto.UserId);
@@ -217,11 +258,19 @@ namespace HostelFinder.Application.Services
                 UserId = userMembershipDto.UserId,
                 MembershipId = userMembershipDto.MembershipId,
                 PostsUsed = 0,
+                PushTopUsed = 0,
                 CreatedBy = "System",
                 CreatedOn = DateTime.Now
             };
 
             await _userMembershipRepository.AddAsync(userMembership);
+
+            var user = await _userRepository.GetByIdAsync(userMembershipDto.UserId);
+            if (user != null)
+            {
+                user.Role = UserRole.Landlord;
+                await _userRepository.UpdateAsync(user);
+            }
 
             return new Response<string>
             {

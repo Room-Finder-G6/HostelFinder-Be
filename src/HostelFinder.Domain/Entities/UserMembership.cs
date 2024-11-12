@@ -7,6 +7,7 @@ namespace HostelFinder.Domain.Entities
         public Guid UserId { get; set; }
         public User User { get; set; }
         public int PostsUsed { get; set; }
+        public int PushTopUsed { get; set; }
         public Guid MembershipId { get; set; }
         public Membership Membership { get; set; }
     }
