@@ -204,5 +204,17 @@ public class PostController : ControllerBase
         return BadRequest(new { Message = result.Message });
     }
 
+    [HttpGet("ordered")]
+    public async Task<IActionResult> GetPostsOrderedByPriority()
+    {
+        var result = await _postService.GetPostsOrderedByPriorityAsync();
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result.Errors);
+    }
 
 }

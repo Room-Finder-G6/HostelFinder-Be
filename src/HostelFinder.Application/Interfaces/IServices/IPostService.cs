@@ -17,4 +17,5 @@ public interface IPostService
     Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request);
     Task<Response<List<PostResponseDto>>> FilterPostsAsync(FilterPostsRequestDto filter);
     Task<Response<PostResponseDto>> PushPostOnTopAsync(Guid postId, DateTime newDate, Guid userId);
+    Task<Response<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync();
 }

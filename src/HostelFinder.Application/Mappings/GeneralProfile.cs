@@ -121,10 +121,12 @@ public class GeneralProfile : Profile
         CreateMap<MembershipServices, MembershipServiceResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
             .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
+            .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))
             .ReverseMap();
         CreateMap<AddMembershipServiceReqDto, MembershipServices>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
             .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
+            .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))
             .ReverseMap();
         CreateMap<MembershipServiceResponseDto, AddMembershipServiceReqDto>().ReverseMap();
 
