@@ -15,4 +15,5 @@ public interface IPostService
     Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request);
     Task<Response<PostResponseDto>> GetPostByIdAsync(Guid postId);
     Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request);
+    Task<Response<List<PostResponseDto>>> FilterPostsAsync(FilterPostsRequestDto filter);
 }

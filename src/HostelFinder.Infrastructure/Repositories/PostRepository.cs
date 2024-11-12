@@ -92,4 +92,29 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         return await _dbContext.Database.BeginTransactionAsync();
     }
 
+    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, float? size, RoomType? roomType)
+    {
+        var query = _dbContext.Posts
+            .Include(p => p.Hostel)
+                .ThenInclude(h => h.Address)
+            .Include(p => p.Room)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(province))
+            query = query.Where(p => p.Hostel.Address.Province == province);
+
+        if (!string.IsNullOrEmpty(district))
+            query = query.Where(p => p.Hostel.Address.District == district);
+
+        if (!string.IsNullOrEmpty(commune))
+            query = query.Where(p => p.Hostel.Address.commune == commune);
+
+        if (size.HasValue)
+            query = query.Where(p => p.Room.RoomDetails.Size >= size);
+
+        if (roomType.HasValue)
+            query = query.Where(p => p.Room.RoomType == roomType);
+
+        return await query.ToListAsync();
+    }
 }
