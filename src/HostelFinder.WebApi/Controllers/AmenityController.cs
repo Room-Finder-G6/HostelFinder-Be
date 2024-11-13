@@ -24,6 +24,7 @@ public class AmenityController : ControllerBase
         {
             return BadRequest(new Response<AmenityResponse>("Invalid model state"));
         }
+
         try
         {
             var response = await _amenityService.AddAmenityAsync(addAmenityDto);
@@ -38,7 +39,6 @@ public class AmenityController : ControllerBase
         {
             return StatusCode(500, ex.Message);
         }
-
     }
 
     [HttpGet]
@@ -62,8 +62,19 @@ public class AmenityController : ControllerBase
         {
             return NotFound(response);
         }
+
         return Ok(response);
     }
 
+    [HttpGet("GetAmenitiesByRoomId/{roomId}")]
+    public async Task<IActionResult> GetAmenitiesByRoomId(Guid roomId)
+    {
+        var response = await _amenityService.GetAmenitiesByRoomlIdAsync(roomId);
+        if (!response.Succeeded || response.Data == null || !response.Data.Any())
+        {
+            return NotFound(new Response<IEnumerable<AmenityResponse>>("No amenities found"));
+        }
 
+        return Ok(response);
+    }
 }
