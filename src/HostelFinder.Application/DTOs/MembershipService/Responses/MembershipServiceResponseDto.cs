@@ -4,5 +4,6 @@
     {
         public string ServiceName { get; set; }
         public int MaxPostsAllowed { get; set; }
+        public int MaxPushTopAllowed {  get; set; }
     }
 }

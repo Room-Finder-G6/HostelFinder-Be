@@ -56,5 +56,19 @@ namespace HostelFinder.Infrastructure.Repositories
 
             return services;
         }
+
+        public async Task<IEnumerable<Service>> GetServiceByHostelIdAsync(Guid hostelId)
+        {
+            var services = await _dbContext.Services.Include(s => s.HostelServices)
+                .Where(s => s.HostelServices.Any(hs => hs.HostelId == hostelId))
+                .ToListAsync();
+            
+            if(services == null)
+            {
+                throw new NotFoundException("Không tìm thấy dịch vụ nào của nhà trọ!");
+            }
+            
+            return services;
+        }
     }
 }

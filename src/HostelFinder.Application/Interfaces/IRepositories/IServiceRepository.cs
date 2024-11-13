@@ -13,5 +13,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 
         Task<IEnumerable<Service>> GetServiceByRoomIdAsync(Guid roomId);
        
+        Task<IEnumerable<Service>> GetServiceByHostelIdAsync(Guid hostelId);
     }
 }

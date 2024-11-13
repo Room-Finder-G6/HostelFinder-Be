@@ -99,5 +99,12 @@ namespace HostelFinder.Application.Services
                 return new Response<string>(message: ex.Message);
             }
         }
+
+        public async Task<Response<List<ServiceResponseDTO>>> GetServiceByHostelIdAsync(Guid hostelId)
+        {
+            var services = await _serviceRepository.GetServiceByHostelIdAsync(hostelId);
+            var serviceResponseDtos = _mapper.Map<List<ServiceResponseDTO>>(services);
+            return new Response<List<ServiceResponseDTO>> { Succeeded = true, Data = serviceResponseDtos };
+        }
     }
 }

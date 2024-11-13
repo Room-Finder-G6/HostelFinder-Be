@@ -176,4 +176,45 @@ public class PostController : ControllerBase
 
         return NotFound();
     }
+
+    [HttpPost("filter")]
+    public async Task<IActionResult> FilterPosts([FromBody] FilterPostsRequestDto filter)
+    {
+        var result = await _postService.FilterPostsAsync(filter);
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPatch]
+    [Route("{postId}/push")]
+    public async Task<IActionResult> PushPost(Guid postId, Guid userId)
+    {
+        var result = await _postService.PushPostOnTopAsync(postId, DateTime.Now, userId);
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(new { Message = result.Message });
+    }
+
+    [HttpGet("ordered")]
+    public async Task<IActionResult> GetPostsOrderedByPriority()
+    {
+        var result = await _postService.GetPostsOrderedByPriorityAsync();
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result.Errors);
+    }
+
 }
