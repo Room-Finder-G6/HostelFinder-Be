@@ -199,9 +199,9 @@ public class HostelFinderDbContext : DbContext
 
         // Configure ServiceCost entity
         modelBuilder.Entity<ServiceCost>()
-            .HasOne(sc => sc.Room)
+            .HasOne(sc => sc.Hostel)
             .WithMany(r => r.ServiceCosts)
-            .HasForeignKey(sc => sc.RoomId);
+            .HasForeignKey(sc => sc.HostelId);
 
         modelBuilder.Entity<ServiceCost>()
             .HasOne(sc => sc.Service)

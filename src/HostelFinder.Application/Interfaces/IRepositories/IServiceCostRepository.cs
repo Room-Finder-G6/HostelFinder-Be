@@ -5,5 +5,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 {
     public interface IServiceCostRepository : IBaseGenericRepository<ServiceCost>
     {
+        Task<ServiceCost> CheckExistingServiceCostAsync(Guid hostelId, Guid serviceId, DateTime effectiveFrom);
     }
 }

@@ -19,7 +19,8 @@ namespace HostelFinder.Infrastructure.Repositories
         {
             var room = await _dbContext.Rooms
                     .Include(r => r.RoomDetails)
-                    .Include(r => r.ServiceCosts)
+                    .Include(r => r.Hostel)
+                    .ThenInclude(h => h.ServiceCosts)
                     .FirstOrDefaultAsync(r => r.Id == roomId && !r.IsDeleted);
             if (room == null)
             {
@@ -31,7 +32,8 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<IEnumerable<Room>> ListAllWithDetailsAsync()
         {
             return await _dbContext.Rooms
-                          .Include(r => r.ServiceCosts)
+                .Include(r => r.Hostel)
+                          .ThenInclude(h => h.ServiceCosts)
                           .Include(r => r.RoomDetails)
                           .ToListAsync();
         }
@@ -41,7 +43,7 @@ namespace HostelFinder.Infrastructure.Repositories
             IQueryable<Room> query =  _dbContext.Rooms
                             .AsNoTracking()
                             .Include(r => r.Hostel)
-                            .Include(r => r.ServiceCosts)
+                            .ThenInclude(h => h.ServiceCosts)
                                 .ThenInclude(sc => sc.Service)
                             .Include(r => r.Invoices)
                             .Where(r => r.HostelId == hostelId && !r.IsDeleted);
@@ -62,10 +64,11 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<Room> GetRoomByIdAsync(Guid roomId)
         {
             var room = await _dbContext.Rooms
-                .Include(r => r.ServiceCosts)
-                .ThenInclude(sc => sc.Service)
-                .Include(r => r.Invoices)
                 .Include(r => r.Hostel)
+                .ThenInclude(sc => sc.ServiceCosts)
+                .Include(r => r.Invoices)
+                .Include(r => r.Images)
+                .Include(r => r.RoomAmenities)
                 .FirstOrDefaultAsync(r => r.Id == roomId && !r.IsDeleted);
 
             if(room == null)

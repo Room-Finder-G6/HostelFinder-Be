@@ -84,8 +84,11 @@ public class GeneralProfile : Profile
         CreateMap<AddAmenityDto, Amenity>().ReverseMap();
 
         // Service Cost Mapping
-        CreateMap<ServiceCost, ServiceCostResponseDto>().ReverseMap();
-        CreateMap<ServiceCost, AddServiceCostDto>().ReverseMap();
+        CreateMap<ServiceCost, ServiceCostResponseDto>()
+            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service.ServiceName))
+            .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
+            .ReverseMap();
+        CreateMap<ServiceCost, CreateServiceCostDto>().ReverseMap();
         CreateMap<UpdateServiceCostDto, ServiceCost>().ReverseMap();
 
         //Map User

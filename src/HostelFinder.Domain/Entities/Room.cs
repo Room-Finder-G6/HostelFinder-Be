@@ -23,7 +23,6 @@ namespace HostelFinder.Domain.Entities
         public virtual ICollection<Post>? Posts { get; set; }
         public virtual ICollection<RoomAmenities> RoomAmenities { get; set; } 
         public virtual RoomDetails RoomDetails { get; set; }
-        public virtual ICollection<ServiceCost> ServiceCosts { get; set; } 
 
         public virtual ICollection<Image>? Images { get; set; }
 

@@ -95,7 +95,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 },
                 new () {
                     Id = Guid.NewGuid(),
-                    ServiceName = "Tiền vệ sinh chung",
+                    ServiceName = "Vệ sinh",
                     IsBillable = true,
                     IsUsageBased = false,
                     CreatedBy = "Hệ thống",
@@ -104,7 +104,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 },
                 new () {
                     Id = Guid.NewGuid(),
-                    ServiceName = "Tiền điện",
+                    ServiceName = "Điện",
                     IsBillable = true,
                     IsUsageBased = true,
                     CreatedBy = "Hệ thống",
@@ -113,7 +113,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 },
                 new () {
                     Id = Guid.NewGuid(),
-                    ServiceName = "Tiền nước",
+                    ServiceName = "Nước",
                     IsBillable = true,
                     IsUsageBased = true,
                     CreatedBy = "Hệ thống",
