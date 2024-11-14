@@ -16,19 +16,22 @@ namespace HostelFinder.Application.Services
         private readonly IRoomRepository _roomRepository;
         private readonly IMeterReadingRepository _meterReadingRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger<InvoiceService> _logger;   
+        private readonly ILogger<InvoiceService> _logger;
+        private readonly IServiceRepository _serviceRepository;
 
         public InvoiceService(IInVoiceRepository invoiceRepository,
             IRoomRepository roomRepository,
             IMeterReadingRepository meterReadingRepository,
             IMapper mapper,
-            ILogger<InvoiceService> logger)
+            ILogger<InvoiceService> logger,
+            IServiceRepository serviceRepository)
         {
             _invoiceRepository = invoiceRepository;
             _roomRepository = roomRepository;
             _meterReadingRepository = meterReadingRepository;
             _mapper = mapper;
             _logger = logger;
+            _serviceRepository = serviceRepository;
         }
 
         public async Task<Response<List<InvoiceResponseDto>>> GetAllAsync()
@@ -114,11 +117,11 @@ namespace HostelFinder.Application.Services
                     InvoiceDetails = new List<InvoiceDetail>()
                 };
 
-                var serviceCosts = room.ServiceCosts.ToList();
+                var serviceCosts = room.Hostel.ServiceCosts.ToList();
 
                 foreach (var serviceCost in serviceCosts)
                 {
-                    var service = serviceCost.Service;
+                    var service = await _serviceRepository.GetServiceByIdAsync(serviceCost.ServiceId);
                     var invoiceDetail = new InvoiceDetail
                     {
                         InvoiceId = invoice.Id,

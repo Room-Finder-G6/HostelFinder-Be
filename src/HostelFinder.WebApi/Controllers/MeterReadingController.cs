@@ -26,7 +26,7 @@ namespace HostelFinder.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Đã xảy ra lỗi: {ex.Message}");
+                return BadRequest(ex.Message);
             }
         }
     }
