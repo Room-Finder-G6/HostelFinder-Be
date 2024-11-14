@@ -5,5 +5,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 {
     public interface IHostelServiceRepository : IBaseGenericRepository<HostelServices>
     {
+        Task<List<HostelServices>> GetServicesByHostelIdAsync(Guid hostelId);
     }
 }

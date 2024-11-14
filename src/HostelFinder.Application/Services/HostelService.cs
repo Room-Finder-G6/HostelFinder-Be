@@ -6,6 +6,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using System.Linq;
 
 namespace HostelFinder.Application.Services
 {
@@ -15,14 +16,18 @@ namespace HostelFinder.Application.Services
         private readonly IMapper _mapper;
         private readonly IHostelServiceRepository _hostelServiceRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly IAddressRepository _addressRepository;
+        private readonly IS3Service _s3Service;
 
         public HostelService(IHostelRepository hostelRepository, IMapper mapper,
-            IHostelServiceRepository hostelServiceRepository, IImageRepository imageRepository)
+            IHostelServiceRepository hostelServiceRepository, IImageRepository imageRepository, IS3Service s3Service, IAddressRepository addressRepository)
         {
             _hostelRepository = hostelRepository;
             _mapper = mapper;
             _hostelServiceRepository = hostelServiceRepository;
             _imageRepository = imageRepository;
+            _s3Service = s3Service;
+            _addressRepository = addressRepository;
         }
 
         public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request,
@@ -67,7 +72,6 @@ namespace HostelFinder.Application.Services
                     {
                         HostelId = hostelAdded.Id,
                         Url = imageUrl
-
                     });
                 }
 
@@ -75,7 +79,7 @@ namespace HostelFinder.Application.Services
                 var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
 
                 return new Response<HostelResponseDto>
-                    { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
+                { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
             }
             catch (Exception ex)
             {
@@ -83,30 +87,109 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, Guid userId,
-            UpdateHostelRequestDto hostelDto)
+        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, List<string> imageUrls)
         {
-            var hostel = await _hostelRepository.GetHostelByIdAndUserIdAsync(hostelId, userId);
+            var hostel = await _hostelRepository.GetByIdAsync(hostelId);
             if (hostel == null)
             {
-                return new Response<HostelResponseDto>("Hostel not found");
+                return new Response<HostelResponseDto>("Hostel not found.");
             }
+
+            // Update the basic hostel properties
+            _mapper.Map(request, hostel);
+            hostel.LastModifiedOn = DateTime.Now;
 
             try
             {
-                _mapper.Map(hostelDto, hostel);
-                hostel.LastModifiedOn = DateTime.Now;
-                hostel.LastModifiedBy = userId.ToString();
-                await _hostelRepository.UpdateAsync(hostel);
+                using (var transaction = await _hostelRepository.BeginTransactionAsync())
+                {
+                    // Update or Add Address using AutoMapper
+                    var address = await _addressRepository.GetAddressByHostelIdAsync(hostelId);
+                    if (address != null)
+                    {
+                        // Update existing address by mapping request.Address onto it
+                        _mapper.Map(request.Address, address);
+                        await _addressRepository.UpdateAsync(address);
+                    }
+                    else
+                    {
+                        // Map request.Address to a new Address object and add it
+                        var newAddress = _mapper.Map<Address>(request.Address);
+                        newAddress.HostelId = hostelId;
+                        newAddress.CreatedOn = DateTime.Now;
+                        await _addressRepository.AddAsync(newAddress);
+                    }
 
-                var updatedHostelDto = _mapper.Map<HostelResponseDto>(hostel);
-                return new Response<HostelResponseDto>(updatedHostelDto, "Update successful.");
+                    // Update services
+                    var existingServices = await _hostelServiceRepository.GetServicesByHostelIdAsync(hostelId);
+                    var existingServiceIds = existingServices.Select(s => s.ServiceId).ToList();
+                    var newServiceIds = request.ServiceId.Where(id => id.HasValue).Select(id => id.Value).Except(existingServiceIds).ToList();
+
+                    // Add new services
+                    foreach (var serviceId in newServiceIds)
+                    {
+                        var newService = new HostelServices
+                        {
+                            ServiceId = serviceId,
+                            HostelId = hostelId,
+                            CreatedBy = hostel.LandlordId.ToString(),
+                            CreatedOn = DateTime.Now,
+                            IsDeleted = false,
+                        };
+                        await _hostelServiceRepository.AddAsync(newService);
+                    }
+
+                    // Remove old services
+                    var removedServiceIds = existingServiceIds.Except(request.ServiceId.Where(id => id.HasValue).Select(id => id.Value)).ToList();
+                    foreach (var serviceId in removedServiceIds)
+                    {
+                        var serviceToRemove = existingServices.FirstOrDefault(s => s.ServiceId == serviceId);
+                        if (serviceToRemove != null)
+                        {
+                            await _hostelServiceRepository.DeleteAsync(serviceToRemove.Id);
+                        }
+                    }
+
+                    // Update images
+                    var existingImages = await _imageRepository.GetImagesByHostelIdAsync(hostelId);
+                    foreach (var image in existingImages)
+                    {
+                        await _s3Service.DeleteFileAsync(image.Url);
+                        await _imageRepository.DeletePermanentAsync(image.Id);
+                    }
+
+                    foreach (var imageUrl in imageUrls)
+                    {
+                        var newImage = new Image
+                        {
+                            HostelId = hostelId,
+                            Url = imageUrl,
+                            CreatedOn = DateTime.Now,
+                        };
+                        await _imageRepository.AddAsync(newImage);
+                    }
+
+                    // Save hostel details
+                    await _hostelRepository.UpdateAsync(hostel);
+
+                    // Commit transaction
+                    await transaction.CommitAsync();
+                }
+
+                // Map to response DTO
+                var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
+                return new Response<HostelResponseDto>
+                {
+                    Data = hostelResponseDto,
+                    Message = "Hostel updated successfully."
+                };
             }
             catch (Exception ex)
             {
                 return new Response<HostelResponseDto>(message: ex.Message);
             }
         }
+
 
         public async Task<Response<bool>> DeleteHostelAsync(Guid hostelId)
         {
@@ -138,7 +221,6 @@ namespace HostelFinder.Application.Services
 
             return response;
         }
-
 
         public async Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId)
         {
