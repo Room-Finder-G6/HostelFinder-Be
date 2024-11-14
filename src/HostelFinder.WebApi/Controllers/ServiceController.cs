@@ -65,7 +65,7 @@ namespace HostelFinder.WebApi.Controllers
             return NotFound(response.Message);
         }
         
-        [HttpGet("GetServiceByHostelId/{hostelId}")]
+        [HttpGet("GetServicesByHostelId/{hostelId}")]
         public async Task<IActionResult> GetServiceByHostelId(Guid hostelId)
         {
             var services = await _serviceService.GetServiceByHostelIdAsync(hostelId);
