@@ -17,7 +17,8 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
     }
 
-    public async Task<IEnumerable<Post>> GetFilteredPosts(decimal? minPrice, decimal? maxPrice, string? location, RoomType? roomType)
+    public async Task<IEnumerable<Post>> GetFilteredPosts(decimal? minPrice, decimal? maxPrice, string? location,
+        RoomType? roomType)
     {
         var query = _dbContext.Posts.AsQueryable();
 
@@ -33,15 +34,16 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
         return await query.ToListAsync();
     }
-    
-    public async Task<(IEnumerable<Post> Data, int TotalRecords)> GetAllMatchingAsync(string? searchPhrase, int pageSize, int pageNumber, string? sortBy, SortDirection sortDirection)
+
+    public async Task<(IEnumerable<Post> Data, int TotalRecords)> GetAllMatchingAsync(string? searchPhrase,
+        int pageSize, int pageNumber, string? sortBy, SortDirection sortDirection)
     {
         var searchPhraseLower = searchPhrase?.ToLower();
 
         var baseQuery = _dbContext
             .Posts
             .Where(p => searchPhraseLower == null || (p.Title.ToLower().Contains(searchPhraseLower)
-                                                || p.Description.ToLower().Contains(searchPhraseLower)));
+                                                      || p.Description.ToLower().Contains(searchPhraseLower)));
 
         var totalCount = await baseQuery.CountAsync();
 
@@ -49,8 +51,8 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         {
             var columnsSelector = new Dictionary<string, Expression<Func<Post, object>>>
             {
-                {nameof(Post.Title), r => r.Title },
-                {nameof(Post.Description), r => r.Description },
+                { nameof(Post.Title), r => r.Title },
+                { nameof(Post.Description), r => r.Description },
             };
 
             var selectedColumn = columnsSelector[sortBy];
@@ -65,7 +67,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .Take(pageSize)
             .ToListAsync();
 
-        return (Data : posts,TotalRecords : totalCount);
+        return (Data: posts, TotalRecords: totalCount);
     }
 
     public Task<Post?> GetPostByIdAsync(Guid postId)
@@ -82,21 +84,28 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
     public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(Guid userId)
     {
-        var posts = await _dbContext.Posts.Where(x => x.Hostel.LandlordId == userId)
+        var posts = await _dbContext.Posts
+            .Include(x => x.Hostel)
+            .Include(x => x.Room)
+            .Include(x => x.Images)
+            .Where(x => x.Hostel.LandlordId == userId) // Kiểm tra Hostel có null hay không
+            .AsNoTracking() // Tăng hiệu suất cho truy vấn chỉ đọc
             .ToListAsync();
         return posts;
     }
+
 
     public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
         return await _dbContext.Database.BeginTransactionAsync();
     }
 
-    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, float? size, RoomType? roomType)
+    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, float? size,
+        RoomType? roomType)
     {
         var query = _dbContext.Posts
             .Include(p => p.Hostel)
-                .ThenInclude(h => h.Address)
+            .ThenInclude(h => h.Address)
             .Include(p => p.Room)
             .AsQueryable();
 
@@ -122,10 +131,9 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
         return await _dbContext.Posts
             .Include(p => p.MembershipServices)
-                .ThenInclude(ms => ms.Membership)
+            .ThenInclude(ms => ms.Membership)
             .OrderByDescending(p => p.MembershipServices.Membership.Price)
             .ThenByDescending(p => p.CreatedOn)
             .ToListAsync();
     }
-
 }

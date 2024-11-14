@@ -49,7 +49,7 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.MonthlyRentCost, opt =>
                 opt.MapFrom(src => src.Room.MonthlyRentCost))
             .ForMember(dest => dest.Size, opt =>
-                opt.MapFrom(src => src.Room.RoomDetails.Size))
+                opt.MapFrom(src => src.Room.Size))
             .ForMember(dest => dest.FirstImage, opt =>
                 opt.MapFrom(src => src.Images.Any()
                     ? src.Images.First().Url
