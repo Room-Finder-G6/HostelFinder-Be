@@ -21,7 +21,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
             h.HostelName == hostelName
             && h.Address.Province == province
             && h.Address.District == district
-            && h.Address.commune == commune
+            && h.Address.Commune == commune
             && h.Address.DetailAddress == detailAddress
         );
     }

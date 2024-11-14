@@ -1,12 +1,12 @@
-﻿namespace HostelFinder.Application.DTOs.ServiceCost.Request;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HostelFinder.Application.DTOs.ServiceCost.Request;
 
 public class UpdateServiceCostDto
 {
-    public Guid ServiceCostId { get; set; }
-    public string ServiceName { get; set; }
+    [Required]
+    [Range(0, double.MaxValue, ErrorMessage = "UnitCost must be non-negative.")]
     public decimal UnitCost { get; set; }
-    public decimal Cost { get; set; }
-    public int PreviousReading { get; set; }
-    public int CurrentReading { get; set; }
-    public Guid? InVoiceId { get; set; }
+
+    public DateTime? EffectiveTo { get; set; }
 }

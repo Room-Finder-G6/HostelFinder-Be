@@ -134,28 +134,28 @@ namespace HostelFinder.Application.Services
                 room.RoomDetails.LastModifiedBy = room.LastModifiedBy;
                 room.RoomDetails.LastModifiedOn = DateTime.UtcNow;
             }
-            if (roomDto.UpdateServiceCostDtos != null)
-            {
-                var incomingServiceCosts = roomDto.UpdateServiceCostDtos
-                    .Where(dto => dto.ServiceCostId != Guid.Empty)
-                    .ToDictionary(sc => sc.ServiceCostId);
+            //if (roomDto.UpdateServiceCostDtos != null)
+            //{
+            //    var incomingServiceCosts = roomDto.UpdateServiceCostDtos
+            //        .Where(dto => dto. != Guid.Empty)
+            //        .ToDictionary(sc => sc.ServiceCostId);
 
-                foreach (var serviceCost in room.ServiceCosts)
-                {
-                    if (incomingServiceCosts.TryGetValue(serviceCost.Id, out var updateDto))
-                    {
-                        _mapper.Map(updateDto, serviceCost);
-                        serviceCost.LastModifiedBy = room.LastModifiedBy;
-                        serviceCost.LastModifiedOn = DateTime.UtcNow;
-                        incomingServiceCosts.Remove(serviceCost.Id);
-                    }
-                    else
-                    {
-                        Console.WriteLine("No matching ServiceCost ID found for: " + serviceCost.Id);
-                    }
-                }
+            //    foreach (var serviceCost in room.Hostel.ServiceCosts)
+            //    {
+            //        if (incomingServiceCosts.TryGetValue(serviceCost.Id, out var updateDto))
+            //        {
+            //            _mapper.Map(updateDto, serviceCost);
+            //            serviceCost.LastModifiedBy = room.LastModifiedBy;
+            //            serviceCost.LastModifiedOn = DateTime.UtcNow;
+            //            incomingServiceCosts.Remove(serviceCost.Id);
+            //        }
+            //        else
+            //        {
+            //            Console.WriteLine("No matching ServiceCost ID found for: " + serviceCost.Id);
+            //        }
+            //    }
 
-            }
+            //}
             room = await _roomRepository.UpdateAsync(room);
             var result = _mapper.Map<RoomResponseDto>(room);
             return new Response<RoomResponseDto>(result, "Room updated successfully.");

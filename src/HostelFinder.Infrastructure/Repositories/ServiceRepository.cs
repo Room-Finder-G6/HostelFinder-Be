@@ -42,11 +42,13 @@ namespace HostelFinder.Infrastructure.Repositories
             return service;
         }
 
-        public async Task<IEnumerable<Service>> GetServiceByRoomIdAsync(Guid roomId)
+        public async Task<IEnumerable<Service>> GetServiceByHostelIdAsync(Guid hostelId)
         {
             var services = await _dbContext.ServiceCosts
-                .Where(sr => sr.RoomId == roomId && !sr.IsDeleted)
+                .Where(sr => sr.HostelId == hostelId && !sr.IsDeleted)
                 .Include(sr => sr.Service)
+                .Include(sr => sr.Hostel)
+                .ThenInclude(h => h.ServiceCosts)
                 .Select(sr => sr.Service)
                 .ToListAsync();
             if (!services.Any())
@@ -57,18 +59,14 @@ namespace HostelFinder.Infrastructure.Repositories
             return services;
         }
 
-        public async Task<IEnumerable<Service>> GetServiceByHostelIdAsync(Guid hostelId)
+        public async Task<ServiceCost> GetCurrentServiceCostAsync(Guid hostelId, Guid serviceId)
         {
-            var services = await _dbContext.Services.Include(s => s.HostelServices)
-                .Where(s => s.HostelServices.Any(hs => hs.HostelId == hostelId))
-                .ToListAsync();
-            
-            if(services == null)
-            {
-                throw new NotFoundException("Không tìm thấy dịch vụ nào của nhà trọ!");
-            }
-            
-            return services;
+            return await _dbContext.ServiceCosts
+                .FirstOrDefaultAsync(sc => sc.HostelId == hostelId
+                && sc.ServiceId == serviceId
+                    && sc.EffectiveFrom <= DateTime.Now
+                        && (sc.EffectiveTo == null || sc.EffectiveTo >= sc.EffectiveFrom));
+
         }
     }
 }

@@ -26,5 +26,7 @@ namespace HostelFinder.Domain.Entities
         public virtual User Landlord { get; set; } 
         public virtual Address Address { get; set; } 
 
+        public virtual ICollection<ServiceCost> ServiceCosts { get; set; } = new List<ServiceCost>();
+
     }
 }

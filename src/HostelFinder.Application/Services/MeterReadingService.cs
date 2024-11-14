@@ -30,6 +30,11 @@ namespace HostelFinder.Application.Services
                     return new Response<string> { Message = "Không tìm thấy phòng để ghi số liệu", Succeeded = false }; 
                 }
 
+                if (existingRoom.IsAvailable)
+                {
+                    return new Response<string> { Message = "Phòng trọ không có người thuê phòng không thể ghi số liệu" , Succeeded = true};
+                }
+
                 var existingService = await _serviceRepository.GetByIdAsync(serviceId);
                 if (existingService == null)
                 {
