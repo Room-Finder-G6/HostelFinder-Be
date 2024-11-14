@@ -3,6 +3,7 @@ using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -130,6 +131,29 @@ public class PostService : IPostService
         };
     }
 
+    public async Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request)
+    {
+        var post = await _postRepository.GetByIdAsync(postId);
+        if (post == null)
+        {
+            return new Response<PostResponseDto>("Không tìm thấy bài đăng");
+        }
+
+        try
+        {
+            _mapper.Map(request, post);
+            post.LastModifiedOn = DateTime.Now;
+            await _postRepository.UpdateAsync(post);
+            
+            var updatedPostDto = _mapper.Map<PostResponseDto>(post);
+            return new Response<PostResponseDto>(updatedPostDto,"Cập nhật bài đăng thành công");
+        }
+        catch (Exception e)
+        {
+            return new Response<PostResponseDto>(message: e.Message);
+        }
+    }
+
     public async Task<Response<List<ListPostsResponseDto>>> GetPostsByUserIdAsync(Guid userId)
     {
         var posts = await _postRepository.GetPostsByUserIdAsync(userId);
@@ -151,7 +175,8 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls, Guid userId)
+    public async Task<Response<AddPostRequestDto>> AddPostAsync(AddPostRequestDto request, List<string> imageUrls,
+        Guid userId)
     {
         if (_membershipService == null)
         {
@@ -212,6 +237,103 @@ public class PostService : IPostService
                 Message = ex.Message
             };
         }
+    }
+
+    public async Task<Response<List<PostResponseDto>>> FilterPostsAsync(FilterPostsRequestDto filter)
+    {
+        var posts = await _postRepository.FilterPostsAsync(
+            filter.Province,
+            filter.District,
+            filter.Commune,
+            filter.Size,
+            filter.RoomType
+        );
+
+        var postDtos = _mapper.Map<List<PostResponseDto>>(posts);
+        return new Response<List<PostResponseDto>>
+        {
+            Data = postDtos,
+            Succeeded = true
+        };
+    }
+
+    public async Task<Response<PostResponseDto>> PushPostOnTopAsync(Guid postId, DateTime newDate, Guid userId)
+    {
+        // Ensure the MembershipService is initialized
+        if (_membershipService == null)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = "Membership service not initialized."
+            };
+        }
+
+        // Check if the user can push a post to the top
+        var pushCountResponse = await _membershipService.UpdatePushTopCountAsync(userId);
+        if (!pushCountResponse.Succeeded)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = pushCountResponse.Message
+            };
+        }
+
+        // Retrieve the post to be pushed
+        var post = await _postRepository.GetByIdAsync(postId);
+        if (post == null)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = "Post not found."
+            };
+        }
+
+        try
+        {
+            // Begin a transaction to ensure atomic updates
+            using (var transaction = await _postRepository.BeginTransactionAsync())
+            {
+                // Update the post's dates to push it to the top
+                post.CreatedOn = newDate;
+                post.LastModifiedOn = newDate;
+                await _postRepository.UpdateAsync(post);
+
+                // Commit transaction
+                await transaction.CommitAsync();
+            }
+
+            // Map the updated post to the response DTO
+            var postResponseDto = _mapper.Map<PostResponseDto>(post);
+            return new Response<PostResponseDto>
+            {
+                Succeeded = true,
+                Message = "Post pushed to the top successfully.",
+                Data = postResponseDto
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = ex.Message
+            };
+        }
+    }
+
+    public async Task<Response<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync()
+    {
+        var posts = await _postRepository.GetPostsOrderedByMembershipPriceAndCreatedOnAsync();
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts);
+
+        return new Response<List<ListPostsResponseDto>>
+        {
+            Data = postDtos,
+            Succeeded = true
+        };
     }
 
 }

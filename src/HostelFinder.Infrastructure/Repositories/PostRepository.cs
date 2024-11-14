@@ -70,7 +70,9 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
     public Task<Post?> GetPostByIdAsync(Guid postId)
     {
-        return _dbContext.Posts.FirstOrDefaultAsync(x => x.Id == postId);
+        return _dbContext.Posts
+            .Include(x => x.Images)
+            .FirstOrDefaultAsync(x => x.Id == postId);
     }
 
     public Task<Post?> GetPostByIdWithHostelAsync(Guid postId)
@@ -80,13 +82,50 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
     public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(Guid userId)
     {
-        var posts = await _dbContext.Posts.Where(x => x.Hostel.LandlordId == userId).ToListAsync();
+        var posts = await _dbContext.Posts.Where(x => x.Hostel.LandlordId == userId)
+            .ToListAsync();
         return posts;
     }
 
     public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
         return await _dbContext.Database.BeginTransactionAsync();
+    }
+
+    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, float? size, RoomType? roomType)
+    {
+        var query = _dbContext.Posts
+            .Include(p => p.Hostel)
+                .ThenInclude(h => h.Address)
+            .Include(p => p.Room)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(province))
+            query = query.Where(p => p.Hostel.Address.Province == province);
+
+        if (!string.IsNullOrEmpty(district))
+            query = query.Where(p => p.Hostel.Address.District == district);
+
+        if (!string.IsNullOrEmpty(commune))
+            query = query.Where(p => p.Hostel.Address.commune == commune);
+
+        if (size.HasValue)
+            query = query.Where(p => p.Room.RoomDetails.Size >= size);
+
+        if (roomType.HasValue)
+            query = query.Where(p => p.Room.RoomType == roomType);
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<List<Post>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync()
+    {
+        return await _dbContext.Posts
+            .Include(p => p.MembershipServices)
+                .ThenInclude(ms => ms.Membership)
+            .OrderByDescending(p => p.MembershipServices.Membership.Price)
+            .ThenByDescending(p => p.CreatedOn)
+            .ToListAsync();
     }
 
 }

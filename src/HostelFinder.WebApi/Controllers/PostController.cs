@@ -1,4 +1,5 @@
 using HostelFinder.Application.DTOs.Post.Requests;
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,7 +32,8 @@ public class PostController : ControllerBase
     }*/
 
     [HttpPost]
-    public async Task<IActionResult> AddPost(Guid userId, [FromForm] AddPostRequestDto postDto, [FromForm] List<IFormFile> images)
+    public async Task<IActionResult> AddPost(Guid userId, [FromForm] AddPostRequestDto postDto,
+        [FromForm] List<IFormFile> images)
     {
         if (!ModelState.IsValid)
         {
@@ -57,33 +59,34 @@ public class PostController : ControllerBase
         {
             return Ok(result);
         }
+
         return BadRequest(result.Message);
     }
 
-    /*[HttpPut]
+    [HttpPut]
     [Route("{postId}")]
-    public async Task<IActionResult> UpdatePost([FromBody] UpdatePostRequestDto postDto, Guid roomId)
+    public async Task<IActionResult> UpdatePost([FromForm] UpdatePostRequestDto postDto, Guid postId)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _postService.UpdateRoomAsync(postDto, roomId);
+        var result = await _postService.UpdatePostAsync(postId, postDto);
         if (result.Succeeded)
         {
             return Ok(result);
         }
 
         return BadRequest(result.Errors);
-    }*/
+    }
 
     [HttpDelete]
     [Route("{postId}")]
     public async Task<IActionResult> DeletePost(Guid postId)
     {
         var userIdClaim = User.FindFirst("UserId");
-        if(userIdClaim == null)
+        if (userIdClaim == null)
         {
             return Unauthorized("Người dùng chưa được xác thực.");
         }
@@ -173,4 +176,45 @@ public class PostController : ControllerBase
 
         return NotFound();
     }
+
+    [HttpPost("filter")]
+    public async Task<IActionResult> FilterPosts([FromBody] FilterPostsRequestDto filter)
+    {
+        var result = await _postService.FilterPostsAsync(filter);
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPatch]
+    [Route("{postId}/push")]
+    public async Task<IActionResult> PushPost(Guid postId, Guid userId)
+    {
+        var result = await _postService.PushPostOnTopAsync(postId, DateTime.Now, userId);
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(new { Message = result.Message });
+    }
+
+    [HttpGet("ordered")]
+    public async Task<IActionResult> GetPostsOrderedByPriority()
+    {
+        var result = await _postService.GetPostsOrderedByPriorityAsync();
+
+        if (result.Succeeded)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result.Errors);
+    }
+
 }

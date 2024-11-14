@@ -28,6 +28,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 {
                     ServiceName = ms.ServiceName,
                     MaxPostsAllowed = ms.MaxPostsAllowed,
+                    MaxPushTopAllowed = ms.MaxPushTopAllowed,
                     Membership = membership,
                     CreatedOn = DateTime.Now,
                     CreatedBy = "System"
