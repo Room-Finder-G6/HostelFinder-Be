@@ -107,7 +107,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             query = query.Where(p => p.Hostel.Address.District == district);
 
         if (!string.IsNullOrEmpty(commune))
-            query = query.Where(p => p.Hostel.Address.commune == commune);
+            query = query.Where(p => p.Hostel.Address.Commune == commune);
 
         if (size.HasValue)
             query = query.Where(p => p.Room.RoomDetails.Size >= size);

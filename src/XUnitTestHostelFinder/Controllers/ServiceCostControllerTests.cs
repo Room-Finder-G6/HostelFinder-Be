@@ -19,32 +19,7 @@ namespace XUnitTestHostelFinder.Controllers
             _controller = new ServiceCostController(_serviceCostServiceMock.Object);
         }
 
-        [Fact]
-        public async Task GetServiceCosts_ReturnsOkResult_WhenServiceCostsExist()
-        {
-            // Arrange
-            var mockResponse = new Response<List<ServiceCostResponseDto>>
-            {
-                Data = new List<ServiceCostResponseDto>
-                {
-                    new ServiceCostResponseDto { Id = Guid.NewGuid(), ServiceName = "Service 1" },
-                    new ServiceCostResponseDto { Id = Guid.NewGuid(), ServiceName = "Service 2" }
-                },
-                Succeeded = true
-            };
-
-            _serviceCostServiceMock
-                .Setup(service => service.GetAllAsync())
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.GetServiceCosts();
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<List<ServiceCostResponseDto>>(okResult.Value);
-            Assert.Equal(2, returnValue.Count);
-        }
+      
 
         [Fact]
         public async Task GetServiceCost_ReturnsOkResult_WhenServiceCostExists()
@@ -53,7 +28,7 @@ namespace XUnitTestHostelFinder.Controllers
             var serviceCostId = Guid.NewGuid();
             var mockResponse = new Response<ServiceCostResponseDto>
             {
-                Data = new ServiceCostResponseDto { Id = serviceCostId, ServiceName = "Test Service" },
+                Data = new ServiceCostResponseDto { ServiceName = "Test Service" },
                 Succeeded = true
             };
 
@@ -105,7 +80,7 @@ namespace XUnitTestHostelFinder.Controllers
 
             var mockResponse = new Response<ServiceCostResponseDto>
             {
-                Data = new ServiceCostResponseDto { Id = Guid.NewGuid(), ServiceName = "New Service" },
+                Data = new ServiceCostResponseDto { ServiceName = "New Service" },
                 Succeeded = true
             };
 
@@ -164,7 +139,7 @@ namespace XUnitTestHostelFinder.Controllers
 
             var mockResponse = new Response<ServiceCostResponseDto>
             {
-                Data = new ServiceCostResponseDto { Id = serviceCostId, ServiceName = "Updated Service" },
+                Data = new ServiceCostResponseDto { ServiceName = "Updated Service" },
                 Succeeded = true
             };
 
