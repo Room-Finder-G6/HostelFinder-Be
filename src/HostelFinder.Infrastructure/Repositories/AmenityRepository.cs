@@ -16,4 +16,14 @@ public class AmenityRepository : BaseGenericRepository<Amenity>, IAmenityReposit
     {
         return await _dbContext.Amenities.AnyAsync(a => a.AmenityName == amenityName);
     }
+
+    public async Task<IEnumerable<Amenity>> GetAmenitysByRoomIdAsync(Guid roomId)
+    {
+        var amenities = await _dbContext.RoomAmenities
+            .Where(ra => ra.RoomId == roomId)
+            .Include(ra => ra.Amenity)
+            .Select(ra => ra.Amenity)
+            .ToListAsync();
+        return amenities;
+    }
 }

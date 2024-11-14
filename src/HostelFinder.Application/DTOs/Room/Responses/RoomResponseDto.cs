@@ -18,7 +18,7 @@ namespace HostelFinder.Application.DTOs.Room.Responses
         public RoomType RoomType { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
 
-        public string ImageRoom { get; set; }
+        public List<string> ImageUrls { get; set; }
 
     }
 }

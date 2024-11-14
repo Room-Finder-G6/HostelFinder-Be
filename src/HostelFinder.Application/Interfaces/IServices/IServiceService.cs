@@ -1,6 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.Service.Request;
 using HostelFinder.Application.DTOs.Service.Response;
 using HostelFinder.Application.Wrappers;
+using Task = DocumentFormat.OpenXml.Office2021.DocumentTasks.Task;
 
 namespace HostelFinder.Application.Interfaces.IServices
 {
@@ -13,5 +14,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<string>> DeleteServiceAsync(Guid id);
 
 
+        Task<Response<List<ServiceResponseDTO>>> GetServiceByHostelIdAsync(Guid hostelId);
     }
 }

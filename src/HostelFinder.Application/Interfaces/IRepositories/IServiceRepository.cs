@@ -15,5 +15,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 
         Task<ServiceCost> GetCurrentServiceCostAsync(Guid hostelId, Guid serviceId);
        
+        Task<IEnumerable<Service>> GetServiceByHostelIdAsync(Guid hostelId);
     }
 }

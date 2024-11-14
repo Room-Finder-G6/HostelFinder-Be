@@ -46,6 +46,7 @@ namespace HostelFinder.Infrastructure.Repositories
                             .ThenInclude(h => h.ServiceCosts)
                                 .ThenInclude(sc => sc.Service)
                             .Include(r => r.Invoices)
+                            .Include(r => r.Images)
                             .Where(r => r.HostelId == hostelId && !r.IsDeleted);
             if (floor.HasValue)
             {
