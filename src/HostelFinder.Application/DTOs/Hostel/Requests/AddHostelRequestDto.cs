@@ -13,12 +13,9 @@ namespace HostelFinder.Application.DTOs.Hostel.Requests
         public string? Description { get; set; }
         [Required]
         public AddressDto Address { get; set; }
-        [Range(0, int.MaxValue)]
         public float? Size { get; set; }
-        [Range(0, int.MaxValue)]
         public int NumberOfRooms { get; set; }
         public string? Coordinates { get; set; }
-
         public List<Guid?>? ServiceId { get; set; }
     }
 }

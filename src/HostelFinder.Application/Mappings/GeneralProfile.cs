@@ -55,10 +55,19 @@ public class GeneralProfile : Profile
                     ? src.Images.First().Url
                     : null))
             .ReverseMap();
-        
-        
+
+
         // Hostel Mapping
-        CreateMap<Hostel, HostelResponseDto>().ReverseMap();
+        CreateMap<Hostel, HostelResponseDto>()
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+            .ForMember(dest => dest.Image, opt =>
+                opt.MapFrom(src => src.Images.Select(img => new ImageResponseDto
+                {
+                    Id = img.Id,
+                    Url = img.Url
+                }).ToList()))
+            .ReverseMap();
+
         CreateMap<Hostel, AddHostelRequestDto>()
             .ForMember(dest => dest.Address, opt => 
                 opt.MapFrom(src => src.Address))
