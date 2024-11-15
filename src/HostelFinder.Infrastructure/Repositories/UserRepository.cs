@@ -109,5 +109,12 @@ namespace HostelFinder.Infrastructure.Repositories
 
             return post?.Hostel;
         }
+
+        public Task<User> GetUserByHostelIdAsync(Guid hostelId)
+        {
+            return _dbContext.Users
+                .Include(u => u.Hostels)
+                .FirstOrDefaultAsync(u => u.Hostels.Any(h => h.Id == hostelId));
+        }
     }
 }

@@ -130,5 +130,12 @@ namespace HostelFinder.Application.Services
             await _userRepository.UpdateAsync(user);
             return new Response<bool>(true);
         }
+
+        public async Task<Response<UserProfileResponse>> GetUserByHostelIdAsync(Guid hostelId)
+        {
+            var user = await _userRepository.GetUserByHostelIdAsync(hostelId);
+            var userDto = _mapper.Map<UserProfileResponse>(user);
+            return new Response<UserProfileResponse>(userDto);
+        }
     }
 }

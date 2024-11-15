@@ -117,7 +117,7 @@ public class GeneralProfile : Profile
         CreateMap<User, UserDto>().ReverseMap();
         CreateMap<UserProfileResponse, User>().ReverseMap();
         CreateMap<CreateUserRequestDto, User>().ReverseMap();
-
+        
         CreateMap<UserProfileResponse, Response<UserProfileResponse>>()
             .ConstructUsing(src => new Response<UserProfileResponse>
             {
