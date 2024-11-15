@@ -14,7 +14,7 @@ public interface IPostService
     Task<Response<bool>> DeletePostAsync(Guid postId, Guid userId);
     Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request);
     Task<Response<PostResponseDto>> GetPostByIdAsync(Guid postId);
-    Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request);
+    Task<Response<UpdatePostRequestDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request, List<string> imageUrls);
     Task<Response<List<PostResponseDto>>> FilterPostsAsync(FilterPostsRequestDto filter);
     Task<Response<PostResponseDto>> PushPostOnTopAsync(Guid postId, DateTime newDate, Guid userId);
     Task<Response<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync();
