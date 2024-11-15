@@ -66,7 +66,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet]
-        [Route("api/serivces/hostels")]
+        [Route("hostels/{hostelId}")]
         public async Task<IActionResult> GetServiceByHostel(Guid hostelId)
         {
             var response = await _serviceService.GetAllServiceByHostelAsync(hostelId);

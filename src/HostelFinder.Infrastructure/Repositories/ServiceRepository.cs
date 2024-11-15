@@ -67,14 +67,6 @@ namespace HostelFinder.Infrastructure.Repositories
 
         }
 
-        public async Task<ServiceCost> GetCurrentServiceCostAsync(Guid hostelId, Guid serviceId)
-        {
-            return await _dbContext.ServiceCosts
-                .FirstOrDefaultAsync(sc => sc.HostelId == hostelId
-                && sc.ServiceId == serviceId
-                    && sc.EffectiveFrom <= DateTime.Now
-                        && (sc.EffectiveTo == null || sc.EffectiveTo >= sc.EffectiveFrom));
 
-        }
     }
 }
