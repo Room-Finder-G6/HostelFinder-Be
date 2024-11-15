@@ -3,6 +3,7 @@ using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace HostelFinder.Infrastructure.Repositories
 {
@@ -18,6 +19,23 @@ namespace HostelFinder.Infrastructure.Repositories
                                                                         sc.ServiceId == serviceId
                                                                             && sc.EffectiveFrom <= effectiveFrom
                                                                                 && (sc.EffectiveTo == null || sc.EffectiveTo >= effectiveFrom));
+        }
+
+        public async Task<List<ServiceCost>> GetAllServiceCostListAsync()
+        {
+            return await _dbContext.ServiceCosts.Include(sr => sr.Hostel)
+                .ThenInclude(h => h.Rooms)
+                .Include(sr => sr.Service)
+                .ToListAsync();
+        }
+
+        public async Task<List<ServiceCost>> GetAllServiceCostListWithConditionAsync(Expression<Func<ServiceCost, bool>> filter)
+        {
+            return await _dbContext.ServiceCosts.Include(sr => sr.Hostel)
+            .ThenInclude(h => h.Rooms)
+            .Include(sr => sr.Service)
+            .Where(filter)
+            .ToListAsync();
         }
     }
 }

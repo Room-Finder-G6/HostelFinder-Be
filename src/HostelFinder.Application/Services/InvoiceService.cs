@@ -114,6 +114,7 @@ namespace HostelFinder.Application.Services
                     BillingYear = billingYear,
                     TotalAmount = 0,
                     IsPaid = false,
+                    CreatedOn = DateTime.Now,
                     InvoiceDetails = new List<InvoiceDetail>()
                 };
 

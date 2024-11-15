@@ -78,6 +78,19 @@ namespace HostelFinder.WebApi.Controllers
             return Ok(response);
         }
 
+        [HttpGet]
+        [Route("hostels")]
+        public async Task<IActionResult> GetServiceCostsByHostel(Guid hostelId)
+        {
+            var response =await _serviceCostService.GetAllServiceCostByHostel(hostelId); 
+
+            if(!response.Succeeded)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
     }
 
 }
