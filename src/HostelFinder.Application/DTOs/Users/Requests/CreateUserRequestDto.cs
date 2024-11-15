@@ -7,12 +7,16 @@ namespace HostelFinder.Application.DTOs.Users.Requests
         [Required]
         [MaxLength(100)]
         public string Username { get; set; }
+        
         [Required]
-        [MaxLength(256)]
+        public string FullName { get; set; }
+        
+        [Required]
+        [MaxLength(100)]
         public string Password { get; set; }
         [Required]
         [EmailAddress]
-        [MaxLength(256)]
+        [MaxLength(100)]
         public string Email { get; set; }
         [Phone]
         [Required]

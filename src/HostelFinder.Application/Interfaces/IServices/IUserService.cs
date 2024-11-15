@@ -12,5 +12,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task <Response<UserProfileResponse>> GetUserByIdAsync(Guid id);
         Task<Response<UserDto>> UpdateUserAsync(Guid userId, UpdateUserRequestDto updateUserDto);
         Task<Response<bool>> UnActiveUserAsync(Guid userId);
+        Task<Response<UserProfileResponse>> GetUserByHostelIdAsync(Guid hostelId);
     }
 }
