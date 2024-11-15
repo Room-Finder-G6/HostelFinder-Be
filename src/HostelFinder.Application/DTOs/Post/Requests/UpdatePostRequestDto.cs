@@ -4,6 +4,7 @@ namespace HostelFinder.Application.DTOs.Room.Requests;
 
 public class UpdatePostRequestDto
 {
+    public Guid HostelId { get; set; }
     public Guid RoomId { get; set; }
     [MaxLength(50)]
     public string Title { get; set; }

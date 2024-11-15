@@ -226,6 +226,8 @@ public class PostService : IPostService
             filter.District,
             filter.Commune,
             filter.Size,
+            filter.minPrice,
+            filter.maxPrice,
             filter.RoomType
         );
 
@@ -325,7 +327,6 @@ public class PostService : IPostService
 
         _mapper.Map(request, post);
         post.LastModifiedOn = DateTime.Now;
-        post.RoomId = request.RoomId;
 
         try
         {
