@@ -42,21 +42,19 @@ namespace HostelFinder.Infrastructure.Repositories
             return service;
         }
 
-        public async Task<IEnumerable<Service>> GetServiceByHostelIdAsync(Guid hostelId)
+        public async Task<IEnumerable<HostelServices>> GetServiceByHostelIdAsync(Guid hostelId)
         {
-            var services = await _dbContext.ServiceCosts
-                .Where(sr => sr.HostelId == hostelId && !sr.IsDeleted)
-                .Include(sr => sr.Service)
-                .Include(sr => sr.Hostel)
-                .ThenInclude(h => h.ServiceCosts)
-                .Select(sr => sr.Service)
+            var hostelServices = await _dbContext.HostelServices
+                .Where(hs => hs.HostelId == hostelId && !hs.IsDeleted)
+                .Include(hs => hs.Services)
+                .Include(hs => hs.Hostel)
                 .ToListAsync();
-            if (!services.Any())
+            if (!hostelServices.Any())
             {
                 throw new NotFoundException("Phòng có dịch vụ nào trong phòng");
             }
 
-            return services;
+            return hostelServices;
         }
 
         public async Task<ServiceCost> GetCurrentServiceCostAsync(Guid hostelId, Guid serviceId)

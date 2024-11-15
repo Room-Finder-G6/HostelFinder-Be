@@ -99,5 +99,19 @@ namespace HostelFinder.Application.Services
                 return new Response<string>(message: ex.Message);
             }
         }
+
+        public async Task<Response<List<HostelServiceResponseDto>>> GetAllServiceByHostelAsync(Guid hostelId)
+        {
+            var hostelServices =await _serviceRepository.GetServiceByHostelIdAsync(hostelId);
+            if(hostelServices == null || hostelServices.Count() == 0)
+            {
+                return new Response<List<HostelServiceResponseDto>> { Message = "Không tìm thấy dịch vụ nào trong phòng trọ", Succeeded = true, Data = new List<HostelServiceResponseDto>() };
+            }
+
+            var hostelServiceResponseDto = _mapper.Map<List<HostelServiceResponseDto>>(hostelServices);
+
+            return new Response<List<HostelServiceResponseDto>> { Data = hostelServiceResponseDto, Succeeded = true, Message = "Lấy danh sách dịch vụ trong phòng trọ thành công" };
+
+        } 
     }
 }

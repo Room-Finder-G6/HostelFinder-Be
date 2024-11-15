@@ -12,6 +12,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<ServiceResponseDTO>> UpdateServiceAsync(Guid id, ServiceUpdateRequestDTO serviceUpdateRequestDTO);
         Task<Response<string>> DeleteServiceAsync(Guid id);
 
-
+        Task<Response<List<HostelServiceResponseDto>>> GetAllServiceByHostelAsync(Guid hostelId);
     }
 }

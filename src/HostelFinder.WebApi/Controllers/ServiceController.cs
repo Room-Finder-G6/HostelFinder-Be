@@ -15,7 +15,7 @@ namespace HostelFinder.WebApi.Controllers
             _serviceService = serviceService;
         }
 
-        [HttpGet("GetAllServices")]
+        [HttpGet]
         public async Task<IActionResult> GetAllServices()
         {
             var services = await _serviceService.GetAllServicesAsync();
@@ -63,6 +63,18 @@ namespace HostelFinder.WebApi.Controllers
                 return NoContent();
             }
             return NotFound(response.Message);
+        }
+
+        [HttpGet]
+        [Route("api/serivces/hostels")]
+        public async Task<IActionResult> GetServiceByHostel(Guid hostelId)
+        {
+            var response = await _serviceService.GetAllServiceByHostelAsync(hostelId);
+            if(!response.Succeeded)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
     }
 }
