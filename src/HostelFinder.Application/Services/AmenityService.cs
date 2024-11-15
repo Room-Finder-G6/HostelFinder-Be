@@ -49,4 +49,11 @@ public class AmenityService : IAmenityService
         var amenityResponses = _mapper.Map<List<AmenityResponse>>(amenities);
         return new Response<List<AmenityResponse>>(amenityResponses, "Danh sách tiện ích");
     }
+
+    public async Task<Response<IEnumerable<AmenityResponse>>> GetAmenitiesByRoomlIdAsync(Guid roomId)
+    {
+        var amenities = await _amenityRepository.GetAmenitysByRoomIdAsync(roomId);
+        var amenityResponses = _mapper.Map<IEnumerable<AmenityResponse>>(amenities);
+        return new Response<IEnumerable<AmenityResponse>>(amenityResponses, "Danh sách tiện ích");
+    }
 }

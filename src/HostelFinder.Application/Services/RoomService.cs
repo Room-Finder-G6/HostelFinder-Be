@@ -182,11 +182,11 @@ namespace HostelFinder.Application.Services
             var result = _mapper.Map<List<RoomResponseDto>>(rooms);
 
            
-            foreach(var room in result)
+            /*foreach(var room in result)
             {
                 var imageRoom = await _imageRepository.GetImageUrlByRoomId(room.Id);
                 room.ImageRoom = imageRoom.Url ?? "";
-            }
+            }*/
             return new Response<List<RoomResponseDto>>(result);
         }
     }
