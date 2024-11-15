@@ -27,6 +27,8 @@ namespace HostelFinder.Infrastructure.Seeders
                         Phone = "06868686868",
                         IsActive = true,
                         IsEmailConfirmed = true,
+                        CreatedBy = "Hệ Thống",
+                        CreatedOn = DateTime.Now,
                         FullName = "HostelFinder"
                     };
                     await dbContext.Users.AddAsync(admin);
