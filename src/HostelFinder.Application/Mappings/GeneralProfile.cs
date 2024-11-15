@@ -54,6 +54,8 @@ public class GeneralProfile : Profile
                     : null))
             .ReverseMap();
         CreateMap<UpdatePostRequestDto, Post>()
+            .ForMember(dest => dest.HostelId, opt =>
+                opt.MapFrom(src => src.HostelId))
             .ForMember(dest => dest.RoomId, opt =>
                 opt.MapFrom(src => src.RoomId))
             .ForMember(dest => dest.Title, opt =>

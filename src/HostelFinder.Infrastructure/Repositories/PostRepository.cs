@@ -6,7 +6,6 @@ using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using HostelFinder.Application.DTOs.Post.Responses;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace HostelFinder.Infrastructure.Repositories;
@@ -100,8 +99,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         return await _dbContext.Database.BeginTransactionAsync();
     }
 
-    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, float? size,
-        RoomType? roomType)
+    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, float? size, decimal? minPrice, decimal? maxPrice, RoomType? roomType)
     {
         var query = _dbContext.Posts
             .Include(p => p.Hostel)
@@ -123,6 +121,12 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
         if (roomType.HasValue)
             query = query.Where(p => p.Room.RoomType == roomType);
+
+        if (minPrice.HasValue)
+            query = query.Where(p => p.Room.MonthlyRentCost >= minPrice.Value);
+
+        if (maxPrice.HasValue)
+            query = query.Where(p => p.Room.MonthlyRentCost <= maxPrice.Value);
 
         return await query.ToListAsync();
     }
