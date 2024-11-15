@@ -48,4 +48,17 @@ public class S3Service : IS3Service
             return $"https://{_bucketName}.s3.amazonaws.com/{fileName}";
         }
     }
+
+    public async Task DeleteFileAsync(string fileUrl)
+    {
+        var fileName = Path.GetFileName(fileUrl);
+        var deleteObjectRequest = new Amazon.S3.Model.DeleteObjectRequest
+        {
+            BucketName = _bucketName,
+            Key = fileName
+        };
+
+        await _s3Client.DeleteObjectAsync(deleteObjectRequest);
+    }
+
 }

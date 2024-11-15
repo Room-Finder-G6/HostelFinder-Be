@@ -6,6 +6,7 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Linq.Expressions;
 
 namespace HostelFinder.Application.Services
 {
@@ -25,7 +26,7 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<List<ServiceCostResponseDto>>> GetAllAsync()
         {
-            var serviceCosts = await _serviceCostRepository.ListAllAsync();
+            var serviceCosts = await _serviceCostRepository.GetAllServiceCostListAsync();
             var result = _mapper.Map<List<ServiceCostResponseDto>>(serviceCosts);
             return new Response<List<ServiceCostResponseDto>>(result);
         }
@@ -108,6 +109,26 @@ namespace HostelFinder.Application.Services
                 return new Response<ServiceCostResponseDto> { Succeeded = false, Errors = { ex.Message } };
             }
 
+        }
+
+        public async Task<Response<List<ServiceCostResponseDto>>> GetAllServiceCostByHostel(Guid hostelId)
+        {
+            Expression<Func<ServiceCost, bool>> filter = sr => sr.HostelId == hostelId;
+
+            var servicerCosts = await _serviceCostRepository.GetAllServiceCostListWithConditionAsync(filter);
+
+            if(servicerCosts == null || !servicerCosts.Any())
+            {
+                return new Response<List<ServiceCostResponseDto>>
+                {
+                    Succeeded = true,
+                    Message = "Không tìm thấy giá của dịch vụ trong nhà trọ",
+                    Data = new List<ServiceCostResponseDto>()
+                };
+            }
+
+            var responseDtos = _mapper.Map<List<ServiceCostResponseDto>>(servicerCosts);
+            return new Response<List<ServiceCostResponseDto>> { Data = responseDtos, Succeeded = true, Message = "Lấy danh sách dịch vụ giá trọ thành công" };
         }
     }
 }

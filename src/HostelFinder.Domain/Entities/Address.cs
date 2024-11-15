@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RoomFinder.Domain.Common;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HostelFinder.Domain.Entities;
 
-public class Address
+public class Address : BaseEntity
 {
     [Key]
     [ForeignKey("Hostel")]

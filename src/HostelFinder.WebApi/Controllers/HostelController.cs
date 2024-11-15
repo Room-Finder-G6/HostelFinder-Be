@@ -79,35 +79,34 @@ namespace HostelFinder.WebApi.Controllers
         }
 
 
-        [HttpPut("UpdateHostel/{hostelId}")]
-        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromBody] UpdateHostelRequestDto hostelDto)
+        [HttpPut("{hostelId}")]
+        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromForm] UpdateHostelRequestDto request, [FromForm] List<IFormFile> images)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var userIdClaim = User.FindFirst("UserId");
+            var imageUrls = new List<string>();
 
-            if (userIdClaim == null)
+            if (images != null && images.Count > 0)
             {
-                return Unauthorized("User ID claim not found in token.");
+                foreach (var image in images)
+                {
+                    var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
+                    var imageUrl = uploadToAWS3;
+                    imageUrls.Add(imageUrl);
+                }
             }
 
-            var userId = Guid.Parse(userIdClaim.Value);
+            var result = await _hostelService.UpdateHostelAsync(hostelId, request, imageUrls);
 
-
-            var result = await _hostelService.UpdateHostelAsync(hostelId, userId, hostelDto);
             if (result.Succeeded)
             {
                 return Ok(result);
             }
 
-            return NotFound(new Dictionary<string, object>
-            {
-                { "message", "Hostel not found or update failed." },
-                { "errors", result.Errors }
-            });
+            return BadRequest(result.Message);
         }
 
         [HttpDelete("DeleteHostel/{id}")]

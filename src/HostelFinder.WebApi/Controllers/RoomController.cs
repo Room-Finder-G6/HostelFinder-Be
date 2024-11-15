@@ -46,7 +46,7 @@ namespace HostelFinder.WebApi.Controllers
                 //map to Domain Room 
                 var response = await _roomService.CreateRoomAsync(roomDto, roomImages);
                 if (!response.Succeeded)
-                    return BadRequest(response.Message);
+                    return BadRequest(response);
 
                 return Ok(response);
             }

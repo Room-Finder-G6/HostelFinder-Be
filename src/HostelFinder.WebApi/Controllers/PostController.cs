@@ -63,23 +63,35 @@ public class PostController : ControllerBase
         return BadRequest(result.Message);
     }
 
-    [HttpPut]
-    [Route("{postId}")]
-    public async Task<IActionResult> UpdatePost([FromForm] UpdatePostRequestDto postDto, Guid postId)
+    [HttpPut("{postId}")]
+    public async Task<IActionResult> UpdatePost(Guid postId, [FromForm] UpdatePostRequestDto request, [FromForm] List<IFormFile> images)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _postService.UpdatePostAsync(postId, postDto);
+        var imageUrls = new List<string>();
+
+        if (images != null && images.Count > 0)
+        {
+            foreach (var image in images)
+            {
+                var imageUrl = await _s3Service.UploadFileAsync(image);
+                imageUrls.Add(imageUrl);
+            }
+        }
+
+        var result = await _postService.UpdatePostAsync(postId, request, imageUrls);
+
         if (result.Succeeded)
         {
             return Ok(result);
         }
 
-        return BadRequest(result.Errors);
+        return BadRequest(result.Message);
     }
+
 
     [HttpDelete]
     [Route("{postId}")]
