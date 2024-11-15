@@ -35,14 +35,12 @@ public class GeneralProfile : Profile
     {
         // Post Mapping
         CreateMap<AddPostRequestDto, Post>().ReverseMap();
-
         CreateMap<Post, PostResponseDto>()
             .ForMember(dest => dest.MembershipServiceId, opt =>
                 opt.MapFrom(src => src.MembershipServiceId))
             .ForMember(dest => dest.ImageUrls, opt =>
                 opt.MapFrom(src => src.Images.Select(image => image.Url).ToList()))
             .ReverseMap();
-        
         CreateMap<Post, ListPostsResponseDto>()
             .ForMember(dest => dest.Address, opt =>
                 opt.MapFrom(src => src.Hostel.Address))
@@ -55,7 +53,18 @@ public class GeneralProfile : Profile
                     ? src.Images.First().Url
                     : null))
             .ReverseMap();
-
+        CreateMap<UpdatePostRequestDto, Post>()
+            .ForMember(dest => dest.RoomId, opt =>
+                opt.MapFrom(src => src.RoomId))
+            .ForMember(dest => dest.Title, opt =>
+                opt.MapFrom(src => src.Title))
+            .ForMember(dest => dest.Description, opt =>
+                opt.MapFrom(src => src.Description))
+            .ForMember(dest => dest.Status, opt =>
+                opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.DateAvailable, opt =>
+                opt.MapFrom(src => src.DateAvailable))
+            .ReverseMap();
 
         // Hostel Mapping
         CreateMap<Hostel, HostelResponseDto>()

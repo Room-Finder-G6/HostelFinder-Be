@@ -28,5 +28,13 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Where(img => img.HostelId == hostelId)
                 .ToListAsync();
         }
+
+        public async Task<List<Image>> GetImagesByPostIdAsync(Guid postId)
+        {
+            return await _dbContext.Images
+                .Where(img => img.PostId == postId)
+                .ToListAsync();
+        }
+
     }
 }
