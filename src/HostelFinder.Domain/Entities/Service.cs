@@ -9,7 +9,13 @@ namespace HostelFinder.Domain.Entities
         public string ServiceName { get; set; }
         [MaxLength(500)]
         public string? Description { get; set; }
+        /// <summary>
+        /// Xem dịch vụ có tính tiền hay không
+        /// </summary>
         public bool IsBillable { get; set; }
+        /// <summary>
+        /// Dịch vụ có tính theo số người hoặc tính theo số lượng sử dụng
+        /// </summary>
         public bool IsUsageBased { get; set; }
 
         //Navigation

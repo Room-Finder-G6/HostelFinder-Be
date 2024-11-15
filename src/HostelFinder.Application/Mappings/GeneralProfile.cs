@@ -154,6 +154,14 @@ public class GeneralProfile : Profile
             .ReverseMap();
         CreateMap<UpdateRoomRequestDto, Room>()
             .ReverseMap();
+
+
+        //HostelService
+        CreateMap<HostelServices, HostelServiceResponseDto>()
+            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Services.ServiceName))
+            .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
+            .ReverseMap();
+
             
     }
 }
