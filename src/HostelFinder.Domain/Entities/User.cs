@@ -11,7 +11,10 @@ namespace HostelFinder.Domain.Entities
         public string Username { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(100)]
+        public string FullName { get; set; }
+        [Required]
+        [MaxLength(100)]
         public string Password { get; set; }
 
         [Required]

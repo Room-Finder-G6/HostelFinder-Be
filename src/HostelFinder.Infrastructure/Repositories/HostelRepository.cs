@@ -4,6 +4,7 @@ using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Linq.Expressions;
 
 namespace HostelFinder.Infrastructure.Repositories;
@@ -80,12 +81,17 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
 
         return post?.Hostel;
     }
-    
-    
+
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return await _dbContext.Database.BeginTransactionAsync();
+    }
+
     public async Task<Hostel?> GetHostelByIdAsync(Guid hostelId)
     {
         return await _dbContext.Hostels
             .Include(h => h.Address)
+            .Include(i => i.Images)
             .FirstOrDefaultAsync(h => h.Id == hostelId);
     }
 }

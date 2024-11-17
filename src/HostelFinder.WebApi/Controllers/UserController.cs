@@ -85,7 +85,20 @@ namespace HostelFinder.WebApi.Controllers
             }
             return Ok(user);
         }
+        
+        [HttpGet("GetUserByHostelId/{hostelId}")]
+        public async Task<IActionResult> GetUserByHostelId(Guid hostelId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var user = await _userService.GetUserByHostelIdAsync(hostelId);
+            if (user == null)
+            {
+                return NotFound(user);
+            }
+            return Ok(user);
+        }
     }
-
-
 }

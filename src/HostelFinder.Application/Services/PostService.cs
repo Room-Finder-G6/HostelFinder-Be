@@ -20,10 +20,12 @@ public class PostService : IPostService
     private readonly IUserRepository _userRepository;
     private readonly IHostelRepository _hostelRepository;
     private readonly IImageRepository _imageRepository;
+    private readonly IRoomRepository _roomRepository;
     private readonly IMembershipService _membershipService;
+    private readonly IS3Service _s3Service;
 
     public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository,
-        IHostelRepository hostelRepository, IImageRepository imageRepository, IMembershipService membershipService)
+        IHostelRepository hostelRepository, IImageRepository imageRepository, IMembershipService membershipService, IS3Service s3Service, IRoomRepository roomRepository)
     {
         _mapper = mapper;
         _postRepository = postRepository;
@@ -31,6 +33,8 @@ public class PostService : IPostService
         _hostelRepository = hostelRepository;
         _imageRepository = imageRepository;
         _membershipService = membershipService;
+        _s3Service = s3Service;
+        _roomRepository = roomRepository;
     }
 
     public async Task<Response<bool>> DeletePostAsync(Guid postId, Guid userId)
@@ -131,29 +135,6 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request)
-    {
-        var post = await _postRepository.GetByIdAsync(postId);
-        if (post == null)
-        {
-            return new Response<PostResponseDto>("Không tìm thấy bài đăng");
-        }
-
-        try
-        {
-            _mapper.Map(request, post);
-            post.LastModifiedOn = DateTime.Now;
-            await _postRepository.UpdateAsync(post);
-            
-            var updatedPostDto = _mapper.Map<PostResponseDto>(post);
-            return new Response<PostResponseDto>(updatedPostDto,"Cập nhật bài đăng thành công");
-        }
-        catch (Exception e)
-        {
-            return new Response<PostResponseDto>(message: e.Message);
-        }
-    }
-
     public async Task<Response<List<ListPostsResponseDto>>> GetPostsByUserIdAsync(Guid userId)
     {
         var posts = await _postRepository.GetPostsByUserIdAsync(userId);
@@ -217,7 +198,6 @@ public class PostService : IPostService
                     });
                 }
 
-                // Since we've already called UpdatePostCountAsync before, there's no need to call it again here.
                 await transaction.CommitAsync();
             }
 
@@ -246,6 +226,8 @@ public class PostService : IPostService
             filter.District,
             filter.Commune,
             filter.Size,
+            filter.minPrice,
+            filter.maxPrice,
             filter.RoomType
         );
 
@@ -259,7 +241,6 @@ public class PostService : IPostService
 
     public async Task<Response<PostResponseDto>> PushPostOnTopAsync(Guid postId, DateTime newDate, Guid userId)
     {
-        // Ensure the MembershipService is initialized
         if (_membershipService == null)
         {
             return new Response<PostResponseDto>
@@ -269,7 +250,6 @@ public class PostService : IPostService
             };
         }
 
-        // Check if the user can push a post to the top
         var pushCountResponse = await _membershipService.UpdatePushTopCountAsync(userId);
         if (!pushCountResponse.Succeeded)
         {
@@ -280,7 +260,6 @@ public class PostService : IPostService
             };
         }
 
-        // Retrieve the post to be pushed
         var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)
         {
@@ -293,19 +272,15 @@ public class PostService : IPostService
 
         try
         {
-            // Begin a transaction to ensure atomic updates
             using (var transaction = await _postRepository.BeginTransactionAsync())
             {
-                // Update the post's dates to push it to the top
                 post.CreatedOn = newDate;
                 post.LastModifiedOn = newDate;
                 await _postRepository.UpdateAsync(post);
 
-                // Commit transaction
                 await transaction.CommitAsync();
             }
 
-            // Map the updated post to the response DTO
             var postResponseDto = _mapper.Map<PostResponseDto>(post);
             return new Response<PostResponseDto>
             {
@@ -336,4 +311,67 @@ public class PostService : IPostService
         };
     }
 
+    public async Task<Response<UpdatePostRequestDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request, List<string> imageUrls)
+    {
+        var post = await _postRepository.GetByIdAsync(postId);
+        if (post == null)
+        {
+            return new Response<UpdatePostRequestDto>("Post not found.");
+        }
+
+        var room = await _roomRepository.GetByIdAsync(request.RoomId);
+        if (room == null || room.HostelId != post.HostelId)
+        {
+            return new Response<UpdatePostRequestDto>("The specified room does not belong to the hostel associated with this post.");
+        }
+
+        _mapper.Map(request, post);
+        post.LastModifiedOn = DateTime.Now;
+
+        try
+        {
+            using (var transaction = await _postRepository.BeginTransactionAsync())
+            {
+                var existingImages = await _imageRepository.GetImagesByPostIdAsync(postId);
+
+                foreach (var image in existingImages)
+                {
+                    await _s3Service.DeleteFileAsync(image.Url);
+                    await _imageRepository.DeletePermanentAsync(image.Id);
+                }
+
+                foreach (var imageUrl in imageUrls)
+                {
+                    var newImage = new Image
+                    {
+                        PostId = post.Id,
+                        HostelId = post.HostelId,
+                        Url = imageUrl,
+                        CreatedOn = DateTime.Now,
+                    };
+                    await _imageRepository.AddAsync(newImage);
+                }
+
+                await _postRepository.UpdateAsync(post);
+                await transaction.CommitAsync();
+            }
+
+            var postResponseDto = _mapper.Map<UpdatePostRequestDto>(post);
+            return new Response<UpdatePostRequestDto>
+            {
+                Data = postResponseDto,
+                Succeeded = true,
+                Message = "Post updated successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<UpdatePostRequestDto>
+            {
+                Succeeded = false,
+                Message = ex.Message
+            };
+        }
+    }
 }
+

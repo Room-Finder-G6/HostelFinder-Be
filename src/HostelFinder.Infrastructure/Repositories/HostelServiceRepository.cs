@@ -2,6 +2,7 @@
 using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace HostelFinder.Infrastructure.Repositories
 {
@@ -9,6 +10,13 @@ namespace HostelFinder.Infrastructure.Repositories
     {
         public HostelServiceRepository(HostelFinderDbContext dbContext) : base(dbContext)
         {
+        }
+        public async Task<List<HostelServices>> GetServicesByHostelIdAsync(Guid hostelId)
+        {
+            return await _dbContext.HostelServices
+                .Where(hs => hs.HostelId == hostelId)
+                .Include(hs => hs.Services) 
+                .ToListAsync();
         }
     }
 }

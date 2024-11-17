@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace HostelFinder.Application.DTOs.Post.Requests;
@@ -10,8 +9,10 @@ public class AddPostRequestDto
     [Required]
     public Guid RoomId { get; set; }
     [Required]
+    [MaxLength(50)]
     public string Title { get; set; }
     [Required]
+    [MaxLength(100)]
     public string Description { get; set; }
     public bool Status { get; set; } = true;
     [Required]
