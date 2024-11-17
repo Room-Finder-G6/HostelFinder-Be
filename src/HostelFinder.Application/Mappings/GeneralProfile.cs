@@ -26,6 +26,8 @@ using HostelFinder.Application.DTOs.InVoice.Requests;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Responses;
+using HostelFinder.Application.DTOs.RoomTenancies.Request;
+using HostelFinder.Application.DTOs.Vehicle.Request;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -182,6 +184,11 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
             .ReverseMap();
 
-            
+        //Terant Room
+        CreateMap<AddRoomTenacyDto, RoomTenancy>()
+            .ReverseMap();
+
+        //Vehicle
+        CreateMap<AddVehicleDto, Vehicle>() .ReverseMap();
     }
 }

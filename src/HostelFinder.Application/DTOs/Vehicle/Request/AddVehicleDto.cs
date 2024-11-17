@@ -1,11 +1,11 @@
-﻿using RoomFinder.Domain.Common;
+﻿using HostelFinder.Domain.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using HostelFinder.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 
-namespace HostelFinder.Domain.Entities
+namespace HostelFinder.Application.DTOs.Vehicle.Request
 {
-    public class Vehicle : BaseEntity
+    public class AddVehicleDto
     {
         [Required]
         [MaxLength(100)]
@@ -20,13 +20,8 @@ namespace HostelFinder.Domain.Entities
         public VehicleType VehicleType { get; set; }
 
         [MaxLength(255)]
-        public string? ImageUrl { get; set; }
+        public IFormFile Image { get; set; }
 
-
-
-        [ForeignKey("Tenant")]
         public Guid TenantId { get; set; }
-
-        public virtual Tenant Tenant { get; set; }
     }
 }
