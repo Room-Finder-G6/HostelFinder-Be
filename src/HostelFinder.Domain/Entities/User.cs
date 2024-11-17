@@ -28,7 +28,8 @@ namespace HostelFinder.Domain.Entities
         public string Phone { get; set; }
 
         [MaxLength(255)]
-        public string? AvatarUrl { get; set; }
+        public string? AvatarUrl { get; set; } =
+            "https://hostel-finder-images.s3.ap-southeast-1.amazonaws.com/Default-Avatar.png";
 
         [Required]
         public UserRole Role { get; set; }

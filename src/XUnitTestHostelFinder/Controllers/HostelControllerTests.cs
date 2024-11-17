@@ -48,7 +48,7 @@
 //                    {
 //                        new ImageResponseDto
 //                        {
-//                            Url = "image_url",
+//                            Image = "image_url",
 //                        }
 //                    },
 //                    Coordinates = "10.762622,106.660172",

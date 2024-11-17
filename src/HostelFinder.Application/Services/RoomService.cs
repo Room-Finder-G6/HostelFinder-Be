@@ -63,7 +63,7 @@ namespace HostelFinder.Application.Services
             //add to db
             var roomAdded = await _roomRepository.AddAsync(room);
 
-            //upload image to AWS and collect return Url response
+            //upload image to AWS and collect return Image response
 
             var imageUrls = new List<string>();
 
@@ -185,7 +185,7 @@ namespace HostelFinder.Application.Services
             /*foreach(var room in result)
             {
                 var imageRoom = await _imageRepository.GetImageUrlByRoomId(room.Id);
-                room.ImageRoom = imageRoom.Url ?? "";
+                room.ImageRoom = imageRoom.Image ?? "";
             }*/
             return new Response<List<RoomResponseDto>>(result);
         }
