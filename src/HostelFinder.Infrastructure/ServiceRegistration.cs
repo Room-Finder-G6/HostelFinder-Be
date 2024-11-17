@@ -43,5 +43,8 @@ public class ServiceRegistration
         service.AddScoped<IMeterReadingRepository, MeterReadingRepository>();
         service.AddScoped<IUserMembershipRepository, UserMembershipRepository>();
         service.AddScoped<IAddressRepository, AddressRepository>();
+        service.AddScoped<IRoomTenancyRepository, RoomTenancyRepository>();
+        service.AddScoped<IVehicleRepository, VehicleRepository>();
+        service.AddScoped<ITenantRepository, TenantRepository>();
     }
 }

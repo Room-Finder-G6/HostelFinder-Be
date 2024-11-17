@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DTOs\RoomTenancies\Response\" />
     <Folder Include="Helper\" />
     <Folder Include="Mappings\" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
