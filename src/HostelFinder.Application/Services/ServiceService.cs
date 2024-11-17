@@ -102,8 +102,8 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<List<HostelServiceResponseDto>>> GetAllServiceByHostelAsync(Guid hostelId)
         {
-            var hostelServices =await _serviceRepository.GetServiceByHostelIdAsync(hostelId);
-            if(hostelServices == null || hostelServices.Count() == 0)
+            var hostelServices = await _serviceRepository.GetServiceByHostelIdAsync(hostelId);
+            if(hostelServices == null ||  hostelServices.Count() == 0)
             {
                 return new Response<List<HostelServiceResponseDto>> { Message = "Không tìm thấy dịch vụ nào trong phòng trọ", Succeeded = true, Data = new List<HostelServiceResponseDto>() };
             }

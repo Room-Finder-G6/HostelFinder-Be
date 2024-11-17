@@ -28,7 +28,9 @@ namespace HostelFinder.Domain.Entities
 
         public virtual ICollection<Invoice> Invoices { get; set; } 
 
-        public virtual ICollection<MeterReading> MeterReadings { get; set; }  
+        public virtual ICollection<MeterReading> MeterReadings { get; set; }
+
+        public virtual ICollection<RoomTenancy> RoomTenancies { get; set; } = new List<RoomTenancy>();
 
     }
 }
