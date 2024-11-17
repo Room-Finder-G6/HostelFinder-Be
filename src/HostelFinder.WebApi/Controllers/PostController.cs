@@ -40,7 +40,7 @@ public class PostController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        // Upload image to AWS and collect Url response
+        // Upload image to AWS and collect Image response
         var imageUrls = new List<string>();
 
         if (images != null && images.Count > 0)
@@ -112,32 +112,6 @@ public class PostController : ControllerBase
 
         return Ok(response.Message);
     }
-
-    /*[HttpGet("{postId}/landlord")]
-    public async Task<IActionResult> GetLandlordByPostId(Guid postId)
-    {
-        var landlord = await _postService.GetLandlordByPostIdAsync(postId);
-
-        if (landlord == null)
-        {
-            return NotFound("Post or associated landlord not found.");
-        }
-
-        return Ok(landlord);
-    }*/
-
-    /*[HttpGet("{postId}/hostel")]
-    public async Task<IActionResult> GetHostelByPostId(Guid postId)
-    {
-        var hostel = await _postService.GetHostelByPostIdAsync(postId);
-
-        if (hostel == null)
-        {
-            return NotFound("Hostel not found.");
-        }
-
-        return Ok(hostel);
-    }*/
 
     [HttpPost("get-all")]
     public async Task<IActionResult> Get(GetAllPostsQuery request)

@@ -168,7 +168,7 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.HostelName, opt => 
                 opt.MapFrom(src => src.Hostel.HostelName))
             /*.ForMember(dest => dest.ImageUrls, opt =>
-                opt.MapFrom(src => src.Images.Select(image => image.Url).ToList()))*/
+                opt.MapFrom(src => src.Images.Select(image => image.Image).ToList()))*/
             .ReverseMap();
         CreateMap<AddRoomRequestDto, Room>()
             .ReverseMap();

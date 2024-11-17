@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using HostelFinder.Application.DTOs.Image.Requests;
 using HostelFinder.Application.DTOs.Users;
 using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.DTOs.Users.Response;
@@ -8,6 +9,7 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace HostelFinder.Application.Services
@@ -18,40 +20,50 @@ namespace HostelFinder.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly IValidator<CreateUserRequestDto> _createUserValidator;
+        private readonly IS3Service _s3Service;
+
         public UserService
         (
             IMapper mapper,
             IUserRepository userRepository,
-            IValidator<CreateUserRequestDto> createUserValidator
+            IValidator<CreateUserRequestDto> createUserValidator,
+            IS3Service s3Service
         )
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _passwordHasher = new PasswordHasher<User>();
             _createUserValidator = createUserValidator;
+            _s3Service = s3Service;
         }
 
         public async Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request)
         {
-            var validationResult = await _createUserValidator.ValidateAsync( request );
+            var validationResult = await _createUserValidator.ValidateAsync(request);
             if (!validationResult.IsValid)
             {
                 var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                return new Response<UserDto> {Succeeded = false, Errors = errors };
+                return new Response<UserDto> { Succeeded = false, Errors = errors };
             }
+
             try
             {
                 if (await _userRepository.CheckUserNameExistAsync(request.Username))
                 {
-                    return new Response<UserDto> { Succeeded = false, Message = "Tên người dùng đã tồn tại. Vui lòng nhập tên khác" };
+                    return new Response<UserDto>
+                        { Succeeded = false, Message = "Tên người dùng đã tồn tại. Vui lòng nhập tên khác" };
                 }
+
                 if (await _userRepository.CheckEmailExistAsync(request.Email))
                 {
-                    return new Response<UserDto> { Succeeded = false, Message = "Email đã tồn tại. Vui lòng nhập email khác." };
+                    return new Response<UserDto>
+                        { Succeeded = false, Message = "Email đã tồn tại. Vui lòng nhập email khác." };
                 }
+
                 if (await _userRepository.CheckPhoneNumberAsync(request.Phone))
                 {
-                    return new Response<UserDto> { Succeeded = false, Message = "Số điện thoại đã tồn tại. Vui lòng nhập số điện thoại khác." };
+                    return new Response<UserDto>
+                        { Succeeded = false, Message = "Số điện thoại đã tồn tại. Vui lòng nhập số điện thoại khác." };
                 }
 
                 var userDomain = _mapper.Map<User>(request);
@@ -59,6 +71,8 @@ namespace HostelFinder.Application.Services
                 userDomain.Password = _passwordHasher.HashPassword(userDomain, userDomain.Password);
                 userDomain.Role = UserRole.User;
                 userDomain.IsEmailConfirmed = false;
+                userDomain.AvatarUrl =
+                    "https://hostel-finder-images.s3.ap-southeast-1.amazonaws.com/Default-Avatar.png";
                 userDomain.IsDeleted = false;
                 userDomain.CreatedOn = DateTime.Now;
 
@@ -66,7 +80,8 @@ namespace HostelFinder.Application.Services
 
                 var userDto = _mapper.Map<UserDto>(user);
 
-                return new Response<UserDto> { Succeeded = true, Data = userDto, Message = "Bạn đã đăng ký thành công tài khoản" };
+                return new Response<UserDto>
+                    { Succeeded = true, Data = userDto, Message = "Bạn đã đăng ký thành công tài khoản" };
             }
             catch (Exception ex)
             {
@@ -79,7 +94,8 @@ namespace HostelFinder.Application.Services
             var users = await _userRepository.GetAllAsync();
             if (users == null || !users.Any())
             {
-                return new Response<List<UserDto>> { Succeeded = false, Errors = new List<string> { "No users found." } };
+                return new Response<List<UserDto>>
+                    { Succeeded = false, Errors = new List<string> { "No users found." } };
             }
 
             var userDtos = _mapper.Map<List<UserDto>>(users);
@@ -91,7 +107,8 @@ namespace HostelFinder.Application.Services
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
-                return new Response<UserProfileResponse> { Succeeded = false, Errors = new List<string> { "User not found." } };
+                return new Response<UserProfileResponse>
+                    { Succeeded = false, Errors = new List<string> { "User not found." } };
             }
 
             var userProfileResponse = _mapper.Map<UserProfileResponse>(user);
@@ -99,7 +116,8 @@ namespace HostelFinder.Application.Services
             return new Response<UserProfileResponse> { Data = userProfileResponse, Succeeded = true };
         }
 
-        public async Task<Response<UserDto>> UpdateUserAsync(Guid userId, UpdateUserRequestDto updateUserDto)
+        public async Task<Response<UserDto>> UpdateUserAsync(Guid userId, UpdateUserRequestDto updateUserDto,
+            UploadImageRequestDto? image)
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
@@ -107,11 +125,16 @@ namespace HostelFinder.Application.Services
                 return new Response<UserDto>("Người dùng không tồn tại.");
             }
 
-            // Update fields
+            if (image.Image != null)
+            {
+                var imageUrl = await _s3Service.UploadFileAsync(image.Image);
+                user.AvatarUrl = imageUrl;
+            }
+
             user.Username = updateUserDto.Username;
             user.Email = updateUserDto.Email;
             user.Phone = updateUserDto.Phone;
-            user.AvatarUrl = updateUserDto.AvatarUrl;
+            user.FullName = updateUserDto.FullName;
 
             await _userRepository.UpdateAsync(user);
             var updatedUserDto = _mapper.Map<UserDto>(user);
