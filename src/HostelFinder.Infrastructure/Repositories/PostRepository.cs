@@ -99,7 +99,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         return await _dbContext.Database.BeginTransactionAsync();
     }
 
-    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, float? size, decimal? minPrice, decimal? maxPrice, RoomType? roomType)
+    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, decimal? minSize, decimal? maxSize, decimal? minPrice, decimal? maxPrice, RoomType? roomType)
     {
         var query = _dbContext.Posts
             .Include(p => p.Hostel)
@@ -116,8 +116,11 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         if (!string.IsNullOrEmpty(commune))
             query = query.Where(p => p.Hostel.Address.Commune == commune);
 
-        if (size.HasValue)
-            query = query.Where(p => p.Room.RoomDetails.Size >= size);
+        if (minSize.HasValue)
+            query = query.Where(p => p.Room.Size >= minSize.Value);
+
+        if (maxSize.HasValue)
+            query = query.Where(p => p.Room.Size <= maxSize.Value);
 
         if (roomType.HasValue)
             query = query.Where(p => p.Room.RoomType == roomType);
