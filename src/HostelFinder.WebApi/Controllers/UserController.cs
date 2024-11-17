@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.DTOs.Users.Requests;
+﻿using HostelFinder.Application.DTOs.Image.Requests;
+using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,18 +38,18 @@ namespace HostelFinder.WebApi.Controllers
 
         // PUT: api/User/UpdateUser/{userId}
         [HttpPut("UpdateUser/{userId}")]
-        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserRequestDto request)
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromForm] UpdateUserRequestDto request, [FromForm] UploadImageRequestDto? image)
         {
             try
             {
-                var result = await _userService.UpdateUserAsync(userId, request);
+                var result = await _userService.UpdateUserAsync(userId, request, image);
                 if (!result.Succeeded)
                 {
                     return NotFound(result);
                 }
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "Something went wrong!");
             }
