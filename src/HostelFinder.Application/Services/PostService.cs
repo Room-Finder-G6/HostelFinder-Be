@@ -225,7 +225,8 @@ public class PostService : IPostService
             filter.Province,
             filter.District,
             filter.Commune,
-            filter.Size,
+            filter.minSize,
+            filter.maxSize,
             filter.minPrice,
             filter.maxPrice,
             filter.RoomType
