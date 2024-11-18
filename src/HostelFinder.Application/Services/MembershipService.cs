@@ -108,8 +108,6 @@ namespace HostelFinder.Application.Services
                         existingService.ServiceName = newServiceDto.ServiceName;
                         existingService.LastModifiedOn = DateTime.Now;
                         existingService.LastModifiedBy = "System";
-
-                        _membershipRepository.Update(existingService);
                     }
                     else
                     {
