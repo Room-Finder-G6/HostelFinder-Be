@@ -125,20 +125,6 @@ public class PostController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPost("test-upload-file")]
-    public async Task<IActionResult> TestUploadFile(IFormFile file)
-    {
-        try
-        {
-            var fileUrl = await _s3Service.UploadFileAsync(file);
-            return Ok(new { Url = fileUrl });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Message = ex.Message });
-        }
-    }
-
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetPostsByUserId(Guid userId)
     {

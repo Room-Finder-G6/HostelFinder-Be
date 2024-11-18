@@ -4,6 +4,6 @@ namespace HostelFinder.Application.DTOs.Image.Requests
 {
     public class UploadImageRequestDto
     {
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; }
     }
 }

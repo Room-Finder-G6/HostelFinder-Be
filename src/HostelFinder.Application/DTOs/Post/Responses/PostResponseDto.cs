@@ -1,6 +1,4 @@
-﻿using HostelFinder.Application.DTOs.Image.Responses;
-
-namespace HostelFinder.Application.DTOs.Post.Responses;
+﻿namespace HostelFinder.Application.DTOs.Post.Responses;
 
 public class PostResponseDto
 {
