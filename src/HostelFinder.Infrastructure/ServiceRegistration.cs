@@ -46,5 +46,6 @@ public class ServiceRegistration
         service.AddScoped<IRoomTenancyRepository, RoomTenancyRepository>();
         service.AddScoped<IVehicleRepository, VehicleRepository>();
         service.AddScoped<ITenantRepository, TenantRepository>();
+        service.AddScoped<IRentalContractRepository, RentalContractRepository>();   
     }
 }

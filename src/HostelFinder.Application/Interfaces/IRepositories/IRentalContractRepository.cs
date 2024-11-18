@@ -3,8 +3,7 @@ using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Interfaces.IRepositories
 {
-    public interface ITenantRepository : IBaseGenericRepository<Tenant>
+    public interface IRentalContractRepository : IBaseGenericRepository<RentalContract>
     {
-        Task<Tenant> GetByIdentityCardNumber(string identityCardNumber);
     }
 }
