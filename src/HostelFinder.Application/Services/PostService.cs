@@ -219,7 +219,7 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<Response<List<PostResponseDto>>> FilterPostsAsync(FilterPostsRequestDto filter)
+    public async Task<Response<List<ListPostsResponseDto>>> FilterPostsAsync(FilterPostsRequestDto filter)
     {
         var posts = await _postRepository.FilterPostsAsync(
             filter.Province,
@@ -232,8 +232,8 @@ public class PostService : IPostService
             filter.RoomType
         );
 
-        var postDtos = _mapper.Map<List<PostResponseDto>>(posts);
-        return new Response<List<PostResponseDto>>
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts);
+        return new Response<List<ListPostsResponseDto>>
         {
             Data = postDtos,
             Succeeded = true
