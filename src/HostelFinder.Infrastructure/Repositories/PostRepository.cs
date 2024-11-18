@@ -16,24 +16,6 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
     }
 
-    public async Task<IEnumerable<Post>> GetFilteredPosts(decimal? minPrice, decimal? maxPrice, string? location,
-        RoomType? roomType)
-    {
-        var query = _dbContext.Posts.AsQueryable();
-
-        if (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice)
-        {
-            throw new ArgumentException("Minimum price cannot be greater than maximum price");
-        }
-
-        if (!string.IsNullOrEmpty(location))
-        {
-            query = query.Where(x => x.Hostel.Address.Province.Contains(location));
-        }
-
-        return await query.ToListAsync();
-    }
-
     public async Task<(IEnumerable<Post> Data, int TotalRecords)> GetAllMatchingAsync(string? searchPhrase,
         int pageSize, int pageNumber, string? sortBy, SortDirection sortDirection)
     {
@@ -85,9 +67,10 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
         var posts = await _dbContext.Posts
             .Include(x => x.Hostel)
+            .ThenInclude(h => h.Address)
             .Include(x => x.Room)
             .Include(x => x.Images)
-            .Where(x => x.Hostel.LandlordId == userId) // Kiểm tra Hostel có null hay không
+            .Where(x => x.Hostel.LandlordId == userId) 
             .AsNoTracking() // Tăng hiệu suất cho truy vấn chỉ đọc
             .ToListAsync();
         return posts;
@@ -137,6 +120,9 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     public async Task<List<Post>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync()
     {
         return await _dbContext.Posts
+            .Include(x => x.Hostel)
+            .ThenInclude(x=>x.Address)
+            .Include(x => x.Images)
             .Include(p => p.MembershipServices)
             .ThenInclude(ms => ms.Membership)
             .OrderByDescending(p => p.MembershipServices.Membership.Price)
