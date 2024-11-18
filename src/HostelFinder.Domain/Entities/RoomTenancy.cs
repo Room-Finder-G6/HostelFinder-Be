@@ -12,7 +12,7 @@ namespace HostelFinder.Domain.Entities
         public Guid RoomId { get; set; }
 
         public DateTime MoveInDate { get; set; }
-
+        
         public DateTime? MoveOutDate { get; set; }
 
         public virtual Tenant Tenant { get; set; }
