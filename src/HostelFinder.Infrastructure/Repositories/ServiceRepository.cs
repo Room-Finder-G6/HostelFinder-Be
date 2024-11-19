@@ -47,6 +47,7 @@ namespace HostelFinder.Infrastructure.Repositories
             var hostelServices = await _dbContext.HostelServices
                 .Where(hs => hs.HostelId == hostelId && !hs.IsDeleted)
                 .Include(hs => hs.Services)
+                    .ThenInclude(s => s.ServiceCosts)
                 .Include(hs => hs.Hostel)
                 .ToListAsync();
             if (!hostelServices.Any())

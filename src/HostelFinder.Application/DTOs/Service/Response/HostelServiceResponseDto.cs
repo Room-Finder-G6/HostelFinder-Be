@@ -9,5 +9,7 @@
         public string? ServiceName { get; set; }
 
         public string? HostelName {  get; set; }
+
+
     }
 }

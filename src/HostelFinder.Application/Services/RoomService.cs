@@ -189,5 +189,10 @@ namespace HostelFinder.Application.Services
             }*/
             return new Response<List<RoomResponseDto>>(result);
         }
+
+        public Task<Response<List<RoomServiceDto>>> GetServicesByRoom(Guid roomId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
