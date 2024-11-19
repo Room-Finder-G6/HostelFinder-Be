@@ -10,5 +10,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<List<ServiceCost>> GetAllServiceCostListAsync();
 
         Task<List<ServiceCost>> GetAllServiceCostListWithConditionAsync(Expression<Func<ServiceCost, bool>> filter);
+        Task<ServiceCost> GetServiceCostById(Guid serviceCostId);
     }
 }

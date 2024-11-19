@@ -52,7 +52,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 .ToListAsync();
             if (!hostelServices.Any())
             {
-                throw new NotFoundException("Phòng có dịch vụ nào trong phòng");
+                throw new NotFoundException("Không tìm thấy dịch vụ nào trong nhà trọ");
             }
 
             return hostelServices;

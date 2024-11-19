@@ -45,7 +45,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 var response = await _serviceCostService.CreateServiceCost(serviceCostDto);
                 if (!response.Succeeded)
-                    return BadRequest(response.Message);
+                    return BadRequest(response);
 
                 return Ok(response);
             }
@@ -63,9 +63,9 @@ namespace HostelFinder.WebApi.Controllers
 
             var response = await _serviceCostService.UpdateAsync(id, serviceCostDto);
             if (!response.Succeeded)
-                return NotFound(response.Message);
+                return NotFound(response);
 
-            return Ok(response.Data);
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
