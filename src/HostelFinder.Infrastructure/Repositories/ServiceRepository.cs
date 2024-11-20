@@ -47,11 +47,12 @@ namespace HostelFinder.Infrastructure.Repositories
             var hostelServices = await _dbContext.HostelServices
                 .Where(hs => hs.HostelId == hostelId && !hs.IsDeleted)
                 .Include(hs => hs.Services)
+                    .ThenInclude(s => s.ServiceCosts)
                 .Include(hs => hs.Hostel)
                 .ToListAsync();
             if (!hostelServices.Any())
             {
-                throw new NotFoundException("Phòng có dịch vụ nào trong phòng");
+                throw new NotFoundException("Không tìm thấy dịch vụ nào trong nhà trọ");
             }
 
             return hostelServices;

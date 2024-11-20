@@ -18,13 +18,15 @@ namespace HostelFinder.Application.Services
         private readonly IMapper _mapper;
         private readonly ILogger<InvoiceService> _logger;
         private readonly IServiceRepository _serviceRepository;
+        private readonly IRoomTenancyRepository _roomTenancyRepository;
 
         public InvoiceService(IInVoiceRepository invoiceRepository,
             IRoomRepository roomRepository,
             IMeterReadingRepository meterReadingRepository,
             IMapper mapper,
             ILogger<InvoiceService> logger,
-            IServiceRepository serviceRepository)
+            IServiceRepository serviceRepository,
+            IRoomTenancyRepository roomTenancyRepository)
         {
             _invoiceRepository = invoiceRepository;
             _roomRepository = roomRepository;
@@ -32,6 +34,7 @@ namespace HostelFinder.Application.Services
             _mapper = mapper;
             _logger = logger;
             _serviceRepository = serviceRepository;
+            _roomTenancyRepository = roomTenancyRepository;
         }
 
         public async Task<Response<List<InvoiceResponseDto>>> GetAllAsync()
@@ -137,7 +140,7 @@ namespace HostelFinder.Application.Services
                         UnitCost = serviceCost.UnitCost,
                         ActualCost = 0,
                         //tạm thời tính là max of renters
-                        NumberOfCustomer = room.MaxRenters,
+                        NumberOfCustomer = await _roomTenancyRepository.CountCurrentTenantsAsync(room.Id),
                         BillingDate = DateTime.Now,
                         CreatedOn = DateTime.Now,
                         IsRentRoom = false,

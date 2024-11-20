@@ -65,7 +65,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 var response = await _roomService.UpdateAsync(id, roomDto);
                 if (!response.Succeeded)
-                    return NotFound(response.Message);
+                    return BadRequest(response);
 
                 return Ok(response);
             }
@@ -92,7 +92,7 @@ namespace HostelFinder.WebApi.Controllers
         {
             var response = await _roomService.GetRoomsByHostelIdAsync(hostelId,floor);
             if (!response.Succeeded)
-                return NotFound(response.Message);
+                return BadRequest(response);
 
             return Ok(response);
         }

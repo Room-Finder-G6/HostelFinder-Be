@@ -17,6 +17,8 @@ public class ServiceCost : BaseEntity
     
     public decimal UnitCost { get; set; }
 
+    public string? Unit {  get; set; }
+
     [Required]
     public DateTime EffectiveFrom { get; set; }
 

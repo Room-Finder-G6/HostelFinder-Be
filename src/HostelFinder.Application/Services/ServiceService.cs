@@ -102,15 +102,23 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<List<HostelServiceResponseDto>>> GetAllServiceByHostelAsync(Guid hostelId)
         {
-            var hostelServices = await _serviceRepository.GetServiceByHostelIdAsync(hostelId);
-            if(hostelServices == null ||  hostelServices.Count() == 0)
+            try
             {
-                return new Response<List<HostelServiceResponseDto>> { Message = "Không tìm thấy dịch vụ nào trong phòng trọ", Succeeded = true, Data = new List<HostelServiceResponseDto>() };
+                var hostelServices = await _serviceRepository.GetServiceByHostelIdAsync(hostelId);
+                if (hostelServices == null)
+                {
+                    return new Response<List<HostelServiceResponseDto>> { Message = "Không tìm thấy dịch vụ nào trong phòng trọ", Succeeded = true, Data = new List<HostelServiceResponseDto>() };
+                }
+
+                var hostelServiceResponseDto = _mapper.Map<List<HostelServiceResponseDto>>(hostelServices);
+
+
+                return new Response<List<HostelServiceResponseDto>> { Data = hostelServiceResponseDto, Succeeded = true, Message = "Lấy danh sách dịch vụ trong phòng trọ thành công" };
             }
-
-            var hostelServiceResponseDto = _mapper.Map<List<HostelServiceResponseDto>>(hostelServices);
-
-            return new Response<List<HostelServiceResponseDto>> { Data = hostelServiceResponseDto, Succeeded = true, Message = "Lấy danh sách dịch vụ trong phòng trọ thành công" };
+            catch (Exception ex)
+            {
+                return new Response<List<HostelServiceResponseDto>> { Succeeded = false, Message = ex.Message };
+            }
 
         } 
     }

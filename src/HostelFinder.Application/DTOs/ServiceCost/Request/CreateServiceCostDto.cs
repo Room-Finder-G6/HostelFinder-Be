@@ -15,6 +15,8 @@ public class CreateServiceCostDto
     [Range(0, double.MaxValue, ErrorMessage = "Unit Cost phải là số dương")]
     public decimal UnitCost { get; set; }
 
+    public string? Unit { get; set; }
+
     [Required]
     public DateTime EffectiveFrom { get; set; }
 }
