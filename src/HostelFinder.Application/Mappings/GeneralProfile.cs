@@ -118,6 +118,8 @@ public class GeneralProfile : Profile
         CreateMap<ServiceCost, ServiceCostResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service.ServiceName))
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
+            .ForMember(dest => dest.IsBillable, opt => opt.MapFrom(src => src.Service.IsBillable))
+            .ForMember(dest => dest.IsUsageBased, opt => opt.MapFrom(src => src.Service.IsUsageBased))
             .ReverseMap();
         CreateMap<ServiceCost, CreateServiceCostDto>().ReverseMap();
         CreateMap<UpdateServiceCostDto, ServiceCost>().ReverseMap();
@@ -187,7 +189,11 @@ public class GeneralProfile : Profile
         CreateMap<HostelServices, HostelServiceResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Services.ServiceName))
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
+            .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.Services.ServiceCosts))
             .ReverseMap();
+
+        //Service Cost
+        CreateMap<HostelServiceCostResponseDto, ServiceCost>().ReverseMap();
 
         //Terant Room
         CreateMap<AddRoomTenacyDto, RoomTenancy>()

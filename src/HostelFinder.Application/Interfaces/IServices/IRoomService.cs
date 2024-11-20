@@ -13,5 +13,13 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<RoomResponseDto>> UpdateAsync(Guid id, UpdateRoomRequestDto roomDto);
         Task<Response<bool>> DeleteAsync(Guid id);
         Task<Response<List<RoomResponseDto>>> GetRoomsByHostelIdAsync(Guid hostelId,int? floor);
+
+        /// <summary>
+        /// lấy ra tất cả thông tin của dịch vụ bao gồm giá cả 
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        Task<Response<List<RoomServiceDto>>> GetServicesByRoom(Guid roomId);
+
     }
 }

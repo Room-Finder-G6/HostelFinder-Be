@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Exceptions;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,7 @@ namespace HostelFinder.Infrastructure.Repositories
         {
             return await _dbContext.ServiceCosts.SingleOrDefaultAsync(sc => sc.HostelId == hostelId &&
                                                                         sc.ServiceId == serviceId
-                                                                            && sc.EffectiveFrom <= effectiveFrom
-                                                                                && (sc.EffectiveTo == null || sc.EffectiveTo >= effectiveFrom));
+                                                                         );
         }
 
         public async Task<List<ServiceCost>> GetAllServiceCostListAsync()
@@ -36,6 +36,18 @@ namespace HostelFinder.Infrastructure.Repositories
             .Include(sr => sr.Service)
             .Where(filter)
             .ToListAsync();
+        }
+
+        public async Task<ServiceCost> GetServiceCostById(Guid serviceCostId)
+        {
+            var serviceCost = await _dbContext.ServiceCosts.Include(x => x.Hostel)
+                .Include(x => x.Service)
+                .FirstOrDefaultAsync(sc => sc.Id == serviceCostId && !sc.IsDeleted);
+            if (serviceCost == null)
+            {
+                throw new NotFoundException("Không tìm thấy giá dịch vụ ");
+            }
+            return serviceCost;
         }
     }
 }

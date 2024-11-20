@@ -56,6 +56,7 @@ namespace HostelFinder.Application.Services
             }
             //map to Domain 
             var room = _mapper.Map<Room>(roomDto);
+            room.IsAvailable = true;
             room.CreatedBy = room.HostelId.ToString();
             room.CreatedOn = DateTime.Now;
             room.IsDeleted = false;
@@ -176,18 +177,23 @@ namespace HostelFinder.Application.Services
             var rooms = await _roomRepository.GetRoomsByHostelIdAsync(hostelId, floor);
 
             if (rooms == null || !rooms.Any())
-                return new Response<List<RoomResponseDto>>("No rooms found for this hostel.");
+                return new Response<List<RoomResponseDto>> { Succeeded = false, Message = "Không tìm thấy phòng nào trong trọ" };
 
 
             var result = _mapper.Map<List<RoomResponseDto>>(rooms);
 
-           
-            /*foreach(var room in result)
+
+            foreach (var room in result)
             {
                 var imageRoom = await _imageRepository.GetImageUrlByRoomId(room.Id);
-                room.ImageRoom = imageRoom.Image ?? "";
-            }*/
+                room.ImageRoom = imageRoom.Url;
+            }
             return new Response<List<RoomResponseDto>>(result);
+        }
+
+        public Task<Response<List<RoomServiceDto>>> GetServicesByRoom(Guid roomId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

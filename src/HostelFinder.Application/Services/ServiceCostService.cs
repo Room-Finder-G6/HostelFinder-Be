@@ -44,15 +44,21 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<ServiceCostResponseDto>> UpdateAsync(Guid id, UpdateServiceCostDto serviceCostDto)
         {
-            var serviceCost = await _serviceCostRepository.GetByIdAsync(id);
-            if (serviceCost == null)
-                return new Response<ServiceCostResponseDto>("Service cost not found.");
+            try
+            {
+                var serviceCost = await _serviceCostRepository.GetServiceCostById(id);
+                if (serviceCost == null)
+                    return new Response<ServiceCostResponseDto>("Service cost not found.");
+                _mapper.Map(serviceCostDto, serviceCost);
+                serviceCost = await _serviceCostRepository.UpdateAsync(serviceCost);
 
-            _mapper.Map(serviceCostDto, serviceCost);
-            serviceCost = await _serviceCostRepository.UpdateAsync(serviceCost);
-
-            var result = _mapper.Map<ServiceCostResponseDto>(serviceCost);
-            return new Response<ServiceCostResponseDto>(result, "Service cost updated successfully.");
+                var result = _mapper.Map<ServiceCostResponseDto>(serviceCost);
+                return new Response<ServiceCostResponseDto>(result, "Service cost updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<ServiceCostResponseDto> { Message = ex.Message };
+            }
         }
 
         public async Task<Response<bool>> DeleteAsync(Guid id)
@@ -110,14 +116,18 @@ namespace HostelFinder.Application.Services
             }
 
         }
-
+        /// <summary>
+        /// lấy ra giá tiền dịch vụ của 1 phòng trọ 
+        /// </summary>
+        /// <param name="hostelId"></param>
+        /// <returns></returns>
         public async Task<Response<List<ServiceCostResponseDto>>> GetAllServiceCostByHostel(Guid hostelId)
         {
             Expression<Func<ServiceCost, bool>> filter = sr => sr.HostelId == hostelId;
 
             var servicerCosts = await _serviceCostRepository.GetAllServiceCostListWithConditionAsync(filter);
 
-            if(servicerCosts == null || !servicerCosts.Any())
+            if (servicerCosts == null || !servicerCosts.Any())
             {
                 return new Response<List<ServiceCostResponseDto>>
                 {

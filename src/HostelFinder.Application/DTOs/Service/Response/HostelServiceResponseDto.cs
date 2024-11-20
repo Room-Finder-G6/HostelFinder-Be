@@ -1,4 +1,6 @@
-﻿namespace HostelFinder.Application.DTOs.Service.Response
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HostelFinder.Application.DTOs.Service.Response
 {
     public class HostelServiceResponseDto
     {
@@ -9,5 +11,8 @@
         public string? ServiceName { get; set; }
 
         public string? HostelName {  get; set; }
+
+        public ICollection<HostelServiceCostResponseDto >? ServiceCost { get; set; }
+
     }
 }

@@ -15,5 +15,10 @@
         public decimal DepositAmount { get; set; }
         public int PaymentCycleDays { get; set; }
         public string? ContractTerms { get; set; }
+
+        /// <summary>
+        /// Ghi số dịch vụ của tháng trước khi vào phòng
+        /// </summary>
+        public List<AddMeterReadingServiceDto>? AddMeterReadingServiceDto { get; set; }
     }
 }

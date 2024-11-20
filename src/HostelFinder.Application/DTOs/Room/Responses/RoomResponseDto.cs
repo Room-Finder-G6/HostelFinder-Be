@@ -13,12 +13,12 @@ namespace HostelFinder.Application.DTOs.Room.Responses
         public int? Floor { get; set; }
         public int MaxRenters { get; set; }
         public float Size { get; set; }
-        public bool Status { get; set; }
+        public bool IsAvailable { get; set; }
         public decimal MonthlyRentCost { get; set; }
         public RoomType RoomType { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
 
-        public List<string> ImageUrls { get; set; }
+        public string ImageRoom { get; set; }
 
     }
 }
