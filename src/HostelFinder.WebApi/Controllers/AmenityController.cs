@@ -44,14 +44,22 @@ public class AmenityController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllAmenities()
     {
-        var response = await _amenityService.GetAllAmenitiesAsync();
-        if (!response.Succeeded || response.Data == null || !response.Data.Any())
+        try
         {
-            return NotFound(new Response<List<AmenityResponse>>("No amenities found"));
-        }
+            var response = await _amenityService.GetAllAmenitiesAsync();
+            if (!response.Succeeded || response.Data == null || !response.Data.Any())
+            {
+                return NotFound(new Response<List<AmenityResponse>>("No amenities found"));
+            }
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
+
 
     [HttpDelete("{amenityId}")]
     public async Task<IActionResult> DeleteAmenity(Guid amenityId)
@@ -60,7 +68,11 @@ public class AmenityController : ControllerBase
 
         if (!response.Succeeded)
         {
-            return NotFound(response);
+            return NotFound(new Response<bool>
+            {
+                Succeeded = false,
+                Message = response.Message
+            });
         }
 
         return Ok(response);

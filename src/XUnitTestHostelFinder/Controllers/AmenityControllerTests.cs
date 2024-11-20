@@ -152,29 +152,6 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.True(returnValue.Data);
         }
 
-        // Test when amenity does not exist and should return NotFound
-        //[Fact]
-        //public async Task DeleteAmenity_ReturnsNotFound_WhenAmenityDoesNotExist()
-        //{
-        //    // Arrange
-        //    var amenityId = Guid.NewGuid();
-        //    var mockResponse = new Response<bool>(false, "Amenity not found");
-
-        //    _amenityServiceMock
-        //        .Setup(service => service.DeleteAmenityAsync(amenityId))
-        //        .ReturnsAsync(mockResponse);
-
-        //    // Act
-        //    var result = await _controller.DeleteAmenity(amenityId);
-
-        //    // Assert
-        //    var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-        //    var returnValue = Assert.IsType<Response<bool>>(notFoundResult.Value);
-        //    Assert.False(returnValue.Succeeded);
-        //    Assert.Equal("Amenity not found", returnValue.Message);
-        //}
-
-
         // 8. Parameterized Test for AddAmenity with valid and invalid data
         [Theory]
         [InlineData("WiFi", true)]
@@ -213,5 +190,90 @@ namespace XUnitTestHostelFinder.Controllers
                 Assert.Contains("Invalid amenity data", returnValue.Errors);
             }
         }
+
+        [Fact]
+        public async Task GetAllAmenities_ReturnsInternalServerError_OnException()
+        {
+            // Arrange
+            _amenityServiceMock
+                .Setup(service => service.GetAllAmenitiesAsync())
+                .ThrowsAsync(new Exception("Internal server error"));
+
+            // Act
+            var result = await _controller.GetAllAmenities();
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            Assert.Equal("Internal server error", objectResult.Value);
+        }
+
+        [Fact]
+        public async Task AddAmenity_ReturnsBadRequest_WhenAmenityNameIsNull()
+        {
+            // Arrange
+            var addAmenityDto = new AddAmenityDto { AmenityName = null };
+            _controller.ModelState.AddModelError("AmenityName", "Required");
+
+            // Act
+            var result = await _controller.AddAmenity(addAmenityDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<Response<AmenityResponse>>(badRequestResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Invalid model state", response.Message);
+        }
+
+        [Fact]
+        public async Task GetAmenitiesByRoomId_ReturnsOkResult_WhenAmenitiesExistForRoom()
+        {
+            // Arrange
+            var roomId = Guid.NewGuid();
+            var amenities = new List<AmenityResponse>
+                {
+                    new AmenityResponse { AmenityName = "WiFi" },
+                    new AmenityResponse { AmenityName = "Pool" }
+                };
+            var mockResponse = new Response<IEnumerable<AmenityResponse>>(amenities, "Amenities retrieved successfully");
+
+            _amenityServiceMock
+                .Setup(service => service.GetAmenitiesByRoomlIdAsync(roomId))
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller.GetAmenitiesByRoomId(roomId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnValue = Assert.IsType<Response<IEnumerable<AmenityResponse>>>(okResult.Value);
+            Assert.True(returnValue.Succeeded);
+            Assert.Equal(amenities.Count(), returnValue.Data.Count());
+        }
+
+        [Fact]
+        public async Task GetAmenitiesByRoomId_ReturnsNotFound_WhenNoAmenitiesExistForRoom()
+        {
+            // Arrange
+            var roomId = Guid.NewGuid();
+            var mockResponse = new Response<IEnumerable<AmenityResponse>>(null, "No amenities found")
+            {
+                Succeeded = false
+            };
+
+            _amenityServiceMock
+                .Setup(service => service.GetAmenitiesByRoomlIdAsync(roomId))
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller.GetAmenitiesByRoomId(roomId);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            var returnValue = Assert.IsType<Response<IEnumerable<AmenityResponse>>>(notFoundResult.Value);
+            Assert.False(returnValue.Succeeded);
+            Assert.Equal("No amenities found", returnValue.Message);
+        }
+
     }
 }

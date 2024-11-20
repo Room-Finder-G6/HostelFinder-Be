@@ -1,6 +1,7 @@
-﻿using System.Security.Claims;
-using HostelFinder.Application.DTOs.Hostel.Requests;
+﻿using HostelFinder.Application.DTOs.Hostel.Requests;
+using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -84,7 +85,11 @@ namespace HostelFinder.WebApi.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(new Response<HostelResponseDto>
+                {
+                    Succeeded = false,
+                    Message = "Invalid model state."
+                });
             }
 
             var imageUrls = new List<string>();
@@ -106,7 +111,11 @@ namespace HostelFinder.WebApi.Controllers
                 return Ok(result);
             }
 
-            return BadRequest(result.Message);
+            return BadRequest(new Response<HostelResponseDto>
+            {
+                Succeeded = false,
+                Message = result.Message
+            });
         }
 
         [HttpDelete("DeleteHostel/{id}")]

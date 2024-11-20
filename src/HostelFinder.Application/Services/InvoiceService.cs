@@ -79,12 +79,19 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<bool>> DeleteAsync(Guid id)
         {
-            var invoice = await _invoiceRepository.GetByIdAsync(id);
-            if (invoice == null)
-                return new Response<bool>("Invoice not found.");
+            try
+            {
+                var invoice = await _invoiceRepository.GetByIdAsync(id);
+                if (invoice == null)
+                    return new Response<bool>(false, "Invoice not found.");
 
-            await _invoiceRepository.DeleteAsync(id);
-            return new Response<bool>(true, "Invoice deleted successfully.");
+                await _invoiceRepository.DeleteAsync(id);
+                return new Response<bool>(true, "Invoice deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(false, $"Error occurred: {ex.Message}");
+            }
         }
 
         public async Task<Response<InvoiceResponseDto>> GenerateMonthlyInvoicesAsync(Guid roomId, int billingMonth, int billingYear)
@@ -200,14 +207,14 @@ namespace HostelFinder.Application.Services
                         PreviousReading = details.PreviousReading,
                         InvoiceId = details.InvoiceId,
                         NumberOfCustomer = details.NumberOfCustomer,
-                        ServiceName = details.Service?.ServiceName ?? (details.IsRentRoom ? "Tiền thuê phòng" : "Không xác định") ,
+                        ServiceName = details.Service?.ServiceName ?? (details.IsRentRoom ? "Tiền thuê phòng" : "Không xác định"),
                         UnitCost = details.UnitCost,
                     }).ToList()
 
                 };
                 return new Response<InvoiceResponseDto> { Data = invoiceCreatedDto, Message = $"Tạo hóa đơn thành công cho phòng {room.RoomName} vào ngày {DateTime.Now}", Succeeded = true };
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 _logger.LogError(ex, "Xảy ra trong quá tình tạo hóa đơn phòng");

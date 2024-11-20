@@ -13,7 +13,7 @@ public class AmenityService : IAmenityService
     private readonly IAmenityRepository _amenityRepository;
     private readonly IMapper _mapper;
 
-    
+
     public AmenityService(IAmenityRepository amenityRepository, IMapper mapper)
     {
         _amenityRepository = amenityRepository;
@@ -26,7 +26,13 @@ public class AmenityService : IAmenityService
         {
             return new Response<AmenityResponse>("An amenity with the same name already exists.");
         }
+        try
+        {
 
+        }
+        catch (Exception ex)
+        {
+        }
         var amenity = _mapper.Map<Amenity>(addAmenityDto);
         var addedAmenity = await _amenityRepository.AddAsync(amenity);
         var response = _mapper.Map<AmenityResponse>(addedAmenity);
@@ -37,11 +43,26 @@ public class AmenityService : IAmenityService
     {
         var amenity = await _amenityRepository.GetByIdAsync(amenityId);
         if (amenity == null)
+        {
             return new Response<bool>(false, "Amenity not found");
+        }
 
-        await _amenityRepository.DeletePermanentAsync(amenityId);
-        return new Response<bool>(true, "Amenity deleted successfully");
+        try
+        {
+            var deletedEntity = await _amenityRepository.DeletePermanentAsync(amenityId);
+            if (deletedEntity == null)
+            {
+                return new Response<bool>(false, "Failed to delete amenity");
+            }
+
+            return new Response<bool>(true, "Amenity deleted successfully");
+        }
+        catch (Exception ex)
+        {
+            return new Response<bool>(false, message: ex.Message);
+        }
     }
+
 
     public async Task<Response<List<AmenityResponse>>> GetAllAmenitiesAsync()
     {

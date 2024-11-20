@@ -1,5 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.InVoice.Requests;
+using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -20,44 +22,86 @@ namespace HostelFinder.WebApi.Controllers
         {
             var response = await _invoiceService.GetAllAsync();
             if (!response.Succeeded)
-                return BadRequest(response.Message);
+            {
+                return BadRequest(new Response<List<InvoiceResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = response.Message
+                });
+            }
 
-            return Ok(response.Data);
+            return Ok(response);
         }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetInvoice(Guid id)
         {
-            var response = await _invoiceService.GetByIdAsync(id);
-            if (!response.Succeeded)
-                return NotFound(response.Message);
-
-            return Ok(response.Data);
-        }
-
-        [HttpPost]
-        [Route("monthly-invoice")]
-        public async Task<IActionResult> CreateInvoice([FromBody] AddInVoiceRequestDto invoiceDto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             try
             {
-                var response = await _invoiceService.GenerateMonthlyInvoicesAsync(invoiceDto.roomId, invoiceDto.billingMonth,invoiceDto.billingYear);
+                var response = await _invoiceService.GetByIdAsync(id);
                 if (!response.Succeeded)
-                    return BadRequest(response);
+                    return NotFound(new Response<InvoiceResponseDto>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
 
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error: " + ex.Message);
+                return StatusCode(500, new Response<InvoiceResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
+
+
+        [HttpPost]
+        [Route("monthly-invoice")]
+        public async Task<IActionResult> CreateInvoice([FromForm] AddInVoiceRequestDto invoiceDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new Response<InvoiceResponseDto>
+                {
+                    Succeeded = false,
+                    Message = "Invalid model state."
+                });
+
+            try
+            {
+                var response = await _invoiceService.GenerateMonthlyInvoicesAsync(invoiceDto.roomId, invoiceDto.billingMonth, invoiceDto.billingYear);
+                if (!response.Succeeded)
+                {
+                    return new ObjectResult(response)
+                    {
+                        StatusCode = 400
+                    };
+                }
+
+                return new ObjectResult(response)
+                {
+                    StatusCode = 200
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ObjectResult(new Response<InvoiceResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                })
+                {
+                    StatusCode = 500
+                };
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateInvoice(Guid id, [FromBody] UpdateInvoiceRequestDto invoiceDto)
+        public async Task<IActionResult> UpdateInvoice(Guid id, [FromForm] UpdateInvoiceRequestDto invoiceDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -66,16 +110,49 @@ namespace HostelFinder.WebApi.Controllers
             if (!response.Succeeded)
                 return NotFound(response.Message);
 
-            return Ok(response.Data);
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInvoice(Guid id)
         {
-            var response = await _invoiceService.DeleteAsync(id);
-            if (!response.Succeeded)
-                return NotFound(response.Message);
-            return Ok(response);
+            try
+            {
+                var response = await _invoiceService.DeleteAsync(id);
+                if (!response.Succeeded)
+                {
+                    if (response.Message == "Invoice not found.")
+                    {
+                        return NotFound(new Response<bool>
+                        {
+                            Succeeded = false,
+                            Message = response.Message
+                        });
+                    }
+
+                    return BadRequest(new Response<bool>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
+                }
+
+                return Ok(new Response<bool>
+                {
+                    Succeeded = true,
+                    Message = response.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
+
+
     }
 }
