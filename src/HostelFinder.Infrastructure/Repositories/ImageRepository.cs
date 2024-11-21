@@ -36,5 +36,18 @@ namespace HostelFinder.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<string>> GetAllUrlRoomPicture(Guid roomId)
+        {
+            var urlImages = await _dbContext.Images
+                .Where(img => img.RoomId == roomId)
+                .Select(img => img.Url)
+                .ToListAsync();
+            if(!urlImages.Any() || urlImages == null)
+            {
+                return new List<string>();
+            }
+            return urlImages;
+
+        }
     }
 }

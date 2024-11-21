@@ -198,6 +198,17 @@ public class GeneralProfile : Profile
         //Terant Room
         CreateMap<AddRoomTenacyDto, RoomTenancy>()
             .ReverseMap();
+        CreateMap<RoomTenancy, InformationTenacyReponseDto>()
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Tenant.FullName))
+            .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(src => src.Tenant.AvatarUrl))
+            .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Tenant.Phone))
+            .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Tenant.Province))
+            .ForMember(dest => dest.IdentityCardNumber, opt => opt.MapFrom(src => src.Tenant.IdentityCardNumber))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Tenant.Description))
+            .ForMember(dest => dest.MoveInDate, opt => opt.MapFrom(src => src.MoveInDate))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Tenant.Email))
+            .ReverseMap();
+        CreateMap<RoomInfoDetailResponseDto, Room>().ReverseMap();
 
         //Vehicle
         CreateMap<AddVehicleDto, Vehicle>().ReverseMap();

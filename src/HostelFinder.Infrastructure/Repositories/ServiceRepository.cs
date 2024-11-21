@@ -68,6 +68,5 @@ namespace HostelFinder.Infrastructure.Repositories
 
         }
 
-
     }
 }
