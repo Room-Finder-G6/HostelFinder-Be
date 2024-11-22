@@ -317,7 +317,11 @@ public class PostService : IPostService
         var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)
         {
-            return new Response<UpdatePostRequestDto>("Post not found.");
+            return new Response<UpdatePostRequestDto>
+            {
+                Succeeded = false,
+                Message = "Post not found."
+            };
         }
 
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
@@ -374,5 +378,25 @@ public class PostService : IPostService
             };
         }
     }
+
+    public async Task<Response<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime()
+    {
+        // Fetch posts from the repository
+        var posts = await _postRepository.GetAllPostsOrderedAsync();
+
+        // Map posts to DTOs or initialize with an empty list if null/empty
+        var postDtos = posts != null && posts.Any()
+            ? _mapper.Map<List<ListPostsResponseDto>>(posts)
+            : new List<ListPostsResponseDto>();
+
+        // Return the response with appropriate success status
+        return new Response<List<ListPostsResponseDto>>
+        {
+            Data = postDtos,
+            Succeeded = postDtos.Any(),
+            Message = postDtos.Any() ? "Posts retrieved successfully" : "No posts found"
+        };
+    }
+
 }
 

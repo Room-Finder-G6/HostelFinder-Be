@@ -131,9 +131,9 @@ namespace HostelFinder.Application.Services
             {
                 return new Response<List<ServiceCostResponseDto>>
                 {
-                    Succeeded = true,
+                    Succeeded = false,
                     Message = "Không tìm thấy giá của dịch vụ trong nhà trọ",
-                    Data = new List<ServiceCostResponseDto>()
+                    Data = null
                 };
             }
 

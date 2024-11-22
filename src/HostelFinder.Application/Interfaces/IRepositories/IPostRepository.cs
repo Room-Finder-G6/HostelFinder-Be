@@ -15,4 +15,5 @@ public interface IPostRepository : IBaseGenericRepository<Post>
     Task<IDbContextTransaction> BeginTransactionAsync();
     Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, decimal? minSize, decimal? maxSize, decimal? minPrice, decimal? maxPrice, RoomType? roomType);
     Task<List<Post>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync();
+    Task<List<Post>> GetAllPostsOrderedAsync();
 }

@@ -12,7 +12,7 @@ namespace HostelFinder.WebApi.Controllers
     {
         private readonly IHostelService _hostelService;
         private readonly IS3Service _s3Service;
-        
+
         public HostelController(IHostelService hostelService, IS3Service s3Service)
         {
             _hostelService = hostelService;
@@ -22,25 +22,43 @@ namespace HostelFinder.WebApi.Controllers
         [HttpGet("{hostelId}")]
         public async Task<IActionResult> GetHostelById(Guid hostelId)
         {
-            var result = await _hostelService.GetHostelByIdAsync(hostelId);
-            if (!result.Succeeded || result.Data == null)
+            try
             {
-                return NotFound(result);
-            }
+                var result = await _hostelService.GetHostelByIdAsync(hostelId);
+                if (!result.Succeeded || result.Data == null)
+                {
+                    return NotFound(result);
+                }
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<HostelResponseDto>
+                {
+                    Succeeded = false,
+                    Message = ex.Message
+                });
+            }
         }
 
         [HttpGet("GetHostelsByLandlordId/{landlordId}")]
         public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId)
         {
-            var hostels = await _hostelService.GetHostelsByUserIdAsync(landlordId);
-            if (hostels.Succeeded)
+            try
             {
-                return Ok(hostels);
-            }
+                var hostels = await _hostelService.GetHostelsByUserIdAsync(landlordId);
+                if (hostels.Succeeded && hostels.Data != null)
+                {
+                    return Ok(hostels);
+                }
 
-            return NotFound(hostels.Errors);
+                return NotFound(hostels.Errors ?? new List<string> { "No hostels found" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPost]
@@ -62,13 +80,13 @@ namespace HostelFinder.WebApi.Controllers
                     imageUrls.Add(imageUrl);
                 }
             }
-            
+
             try
             {
                 var result = await _hostelService.AddHostelAsync(hostelDto, imageUrls);
                 if (result.Succeeded)
                 {
-                    return CreatedAtAction(nameof(GetHostelById), new { hostelId = result.Data.Id }, result);
+                    return Ok(result);
                 }
 
                 return BadRequest(result);
@@ -104,42 +122,75 @@ namespace HostelFinder.WebApi.Controllers
                 }
             }
 
-            var result = await _hostelService.UpdateHostelAsync(hostelId, request, imageUrls);
-
-            if (result.Succeeded)
+            try
             {
-                return Ok(result);
+                var result = await _hostelService.UpdateHostelAsync(hostelId, request, imageUrls);
+
+                if (result.Succeeded)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(new Response<HostelResponseDto>
+                {
+                    Succeeded = false,
+                    Message = result.Message
+                });
             }
-
-            return BadRequest(new Response<HostelResponseDto>
+            catch (Exception ex)
             {
-                Succeeded = false,
-                Message = result.Message
-            });
+                return StatusCode(500, new Response<HostelResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
 
         [HttpDelete("DeleteHostel/{id}")]
         public async Task<IActionResult> DeleteHostel(Guid id)
         {
-            var result = await _hostelService.DeleteHostelAsync(id);
-            if (result.Succeeded)
+            try
             {
-                return Ok(result);
-            }
+                var result = await _hostelService.DeleteHostelAsync(id);
+                if (result.Succeeded)
+                {
+                    return Ok(result);
+                }
 
-            return NotFound(result);
+                return NotFound(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
 
         [HttpPost("get-all")]
         public async Task<IActionResult> GetAll([FromBody] GetAllHostelQuery request)
         {
-            var response = await _hostelService.GetAllHostelAsync(request);
-            if (!response.Succeeded)
+            try
             {
-                return NotFound(response);
-            }
+                var response = await _hostelService.GetAllHostelAsync(request);
+                if (!response.Succeeded || response.Data == null || !response.Data.Any())
+                {
+                    return NotFound(new PagedResponse<List<ListHostelResponseDto>>
+                    {
+                        Succeeded = false,
+                        Message = "No hostels found."
+                    });
+                }
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
 }

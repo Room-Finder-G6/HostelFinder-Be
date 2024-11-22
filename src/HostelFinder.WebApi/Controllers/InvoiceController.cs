@@ -20,17 +20,28 @@ namespace HostelFinder.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetInvoices()
         {
-            var response = await _invoiceService.GetAllAsync();
-            if (!response.Succeeded)
+            try
             {
-                return BadRequest(new Response<List<InvoiceResponseDto>>
+                var response = await _invoiceService.GetAllAsync();
+                if (!response.Succeeded)
+                {
+                    return BadRequest(new Response<List<InvoiceResponseDto>>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<InvoiceResponseDto>>
                 {
                     Succeeded = false,
-                    Message = response.Message
+                    Message = $"Internal server error: {ex.Message}"
                 });
             }
-
-            return Ok(response);
         }
 
 
@@ -39,13 +50,25 @@ namespace HostelFinder.WebApi.Controllers
         {
             try
             {
+                if (id == Guid.Empty)
+                {
+                    return BadRequest(new Response<InvoiceResponseDto>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid ID",
+                        Data = null
+                    });
+                }
+
                 var response = await _invoiceService.GetByIdAsync(id);
-                if (!response.Succeeded)
+                if (!response.Succeeded || response.Data == null)
+                {
                     return NotFound(new Response<InvoiceResponseDto>
                     {
                         Succeeded = false,
                         Message = response.Message
                     });
+                }
 
                 return Ok(response);
             }
@@ -103,14 +126,42 @@ namespace HostelFinder.WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateInvoice(Guid id, [FromForm] UpdateInvoiceRequestDto invoiceDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (id == Guid.Empty)
+                {
+                    return BadRequest(new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid invoice ID"
+                    });
+                }
 
-            var response = await _invoiceService.UpdateAsync(id, invoiceDto);
-            if (!response.Succeeded)
-                return NotFound(response.Message);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            return Ok(response);
+                var response = await _invoiceService.UpdateAsync(id, invoiceDto);
+                if (!response.Succeeded)
+                {
+                    return NotFound(new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
 
         [HttpDelete("{id}")]
@@ -137,11 +188,7 @@ namespace HostelFinder.WebApi.Controllers
                     });
                 }
 
-                return Ok(new Response<bool>
-                {
-                    Succeeded = true,
-                    Message = response.Message
-                });
+                return Ok(response);
             }
             catch (Exception ex)
             {

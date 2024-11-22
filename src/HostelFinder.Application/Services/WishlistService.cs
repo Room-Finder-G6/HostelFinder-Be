@@ -49,7 +49,7 @@ namespace HostelFinder.Application.Services
 
             await _wishlistRepository.AddRoomToWishlistAsync(wishlistRoom);
 
-            return new Response<bool>(true);
+            return new Response<bool>(true, "Thêm vào danh sách yêu thích thành công.");
         }
 
 
@@ -83,7 +83,7 @@ namespace HostelFinder.Application.Services
             }
 
             await _wishlistRepository.DeletePermanentAsync(wishlist.Id);
-            return new Response<bool>(true);
+            return new Response<bool>(true, "Đã xóa khỏi danh sách yêu thích.");
         }
 
     }

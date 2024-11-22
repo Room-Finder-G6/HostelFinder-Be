@@ -75,6 +75,47 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         [Fact]
+        public async Task GetInvoices_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            _invoiceServiceMock.Setup(service => service.GetAllAsync())
+                .ThrowsAsync(new Exception("Internal server error"));
+
+            // Act
+            var result = await _controller.GetInvoices();
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var responseData = Assert.IsType<Response<List<InvoiceResponseDto>>>(objectResult.Value);
+            Assert.False(responseData.Succeeded);
+            Assert.Equal("Internal server error: Internal server error", responseData.Message);
+        }
+
+        [Fact]
+        public async Task GetInvoices_ReturnsEmptyList_WhenNoInvoicesExist()
+        {
+            // Arrange
+            var mockResponse = new Response<List<InvoiceResponseDto>>(new List<InvoiceResponseDto>(), "No invoices found")
+            {
+                Succeeded = true
+            };
+
+            _invoiceServiceMock.Setup(service => service.GetAllAsync())
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller.GetInvoices();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var responseData = Assert.IsType<Response<List<InvoiceResponseDto>>>(okResult.Value);
+            Assert.True(responseData.Succeeded);
+            Assert.Empty(responseData.Data);
+            Assert.Equal("No invoices found", responseData.Message);
+        }
+
+        [Fact]
         public async Task GetInvoice_ReturnsOkResult_WhenInvoiceExists()
         {
             // Arrange
@@ -94,6 +135,46 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.True(responseData.Succeeded);
             Assert.Equal("Room A", responseData.Data.RoomName);
             Assert.Equal(150, responseData.Data.TotalAmount);
+        }
+
+        [Fact]
+        public async Task GetInvoice_ReturnsNotFound_WhenInvoiceDoesNotExist()
+        {
+            // Arrange
+            var invoiceId = Guid.NewGuid();
+            var mockResponse = new Response<InvoiceResponseDto>
+            {
+                Succeeded = false,
+                Message = "Invoice not found"
+            };
+
+            _invoiceServiceMock.Setup(service => service.GetByIdAsync(invoiceId))
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller.GetInvoice(invoiceId);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            var responseData = Assert.IsType<Response<InvoiceResponseDto>>(notFoundResult.Value);
+            Assert.False(responseData.Succeeded);
+            Assert.Equal("Invoice not found", responseData.Message);
+        }
+
+        [Fact]
+        public async Task GetInvoice_ReturnsBadRequest_WhenIdIsInvalid()
+        {
+            // Arrange
+            var invalidId = Guid.Empty;
+
+            // Act
+            var result = await _controller.GetInvoice(invalidId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var responseData = Assert.IsType<Response<InvoiceResponseDto>>(badRequestResult.Value);
+            Assert.False(responseData.Succeeded);
+            Assert.Equal("Invalid ID", responseData.Message);
         }
 
         [Fact]
@@ -188,6 +269,42 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.Equal("Invoice updated successfully", returnValue.Message);
         }
 
+        [Fact]
+        public async Task UpdateInvoice_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var invoiceId = Guid.NewGuid();
+            var invoiceDto = new UpdateInvoiceRequestDto { TotalAmount = 1000 };
+
+            _invoiceServiceMock.Setup(service => service.UpdateAsync(invoiceId, invoiceDto))
+                .ThrowsAsync(new Exception("Internal server error"));
+
+            // Act
+            var result = await _controller.UpdateInvoice(invoiceId, invoiceDto);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var response = Assert.IsType<Response<string>>(objectResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Internal server error", response.Message);
+        }
+
+        [Fact]
+        public async Task UpdateInvoice_ReturnsBadRequest_WhenIdIsInvalid()
+        {
+            // Arrange
+            var invalidId = Guid.Empty;
+
+            // Act
+            var result = await _controller.UpdateInvoice(invalidId, new UpdateInvoiceRequestDto());
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var responseMessage = Assert.IsType<Response<string>>(badRequestResult.Value);
+            Assert.False(responseMessage.Succeeded);
+            Assert.Contains("Invalid invoice ID", responseMessage.Message);
+        }
 
         [Fact]
         public async Task UpdateInvoice_ReturnsNotFound_WhenInvoiceDoesNotExist()
@@ -209,8 +326,9 @@ namespace XUnitTestHostelFinder.Controllers
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var returnValue = Assert.IsType<string>(notFoundResult.Value);
-            Assert.Equal("Invoice not found", returnValue);
+            var returnValue = Assert.IsType<Response<string>>(notFoundResult.Value);
+            Assert.False(returnValue.Succeeded);
+            Assert.Equal("Invoice not found", returnValue.Message);
         }
 
         // Test for DeleteInvoice

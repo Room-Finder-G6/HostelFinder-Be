@@ -136,20 +136,36 @@ namespace XUnitTestHostelFinder.Controllers
         {
             // Arrange
             var amenityId = Guid.NewGuid();
-            var mockResponse = new Response<bool>(true, "Amenity deleted successfully");
+            var response = new Response<bool>(true, "Amenity deleted successfully");
 
-            _amenityServiceMock
-                .Setup(service => service.DeleteAmenityAsync(amenityId))
-                .ReturnsAsync(mockResponse);
+            _amenityServiceMock.Setup(service => service.DeleteAmenityAsync(amenityId))
+                .ReturnsAsync(response);
 
             // Act
             var result = await _controller.DeleteAmenity(amenityId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<Response<bool>>(okResult.Value);
-            Assert.True(returnValue.Succeeded);
-            Assert.True(returnValue.Data);
+            var responseData = Assert.IsType<Response<bool>>(okResult.Value);
+            Assert.True(responseData.Succeeded);
+            Assert.Equal("Amenity deleted successfully", responseData.Message);
+        }
+
+        [Fact]
+        public async Task DeleteAmenity_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var amenityId = Guid.NewGuid();
+            _amenityServiceMock.Setup(service => service.DeleteAmenityAsync(amenityId))
+                .ThrowsAsync(new Exception("Internal server error"));
+
+            // Act
+            var result = await _controller.DeleteAmenity(amenityId);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            Assert.Equal("Internal server error: Internal server error", objectResult.Value);
         }
 
         // 8. Parameterized Test for AddAmenity with valid and invalid data
@@ -226,54 +242,76 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         [Fact]
-        public async Task GetAmenitiesByRoomId_ReturnsOkResult_WhenAmenitiesExistForRoom()
+        public async Task GetAmenitiesByRoomId_ReturnsOkResult_WhenAmenitiesExist()
         {
             // Arrange
             var roomId = Guid.NewGuid();
-            var amenities = new List<AmenityResponse>
-                {
-                    new AmenityResponse { AmenityName = "WiFi" },
-                    new AmenityResponse { AmenityName = "Pool" }
-                };
-            var mockResponse = new Response<IEnumerable<AmenityResponse>>(amenities, "Amenities retrieved successfully");
+            var mockAmenities = new List<AmenityResponse>
+    {
+        new AmenityResponse { Id = Guid.NewGuid(), AmenityName = "WiFi" },
+        new AmenityResponse { Id = Guid.NewGuid(), AmenityName = "Parking" }
+    };
 
-            _amenityServiceMock
-                .Setup(service => service.GetAmenitiesByRoomlIdAsync(roomId))
-                .ReturnsAsync(mockResponse);
+            var response = new Response<IEnumerable<AmenityResponse>>(mockAmenities, "Danh sách tiện ích");
+
+            _amenityServiceMock.Setup(service => service.GetAmenitiesByRoomlIdAsync(roomId))
+                .ReturnsAsync(response);
 
             // Act
             var result = await _controller.GetAmenitiesByRoomId(roomId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<Response<IEnumerable<AmenityResponse>>>(okResult.Value);
-            Assert.True(returnValue.Succeeded);
-            Assert.Equal(amenities.Count(), returnValue.Data.Count());
+            var responseData = Assert.IsType<Response<IEnumerable<AmenityResponse>>>(okResult.Value);
+            Assert.True(responseData.Succeeded);
+            Assert.Equal(2, responseData.Data.Count());
+            Assert.Equal("Danh sách tiện ích", responseData.Message);
         }
 
         [Fact]
-        public async Task GetAmenitiesByRoomId_ReturnsNotFound_WhenNoAmenitiesExistForRoom()
+        public async Task GetAmenitiesByRoomId_ReturnsNotFound_WhenNoAmenitiesExist()
         {
             // Arrange
             var roomId = Guid.NewGuid();
-            var mockResponse = new Response<IEnumerable<AmenityResponse>>(null, "No amenities found")
+            var response = new Response<IEnumerable<AmenityResponse>>(null, "No amenities found")
             {
                 Succeeded = false
             };
 
-            _amenityServiceMock
-                .Setup(service => service.GetAmenitiesByRoomlIdAsync(roomId))
-                .ReturnsAsync(mockResponse);
+            _amenityServiceMock.Setup(service => service.GetAmenitiesByRoomlIdAsync(roomId))
+                .ReturnsAsync(response);
 
             // Act
             var result = await _controller.GetAmenitiesByRoomId(roomId);
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var returnValue = Assert.IsType<Response<IEnumerable<AmenityResponse>>>(notFoundResult.Value);
-            Assert.False(returnValue.Succeeded);
-            Assert.Equal("No amenities found", returnValue.Message);
+            var responseData = Assert.IsType<Response<IEnumerable<AmenityResponse>>>(notFoundResult.Value);
+            Assert.False(responseData.Succeeded);
+            Assert.Equal("No amenities found", responseData.Message);
         }
+
+        [Fact]
+        public async Task GetAmenitiesByRoomId_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var roomId = Guid.NewGuid();
+
+            _amenityServiceMock.Setup(service => service.GetAmenitiesByRoomlIdAsync(roomId))
+                .ThrowsAsync(new Exception("Internal server error"));
+
+            // Act
+            var result = await _controller.GetAmenitiesByRoomId(roomId);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var response = Assert.IsType<Response<IEnumerable<AmenityResponse>>>(objectResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Internal server error", response.Message);
+        }
+
+
 
     }
 }
