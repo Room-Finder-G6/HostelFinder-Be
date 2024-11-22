@@ -21,9 +21,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000")
+                .WithOrigins("http://hostelfinder-alb-1388463493.us-east-1.elb.amazonaws.com/")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -63,7 +65,7 @@ var seeder = scope.ServiceProvider.GetRequiredService<IHostelSeeder>();
 
 await seeder.Seed();
 
-app.UseCors("AllowAllOrigins");
+
 
 //app.UseMiddleware<TokenValidationMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
@@ -72,12 +74,12 @@ app.UseMiddleware<RequestTimeLoggingMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
