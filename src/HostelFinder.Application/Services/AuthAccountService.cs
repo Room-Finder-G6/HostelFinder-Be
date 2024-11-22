@@ -53,29 +53,36 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<AuthenticationResponse>> LoginAsync(AuthenticationRequest request)
         {
-            var user = await _userRepository.FindByUserNameAsync(request.UserName);
-            if (user == null)
+            try
             {
-                return new Response<AuthenticationResponse> { Succeeded = false, Message = "Tên người dùng không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới." };
+                var user = await _userRepository.FindByUserNameAsync(request.UserName);
+                if (user == null)
+                {
+                    return new Response<AuthenticationResponse> { Succeeded = false, Message = "Tên người dùng không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới." };
+                }
+
+                var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, request.Password);
+                if (verificationResult == PasswordVerificationResult.Failed)
+                {
+                    return new Response<AuthenticationResponse> { Succeeded = false, Message = "Tài khoản hoặc mật khẩu không đúng. Vui lòng kiểm tra lại!" };
+                }
+
+                var role = await _userRepository.GetRoleAsync(user.Id);
+                var token = _tokenService.GenerateJwtToken(user, role);
+
+                var response = new AuthenticationResponse
+                {
+                    UserName = user.Username,
+                    Role = role.ToString(),
+                    Token = token
+                };
+
+                return new Response<AuthenticationResponse> { Data = response, Succeeded = true, Message = "Đăng nhập thành công" };
             }
-
-            var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, request.Password);
-            if (verificationResult == PasswordVerificationResult.Failed)
+            catch (Exception ex)
             {
-                return new Response<AuthenticationResponse> { Succeeded = false, Message = "Tài khoản hoặc mật khẩu không đúng. Vui lòng kiểm tra lại!" };
+                return new Response<AuthenticationResponse> { Message = ex.Message };
             }
-
-            var role = await _userRepository.GetRoleAsync(user.Id);
-            var token = _tokenService.GenerateJwtToken(user, role);
-
-            var response = new AuthenticationResponse
-            {
-                UserName = user.Username,
-                Role = role.ToString(),
-                Token = token
-            };
-
-            return new Response<AuthenticationResponse> { Data = response, Succeeded = true, Message = "Đăng nhập thành công" };
         }
 
         public async Task<Response<string>> ResetPasswordAsync(ResetPasswordRequest request)

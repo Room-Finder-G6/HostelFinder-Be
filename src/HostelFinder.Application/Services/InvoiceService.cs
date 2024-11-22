@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.Invoice.Responses;
 using HostelFinder.Application.DTOs.InVoice.Requests;
 using HostelFinder.Application.DTOs.InVoice.Responses;
+using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -218,6 +219,20 @@ namespace HostelFinder.Application.Services
                 await transaction.RollbackAsync();
                 _logger.LogError(ex, "Xảy ra trong quá tình tạo hóa đơn phòng");
                 return new Response<InvoiceResponseDto> { Message = "Xảy ra lỗi trong quá trình tạo hóa đơn" };
+            }
+        }
+
+        public async Task<RoomInvoiceHistoryDetailsResponseDto> GetInvoiceDetailInRoomLastestAsyc(Guid roomId)
+        {
+            try
+            {
+                // lấy ra hóa đơn cuối cùng
+                //var invoice = await _invoiceRepository.GetByIdAsync(roomId);
+                throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

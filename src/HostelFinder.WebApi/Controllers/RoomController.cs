@@ -11,10 +11,12 @@ namespace HostelFinder.WebApi.Controllers
     public class RoomController : ControllerBase
     {
         private readonly IRoomService _roomService;
-
-        public RoomController(IRoomService roomService)
+        private readonly ITenantService _tenantService;
+        public RoomController(IRoomService roomService,
+            ITenantService tenantService)
         {
             _roomService = roomService;
+            _tenantService = tenantService;
         }
 
         [HttpGet]
@@ -173,5 +175,23 @@ namespace HostelFinder.WebApi.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("info-retancy")]
+        public async Task<IActionResult> GetInfoRentacyRoom(Guid roomId)
+        {
+            var response = await _tenantService.GetInformationTenacyAsync(roomId);
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("info-detail")]
+        public async Task<IActionResult> GetInfoDetailRoom(Guid roomId)
+        {
+            var response = await _roomService.GetInformationDetailRoom(roomId);
+            if (!response.Succeeded)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
     }
 }

@@ -126,7 +126,7 @@ namespace HostelFinder.Application.Services
             Expression<Func<ServiceCost, bool>> filter = sr => sr.HostelId == hostelId;
 
             var servicerCosts = await _serviceCostRepository.GetAllServiceCostListWithConditionAsync(filter);
-
+       
             if (servicerCosts == null || !servicerCosts.Any())
             {
                 return new Response<List<ServiceCostResponseDto>>

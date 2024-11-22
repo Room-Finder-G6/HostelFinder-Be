@@ -22,6 +22,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAllOrigins", policy =>
     {
         policy.WithOrigins("http://localhost:3000")
+                .WithOrigins("http://hostelfinder-alb-1388463493.us-east-1.elb.amazonaws.com/")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -63,6 +64,7 @@ var seeder = scope.ServiceProvider.GetRequiredService<IHostelSeeder>();
 
 
 await seeder.Seed();
+
 
 app.UseCors("AllowAllOrigins");
 
