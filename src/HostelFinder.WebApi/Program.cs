@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAllOrigins", policy =>
     {
         policy.WithOrigins("http://localhost:3000")
-                .WithOrigins("http://hostelfinder-alb-1388463493.us-east-1.elb.amazonaws.com/")
+                .WithOrigins("http://hostel-fe-alb-2090926088.us-east-1.elb.amazonaws.com")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
