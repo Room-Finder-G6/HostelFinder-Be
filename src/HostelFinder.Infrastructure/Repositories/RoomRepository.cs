@@ -29,7 +29,7 @@ namespace HostelFinder.Infrastructure.Repositories
             return room;
         }
 
-        public async Task<IEnumerable<Room>> ListAllWithDetailsAsync()
+        public async Task<List<Room>> ListAllWithDetailsAsync()
         {
             return await _dbContext.Rooms
                 .Include(r => r.Hostel)

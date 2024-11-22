@@ -24,54 +24,51 @@ namespace XUnitTestHostelFinder.Controllers
         public async Task GetListUser_ReturnsOkResult_WhenUsersExist()
         {
             // Arrange
-            var mockResponse = new Response<List<UserDto>>
-            {
-                Data = new List<UserDto>
-        {
-            new UserDto { Username = "user1", Email = "user1@example.com", Phone = "123456789", IsActive = true },
-            new UserDto { Username = "user2", Email = "user2@example.com", Phone = "987654321", IsActive = true }
-        },
-                Succeeded = true
-            };
+            var mockUsers = new List<UserDto>
+    {
+        new UserDto { Id = Guid.NewGuid(), Username = "User1" },
+        new UserDto { Id = Guid.NewGuid(), Username = "User2" }
+    };
 
-            _userServiceMock
-                .Setup(service => service.GetAllUsersAsync())
-                .ReturnsAsync(mockResponse);
+            var response = new Response<List<UserDto>>(mockUsers);
+
+            _userServiceMock.Setup(service => service.GetAllUsersAsync())
+                .ReturnsAsync(response);
 
             // Act
             var result = await _controller.GetListUser();
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<Response<List<UserDto>>>(okResult.Value);
-            Assert.True(returnValue.Succeeded);
-            Assert.Equal(2, returnValue.Data.Count);
+            var responseData = Assert.IsType<Response<List<UserDto>>>(okResult.Value);
+            Assert.True(responseData.Succeeded);
+            Assert.Equal(2, responseData.Data.Count);
         }
+
 
         [Fact]
         public async Task GetListUser_ReturnsNotFound_WhenNoUsersExist()
         {
             // Arrange
-            var mockResponse = new Response<List<UserDto>>
+            var response = new Response<List<UserDto>>
             {
-                Data = null,
                 Succeeded = false,
-                Errors = new List<string> { "No users found" }
+                Errors = new List<string> { "No users found." }
             };
 
-            _userServiceMock
-                .Setup(service => service.GetAllUsersAsync())
-                .ReturnsAsync(mockResponse);
+            _userServiceMock.Setup(service => service.GetAllUsersAsync())
+                .ReturnsAsync(response);
 
             // Act
             var result = await _controller.GetListUser();
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var returnValue = Assert.IsType<Response<List<UserDto>>>(notFoundResult.Value);
-            Assert.False(returnValue.Succeeded);
-            Assert.Contains("No users found", returnValue.Errors);
+            var responseData = Assert.IsType<Response<List<UserDto>>>(notFoundResult.Value);
+            Assert.False(responseData.Succeeded);
+            Assert.Equal("No users found.", responseData.Message);
         }
+
 
         [Fact]
         public async Task GetUserById_ReturnsOkResult_WhenUserExists()
@@ -83,16 +80,16 @@ namespace XUnitTestHostelFinder.Controllers
                 Data = new UserProfileResponse
                 {
                     Id = userId,
-                    Username = "user1",
-                    Email = "user1@example.com",
-                    Phone = "123456789",
-                    AvatarUrl = "avatar.jpg"
+                    Username = "johndoe",
+                    FullName = "John Doe",
+                    Email = "johndoe@example.com",
+                    Phone = "1234567890",
+                    AvatarUrl = "https://example.com/avatar.jpg"
                 },
                 Succeeded = true
             };
 
-            _userServiceMock
-                .Setup(service => service.GetUserByIdAsync(userId))
+            _userServiceMock.Setup(service => service.GetUserByIdAsync(userId))
                 .ReturnsAsync(mockResponse);
 
             // Act
@@ -100,9 +97,26 @@ namespace XUnitTestHostelFinder.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<Response<UserProfileResponse>>(okResult.Value);
-            Assert.True(returnValue.Succeeded);
-            Assert.Equal("user1", returnValue.Data.Username);
+            var response = Assert.IsType<Response<UserProfileResponse>>(okResult.Value);
+            Assert.True(response.Succeeded);
+            Assert.NotNull(response.Data);
+            Assert.Equal(userId, response.Data.Id);
+        }
+
+        [Fact]
+        public async Task GetUserById_ReturnsBadRequest_WhenIdIsInvalid()
+        {
+            // Arrange
+            var invalidId = Guid.Empty;
+
+            // Act
+            var result = await _controller.GetUserById(invalidId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<Response<UserProfileResponse>>(badRequestResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Invalid user ID.", response.Message);
         }
 
         [Fact]
@@ -110,16 +124,44 @@ namespace XUnitTestHostelFinder.Controllers
         {
             // Arrange
             var userId = Guid.NewGuid();
-            _userServiceMock
-                .Setup(service => service.GetUserByIdAsync(userId))
-                .ReturnsAsync((Response<UserProfileResponse>)null); 
+            var mockResponse = new Response<UserProfileResponse>
+            {
+                Data = null,
+                Succeeded = false,
+                Errors = new List<string> { "User not found." }
+            };
+
+            _userServiceMock.Setup(service => service.GetUserByIdAsync(userId))
+                .ReturnsAsync(mockResponse);
 
             // Act
             var result = await _controller.GetUserById(userId);
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Null(notFoundResult.Value); 
+            var response = Assert.IsType<Response<UserProfileResponse>>(notFoundResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Contains("User not found.", response.Errors);
+        }
+
+        [Fact]
+        public async Task GetUserById_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+
+            _userServiceMock.Setup(service => service.GetUserByIdAsync(userId))
+                .ThrowsAsync(new Exception("Unexpected error"));
+
+            // Act
+            var result = await _controller.GetUserById(userId);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var response = Assert.IsType<Response<UserProfileResponse>>(objectResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Unexpected error", response.Message);
         }
 
         [Fact]
@@ -216,9 +258,30 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.True(returnValue.Data);
         }
 
+        [Fact]
+        public async Task UnActiveUser_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+
+            _userServiceMock.Setup(service => service.UnActiveUserAsync(userId))
+                .ThrowsAsync(new Exception("Unexpected error"));
+
+            // Act
+            var result = await _controller.UnActiveUser(userId);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+
+            var response = Assert.IsType<Response<bool>>(objectResult.Value); // Updated to Response<bool>
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Unexpected error", response.Message);
+            Assert.False(response.Data); // Validate that the Data property is false
+        }
 
         [Fact]
-        public async Task UnActiveUser_ReturnsNotFound_WhenDeactivationFails()
+        public async Task UnActiveUser_ReturnsNotFound_WhenUserDoesNotExist()
         {
             // Arrange
             var userId = Guid.NewGuid();
@@ -226,7 +289,7 @@ namespace XUnitTestHostelFinder.Controllers
             {
                 Data = false,
                 Succeeded = false,
-                Errors = new List<string> { "User deactivation failed" }
+                Message = "Người dùng không tồn tại."
             };
 
             _userServiceMock
@@ -237,27 +300,29 @@ namespace XUnitTestHostelFinder.Controllers
             var result = await _controller.UnActiveUser(userId);
 
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result); 
-            var returnValue = Assert.IsType<Response<bool>>(notFoundResult.Value); 
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            var returnValue = Assert.IsType<Response<bool>>(notFoundResult.Value);
             Assert.False(returnValue.Succeeded);
-            Assert.Contains("User deactivation failed", returnValue.Errors);
+            Assert.Equal("Người dùng không tồn tại.", returnValue.Message);
         }
 
         [Fact]
-        public async Task GetListUser_ReturnsInternalServerError_WhenExceptionThrown()
+        public async Task GetListUser_ReturnsInternalServerError_WhenExceptionIsThrown()
         {
             // Arrange
-            _userServiceMock
-                .Setup(service => service.GetAllUsersAsync())
-                .ThrowsAsync(new Exception("Something went wrong!"));
+            _userServiceMock.Setup(service => service.GetAllUsersAsync())
+                .ThrowsAsync(new Exception("Unexpected error"));
 
             // Act
             var result = await _controller.GetListUser();
 
             // Assert
-            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, internalServerErrorResult.StatusCode);
-            Assert.Equal("Something went wrong!", internalServerErrorResult.Value);
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+
+            var response = Assert.IsType<Response<List<UserDto>>>(objectResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Unexpected error", response.Message);
         }
 
         [Fact]
@@ -267,36 +332,41 @@ namespace XUnitTestHostelFinder.Controllers
             _controller.ModelState.AddModelError("Id", "Invalid user ID");
 
             // Act
-            var result = await _controller.GetUserById(Guid.Empty); // Simulate an invalid Guid
+            var result = await _controller.GetUserById(Guid.Empty); // Simulate invalid ID
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.IsType<SerializableError>(badRequestResult.Value);
+            var response = Assert.IsType<Response<UserProfileResponse>>(badRequestResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Invalid user ID.", response.Message);
         }
 
         [Fact]
-        public async Task UpdateUser_ReturnsInternalServerError_WhenExceptionThrown()
+        public async Task UpdateUser_ReturnsInternalServerError_WhenExceptionIsThrown()
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var updateUserDto = new UpdateUserRequestDto
+            var request = new UpdateUserRequestDto
             {
-                Username = "updatedUser",
-                Email = "updated@example.com",
-                Phone = "123456789"
+                Username = "usererror",
+                Email = "usererror@example.com",
+                Phone = "1122334455",
+                FullName = "User Error"
             };
 
-            //_userServiceMock
-            //    .Setup(service => service.UpdateUserAsync(userId, updateUserDto))
-            //    .ThrowsAsync(new Exception("Something went wrong!"));
+            _userServiceMock.Setup(service => service.UpdateUserAsync(userId, request, null))
+                .ThrowsAsync(new Exception("Unexpected error"));
 
-            //// Act
-            //var result = await _controller.UpdateUser(userId, updateUserDto);
+            // Act
+            var result = await _controller.UpdateUser(userId, request, null);
 
-            //// Assert
-            //var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
-            //Assert.Equal(500, internalServerErrorResult.StatusCode);
-            //Assert.Equal("Something went wrong!", internalServerErrorResult.Value);
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+
+            var response = Assert.IsType<Response<string>>(objectResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Unexpected error", response.Message);
         }
 
         [Fact]
@@ -310,7 +380,179 @@ namespace XUnitTestHostelFinder.Controllers
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.IsType<SerializableError>(badRequestResult.Value);
+            var responseData = Assert.IsType<Response<bool>>(badRequestResult.Value); // Expecting Response<bool>
+            Assert.False(responseData.Succeeded);
+            Assert.Equal("Invalid model state.", responseData.Message);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ReturnsBadRequest_WhenModelStateIsInvalid()
+        {
+            // Arrange
+            var invalidRequest = new UpdateUserRequestDto();
+            _controller.ModelState.AddModelError("Username", "The Username field is required.");
+
+            // Act
+            var result = await _controller.UpdateUser(Guid.NewGuid(), invalidRequest, null);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<Response<string>>(badRequestResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Invalid model state.", response.Message);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ReturnsNotFound_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var request = new UpdateUserRequestDto
+            {
+                Username = "newuser",
+                Email = "newemail@example.com",
+                Phone = "123456789",
+                FullName = "New User"
+            };
+
+            var response = new Response<UserDto>("Người dùng không tồn tại.")
+            {
+                Succeeded = false
+            };
+
+            _userServiceMock.Setup(service => service.UpdateUserAsync(userId, request, null))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.UpdateUser(userId, request, null);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            var returnValue = Assert.IsType<Response<string>>(notFoundResult.Value);
+            Assert.False(returnValue.Succeeded);
+            Assert.Equal("Người dùng không tồn tại.", returnValue.Message);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ReturnsOkResult_WhenUpdateIsSuccessful()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var request = new UpdateUserRequestDto
+            {
+                Username = "updateduser",
+                Email = "updatedemail@example.com",
+                Phone = "987654321",
+                FullName = "Updated User"
+            };
+
+            var response = new Response<UserDto>(new UserDto
+            {
+                Id = userId,
+                Username = "updateduser",
+                Email = "updatedemail@example.com",
+                Phone = "987654321",
+                FullName = "Updated User"
+            });
+
+            _userServiceMock.Setup(service => service.UpdateUserAsync(userId, request, null))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.UpdateUser(userId, request, null);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnValue = Assert.IsType<Response<UserDto>>(okResult.Value);
+            Assert.True(returnValue.Succeeded);
+            Assert.Equal("updateduser", returnValue.Data.Username);
+            Assert.Equal("updatedemail@example.com", returnValue.Data.Email);
+        }
+
+        [Fact]
+        public async Task GetUserByHostelId_ReturnsBadRequest_WhenHostelIdIsInvalid()
+        {
+            // Act
+            var result = await _controller.GetUserByHostelId(Guid.Empty);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<Response<UserProfileResponse>>(badRequestResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Invalid hostel ID.", response.Message);
+        }
+
+        [Fact]
+        public async Task GetUserByHostelId_ReturnsNotFound_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var hostelId = Guid.NewGuid();
+            var mockResponse = new Response<UserProfileResponse>
+            {
+                Succeeded = false,
+                Message = "User not found for the given hostel ID."
+            };
+
+            _userServiceMock.Setup(service => service.GetUserByHostelIdAsync(hostelId))
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller.GetUserByHostelId(hostelId);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            var response = Assert.IsType<Response<UserProfileResponse>>(notFoundResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("User not found for the given hostel ID.", response.Message);
+        }
+
+        [Fact]
+        public async Task GetUserByHostelId_ReturnsOkResult_WhenUserExists()
+        {
+            // Arrange
+            var hostelId = Guid.NewGuid();
+            var mockUser = new UserProfileResponse
+            {
+                Id = Guid.NewGuid(),
+                FullName = "John Doe",
+                Email = "johndoe@example.com",
+                Phone = "123456789",
+                AvatarUrl = "https://example.com/avatar.jpg"
+            };
+            var mockResponse = new Response<UserProfileResponse>(mockUser);
+
+            _userServiceMock.Setup(service => service.GetUserByHostelIdAsync(hostelId))
+                .ReturnsAsync(mockResponse);
+
+            // Act
+            var result = await _controller.GetUserByHostelId(hostelId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<Response<UserProfileResponse>>(okResult.Value);
+            Assert.True(response.Succeeded);
+            Assert.Equal(mockUser.FullName, response.Data.FullName);
+            Assert.Equal(mockUser.Email, response.Data.Email);
+        }
+
+        [Fact]
+        public async Task GetUserByHostelId_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var hostelId = Guid.NewGuid();
+
+            _userServiceMock.Setup(service => service.GetUserByHostelIdAsync(hostelId))
+                .ThrowsAsync(new Exception("Unexpected error"));
+
+            // Act
+            var result = await _controller.GetUserByHostelId(hostelId);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var response = Assert.IsType<Response<UserProfileResponse>>(objectResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Unexpected error", response.Message);
         }
 
     }

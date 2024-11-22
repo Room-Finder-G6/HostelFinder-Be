@@ -1,6 +1,9 @@
 ﻿using HostelFinder.Application.DTOs.Image.Requests;
+using HostelFinder.Application.DTOs.Users;
 using HostelFinder.Application.DTOs.Users.Requests;
+using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -25,33 +28,60 @@ namespace HostelFinder.WebApi.Controllers
                 var users = await _userService.GetAllUsersAsync();
                 if (!users.Succeeded)
                 {
-                    return NotFound(users);
+                    return NotFound(new Response<List<UserDto>>
+                    {
+                        Succeeded = false,
+                        Message = users.Errors?.FirstOrDefault() ?? "No users found.",
+                        Data = null
+                    });
                 }
+
                 return Ok(users);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Something went wrong!");
+                return StatusCode(500, new Response<List<UserDto>>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}",
+                    Data = null
+                });
             }
-
         }
 
         // PUT: api/User/UpdateUser/{userId}
         [HttpPut("UpdateUser/{userId}")]
         public async Task<IActionResult> UpdateUser(Guid userId, [FromForm] UpdateUserRequestDto request, [FromForm] UploadImageRequestDto? image)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Invalid model state."
+                });
+            }
+
             try
             {
                 var result = await _userService.UpdateUserAsync(userId, request, image);
                 if (!result.Succeeded)
                 {
-                    return NotFound(result);
+                    return NotFound(new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = result.Message
+                    });
                 }
                 return Ok(result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "Something went wrong!");
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
             }
 
         }
@@ -60,46 +90,109 @@ namespace HostelFinder.WebApi.Controllers
         [HttpPut("UnActiveUser/{userId}")]
         public async Task<IActionResult> UnActiveUser(Guid userId)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new Response<bool>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid model state."
+                    });
+                }
+
+                var result = await _userService.UnActiveUserAsync(userId);
+                if (!result.Succeeded)
+                {
+                    return NotFound(new Response<bool>
+                    {
+                        Succeeded = false,
+                        Message = result.Message,
+                        Data = false
+                    });
+                }
+
+                return Ok(result);
             }
-            var result = await _userService.UnActiveUserAsync(userId);
-            if (!result.Succeeded)
+            catch (Exception ex)
             {
-                return NotFound(result);
+                return StatusCode(500, new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}",
+                    Data = false
+                });
             }
-            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (id == Guid.Empty)
+                {
+                    return BadRequest(new Response<UserProfileResponse>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid user ID."
+                    });
+                }
+
+                var response = await _userService.GetUserByIdAsync(id);
+
+                if (!response.Succeeded || response.Data == null)
+                {
+                    return NotFound(response);
+                }
+
+                return Ok(response);
             }
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user == null)
+            catch (Exception ex)
             {
-                return NotFound(user);
+                return StatusCode(500, new Response<UserProfileResponse>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
             }
-            return Ok(user);
         }
         
         [HttpGet("GetUserByHostelId/{hostelId}")]
         public async Task<IActionResult> GetUserByHostelId(Guid hostelId)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (hostelId == Guid.Empty)
+                {
+                    return BadRequest(new Response<UserProfileResponse>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid hostel ID."
+                    });
+                }
+
+                var response = await _userService.GetUserByHostelIdAsync(hostelId);
+
+                if (!response.Succeeded || response.Data == null)
+                {
+                    return NotFound(new Response<UserProfileResponse>
+                    {
+                        Succeeded = false,
+                        Message = "User not found for the given hostel ID."
+                    });
+                }
+
+                return Ok(response);
             }
-            var user = await _userService.GetUserByHostelIdAsync(hostelId);
-            if (user == null)
+            catch (Exception ex)
             {
-                return NotFound(user);
+                return StatusCode(500, new Response<UserProfileResponse>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
             }
-            return Ok(user);
         }
     }
 }

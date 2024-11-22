@@ -11,7 +11,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<ServiceCostResponseDto>> CreateServiceCost(CreateServiceCostDto request);
         Task<Response<ServiceCostResponseDto>> UpdateAsync(Guid id, UpdateServiceCostDto serviceCostDto);
         Task<Response<bool>> DeleteAsync(Guid id);
-
         Task<Response<List<ServiceCostResponseDto>>> GetAllServiceCostByHostel(Guid hostelId);
     }
 }

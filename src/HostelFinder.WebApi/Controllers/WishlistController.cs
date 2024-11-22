@@ -1,5 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.Wishlist.Request;
+using HostelFinder.Application.DTOs.Wishlist.Response;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -20,44 +22,111 @@ namespace HostelFinder.WebApi.Controllers
         {
             try
             {
+                if (!ModelState.IsValid || request.PostId == Guid.Empty || request.UserId == Guid.Empty)
+                {
+                    return BadRequest(new Response<bool>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid Post ID or User ID."
+                    });
+                }
+
                 var result = await _wishlistService.AddPostToWishlistAsync(request);
 
                 if (!result.Succeeded)
                 {
-                    return BadRequest(new { Errors = result.Errors });
+                    return BadRequest(new Response<bool>
+                    {
+                        Succeeded = false,
+                        Errors = result.Errors
+                    });
                 }
 
                 return Ok(result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "Something went wrong!");
+                return StatusCode(500, new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
             }
         }
-
 
         // GET: api/Wishlist/GetWishlistByUserId/{userId}
         [HttpGet("GetWishlistByUserId/{userId}")]
         public async Task<IActionResult> GetWishlistByUserId(Guid userId)
         {
-            var result = await _wishlistService.GetWishlistByUserIdAsync(userId);
-            if (result.Succeeded)
+            try
             {
+                if (userId == Guid.Empty)
+                {
+                    return BadRequest(new Response<WishlistResponseDto>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid User ID."
+                    });
+                }
+
+                var result = await _wishlistService.GetWishlistByUserIdAsync(userId);
+                if (!result.Succeeded || result.Data == null)
+                {
+                    return NotFound(new Response<WishlistResponseDto>
+                    {
+                        Succeeded = false,
+                        Message = result.Message
+                    });
+                }
+
                 return Ok(result);
             }
-            return NotFound(result.Errors);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<WishlistResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
 
         // DELETE: api/Wishlist/DeleteRoomFromWishlist
         [HttpDelete("DeleteRoomFromWishlist")]
         public async Task<IActionResult> DeleteWishlist(Guid id)
         {
-            var result = await _wishlistService.DeleteRoomFromWishlistAsync(id);
-            if (result.Succeeded)
+            try
             {
+                if (id == Guid.Empty)
+                {
+                    return BadRequest(new Response<bool>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid ID."
+                    });
+                }
+
+                var result = await _wishlistService.DeleteRoomFromWishlistAsync(id);
+
+                if (!result.Succeeded)
+                {
+                    return NotFound(new Response<bool>
+                    {
+                        Succeeded = false,
+                        Message = result.Message
+                    });
+                }
+
                 return Ok(result);
             }
-            return BadRequest(result.Errors);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
     }
 }
