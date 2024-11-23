@@ -18,7 +18,8 @@ namespace HostelFinder.Application.Services
         private readonly IUserMembershipRepository _userMembershipRepository;
         private readonly IMapper _mapper;
 
-        public MembershipService(IMembershipRepository membershipRepository, IMapper mapper, IUserMembershipRepository userMembershipRepository, IUserRepository userRepository)
+        public MembershipService(IMembershipRepository membershipRepository, IMapper mapper,
+            IUserMembershipRepository userMembershipRepository, IUserRepository userRepository)
         {
             _membershipRepository = membershipRepository;
             _mapper = mapper;
@@ -58,12 +59,14 @@ namespace HostelFinder.Application.Services
 
             try
             {
-                var membershipServiceRequests = _mapper.Map<List<AddMembershipServiceReqDto>>(membershipDto.MembershipServices);
+                var membershipServiceRequests =
+                    _mapper.Map<List<AddMembershipServiceReqDto>>(membershipDto.MembershipServices);
 
                 await _membershipRepository.AddMembershipWithServicesAsync(membership, membershipServiceRequests);
 
                 var membershipResponseDto = _mapper.Map<MembershipResponseDto>(membership);
-                membershipResponseDto.MembershipServices = _mapper.Map<List<MembershipServiceResponseDto>>(membership.MembershipServices);
+                membershipResponseDto.MembershipServices =
+                    _mapper.Map<List<MembershipServiceResponseDto>>(membership.MembershipServices);
 
                 return new Response<MembershipResponseDto>
                 {
@@ -77,7 +80,8 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<MembershipResponseDto>> EditMembershipAsync(Guid id, UpdateMembershipRequestDto membershipDto)
+        public async Task<Response<MembershipResponseDto>> EditMembershipAsync(Guid id,
+            UpdateMembershipRequestDto membershipDto)
         {
             var membership = await _membershipRepository.GetMembershipWithServicesAsync(id);
             if (membership == null)
@@ -97,7 +101,7 @@ namespace HostelFinder.Application.Services
                 {
                     if (string.IsNullOrWhiteSpace(newServiceDto.ServiceName))
                     {
-                        continue; 
+                        continue;
                     }
 
                     var existingService = existingServices
@@ -119,7 +123,7 @@ namespace HostelFinder.Application.Services
                             CreatedBy = "System"
                         };
                         membership.MembershipServices.Add(newService);
-                        await _membershipRepository.Add(newService); 
+                        await _membershipRepository.Add(newService);
                     }
                 }
 
@@ -207,7 +211,8 @@ namespace HostelFinder.Application.Services
             {
                 // Find the membership service that supports push-to-top functionality
                 var membershipService = userMembership.Membership.MembershipServices
-                    .FirstOrDefault(ms => ms.MaxPushTopAllowed.HasValue && ms.MaxPushTopAllowed > userMembership.PushTopUsed);
+                    .FirstOrDefault(ms =>
+                        ms.MaxPushTopAllowed.HasValue && ms.MaxPushTopAllowed > userMembership.PushTopUsed);
 
                 if (membershipService != null && userMembership.PushTopUsed < membershipService.MaxPushTopAllowed)
                 {
@@ -226,7 +231,8 @@ namespace HostelFinder.Application.Services
                     return new Response<string>
                     {
                         Succeeded = false,
-                        Message = "You have reached the maximum number of push-to-top actions allowed for your membership."
+                        Message =
+                            "You have reached the maximum number of push-to-top actions allowed for your membership."
                     };
                 }
             }
@@ -276,5 +282,66 @@ namespace HostelFinder.Application.Services
             };
         }
 
+        /*public async Task<Response<List<PostingMemberShipServiceDto>>> GetMembershipServicesForUserAsync(Guid userId)
+        {
+            try
+            {
+                // Kiểm tra nếu userId là null hoặc không hợp lệ
+                if (userId == Guid.Empty)
+                {
+                    return new Response<List<PostingMemberShipServiceDto>>
+                    {
+                        Succeeded = false,
+                        Message = "Invalid User ID."
+                    };
+                }
+
+                // Lấy danh sách các Membership Services mà người dùng đã đăng ký
+                var membershipServices = await _membershipRepository.GetMembershipServicesForUserAsync(userId);
+
+                // Kiểm tra nếu không có MembershipServices cho người dùng
+                if (membershipServices == null || !membershipServices.Any())
+                {
+                    return new Response<List<PostingMemberShipServiceDto>>
+                    {
+                        Succeeded = false,
+                        Message = "No membership services found for this user."
+                    };
+                }
+
+                // Map từ Entity sang DTO
+                var mappedResult = _mapper.Map<List<PostingMemberShipServiceDto>>(membershipServices);
+
+                // Tính toán số bài đăng còn lại cho từng Membership Service
+                foreach (var result in mappedResult)
+                {
+                    var membershipService = membershipServices.FirstOrDefault(ms => ms.Id == result.Id);
+                    if (membershipService != null)
+                    {
+                        var postsByUser = membershipService.Posts.Count(p => p.CreatedBy == userId.ToString());
+
+                        result.NumberOfPostsRemaining = membershipService.MaxPostsAllowed.HasValue
+                            ? membershipService.MaxPostsAllowed.Value - postsByUser
+                            : 0;
+                    }
+                }
+
+                // Trả về danh sách DTO với dữ liệu đầy đủ
+                return new Response<List<PostingMemberShipServiceDto>>
+                {
+                    Succeeded = true,
+                    Data = mappedResult
+                };
+            }
+            catch (Exception ex)
+            {
+                // Ghi log hoặc xử lý lỗi chi tiết tại đây
+                return new Response<List<PostingMemberShipServiceDto>>
+                {
+                    Succeeded = false,
+                    Message = "Internal server error: " + ex.Message
+                };
+            }
+        }*/
     }
 }

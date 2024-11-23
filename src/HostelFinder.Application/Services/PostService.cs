@@ -180,7 +180,9 @@ public class PostService : IPostService
         }
 
         var post = _mapper.Map<Post>(request);
-
+        post.CreatedBy = userId.ToString();
+        post.CreatedOn = DateTime.Now;
+        
         try
         {
             using (var transaction = await _postRepository.BeginTransactionAsync())
