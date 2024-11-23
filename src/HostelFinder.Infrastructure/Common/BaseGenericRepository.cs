@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using RoomFinder.Domain.Common;
 using System.Linq.Expressions;
+using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Infrastructure.Common
 {

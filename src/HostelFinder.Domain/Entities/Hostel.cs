@@ -1,6 +1,7 @@
 ﻿using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {
@@ -11,10 +12,9 @@ namespace HostelFinder.Domain.Entities
         [Required]
         [MaxLength(50)]
         public string HostelName { get; set; } 
-        [MaxLength(255)]
+        [MaxLength(1000)]
         public string? Description { get; set; } 
         [Required]
-        [MaxLength(255)]
         public float? Size { get; set; }
         [Required]
         public int NumberOfRooms { get; set; }

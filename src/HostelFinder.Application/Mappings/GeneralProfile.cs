@@ -58,6 +58,8 @@ public class GeneralProfile : Profile
                 opt.MapFrom(src => src.Images.Any()
                     ? src.Images.First().Url
                     : null))
+            .ForMember(dest => dest.MemberShipName, opt =>
+                opt.MapFrom(src => src.MembershipServices.Membership.Name))
             .ReverseMap();
         
         CreateMap<UpdatePostRequestDto, Post>()
@@ -148,12 +150,14 @@ public class GeneralProfile : Profile
         CreateMap<AddMembershipRequestDto, Membership>().ReverseMap()
             .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices));
         CreateMap<UpdateMembershipRequestDto, Membership>().ReverseMap();
+        
         // MembershipServices mappings
         CreateMap<MembershipServices, MembershipServiceResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
             .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
             .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))
             .ReverseMap();
+
         CreateMap<AddMembershipServiceReqDto, MembershipServices>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
             .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
@@ -161,6 +165,12 @@ public class GeneralProfile : Profile
             .ReverseMap();
         CreateMap<MembershipServiceResponseDto, AddMembershipServiceReqDto>().ReverseMap();
 
+        CreateMap<MembershipServices, PostingMemberShipServiceDto>()
+            .ForMember(dest => dest.TypeOfPost, opt
+                => opt.MapFrom(src => src.Membership.Tag))
+            .ForMember(dest => dest.NumberOfPostsRemaining, opt
+                => opt.Ignore());
+        
         //Image
         CreateMap<Image, ImageResponseDto>().ReverseMap();
 

@@ -24,6 +24,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 return NotFound(response.Errors);
             }
+
             return Ok(response);
         }
 
@@ -148,7 +149,36 @@ namespace HostelFinder.WebApi.Controllers
             }
         }
 
-        //[HttpGet("GetMembershipByUserId")]
-        //public async 
+        /*[HttpGet("MembershipServices/{userId}")]
+        public async Task<IActionResult> GetMembershipServicesForUser(Guid userId)
+        {
+            if (userId == Guid.Empty)
+            {
+                return BadRequest(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Invalid user ID."
+                });
+            }
+
+            try
+            {
+                var response = await _membershipService.GetMembershipServicesForUserAsync(userId);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+
+                return NotFound(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }*/
     }
 }
