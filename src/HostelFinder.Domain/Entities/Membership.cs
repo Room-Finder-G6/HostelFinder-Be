@@ -1,4 +1,5 @@
-﻿using RoomFinder.Domain.Common;
+﻿using System.ComponentModel.DataAnnotations;
+using RoomFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {
@@ -7,6 +8,8 @@ namespace HostelFinder.Domain.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
+        [MaxLength(50)]
+        public string? Tag { get; set; }
         public int Duration { get; set; }
         public virtual ICollection<MembershipServices> MembershipServices { get; set; }
         public virtual ICollection<UserMembership> UserMemberships { get; set; }

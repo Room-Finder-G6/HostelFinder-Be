@@ -70,7 +70,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .ThenInclude(h => h.Address)
             .Include(x => x.Room)
             .Include(x => x.Images)
-            .Where(x => x.Hostel.LandlordId == userId) 
+            .Where(x => x.Hostel.LandlordId == userId)
             .AsNoTracking() // Tăng hiệu suất cho truy vấn chỉ đọc
             .ToListAsync();
         return posts;
@@ -82,12 +82,16 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         return await _dbContext.Database.BeginTransactionAsync();
     }
 
-    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, decimal? minSize, decimal? maxSize, decimal? minPrice, decimal? maxPrice, RoomType? roomType)
+    public async Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune,
+        decimal? minSize, decimal? maxSize, decimal? minPrice, decimal? maxPrice, RoomType? roomType)
     {
         var query = _dbContext.Posts
             .Include(p => p.Hostel)
             .ThenInclude(h => h.Address)
             .Include(p => p.Room)
+            .Include(p => p.Images)
+            .Include(p => p.MembershipServices)
+            .ThenInclude(p => p.Membership)
             .AsQueryable();
 
         if (!string.IsNullOrEmpty(province))
@@ -121,7 +125,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
         return await _dbContext.Posts
             .Include(x => x.Hostel)
-            .ThenInclude(x=>x.Address)
+            .ThenInclude(x => x.Address)
             .Include(x => x.Images)
             .Include(p => p.MembershipServices)
             .ThenInclude(ms => ms.Membership)
