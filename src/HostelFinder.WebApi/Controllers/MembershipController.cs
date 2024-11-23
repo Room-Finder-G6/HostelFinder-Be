@@ -148,5 +148,7 @@ namespace HostelFinder.WebApi.Controllers
             }
         }
 
+        //[HttpGet("GetMembershipByUserId")]
+        //public async 
     }
 }

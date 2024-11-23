@@ -180,6 +180,8 @@ public class PostService : IPostService
         }
 
         var post = _mapper.Map<Post>(request);
+        post.CreatedOn = DateTime.Now;
+        post.CreatedBy = userId.ToString();
 
         try
         {
