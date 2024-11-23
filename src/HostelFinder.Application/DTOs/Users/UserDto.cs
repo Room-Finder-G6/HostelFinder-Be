@@ -6,9 +6,11 @@ namespace HostelFinder.Application.DTOs.Users
 {
     public class UserDto
     {
+        public Guid Id { get; set; }
         [Required]
         [MaxLength(100)]
         public string Username { get; set; }
+        public string FullName { get; set; }
         [Required]
         [MaxLength(256)]
         public string Password { get; set; }

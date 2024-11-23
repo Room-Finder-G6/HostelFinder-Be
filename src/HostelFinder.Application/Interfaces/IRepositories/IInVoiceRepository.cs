@@ -7,5 +7,7 @@ namespace HostelFinder.Application.Interfaces.IRepositories
     public interface IInVoiceRepository : IBaseGenericRepository<Invoice>
     {
         Task<IDbContextTransaction> BeginTransactionAsync();
+
+        
     }
 }

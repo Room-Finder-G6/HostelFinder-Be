@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Wordprocessing;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -17,19 +16,28 @@ namespace HostelFinder.Application.Services
         private readonly IS3Service _s3Service;
         private readonly IMapper _mapper;
         private readonly IImageRepository _imageRepository;
+        private readonly ITenantService _tenantService;
+        private readonly IRoomTenancyRepository _roomTenancyRepository;
         public RoomService(IRoomRepository roomRepository, 
             IMapper mapper, 
             IRoomAmentityRepository roomAmentityRepository
             , IS3Service s3Service,
-            IImageRepository imageRepository)
+            IImageRepository imageRepository,
+            ITenantService tenantService,
+            IRoomTenancyRepository roomTenancyRepository)
         {
             _roomRepository = roomRepository;
             _mapper = mapper;
             _roomAmentityRepository = roomAmentityRepository;
             _s3Service = s3Service;
             _imageRepository = imageRepository;
+            _tenantService = tenantService;
+            _roomTenancyRepository = roomTenancyRepository;
         }
-
+        /// <summary>
+        /// Lấy ra tất cả các phòng
+        /// </summary>
+        /// <returns></returns>
         public async Task<Response<List<RoomResponseDto>>> GetAllAsync()
         {
             var rooms = await _roomRepository.ListAllWithDetailsAsync();
@@ -37,6 +45,11 @@ namespace HostelFinder.Application.Services
             return new Response<List<RoomResponseDto>>(result);
         }
 
+        /// <summary>
+        /// Lấy phòng theo id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<Response<RoomResponseDto>> GetByIdAsync(Guid id)
         {
             var room = await _roomRepository.GetRoomByIdAsync(id);
@@ -46,7 +59,12 @@ namespace HostelFinder.Application.Services
             var result = _mapper.Map<RoomResponseDto>(room);
             return new Response<RoomResponseDto>(result);
         }
-
+        /// <summary>
+        /// Tạo phòng theo từng trọ, chung cư
+        /// </summary>
+        /// <param name="roomDto"></param>
+        /// <param name="roomImages"></param>
+        /// <returns></returns>
         public async Task<Response<RoomResponseDto>> CreateRoomAsync(AddRoomRequestDto roomDto, List<IFormFile> roomImages)
         {
             bool roomExists = await _roomRepository.RoomExistsAsync(roomDto.RoomName, roomDto.HostelId);
@@ -115,7 +133,12 @@ namespace HostelFinder.Application.Services
                  Message = "Thêm phòng trọ thành công"
             };
         }
-
+        /// <summary>
+        /// Update phòng trọ theo từng tró
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="roomDto"></param>
+        /// <returns></returns>
         public async Task<Response<RoomResponseDto>> UpdateAsync(Guid id, UpdateRoomRequestDto roomDto)
         {
             var room = await _roomRepository.GetRoomWithDetailsAndServiceCostsByIdAsync(id);
@@ -162,6 +185,11 @@ namespace HostelFinder.Application.Services
             return new Response<RoomResponseDto>(result, "Room updated successfully.");
         }
 
+        /// <summary>
+        /// Xóa phòng
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<Response<bool>> DeleteAsync(Guid id)
         {
             var room = await _roomRepository.GetByIdAsync(id);
@@ -171,7 +199,12 @@ namespace HostelFinder.Application.Services
             await _roomRepository.DeletePermanentAsync(id);
             return new Response<bool>(true, "Room deleted successfully.");
         }
-
+        /// <summary>
+        /// Lấy phòng theo id của trọ, theo tầng
+        /// </summary>
+        /// <param name="hostelId"></param>
+        /// <param name="floor"></param>
+        /// <returns></returns>
         public async Task<Response<List<RoomResponseDto>>> GetRoomsByHostelIdAsync(Guid hostelId, int? floor)
         {
             var rooms = await _roomRepository.GetRoomsByHostelIdAsync(hostelId, floor);
@@ -194,6 +227,42 @@ namespace HostelFinder.Application.Services
         public Task<Response<List<RoomServiceDto>>> GetServicesByRoom(Guid roomId)
         {
             throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Lấy ra tất cả thông tin phòng trọ bao gồm thông tin phòng, thông tin người thuê, lịch sử hóa đơn, dịch vụ phòng đang sử dụng
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        public async Task<Response<GetAllInformationRoomResponseDto>> GetInformationDetailRoom(Guid roomId)
+        {
+            try
+            {
+                GetAllInformationRoomResponseDto getAllInformationRoomResponseDto = new GetAllInformationRoomResponseDto();
+                //Lấy ra thông tin phòng chi tiết của phòng đó
+                var roomDomain = await _roomRepository.GetByIdAsync(roomId);
+
+                //map vào dto thông tin cần thiết
+                var roomInfoDetailDto = _mapper.Map<RoomInfoDetailResponseDto>(roomDomain);
+
+                roomInfoDetailDto.NumberOfCustomer = await _roomTenancyRepository.CountCurrentTenantsAsync(roomId);
+
+                // thêm vào list 
+                getAllInformationRoomResponseDto.RoomInfoDetail = roomInfoDetailDto;
+
+                // lấy ra thông tin những người đang thuê ở trọ
+                var roomTenacyList = await _tenantService.GetInformationTenacyAsync(roomId);
+                
+                getAllInformationRoomResponseDto.InfomationTenacy = roomTenacyList;
+
+                //lấy ra thông tin ảnh của phòng 
+                getAllInformationRoomResponseDto.PictureRoom = await _imageRepository.GetAllUrlRoomPicture(roomId);
+
+                return new Response<GetAllInformationRoomResponseDto> { Data = getAllInformationRoomResponseDto, Succeeded = true};
+            }
+            catch (Exception ex)
+            {
+                return new Response<GetAllInformationRoomResponseDto> { Succeeded = false, Message = ex.Message };   
+            }
         }
     }
 }

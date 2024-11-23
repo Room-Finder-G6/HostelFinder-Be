@@ -133,4 +133,19 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .ThenByDescending(p => p.CreatedOn)
             .ToListAsync();
     }
+
+    public async Task<List<Post>> GetAllPostsOrderedAsync()
+    {
+        return await _dbContext.Posts
+            .Include(p => p.Hostel)
+            .ThenInclude(h => h.Address)
+            .Include(p => p.Images)
+            .Include(p => p.MembershipServices)
+            .ThenInclude(ms => ms.Membership)
+            .OrderByDescending(p => p.MembershipServices.Membership.Price)
+            .ThenByDescending(p => p.Status) 
+            .ThenByDescending(p => p.CreatedOn) 
+            .ToListAsync();
+    }
+
 }

@@ -126,14 +126,14 @@ namespace HostelFinder.Application.Services
             Expression<Func<ServiceCost, bool>> filter = sr => sr.HostelId == hostelId;
 
             var servicerCosts = await _serviceCostRepository.GetAllServiceCostListWithConditionAsync(filter);
-
+       
             if (servicerCosts == null || !servicerCosts.Any())
             {
                 return new Response<List<ServiceCostResponseDto>>
                 {
-                    Succeeded = true,
+                    Succeeded = false,
                     Message = "Không tìm thấy giá của dịch vụ trong nhà trọ",
-                    Data = new List<ServiceCostResponseDto>()
+                    Data = null
                 };
             }
 

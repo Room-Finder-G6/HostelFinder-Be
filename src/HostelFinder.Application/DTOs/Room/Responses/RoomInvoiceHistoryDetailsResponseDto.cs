@@ -1,14 +1,10 @@
-﻿using HostelFinder.Domain.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using HostelFinder.Application.DTOs.Invoice.Responses;
+﻿using HostelFinder.Application.DTOs.Invoice.Responses;
 
-namespace HostelFinder.Application.DTOs.InVoice.Responses
+namespace HostelFinder.Application.DTOs.Room.Responses
 {
-    public class InvoiceResponseDto
+    public class RoomInvoiceHistoryDetailsResponseDto
     {
         public Guid Id { get; set; }
-        public string RoomName { get; set; }
 
         public int BillingMonth { get; set; }
 

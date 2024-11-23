@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HostelFinder.Application.DTOs.RentalContract.Request;
 using HostelFinder.Application.DTOs.RentalContract.Response;
+using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -13,14 +14,17 @@ namespace HostelFinder.Application.Services
         private readonly ITenantRepository _tenantRepository;
         private readonly IMapper _mapper;
         private readonly IS3Service _s3Service;
+        private readonly IRoomTenancyRepository _roomTenancyRepository;
 
         public TenantService(ITenantRepository tenantRepository,
             IMapper mapper,
-            IS3Service s3Service)
+            IS3Service s3Service,
+            IRoomTenancyRepository roomTenancyRepository)
         {
             _tenantRepository = tenantRepository;
             _mapper = mapper;
             _s3Service = s3Service;
+            _roomTenancyRepository = roomTenancyRepository;
         }
 
         public async Task<TenantResponse> AddTenentServiceAsync(AddTenantDto request)
@@ -55,6 +59,22 @@ namespace HostelFinder.Application.Services
             catch (Exception ex)
             {
                throw new Exception("Lỗi khi tạo khách thuê phòng", ex);
+            }
+        }
+        //lấy ra thông tin người thuê phòng tại phòng nào đó
+        public async Task<List<InformationTenacyReponseDto>> GetInformationTenacyAsync(Guid roomId)
+        {
+            try
+            {
+                var roomTenacy = await _roomTenancyRepository.GetRoomTenacyByIdAsync(roomId);
+
+                //map to response 
+                var informationTenacyRoomListDto = _mapper.Map<List<InformationTenacyReponseDto>>(roomTenacy);
+                return informationTenacyRoomListDto;
+            }
+            catch(Exception ex) 
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

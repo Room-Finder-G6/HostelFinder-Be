@@ -143,12 +143,12 @@ namespace HostelFinder.Application.Services
             };
         }
 
-        public async Task<Response<string>> DeleteMembershipAsync(Guid id)
+        public async Task<Response<bool>> DeleteMembershipAsync(Guid id)
         {
             var membership = await _membershipRepository.GetByIdAsync(id);
             if (membership == null)
             {
-                return new Response<string>("Membership not found.");
+                return new Response<bool>(false, "Membership not found.");
             }
 
             var membershipServices = await _membershipRepository.GetMembershipServicesByMembershipIdAsync(id);
@@ -161,9 +161,8 @@ namespace HostelFinder.Application.Services
             }
 
             await _membershipRepository.DeletePermanentAsync(membership.Id);
-            return new Response<string> { Data = "Gói thành viên đã xóa thành công!" };
+            return new Response<bool>(true, "Membership deleted successfully.");
         }
-
 
         public async Task<Response<string>> UpdatePostCountAsync(Guid userId)
         {

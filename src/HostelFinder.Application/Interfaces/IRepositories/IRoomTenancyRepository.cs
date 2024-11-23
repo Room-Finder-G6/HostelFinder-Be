@@ -6,5 +6,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
     public interface IRoomTenancyRepository : IBaseGenericRepository<RoomTenancy>
     {
         Task<int> CountCurrentTenantsAsync(Guid roomId);
+        Task<List<RoomTenancy>> GetRoomTenacyByIdAsync(Guid roomId);
     }
 }
