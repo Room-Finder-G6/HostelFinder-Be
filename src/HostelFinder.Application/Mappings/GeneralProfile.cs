@@ -169,6 +169,8 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.TypeOfPost, opt
                 => opt.MapFrom(src => src.Membership.Tag))
             .ForMember(dest => dest.NumberOfPostsRemaining, opt
+                => opt.Ignore())
+            .ForMember(dest => dest.NumberOfPushTopRemaining, opt
                 => opt.Ignore());
         
         //Image
