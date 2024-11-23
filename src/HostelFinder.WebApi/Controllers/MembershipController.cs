@@ -149,7 +149,7 @@ namespace HostelFinder.WebApi.Controllers
             }
         }
 
-        [HttpGet("MembershipService/{userId}")]
+        /*[HttpGet("MembershipServices/{userId}")]
         public async Task<IActionResult> GetMembershipServicesForUser(Guid userId)
         {
             if (userId == Guid.Empty)
@@ -179,6 +179,6 @@ namespace HostelFinder.WebApi.Controllers
                     Message = $"Internal server error: {ex.Message}"
                 });
             }
-        }
+        }*/
     }
 }
