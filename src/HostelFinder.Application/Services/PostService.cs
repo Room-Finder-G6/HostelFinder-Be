@@ -185,7 +185,10 @@ public class PostService : IPostService
         {
             using (var transaction = await _postRepository.BeginTransactionAsync())
             {
-                await _postRepository.AddAsync(post);
+                await _postRepository.AddAsync(new Post
+                {
+                    CreatedBy = userId.ToString(),
+                });
 
                 foreach (var imageUrl in imageUrls)
                 {

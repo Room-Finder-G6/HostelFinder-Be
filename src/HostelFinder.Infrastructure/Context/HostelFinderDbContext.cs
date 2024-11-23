@@ -20,7 +20,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Wishlist> Wishlists { get; set; }
     public DbSet<WishlistPost> WishlistPosts { get; set; }
     public DbSet<Membership> Memberships { get; set; }
-    public DbSet<MembershipServices> MembershipServices { get; set; }
+    public DbSet<MembershipServices?> MembershipServices { get; set; }
     public DbSet<UserMembership> UserMemberships { get; set; }
     public DbSet<Invoice> InVoices { get; set; }
     public DbSet<Room> Rooms { get; set; }

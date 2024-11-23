@@ -1,6 +1,8 @@
 ﻿using HostelFinder.Application.DTOs.Membership.Requests;
 using HostelFinder.Application.DTOs.Membership.Responses;
+using HostelFinder.Application.DTOs.MembershipService.Responses;
 using HostelFinder.Application.Wrappers;
+using Task = DocumentFormat.OpenXml.Office2021.DocumentTasks.Task;
 
 namespace HostelFinder.Application.Interfaces.IServices
 {
@@ -13,5 +15,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<string>> UpdatePostCountAsync(Guid userId);
         Task<Response<string>> UpdatePushTopCountAsync(Guid userId);
         Task<Response<string>> AddUserMembershipAsync(AddUserMembershipRequestDto userMembershipDto);
+        Task<Response<List<PostingMemberShipServiceDto>>> GetMembershipServicesForUserAsync(Guid userId);
     }
 }

@@ -276,5 +276,29 @@ namespace HostelFinder.Application.Services
             };
         }
 
+        public async Task<Response<List<PostingMemberShipServiceDto>>> GetMembershipServicesForUserAsync(Guid userId)
+        {
+            var membershipServices = await _membershipRepository.GetAllMembershipServices();
+            var mappedResult = _mapper.Map<List<PostingMemberShipServiceDto>>(membershipServices);
+            
+            foreach (var result in mappedResult)
+            {
+                var membershipService = membershipServices.First(ms => ms.Id == result.Id);
+                if (membershipService != null)
+                {
+                    var postsByUser = membershipService.Posts.Count(p => p.CreatedBy == userId.ToString());
+
+                    result.NumberOfPostsRemaining = membershipService.MaxPostsAllowed.HasValue
+                        ? membershipService.MaxPostsAllowed.Value - postsByUser
+                        : 0;
+                }
+            }
+
+            return new Response<List<PostingMemberShipServiceDto>>
+            {
+                Succeeded = true,
+                Data = mappedResult
+            };
+        }
     }
 }

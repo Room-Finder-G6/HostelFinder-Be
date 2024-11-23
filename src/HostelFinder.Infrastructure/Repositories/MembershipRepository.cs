@@ -68,10 +68,26 @@ namespace HostelFinder.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<MembershipServices>> GetMembershipServicesByMembershipIdAsync(Guid membershipId)
+        public async Task<List<MembershipServices?>> GetMembershipServicesByMembershipIdAsync(Guid membershipId)
         {
             return await _dbContext.MembershipServices
                 .Where(ms => ms.MembershipId == membershipId)
+                .ToListAsync();
+        }
+
+        public async Task<MembershipServices?> GetMembershipServiceWithPostsAsync(Guid membershipServiceId)
+        {
+            return await _dbContext.MembershipServices
+                .Include(ms => ms.Posts)
+                .FirstOrDefaultAsync(ms => ms.Id == membershipServiceId);
+        }
+
+        public async Task<List<MembershipServices?>> GetAllMembershipServices()
+        {
+            return await _dbContext.MembershipServices
+                .Where(ms => ms.MaxPostsAllowed != null || ms.MaxPushTopAllowed != null)
+                .Include(ms => ms.Membership)
+                .Include(ms => ms.Posts)
                 .ToListAsync();
         }
     }

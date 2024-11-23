@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RoomFinder.Domain.Common
+namespace HostelFinder.Domain.Common
 {
     public class BaseEntity
     {
         [Key]
-        public virtual Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         public string? CreatedBy { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
