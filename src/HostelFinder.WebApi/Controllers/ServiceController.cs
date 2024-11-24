@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.Service.Request;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -18,8 +19,29 @@ namespace HostelFinder.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllServices()
         {
-            var services = await _serviceService.GetAllServicesAsync();
-            return Ok(services);
+            try
+            {
+                var services = await _serviceService.GetAllServicesAsync();
+
+                if (services.Data == null || !services.Data.Any())
+                {
+                    return NotFound(new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "No services available."
+                    });
+                }
+
+                return Ok(services);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
 
         [HttpGet("GetServiceById/{id}")]

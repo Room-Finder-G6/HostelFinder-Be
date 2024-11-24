@@ -47,7 +47,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<Membership> GetMembershipWithServicesAsync(Guid id)
         {
             var membership = await _dbContext.Memberships
-                .Include(m => m.MembershipServices) 
+                .Include(m => m.MembershipServices)
                 .FirstOrDefaultAsync(m => m.Id == id);
             return membership;
         }
@@ -75,20 +75,23 @@ namespace HostelFinder.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        /*public async Task<List<MembershipServices?>> GetMembershipServicesForUserAsync(Guid userId)
+        public async Task<List<UserMembership>> GetUserMembershipsAsync(Guid userId)
         {
-            // Lấy danh sách MembershipServices mà người dùng đã đăng ký
-            var userMemberships = await _dbContext.UserMemberships
-                .Where(um => um.UserId == userId)
+            return await _dbContext.UserMemberships
                 .Include(um => um.Membership)
-                .ThenInclude(m => m.MembershipServices.Where(x => x.MaxPostsAllowed != null))  
+                .ThenInclude(m => m.MembershipServices)
+                .Where(um => um.UserId == userId)
                 .ToListAsync();
+        }
 
-            var membershipServices = userMemberships
+        public async Task<List<MembershipServices>> GetMembershipServicesByUserAsync(Guid userId)
+        {
+            var userMemberships = await GetUserMembershipsAsync(userId);
+
+            return userMemberships
                 .SelectMany(um => um.Membership.MembershipServices)
+                .Where(ms => ms.MaxPostsAllowed > 0)
                 .ToList();
-
-            return membershipServices;
-        }*/
+        }
     }
 }
