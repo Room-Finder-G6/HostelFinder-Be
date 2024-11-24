@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using HostelFinder.Application.DTOs.RentalContract.Request;
+using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -34,17 +36,28 @@ namespace HostelFinder.Application.Services
         {
             try
             {
-                var tenantCreated = await _tenantService.AddTenentServiceAsync(request.AddTenantDto);
-
-                var room = await _roomRepository.GetRoomByIdAsync(request.RoomId);
+                // kiểm tra xem hợp đồng đã hết hạn chưa ?
+                var checkExpiredContract = await _rentalContractRepository.CheckExpiredContractAsync(request.RoomId, request.StartDate, request.EndDate);
+                // Nếu khác null là thì không nằm trong thời gian hợp đồng
+                if (checkExpiredContract != null)
+                {
+                    return new Response<string> { Succeeded = false, Message = $"Hiện tại đã có hợp đồng tồn tại trong khoảng thời gian {checkExpiredContract.StartDate} - {checkExpiredContract.EndDate}." +
+                        $" Hoặc bạn có thể cập nhập lại thời hạn hợp đồng " };
+                }
 
                 // Kiểm tra số người thuê trọ hiện tại trong phòng
-
+                var room = await _roomRepository.GetRoomByIdAsync(request.RoomId);
                 var currentTenantsCount = await _roomTenancyRepository.CountCurrentTenantsAsync(room.Id);
                 if (currentTenantsCount >= room.MaxRenters)
                 {
-                    throw new Exception("Phòng đã đạt số lượng người thuê tối đa");
+                    //throw new Exception("Phòng đã đạt số lượng người thuê tối đa");
+                    return new Response<string> { Succeeded = false, Message = "Phòng hiện tại đã đạt tối đa số lượng người thuê" };
                 }
+
+              
+
+                // tạo người thuê phòng
+                var tenantCreated = await _tenantService.AddTenentServiceAsync(request.AddTenantDto);
 
                 // tạo hợp đồng
                 var rentalContract = new RentalContract
@@ -95,6 +108,25 @@ namespace HostelFinder.Application.Services
             catch (Exception ex)
             {
                 return new Response<string> { Succeeded = false, Errors = new List<string> { ex.Message}, Message = "Lỗi xảy ra khi tạo hợp đồng" };
+            }
+        }
+
+        public async Task<RoomContractHistoryResponseDto> GetRoomContractHistoryLasest(Guid roomId)
+        {
+            try
+            {
+                // lấy ra thông tin của hợp đồng theo room
+                var getRoomContract = await _rentalContractRepository.GetRoomRentalContrctByRoom(roomId);
+                if(getRoomContract == null)
+                {
+                    return null;
+                } 
+                var roomrentalContractResponseDto = _mapper.Map<RoomContractHistoryResponseDto>(getRoomContract);
+                return roomrentalContractResponseDto;
+                    
+            }catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

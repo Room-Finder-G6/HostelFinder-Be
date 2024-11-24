@@ -18,8 +18,12 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> CreateRentalContract([FromForm] AddRentalContractDto request) { 
             try
             {
-                var contract = await _rentalContractService.CreateRentalContractAsync(request);
-                return Ok(contract);
+                var response = await _rentalContractService.CreateRentalContractAsync(request);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(response);
+                }
+                return Ok(response);
             }
             catch (Exception ex)
             {

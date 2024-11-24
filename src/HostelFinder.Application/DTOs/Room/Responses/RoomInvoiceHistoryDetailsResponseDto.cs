@@ -14,6 +14,6 @@ namespace HostelFinder.Application.DTOs.Room.Responses
 
         public bool IsPaid { get; set; } = false;
 
-        public virtual ICollection<InvoiceDetailResponseDto> InvoiceDetails { get; set; } = new List<InvoiceDetailResponseDto>();
+        public virtual ICollection<InvoiceDetailResponseDto?>? InvoiceDetails { get; set; }
     }
 }

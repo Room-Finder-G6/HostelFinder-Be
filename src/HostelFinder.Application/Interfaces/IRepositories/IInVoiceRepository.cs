@@ -8,6 +8,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
     {
         Task<IDbContextTransaction> BeginTransactionAsync();
 
-        
+        Task<Invoice?> GetLastInvoiceByIdAsync(Guid roomId);
     }
 }

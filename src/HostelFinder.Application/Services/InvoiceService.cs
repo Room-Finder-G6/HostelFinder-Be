@@ -215,13 +215,40 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<RoomInvoiceHistoryDetailsResponseDto> GetInvoiceDetailInRoomLastestAsyc(Guid roomId)
+        public async Task<RoomInvoiceHistoryDetailsResponseDto?> GetInvoiceDetailInRoomLastestAsyc(Guid roomId)
         {
             try
             {
                 // lấy ra hóa đơn cuối cùng
-                //var invoice = await _invoiceRepository.GetByIdAsync(roomId);
-                throw new NotImplementedException();
+                var invoice = await _invoiceRepository.GetLastInvoiceByIdAsync(roomId);
+                if (invoice == null)
+                {
+                    return null;
+                }
+
+                RoomInvoiceHistoryDetailsResponseDto invoiceResponseDto = new RoomInvoiceHistoryDetailsResponseDto
+                {
+                    Id = invoice.Id,
+                    TotalAmount = invoice.TotalAmount,
+                    BillingMonth = invoice.BillingMonth,
+                    BillingYear = invoice.BillingYear,
+                    IsPaid = invoice.IsPaid,
+                    InvoiceDetails = invoice.InvoiceDetails.Select(details => new InvoiceDetailResponseDto
+                    {
+                        ActualCost = details.ActualCost,
+                        BillingDate = details.BillingDate,
+                        CurrentReading = details.CurrentReading,
+                        PreviousReading = details.PreviousReading,
+                        InvoiceId = details.InvoiceId,
+                        NumberOfCustomer = details.NumberOfCustomer,
+                        ServiceName = details.Service?.ServiceName ?? (details.IsRentRoom ? "Tiền thuê phòng" : "Không xác định"),
+                        UnitCost = details.UnitCost,
+                    }).ToList()
+                };
+                
+
+                return invoiceResponseDto;
+
             }
             catch (Exception ex)
             {

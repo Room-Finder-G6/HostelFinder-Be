@@ -30,6 +30,7 @@ using HostelFinder.Application.DTOs.RoomTenancies.Request;
 using HostelFinder.Application.DTOs.Vehicle.Request;
 using HostelFinder.Application.DTOs.RentalContract.Request;
 using HostelFinder.Application.DTOs.RentalContract.Response;
+using HostelFinder.Application.DTOs.Invoice.Responses;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -219,5 +220,9 @@ public class GeneralProfile : Profile
 
         // Rental Contract
         CreateMap<AddRentalContractDto, RentalContract>().ReverseMap();
+        CreateMap<RoomContractHistoryResponseDto, RentalContract>().ReverseMap();
+
+        //Invoice Detail
+        CreateMap<InvoiceDetailResponseDto, InvoiceDetail>().ReverseMap();
     }
 }
