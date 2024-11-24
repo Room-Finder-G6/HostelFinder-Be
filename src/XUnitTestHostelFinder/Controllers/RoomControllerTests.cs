@@ -14,11 +14,13 @@ namespace XUnitTestHostelFinder.Controllers
     {
         private readonly Mock<IRoomService> _roomServiceMock;
         private readonly RoomController _controller;
+        private readonly Mock<ITenantService> _tenantServiceMock;
 
         public RoomControllerTests()
         {
             _roomServiceMock = new Mock<IRoomService>();
-            _controller = new RoomController(_roomServiceMock.Object);
+            _controller = new RoomController(_roomServiceMock.Object, _tenantServiceMock.Object);
+
         }
 
         [Fact]
