@@ -19,8 +19,8 @@ namespace XUnitTestHostelFinder.Controllers
         public RoomControllerTests()
         {
             _roomServiceMock = new Mock<IRoomService>();
-            _tenantServiceMock = new Mock<ITenantService>();
             _controller = new RoomController(_roomServiceMock.Object, _tenantServiceMock.Object);
+
         }
 
         [Fact]

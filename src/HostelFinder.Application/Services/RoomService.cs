@@ -18,13 +18,17 @@ namespace HostelFinder.Application.Services
         private readonly IImageRepository _imageRepository;
         private readonly ITenantService _tenantService;
         private readonly IRoomTenancyRepository _roomTenancyRepository;
+        private readonly IInvoiceService _invoiceService;
+        private readonly IRentalContractService _rentalContractService;
         public RoomService(IRoomRepository roomRepository, 
             IMapper mapper, 
             IRoomAmentityRepository roomAmentityRepository
             , IS3Service s3Service,
             IImageRepository imageRepository,
             ITenantService tenantService,
-            IRoomTenancyRepository roomTenancyRepository)
+            IRoomTenancyRepository roomTenancyRepository,
+            IInvoiceService invoiceService,
+            IRentalContractService rentalContractService)
         {
             _roomRepository = roomRepository;
             _mapper = mapper;
@@ -33,6 +37,8 @@ namespace HostelFinder.Application.Services
             _imageRepository = imageRepository;
             _tenantService = tenantService;
             _roomTenancyRepository = roomTenancyRepository;
+            _invoiceService = invoiceService;
+            _rentalContractService = rentalContractService;
         }
         /// <summary>
         /// Lấy ra tất cả các phòng
@@ -256,6 +262,12 @@ namespace HostelFinder.Application.Services
 
                 //lấy ra thông tin ảnh của phòng 
                 getAllInformationRoomResponseDto.PictureRoom = await _imageRepository.GetAllUrlRoomPicture(roomId);
+
+                // lấy ra hóa đơn thanh toán mới nhất của trọ
+                getAllInformationRoomResponseDto.InvoiceDetailInRoom = await _invoiceService.GetInvoiceDetailInRoomLastestAsyc(roomId);
+
+                // lấy ra thông tin hợp đồng mới nhất được thêm
+                getAllInformationRoomResponseDto.ContractDetailInRoom = await _rentalContractService.GetRoomContractHistoryLasest(roomId);
 
                 return new Response<GetAllInformationRoomResponseDto> { Data = getAllInformationRoomResponseDto, Succeeded = true};
             }
