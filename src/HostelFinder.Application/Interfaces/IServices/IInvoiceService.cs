@@ -15,6 +15,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<bool>> DeleteAsync(Guid id);
         Task<Response<InvoiceResponseDto>> GenerateMonthlyInvoicesAsync(Guid roomId, int billingMonth, int billingYear);
 
-        Task<RoomInvoiceHistoryDetailsResponseDto> GetInvoiceDetailInRoomLastestAsyc(Guid roomId);
+        Task<RoomInvoiceHistoryDetailsResponseDto?> GetInvoiceDetailInRoomLastestAsyc(Guid roomId);
     }
 }
