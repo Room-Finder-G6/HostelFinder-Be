@@ -59,8 +59,8 @@ public class GeneralProfile : Profile
                 opt.MapFrom(src => src.Images.Any()
                     ? src.Images.First().Url
                     : null))
-            .ForMember(dest => dest.MemberShipName, opt =>
-                opt.MapFrom(src => src.MembershipServices.Membership.Name))
+            .ForMember(dest => dest.MembershipTag, opt =>
+                opt.MapFrom(src => src.MembershipServices.Membership.Tag))
             .ReverseMap();
 
         CreateMap<UpdatePostRequestDto, Post>()
