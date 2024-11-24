@@ -315,8 +315,11 @@ namespace HostelFinder.Application.Services
                             // Tính toán số bài đăng còn lại
                             int maxPostsAllowed = service.MaxPostsAllowed ?? 0; // Nếu MaxPostsAllowed là null, sử dụng 0
                             int postsUsed = userMembership.PostsUsed > 0 ? userMembership.PostsUsed : 0;
-
                             dto.NumberOfPostsRemaining = maxPostsAllowed - postsUsed;
+                            // Tính toán số lần push top còn lại
+                            int maxPushTopAllowed = service.MaxPushTopAllowed ?? 0; // Nếu MaxPushTopAllowed là null, sử dụng 0
+                            int pushTopUsed = userMembership.PushTopUsed > 0 ? userMembership.PushTopUsed : 0;
+                            dto.NumberOfPushTopRemaining = maxPushTopAllowed - pushTopUsed;
                         }
                     }
                 }
