@@ -230,48 +230,51 @@ namespace HostelFinder.Infrastructure.Seeders
                 new Membership
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Gói Bạc",
-                    Description = "Gói người dùng cơ bản.",
+                    Name = "Hội viên Cơ bản",
+                    Description = "Phù hợp với quy mô nhà trọ nhỏ",
                     Price = 100000,
                     Duration = 30,
+                    Tag = "Đồng",
                     CreatedBy = "Hệ Thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
                     MembershipServices = new List<MembershipServices>
                     {
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 10, MaxPushTopAllowed = 5, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 15, MaxPushTopAllowed = 15, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 },
                 new Membership
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Gói Vàng",
-                    Description = "Số bài đăng & đẩy được tăng lên.",
+                    Name = "Hội viên Tiêu chuẩn",
+                    Description = "Phù hợp với quy mô và số lượng nhà trọ vừa từ 10 BDS",
                     Price = 150000,
                     Duration = 30,
+                    Tag = "Bạc",
                     CreatedBy = "Hệ Thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
                     MembershipServices = new List<MembershipServices>
                     {
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 20, MaxPushTopAllowed = 10, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 30, MaxPushTopAllowed = 30, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 },
                 new Membership
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Gói Kim Cương",
-                    Description = "Số bài đăng được tăng lên.",
+                    Name = "Hội viên Cao cấp",
+                    Description = "Phù hợp với quy mô và số lượng nhà trọ lớn",
                     Price = 200000,
                     Duration = 30,
+                    Tag = "Vàng",
                     CreatedBy = "Hệ Thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
                     MembershipServices = new List<MembershipServices>
                     {
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 35, MaxPushTopAllowed = 15, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 50, MaxPushTopAllowed = 50, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 }

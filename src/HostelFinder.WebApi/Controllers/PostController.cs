@@ -1,6 +1,8 @@
 using HostelFinder.Application.DTOs.Post.Requests;
+using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers;
@@ -18,175 +20,376 @@ public class PostController : ControllerBase
         _s3Service = s3Service;
     }
 
-    /*[HttpGet]
-    [Route("{postId}")]
-    public async Task<IActionResult> GetAllPostFeaturesByPostId(Guid roomId)
+    [HttpGet("GetAllPostWithPriceAndStatusAndTime")]
+    public async Task<IActionResult> GetAllPostWithPriceAndStatusAndTime()
     {
-        var result = await _postService.GetAllRoomFeaturesByIdAsync(roomId);
-        if (result.Succeeded)
+        try
         {
-            return Ok(result);
-        }
+            var response = await _postService.GetAllPostWithPriceAndStatusAndTime();
 
-        return NotFound();
-    }*/
+            // Ensure Data is not null and check if it's empty
+            if (!response.Succeeded || response.Data == null || !response.Data.Any())
+            {
+                return NotFound(new Response<List<ListPostsResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = "No posts found",
+                    Data = new List<ListPostsResponseDto>() // Initialize empty list
+                });
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
+    }
 
     [HttpPost]
     public async Task<IActionResult> AddPost(Guid userId, [FromForm] AddPostRequestDto postDto,
         [FromForm] List<IFormFile> images)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            return BadRequest(ModelState);
-        }
-
-        // Upload image to AWS and collect Image response
-        var imageUrls = new List<string>();
-
-        if (images != null && images.Count > 0)
-        {
-            foreach (var image in images)
+            if (!ModelState.IsValid)
             {
-                var imageUrl = await _s3Service.UploadFileAsync(image);
-                imageUrls.Add(imageUrl);
+                return BadRequest(ModelState);
             }
-        }
 
-        // Pass userId directly to the AddPostAsync method
-        var result = await _postService.AddPostAsync(postDto, imageUrls, userId);
+            var imageUrls = new List<string>();
 
-        if (result.Succeeded)
-        {
+            if (images != null && images.Any())
+            {
+                foreach (var image in images)
+                {
+                    try
+                    {
+                        var imageUrl = await _s3Service.UploadFileAsync(image);
+                        imageUrls.Add(imageUrl);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        return BadRequest(new Response<string>
+                        {
+                            Succeeded = false,
+                            Message = $"Image upload failed: {ex.Message}"
+                        });
+                    }
+                }
+            }
+
+            var result = await _postService.AddPostAsync(postDto, imageUrls, userId);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = result.Message
+                });
+            }
+
             return Ok(result);
         }
-
-        return BadRequest(result.Message);
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 
     [HttpPut("{postId}")]
     public async Task<IActionResult> UpdatePost(Guid postId, [FromForm] UpdatePostRequestDto request, [FromForm] List<IFormFile> images)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            return BadRequest(ModelState);
-        }
-
-        var imageUrls = new List<string>();
-
-        if (images != null && images.Count > 0)
-        {
-            foreach (var image in images)
+            if (!ModelState.IsValid)
             {
-                var imageUrl = await _s3Service.UploadFileAsync(image);
-                imageUrls.Add(imageUrl);
+                return BadRequest(ModelState);
             }
-        }
 
-        var result = await _postService.UpdatePostAsync(postId, request, imageUrls);
+            var imageUrls = new List<string>();
 
-        if (result.Succeeded)
-        {
+            if (images != null && images.Any())
+            {
+                foreach (var image in images)
+                {
+                    try
+                    {
+                        var imageUrl = await _s3Service.UploadFileAsync(image);
+                        imageUrls.Add(imageUrl);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        return BadRequest(new Response<string>
+                        {
+                            Succeeded = false,
+                            Message = $"Image upload failed: {ex.Message}"
+                        });
+                    }
+                }
+            }
+
+            var result = await _postService.UpdatePostAsync(postId, request, imageUrls);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result);
+            }
+
             return Ok(result);
         }
-
-        return BadRequest(result.Message);
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
-
 
     [HttpDelete]
     [Route("{postId}")]
     public async Task<IActionResult> DeletePost(Guid postId)
     {
-        var userIdClaim = User.FindFirst("UserId");
-        if (userIdClaim == null)
+        try
         {
-            return Unauthorized("Người dùng chưa được xác thực.");
-        }
+            var userIdClaim = User.FindFirst("UserId");
+            if (userIdClaim == null)
+            {
+                return Unauthorized("Người dùng chưa được xác thực.");
+            }
 
-        var currentUserId = Guid.Parse(userIdClaim.Value);
-        var response = await _postService.DeletePostAsync(postId, currentUserId);
-        if (!response.Succeeded)
+            var currentUserId = Guid.Parse(userIdClaim.Value);
+            var response = await _postService.DeletePostAsync(postId, currentUserId);
+            if (!response.Succeeded)
+            {
+                return BadRequest(response.Errors);
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
         {
-            return BadRequest(response.Errors);
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
         }
-
-        return Ok(response.Message);
     }
 
     [HttpPost("get-all")]
     public async Task<IActionResult> Get(GetAllPostsQuery request)
     {
-        var response = await _postService.GetAllPostAysnc(request);
-        if (response.Succeeded)
+        try
         {
-            return BadRequest(response.Errors);
-        }
+            var response = await _postService.GetAllPostAysnc(request);
 
-        return Ok(response);
+            if (!response.Succeeded)
+            {
+                return BadRequest(new Response<string>
+                {
+                    Succeeded = false,
+                    Errors = response.Errors
+                });
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetPostsByUserId(Guid userId)
     {
-        var result = await _postService.GetPostsByUserIdAsync(userId);
-        if (result.Succeeded)
+        try
         {
-            return Ok(result);
-        }
+            if (userId == Guid.Empty)
+            {
+                return BadRequest(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Invalid user ID."
+                });
+            }
 
-        return NotFound(result.Errors);
+            var result = await _postService.GetPostsByUserIdAsync(userId);
+
+            if (result.Succeeded)
+            {
+                return Ok(result);
+            }
+
+            return NotFound(new Response<string>
+            {
+                Succeeded = false,
+                Errors = result.Errors
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 
     [HttpGet("{postId}")]
     public async Task<IActionResult> GetPostById(Guid postId)
     {
-        var result = await _postService.GetPostByIdAsync(postId);
-        if (result.Succeeded)
+        try
         {
-            return Ok(result);
-        }
+            if (postId == Guid.Empty)
+            {
+                return BadRequest(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Invalid post ID."
+                });
+            }
 
-        return NotFound();
+            var result = await _postService.GetPostByIdAsync(postId);
+            if (result.Succeeded)
+            {
+                return Ok(result);
+            }
+
+            return NotFound(new Response<string>
+            {
+                Succeeded = false,
+                Errors = new List<string> { "Bài đăng không tồn tại." }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 
     [HttpPost("filter")]
-    public async Task<IActionResult> FilterPosts([FromBody] FilterPostsRequestDto filter)
+    public async Task<IActionResult> FilterPosts([FromForm] FilterPostsRequestDto filter)
     {
-        var result = await _postService.FilterPostsAsync(filter);
-
-        if (result.Succeeded)
+        try
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Invalid filter criteria."
+                });
+            }
+
+            var result = await _postService.FilterPostsAsync(filter);
+
+            if (!result.Succeeded || result.Data == null || !result.Data.Any())
+            {
+                return NotFound(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "No posts found matching the filter criteria."
+                });
+            }
+
             return Ok(result);
         }
-
-        return BadRequest(result.Errors);
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 
     [HttpPatch]
     [Route("{postId}/push")]
     public async Task<IActionResult> PushPost(Guid postId, Guid userId)
     {
-        var result = await _postService.PushPostOnTopAsync(postId, DateTime.Now, userId);
-
-        if (result.Succeeded)
+        try
         {
-            return Ok(result);
-        }
+            if (userId == Guid.Empty)
+            {
+                return BadRequest(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Invalid user ID."
+                });
+            }
 
-        return BadRequest(new { Message = result.Message });
+            var result = await _postService.PushPostOnTopAsync(postId, DateTime.Now, userId);
+
+            if (result.Succeeded)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(new Response<string>
+            {
+                Succeeded = false,
+                Message = result.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 
     [HttpGet("ordered")]
     public async Task<IActionResult> GetPostsOrderedByPriority()
     {
-        var result = await _postService.GetPostsOrderedByPriorityAsync();
-
-        if (result.Succeeded)
+        try
         {
+            var result = await _postService.GetPostsOrderedByPriorityAsync();
+
+            if (!result.Succeeded || result.Data == null || !result.Data.Any())
+            {
+                return NotFound(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "No posts available."
+                });
+            }
+
             return Ok(result);
         }
-
-        return BadRequest(result.Errors);
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 
 }

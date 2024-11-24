@@ -7,6 +7,7 @@ namespace HostelFinder.Application.DTOs.InVoice.Responses
 {
     public class InvoiceResponseDto
     {
+        public Guid Id { get; set; }
         public string RoomName { get; set; }
 
         public int BillingMonth { get; set; }

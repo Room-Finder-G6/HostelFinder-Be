@@ -12,6 +12,7 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<Membership> GetMembershipWithServicesAsync(Guid id);
         Task<bool> CheckDuplicateMembershipAsync(string name, string description);
         Task AddMembershipWithServicesAsync(Membership membership, List<AddMembershipServiceReqDto> membershipServices);
-        Task<List<MembershipServices>> GetMembershipServicesByMembershipIdAsync(Guid membershipId);
+        Task<List<MembershipServices?>> GetMembershipServicesByMembershipIdAsync(Guid membershipId);
+        /*Task<List<MembershipServices?>> GetMembershipServicesForUserAsync(Guid userId);*/
     }
 }
