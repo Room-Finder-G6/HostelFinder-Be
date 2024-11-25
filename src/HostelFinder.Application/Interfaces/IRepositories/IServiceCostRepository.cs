@@ -11,5 +11,10 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 
         Task<List<ServiceCost>> GetAllServiceCostListWithConditionAsync(Expression<Func<ServiceCost, bool>> filter);
         Task<ServiceCost> GetServiceCostById(Guid serviceCostId);
+        
+        Task<ServiceCost> GetOverlappingServiceCostAsync(Guid hostelId, Guid serviceId, DateTime effectiveFrom);
+        Task<ServiceCost> GetLastServiceCostAsync(Guid hostelId, Guid serviceId);
+        
+        Task<IEnumerable<ServiceCost>> GetServiceCostForDateByHostelAsync(Guid hostelId, DateTime date);
     }
 }

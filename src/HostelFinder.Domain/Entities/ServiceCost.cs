@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using HostelFinder.Domain.Common;
+using HostelFinder.Domain.Enums;
 using RoomFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities;
@@ -18,7 +19,7 @@ public class ServiceCost : BaseEntity
     
     public decimal UnitCost { get; set; }
 
-    public string? Unit {  get; set; }
+    public UnitType Unit {  get; set; }
 
     [Required]
     public DateTime EffectiveFrom { get; set; }
