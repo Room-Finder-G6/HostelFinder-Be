@@ -282,24 +282,13 @@ namespace HostelFinder.Application.Services
             };
         }
 
-        /*public async Task<Response<List<PostingMemberShipServiceDto>>> GetMembershipServicesForUserAsync(Guid userId)
+        public async Task<Response<List<PostingMemberShipServiceDto>>> GetMembershipServicesForUserAsync(Guid userId)
         {
             try
             {
-                // Kiểm tra nếu userId là null hoặc không hợp lệ
-                if (userId == Guid.Empty)
-                {
-                    return new Response<List<PostingMemberShipServiceDto>>
-                    {
-                        Succeeded = false,
-                        Message = "Invalid User ID."
-                    };
-                }
+                // Lấy MembershipServices từ Repository
+                var membershipServices = await _membershipRepository.GetMembershipServicesByUserAsync(userId);
 
-                // Lấy danh sách các Membership Services mà người dùng đã đăng ký
-                var membershipServices = await _membershipRepository.GetMembershipServicesForUserAsync(userId);
-
-                // Kiểm tra nếu không có MembershipServices cho người dùng
                 if (membershipServices == null || !membershipServices.Any())
                 {
                     return new Response<List<PostingMemberShipServiceDto>>
@@ -309,39 +298,47 @@ namespace HostelFinder.Application.Services
                     };
                 }
 
-                // Map từ Entity sang DTO
-                var mappedResult = _mapper.Map<List<PostingMemberShipServiceDto>>(membershipServices);
+                // Ánh xạ sang DTO
+                var postingMemberShipServiceDtos = _mapper.Map<List<PostingMemberShipServiceDto>>(membershipServices);
 
-                // Tính toán số bài đăng còn lại cho từng Membership Service
-                foreach (var result in mappedResult)
+                // Tính toán số bài đăng còn lại
+                foreach (var service in membershipServices)
                 {
-                    var membershipService = membershipServices.FirstOrDefault(ms => ms.Id == result.Id);
-                    if (membershipService != null)
+                    // Kiểm tra Membership của service và tìm UserMembership tương ứng
+                    var userMembership = service.Membership?.UserMemberships?.FirstOrDefault(um => um.UserId == userId);
+                    if (userMembership != null)
                     {
-                        var postsByUser = membershipService.Posts.Count(p => p.CreatedBy == userId.ToString());
-
-                        result.NumberOfPostsRemaining = membershipService.MaxPostsAllowed.HasValue
-                            ? membershipService.MaxPostsAllowed.Value - postsByUser
-                            : 0;
+                        // Tìm kiếm DTO tương ứng với service hiện tại
+                        var dto = postingMemberShipServiceDtos.FirstOrDefault(d => d.Id == service.Id);
+                        if (dto != null)
+                        {
+                            // Tính toán số bài đăng còn lại
+                            int maxPostsAllowed = service.MaxPostsAllowed ?? 0; // Nếu MaxPostsAllowed là null, sử dụng 0
+                            int postsUsed = userMembership.PostsUsed > 0 ? userMembership.PostsUsed : 0;
+                            dto.NumberOfPostsRemaining = maxPostsAllowed - postsUsed;
+                            // Tính toán số lần push top còn lại
+                            int maxPushTopAllowed = service.MaxPushTopAllowed ?? 0; // Nếu MaxPushTopAllowed là null, sử dụng 0
+                            int pushTopUsed = userMembership.PushTopUsed > 0 ? userMembership.PushTopUsed : 0;
+                            dto.NumberOfPushTopRemaining = maxPushTopAllowed - pushTopUsed;
+                        }
                     }
                 }
 
-                // Trả về danh sách DTO với dữ liệu đầy đủ
                 return new Response<List<PostingMemberShipServiceDto>>
                 {
                     Succeeded = true,
-                    Data = mappedResult
+                    Data = postingMemberShipServiceDtos,
+                    Message = "Membership services fetched successfully."
                 };
             }
             catch (Exception ex)
             {
-                // Ghi log hoặc xử lý lỗi chi tiết tại đây
                 return new Response<List<PostingMemberShipServiceDto>>
                 {
                     Succeeded = false,
                     Message = "Internal server error: " + ex.Message
                 };
             }
-        }*/
+        }
     }
 }

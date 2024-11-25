@@ -40,14 +40,14 @@ public class GeneralProfile : Profile
     {
         // Post Mapping
         CreateMap<AddPostRequestDto, Post>().ReverseMap();
-        
+
         CreateMap<Post, PostResponseDto>()
             .ForMember(dest => dest.MembershipServiceId, opt =>
                 opt.MapFrom(src => src.MembershipServiceId))
             .ForMember(dest => dest.ImageUrls, opt =>
                 opt.MapFrom(src => src.Images.Select(image => image.Url).ToList()))
             .ReverseMap();
-        
+
         CreateMap<Post, ListPostsResponseDto>()
             .ForMember(dest => dest.Address, opt =>
                 opt.MapFrom(src => src.Hostel.Address))
@@ -59,10 +59,10 @@ public class GeneralProfile : Profile
                 opt.MapFrom(src => src.Images.Any()
                     ? src.Images.First().Url
                     : null))
-            .ForMember(dest => dest.MemberShipName, opt =>
-                opt.MapFrom(src => src.MembershipServices.Membership.Name))
+            .ForMember(dest => dest.MembershipTag, opt =>
+                opt.MapFrom(src => src.MembershipServices.Membership.Tag))
             .ReverseMap();
-        
+
         CreateMap<UpdatePostRequestDto, Post>()
             .ForMember(dest => dest.HostelId, opt =>
                 opt.MapFrom(src => src.HostelId))
@@ -90,12 +90,12 @@ public class GeneralProfile : Profile
             .ReverseMap();
 
         CreateMap<Hostel, AddHostelRequestDto>()
-            .ForMember(dest => dest.Address, opt => 
+            .ForMember(dest => dest.Address, opt =>
                 opt.MapFrom(src => src.Address))
             .ReverseMap();
 
         CreateMap<Hostel, ListHostelResponseDto>()
-            .ForMember(dest => dest.LandlordUserName, opt => 
+            .ForMember(dest => dest.LandlordUserName, opt =>
                 opt.MapFrom(src => src.Landlord.Username))
             .ForMember(dest => dest.ImageUrl, opt =>
                 opt.MapFrom(src => src.Images.Any()
@@ -130,7 +130,7 @@ public class GeneralProfile : Profile
         CreateMap<User, UserDto>().ReverseMap();
         CreateMap<UserProfileResponse, User>().ReverseMap();
         CreateMap<CreateUserRequestDto, User>().ReverseMap();
-        
+
         CreateMap<UserProfileResponse, Response<UserProfileResponse>>()
             .ConstructUsing(src => new Response<UserProfileResponse>
             {
@@ -150,7 +150,7 @@ public class GeneralProfile : Profile
         CreateMap<AddMembershipRequestDto, Membership>().ReverseMap()
             .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices));
         CreateMap<UpdateMembershipRequestDto, Membership>().ReverseMap();
-        
+
         // MembershipServices mappings
         CreateMap<MembershipServices, MembershipServiceResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
@@ -172,7 +172,6 @@ public class GeneralProfile : Profile
                 => opt.Ignore())
             .ForMember(dest => dest.NumberOfPushTopRemaining, opt
                 => opt.Ignore());
-        
         //Image
         CreateMap<Image, ImageResponseDto>().ReverseMap();
 
@@ -186,7 +185,7 @@ public class GeneralProfile : Profile
         CreateMap<UpdateRoomRequestDto, Room>();
         CreateMap<AddRoomRequestDto, Room>().ReverseMap();
         CreateMap<Room, RoomResponseDto>()
-            .ForMember(dest => dest.HostelName, opt => 
+            .ForMember(dest => dest.HostelName, opt =>
                 opt.MapFrom(src => src.Hostel.HostelName))
             /*.ForMember(dest => dest.ImageUrls, opt =>
                 opt.MapFrom(src => src.Images.Select(image => image.Image).ToList()))*/
