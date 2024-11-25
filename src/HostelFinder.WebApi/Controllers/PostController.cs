@@ -50,6 +50,36 @@ public class PostController : ControllerBase
         }
     }
 
+    [HttpGet("GetAllPostWithPriceAndStatusAndTimePaging")]
+    public async Task<IActionResult> GetAllPostWithPriceAndStatusAndTimePaging([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var response = await _postService.GetAllPostWithPriceAndStatusAndTime(pageIndex, pageSize);
+
+            if (!response.Succeeded || response.Data == null || !response.Data.Any())
+            {
+                return NotFound(new Response<List<ListPostsResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = "No posts found",
+                    Data = new List<ListPostsResponseDto>() // Initialize empty list
+                });
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
+    }
+
+
     [HttpPost]
     public async Task<IActionResult> AddPost(Guid userId, [FromForm] AddPostRequestDto postDto,
         [FromForm] List<IFormFile> images)
@@ -392,4 +422,31 @@ public class PostController : ControllerBase
         }
     }
 
+    [HttpGet("GetPostsOrderedPaging")]
+    public async Task<IActionResult> GetPostsOrderedByPriorityPaging([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var result = await _postService.GetPostsOrderedByPriorityAsync(pageIndex, pageSize);
+
+            if (!result.Succeeded || result.Data == null || !result.Data.Any())
+            {
+                return NotFound(new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "No posts available."
+                });
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<string>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
+    }
 }

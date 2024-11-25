@@ -17,4 +17,6 @@ public interface IPostService
     Task<Response<PostResponseDto>> PushPostOnTopAsync(Guid postId, DateTime newDate, Guid userId);
     Task<Response<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync();
     Task <Response<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime();
+    Task<PagedResponse<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync(int pageIndex, int pageSize);
+    Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime(int pageIndex, int pageSize);
 }

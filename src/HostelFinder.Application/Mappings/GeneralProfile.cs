@@ -163,6 +163,12 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
             .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))
             .ReverseMap();
+        CreateMap<UpdateMembershipServiceReqDto, MembershipServices>()
+           .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
+           .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
+           .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))
+           .ReverseMap();
+
         CreateMap<MembershipServiceResponseDto, AddMembershipServiceReqDto>().ReverseMap();
 
         CreateMap<MembershipServices, PostingMemberShipServiceDto>()
