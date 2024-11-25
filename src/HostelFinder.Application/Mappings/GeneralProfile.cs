@@ -59,8 +59,8 @@ public class GeneralProfile : Profile
                 opt.MapFrom(src => src.Images.Any()
                     ? src.Images.First().Url
                     : null))
-            .ForMember(dest => dest.MemberShipName, opt =>
-                opt.MapFrom(src => src.MembershipServices.Membership.Name))
+            .ForMember(dest => dest.MembershipTag, opt =>
+                opt.MapFrom(src => src.MembershipServices.Membership.Tag))
             .ReverseMap();
 
         CreateMap<UpdatePostRequestDto, Post>()
@@ -121,8 +121,7 @@ public class GeneralProfile : Profile
         CreateMap<ServiceCost, ServiceCostResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service.ServiceName))
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
-            .ForMember(dest => dest.IsBillable, opt => opt.MapFrom(src => src.Service.IsBillable))
-            .ForMember(dest => dest.IsUsageBased, opt => opt.MapFrom(src => src.Service.IsUsageBased))
+            .ForMember(dest => dest.ChargingMethod, opt => opt.MapFrom(src => src.Service.ChargingMethod))
             .ReverseMap();
         CreateMap<ServiceCost, CreateServiceCostDto>().ReverseMap();
         CreateMap<UpdateServiceCostDto, ServiceCost>().ReverseMap();

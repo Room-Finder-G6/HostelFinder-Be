@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.DTOs.ServiceCost.Request;
 
@@ -9,7 +10,7 @@ public class UpdateServiceCostDto
     public decimal UnitCost { get; set; }
 
     [Required]
-    public string Unit { get; set; }
+    public UnitType Unit { get; set; }
     [Required]
     public DateTime EffectiveFrom { get; set; }
     public DateTime? EffectiveTo { get; set; }

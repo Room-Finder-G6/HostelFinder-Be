@@ -49,5 +49,32 @@ namespace HostelFinder.Infrastructure.Repositories
             }
             return serviceCost;
         }
+
+        public async Task<ServiceCost> GetOverlappingServiceCostAsync(Guid hostelId, Guid serviceId, DateTime effectiveFrom)
+        {
+            return await _dbContext.ServiceCosts
+                .FirstOrDefaultAsync(sc =>
+                    sc.HostelId == hostelId
+                    && sc.ServiceId == serviceId
+                    && sc.EffectiveFrom <= effectiveFrom
+                    && (sc.EffectiveTo == null || sc.EffectiveTo >= effectiveFrom)
+                );
+        }
+
+        public async Task<ServiceCost> GetLastServiceCostAsync(Guid hostelId, Guid serviceId)
+        {
+            return await _dbContext.ServiceCosts.Where(sc => sc.HostelId == hostelId && sc.ServiceId == serviceId)
+                .OrderByDescending(sc => sc.EffectiveFrom)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<ServiceCost>> GetServiceCostForDateByHostelAsync(Guid hostelId, DateTime date)
+        {
+            return await _dbContext.ServiceCosts
+                .Where(sc => sc.HostelId == hostelId
+                             && sc.EffectiveFrom <= date
+                             && (sc.EffectiveTo == null || sc.EffectiveTo >= date))
+                .ToListAsync();
+        }
     }
 }

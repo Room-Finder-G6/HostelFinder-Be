@@ -89,7 +89,7 @@ namespace HostelFinder.Application.Services
 
 
                 // kiểm tra số lượng trong phòng
-                if(currentTenantsCount + 1 >= room.MaxRenters)
+                if(currentTenantsCount + 1 >= 1)
                 {
                     room.IsAvailable = false;
                    await _roomRepository.UpdateAsync(room);
@@ -107,7 +107,7 @@ namespace HostelFinder.Application.Services
             }
             catch (Exception ex)
             {
-                return new Response<string> { Succeeded = false, Errors = new List<string> { ex.Message}, Message = "Lỗi xảy ra khi tạo hợp đồng" };
+                return new Response<string> { Succeeded = false, Errors = new List<string> { ex.Message}, Message = ex.Message };
             }
         }
 
@@ -129,5 +129,6 @@ namespace HostelFinder.Application.Services
                 throw new Exception(ex.Message);
             }
         }
+
     }
 }

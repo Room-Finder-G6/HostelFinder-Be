@@ -255,7 +255,7 @@ namespace HostelFinder.Application.Services
                 // thêm vào list 
                 getAllInformationRoomResponseDto.RoomInfoDetail = roomInfoDetailDto;
 
-                // lấy ra thông tin những người đang thuê ở trọ
+                // lấy ra thông tin những người đang thuê ở trọ hiện tại
                 var roomTenacyList = await _tenantService.GetInformationTenacyAsync(roomId);
                 
                 getAllInformationRoomResponseDto.InfomationTenacy = roomTenacyList;
@@ -263,10 +263,10 @@ namespace HostelFinder.Application.Services
                 //lấy ra thông tin ảnh của phòng 
                 getAllInformationRoomResponseDto.PictureRoom = await _imageRepository.GetAllUrlRoomPicture(roomId);
 
-                // lấy ra hóa đơn thanh toán mới nhất của trọ
+                // lấy ra hóa đơn thanh toán tháng trước
                 getAllInformationRoomResponseDto.InvoiceDetailInRoom = await _invoiceService.GetInvoiceDetailInRoomLastestAsyc(roomId);
 
-                // lấy ra thông tin hợp đồng mới nhất được thêm
+                // lấy ra thông tin hợp đồng hiện tại
                 getAllInformationRoomResponseDto.ContractDetailInRoom = await _rentalContractService.GetRoomContractHistoryLasest(roomId);
 
                 return new Response<GetAllInformationRoomResponseDto> { Data = getAllInformationRoomResponseDto, Succeeded = true};

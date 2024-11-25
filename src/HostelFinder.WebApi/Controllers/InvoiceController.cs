@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/invoices")]
     [ApiController]
     public class InvoiceController : ControllerBase
     {
@@ -85,7 +85,7 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpPost]
         [Route("monthly-invoice")]
-        public async Task<IActionResult> CreateInvoice([FromForm] AddInVoiceRequestDto invoiceDto)
+        public async Task<IActionResult> CreateInvoice([FromBody] AddInVoiceRequestDto invoiceDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new Response<InvoiceResponseDto>
@@ -115,7 +115,7 @@ namespace HostelFinder.WebApi.Controllers
                 return new ObjectResult(new Response<InvoiceResponseDto>
                 {
                     Succeeded = false,
-                    Message = $"Internal server error: {ex.Message}"
+                    Message = $"{ex.Message}"
                 })
                 {
                     StatusCode = 500

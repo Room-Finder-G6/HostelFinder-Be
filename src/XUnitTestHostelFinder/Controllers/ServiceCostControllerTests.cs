@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using HostelFinder.WebApi.Controllers;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Enums;
 
 namespace XUnitTestHostelFinder.Controllers
 {
@@ -225,7 +226,7 @@ namespace XUnitTestHostelFinder.Controllers
             var updateDto = new UpdateServiceCostDto
             {
                 UnitCost = 100,
-                Unit = "kWh",
+                Unit = UnitType.Kwh,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             };
@@ -234,7 +235,7 @@ namespace XUnitTestHostelFinder.Controllers
                 new ServiceCostResponseDto
                 {
                     UnitCost = 100,
-                    Unit = "kWh"
+                    Unit = UnitType.Kwh
                 },
                 "Service cost updated successfully."
             );
@@ -260,7 +261,7 @@ namespace XUnitTestHostelFinder.Controllers
             var updateDto = new UpdateServiceCostDto
             {
                 UnitCost = 100,
-                Unit = "kWh",
+                Unit = UnitType.Kwh,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             };
@@ -291,7 +292,7 @@ namespace XUnitTestHostelFinder.Controllers
             var updateDto = new UpdateServiceCostDto
             {
                 UnitCost = -10, // Invalid UnitCost
-                Unit = "kWh",
+                Unit = UnitType.Kwh,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             };
@@ -314,7 +315,7 @@ namespace XUnitTestHostelFinder.Controllers
             var updateDto = new UpdateServiceCostDto
             {
                 UnitCost = 100,
-                Unit = "kWh",
+                Unit = UnitType.Kwh,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             };
