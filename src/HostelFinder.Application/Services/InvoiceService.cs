@@ -7,6 +7,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace HostelFinder.Application.Services
@@ -20,6 +21,7 @@ namespace HostelFinder.Application.Services
         private readonly ILogger<InvoiceService> _logger;
         private readonly IServiceRepository _serviceRepository;
         private readonly IRoomTenancyRepository _roomTenancyRepository;
+        private readonly IServiceCostRepository _serviceCostRepository;
 
         public InvoiceService(IInVoiceRepository invoiceRepository,
             IRoomRepository roomRepository,
@@ -27,7 +29,8 @@ namespace HostelFinder.Application.Services
             IMapper mapper,
             ILogger<InvoiceService> logger,
             IServiceRepository serviceRepository,
-            IRoomTenancyRepository roomTenancyRepository)
+            IRoomTenancyRepository roomTenancyRepository,
+            IServiceCostRepository serviceCostRepository)
         {
             _invoiceRepository = invoiceRepository;
             _roomRepository = roomRepository;
@@ -36,6 +39,7 @@ namespace HostelFinder.Application.Services
             _logger = logger;
             _serviceRepository = serviceRepository;
             _roomTenancyRepository = roomTenancyRepository;
+            _serviceCostRepository = serviceCostRepository;
         }
 
         public async Task<Response<List<InvoiceResponseDto>>> GetAllAsync()
@@ -96,28 +100,28 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<InvoiceResponseDto>> GenerateMonthlyInvoicesAsync(Guid roomId, int billingMonth, int billingYear)
         {
-
-            var room = await _roomRepository.GetRoomByIdAsync(roomId);
-            if (room == null)
-            {
-                return new Response<InvoiceResponseDto> { Message = "Phòng không tồn tại!", Succeeded = false };
-            }
-            if (room.IsAvailable)
-            {
-                return new Response<InvoiceResponseDto> { Message = "Phòng đang trống không cần lập hóa đơn", Succeeded = false };
-            }
-            var existingInvoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear);
-
-            if (existingInvoice != null)
-            {
-                return new Response<InvoiceResponseDto> { Message = "Đã có hóa đơn cho tháng này", Succeeded = false };
-            }
-            using var transaction = await _invoiceRepository.BeginTransactionAsync();
+            var transaction = await _invoiceRepository.BeginTransactionAsync();
             try
             {
+                
+                var room = await _roomRepository.GetRoomByIdAsync(roomId);
+                if (room == null)
+                {
+                    return new Response<InvoiceResponseDto> { Message = "Phòng không tồn tại!", Succeeded = false };
+                }
+                if (room.IsAvailable)
+                {
+                    return new Response<InvoiceResponseDto> { Message = "Phòng đang trống không cần lập hóa đơn", Succeeded = false };
+                }
+                var existingInvoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear);
+
+                if (existingInvoice != null)
+                {
+                    return new Response<InvoiceResponseDto> { Message = "Đã có hóa đơn cho tháng này", Succeeded = false };
+                }
 
                 //Tạo hóa đơn mới
-
+                DateTime billingDate = new DateTime(billingYear, billingMonth, 1);
                 var invoice = new Invoice
                 {
                     RoomId = roomId,
@@ -129,48 +133,102 @@ namespace HostelFinder.Application.Services
                     InvoiceDetails = new List<InvoiceDetail>()
                 };
 
-                var serviceCosts = room.Hostel.ServiceCosts.ToList();
+                var serviceCosts = await _serviceCostRepository.GetServiceCostForDateByHostelAsync(room.HostelId, billingDate);
+              
 
                 foreach (var serviceCost in serviceCosts)
                 {
                     var service = await _serviceRepository.GetServiceByIdAsync(serviceCost.ServiceId);
+
+                    decimal detailTotalAmount = 0;
                     var invoiceDetail = new InvoiceDetail
                     {
                         InvoiceId = invoice.Id,
                         ServiceId = service.Id,
                         UnitCost = serviceCost.UnitCost,
                         ActualCost = 0,
-                        //tạm thời tính là max of renters
                         NumberOfCustomer = await _roomTenancyRepository.CountCurrentTenantsAsync(room.Id),
                         BillingDate = DateTime.Now,
                         CreatedOn = DateTime.Now,
                         IsRentRoom = false,
                     };
-                    // tạo hóa đơn chi tiết cho dịch vụ thu phí như điện, nước
-                    if (service.IsUsageBased)
+                    // tạo hóa đơn chi tiết cho dịch vụ thu phí như điện, nước,...
+                    switch (service.ChargingMethod)
                     {
-                        var previousReading = await _meterReadingRepository.GetPreviousMeterReadingAsync(roomId, service.Id, billingMonth, billingYear);
-                        var currentReading = await _meterReadingRepository.GetCurrentMeterReadingAsync(room.Id, service.Id, billingMonth, billingYear);
-                        if (previousReading == null || currentReading == null)
-                        {
-                            return new Response<InvoiceResponseDto> { Message = $"Thiếu số liệu đọc cho dịch vụ {service.ServiceName}.", Succeeded = false };
-                        }
+                        case ChargingMethod.PerUsageUnit:
+                            var previousReading =
+                                await _meterReadingRepository.GetPreviousMeterReadingAsync(roomId, service.Id,
+                                    billingMonth, billingYear);
+                            var currentReading =
+                                await _meterReadingRepository.GetCurrentMeterReadingAsync(roomId, service.Id,
+                                    billingMonth, billingYear);
 
-                        if (currentReading.Reading < previousReading.Reading)
-                        {
-                            return new Response<InvoiceResponseDto> { Message = $"Số đọc hiện tại không thể nhỏ hơn số đọc trước cho dịch vụ {service.ServiceName}.", Succeeded = false };
-                        }
+                            if (previousReading == null || currentReading == null)
+                            {
+                                return new Response<InvoiceResponseDto>
+                                {
+                                    Message = $"Thiếu số liệu đọc cho dịch vụ {service.ServiceName}.", Succeeded = false
+                                };
+                            }
 
-                        invoiceDetail.PreviousReading = previousReading.Reading;
-                        invoiceDetail.CurrentReading = currentReading.Reading;
+                            if (currentReading.Reading < previousReading.Reading)
+                            {
+                                return new Response<InvoiceResponseDto>
+                                {
+                                    Message =
+                                        $"Số đọc hiện tại không thể nhỏ hơn số đọc trước cho dịch vụ {service.ServiceName}.",
+                                    Succeeded = false
+                                };
+                            }
 
+                            invoiceDetail.PreviousReading = previousReading.Reading;
+                            invoiceDetail.CurrentReading = currentReading.Reading;
 
-                        invoice.InvoiceDetails.Add(invoiceDetail);
+                            var usage = invoiceDetail.CurrentReading - invoiceDetail.PreviousReading;
+                            detailTotalAmount = invoiceDetail.UnitCost * usage;
 
-                        invoice.TotalAmount += (invoiceDetail.UnitCost * (invoiceDetail.CurrentReading - invoiceDetail.PreviousReading)) + (invoiceDetail.ActualCost * invoiceDetail.NumberOfCustomer) ?? 0;
+                            invoiceDetail.ActualCost = detailTotalAmount;
+                            invoiceDetail.NumberOfCustomer = null; // Not applicable
+                            break;
+                        case ChargingMethod.PerPerson:
+                            var numberOfTenants = await _roomTenancyRepository.CountCurrentTenantsAsync(room.Id);
+                            invoiceDetail.NumberOfCustomer = numberOfTenants;
+                            detailTotalAmount = invoiceDetail.UnitCost * numberOfTenants;
 
+                            invoiceDetail.ActualCost = detailTotalAmount;
+                            invoiceDetail.CurrentReading = 0;
+                            invoiceDetail.PreviousReading = 0;
+                            break;
+
+                        case ChargingMethod.FlatFee:
+                            detailTotalAmount = invoiceDetail.UnitCost;
+                            invoiceDetail.ActualCost = detailTotalAmount;
+                            invoiceDetail.NumberOfCustomer = 0;
+                            invoiceDetail.CurrentReading = 0;
+                            invoiceDetail.PreviousReading = 0;
+                            break;
+
+                        case ChargingMethod.Free:
+                            detailTotalAmount = 0;
+                            invoiceDetail.ActualCost = detailTotalAmount;
+                            invoiceDetail.NumberOfCustomer = 0;
+                            invoiceDetail.CurrentReading = 0;
+                            invoiceDetail.PreviousReading = 0;
+                            break;
+
+                        default:
+                            return new Response<InvoiceResponseDto>
+                            {
+                                Message = $"Phương thức tính phí không xác định cho dịch vụ {service.ServiceName}.",
+                                Succeeded = false
+                            };
                     }
+                    
+                    invoice.InvoiceDetails.Add(invoiceDetail);
+                    invoice.TotalAmount += detailTotalAmount;
                 }
+
+
                 //tạo hóa đơn tiền phòng
                 var rentInvoiceDetail = new InvoiceDetail
                 {
@@ -194,6 +252,7 @@ namespace HostelFinder.Application.Services
                 //map to Dtos
                 var invoiceCreatedDto = new InvoiceResponseDto
                 {
+                    Id = invoice.Id,
                     RoomName = room.RoomName ?? string.Empty,
                     BillingMonth = invoiceCreated.BillingMonth,
                     BillingYear = invoiceCreated.BillingYear,
@@ -212,7 +271,7 @@ namespace HostelFinder.Application.Services
                     }).ToList()
 
                 };
-                return new Response<InvoiceResponseDto> { Data = invoiceCreatedDto, Message = $"Tạo hóa đơn thành công cho phòng {room.RoomName} vào ngày {DateTime.Now}", Succeeded = true };
+                return new Response<InvoiceResponseDto> { Data = invoiceCreatedDto, Message = $"Tạo hóa đơn thành công cho phòng {room.RoomName} vào cho tháng {billingMonth}-{billingYear}", Succeeded = true };
             }
             catch (Exception ex)
             {

@@ -15,16 +15,19 @@ namespace HostelFinder.Application.Services
         private readonly IMapper _mapper;
         private readonly IS3Service _s3Service;
         private readonly IRoomTenancyRepository _roomTenancyRepository;
+        private readonly IRentalContractRepository _rentalContractRepository;
 
         public TenantService(ITenantRepository tenantRepository,
             IMapper mapper,
             IS3Service s3Service,
-            IRoomTenancyRepository roomTenancyRepository)
+            IRoomTenancyRepository roomTenancyRepository,
+            IRentalContractRepository rentalContractRepository)
         {
             _tenantRepository = tenantRepository;
             _mapper = mapper;
             _s3Service = s3Service;
             _roomTenancyRepository = roomTenancyRepository;
+            _rentalContractRepository = rentalContractRepository;
         }
 
         public async Task<TenantResponse> AddTenentServiceAsync(AddTenantDto request)
@@ -58,7 +61,7 @@ namespace HostelFinder.Application.Services
             }
             catch (Exception ex)
             {
-               throw new Exception("Lỗi khi tạo khách thuê phòng", ex);
+               throw new Exception(ex.Message);
             }
         }
         //lấy ra thông tin người thuê phòng tại phòng nào đó
@@ -66,6 +69,7 @@ namespace HostelFinder.Application.Services
         {
             try
             {
+                // lấy ra bản hợp đồng mới nhất
                 var roomTenacy = await _roomTenancyRepository.GetRoomTenacyByIdAsync(roomId);
 
                 //map to response 

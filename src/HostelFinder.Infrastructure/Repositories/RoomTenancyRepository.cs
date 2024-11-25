@@ -16,18 +16,37 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<int> CountCurrentTenantsAsync(Guid roomId)
         {
             return await _dbContext.RoomTenancies
-                .Where(rt => rt.RoomId == roomId && rt.MoveOutDate == null)
+                .Where(rt => rt.RoomId == roomId && (rt.MoveOutDate == null || rt.MoveOutDate > DateTime.Now))
                 .CountAsync();
         }
-
+        // lấy ra danh sách người đang thuê trọ hiện tại
         public async Task<List<RoomTenancy>> GetRoomTenacyByIdAsync(Guid roomId)
         {
             return await _dbContext.RoomTenancies
                 .Include(x => x.Tenant)
                 .Include(x => x.Room)
-                .Where(x => x.RoomId == roomId)
+                .Where(x => x.RoomId == roomId && x.MoveInDate <=DateTime.Now
+                                    &&(x.MoveOutDate == null || x.MoveOutDate > DateTime.Now))
+                .AsNoTracking()
                 .ToListAsync();
             
+        }
+
+        public async Task<List<RoomTenancy>> GetTenacyCurrentlyByRoom(Guid roomId, DateTime startDate, DateTime? endDate)
+        {
+            var tanecyCurrentInRoomList =  await _dbContext.RoomTenancies
+               .Include(x => x.Tenant)
+               .Include(x => x.Room)
+               .Where(x => x.RoomId == roomId 
+                                    && endDate.HasValue 
+                                        && x.MoveOutDate.HasValue 
+                                            && startDate <= x.MoveInDate && x.MoveInDate <= endDate)
+               .ToListAsync();
+            if(tanecyCurrentInRoomList.Count == 0)
+            {
+                return null;
+            }
+            return tanecyCurrentInRoomList;
         }
     }
 }
