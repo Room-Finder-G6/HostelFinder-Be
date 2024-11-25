@@ -30,7 +30,7 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpPost]
         [Route("AddMembership")]
-        public async Task<IActionResult> AddMembership([FromForm] AddMembershipRequestDto membershipDto)
+        public async Task<IActionResult> AddMembership([FromBody] AddMembershipRequestDto membershipDto)
         {
             try
             {
@@ -54,7 +54,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPut("EditMembership/{id}")]
-        public async Task<IActionResult> EditMembership(Guid id, [FromForm] UpdateMembershipRequestDto membershipDto)
+        public async Task<IActionResult> EditMembership(Guid id, [FromBody] UpdateMembershipRequestDto membershipDto)
         {
             if (!ModelState.IsValid)
             {
