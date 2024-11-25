@@ -235,7 +235,7 @@ namespace XUnitTestHostelFinder.Controllers
                 new ServiceCostResponseDto
                 {
                     UnitCost = 100,
-                    Unit = "kWh"
+                    Unit = UnitType.Kwh
                 },
                 "Service cost updated successfully."
             );

@@ -130,23 +130,5 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<RoomContractHistoryResponseDto> GetRoomContractHistoryLasest(Guid roomId)
-        {
-            try
-            {
-                // lấy ra thông tin của hợp đồng theo room
-                var getRoomContract = await _rentalContractRepository.GetRoomRentalContrctByRoom(roomId);
-                if(getRoomContract == null)
-                {
-                    return null;
-                } 
-                var roomrentalContractResponseDto = _mapper.Map<RoomContractHistoryResponseDto>(getRoomContract);
-                return roomrentalContractResponseDto;
-                    
-            }catch(Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
     }
 }
