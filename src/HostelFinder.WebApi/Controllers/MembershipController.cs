@@ -1,5 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.Membership.Requests;
+using HostelFinder.Application.DTOs.Payment.Requests;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Services;
 using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +12,12 @@ namespace HostelFinder.WebApi.Controllers
     public class MembershipController : ControllerBase
     {
         private readonly IMembershipService _membershipService;
+        private readonly IWalletService _walletService;
 
-        public MembershipController(IMembershipService membershipService)
+        public MembershipController(IMembershipService membershipService, IWalletService walletService)
         {
             _membershipService = membershipService;
+            _walletService = walletService;
         }
 
         [HttpGet("GetListMembership")]
@@ -179,6 +183,35 @@ namespace HostelFinder.WebApi.Controllers
                     Message = $"Internal server error: {ex.Message}"
                 });
             }
+        }
+
+        [HttpPost("Deposit")]
+        public async Task<IActionResult> Deposit([FromForm] WalletDepositRequestDto depositRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new Response<string>("Invalid deposit request."));
+            }
+
+            var depositResponse = await _walletService.DepositAsync(depositRequest);
+            if (!depositResponse.Succeeded)
+            {
+                return BadRequest(depositResponse);
+            }
+
+            return Ok(depositResponse);
+        }
+
+        [HttpGet("CheckTransactionStatus/{orderCode}")]
+        public async Task<IActionResult> CheckTransactionStatus(long orderCode)
+        {
+            var response = await _walletService.CheckTransactionStatusAsync(orderCode);
+            if (!response.Succeeded)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
         }
     }
 }

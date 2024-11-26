@@ -42,9 +42,15 @@ namespace HostelFinder.Domain.Entities
         [MaxLength(255)]
         public bool? IsEmailConfirmed { get; set; }
 
+        [Required]
+        [Range(0, double.MaxValue)]
+        public decimal WalletBalance { get; set; } = 0;
+
+        [MaxLength(50)]
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpires { get; set; }
         public virtual ICollection<Hostel>? Hostels { get; set; }
+        public virtual ICollection<Transaction>? Transactions { get; set; }
         public virtual Wishlist? Wishlists { get; set; }
         public virtual ICollection<UserMembership> UserMemberships { get; set; }
     }

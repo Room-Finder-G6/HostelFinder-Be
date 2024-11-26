@@ -2,7 +2,6 @@
 using HostelFinder.Application.DTOs.Membership.Responses;
 using HostelFinder.Application.DTOs.MembershipService.Responses;
 using HostelFinder.Application.Wrappers;
-using Task = DocumentFormat.OpenXml.Office2021.DocumentTasks.Task;
 
 namespace HostelFinder.Application.Interfaces.IServices
 {

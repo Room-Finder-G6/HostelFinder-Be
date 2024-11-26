@@ -11,6 +11,7 @@
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.0-preview.4" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.0-preview.4" />
     <PackageReference Include="FluentValidation" Version="11.10.0" />
+    <PackageReference Include="payOS" Version="1.0.9" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" />
   </ItemGroup>
 
