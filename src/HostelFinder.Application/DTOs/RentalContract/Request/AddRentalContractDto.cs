@@ -10,8 +10,7 @@ namespace HostelFinder.Application.DTOs.RentalContract.Request
 
         [Required]
         public DateTime StartDate { get; set; }
-        [Required]
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         public decimal MonthlyRent { get; set; }
 
@@ -19,9 +18,5 @@ namespace HostelFinder.Application.DTOs.RentalContract.Request
         public int PaymentCycleDays { get; set; }
         public string? ContractTerms { get; set; }
 
-        /// <summary>
-        /// Ghi số dịch vụ của tháng trước khi vào phòng
-        /// </summary>
-        public List<AddMeterReadingServiceDto>? AddMeterReadingServiceDto { get; set; }
     }
 }
