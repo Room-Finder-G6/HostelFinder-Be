@@ -234,7 +234,7 @@ namespace HostelFinder.Application.Services
                 {
                     InvoiceId = invoice.Id,
                     Service = null,
-                    UnitCost = 0,
+                    UnitCost = room.MonthlyRentCost,
                     ActualCost = room.MonthlyRentCost,
                     NumberOfCustomer = room.MaxRenters,
                     BillingDate = DateTime.Now,
@@ -287,6 +287,7 @@ namespace HostelFinder.Application.Services
             {
                 // lấy ra hóa đơn cuối cùng
                 var invoice = await _invoiceRepository.GetLastInvoiceByIdAsync(roomId);
+                var numberOfTenants = await _roomTenancyRepository.CountCurrentTenantsAsync(roomId);
                 if (invoice == null)
                 {
                     return null;
@@ -306,7 +307,7 @@ namespace HostelFinder.Application.Services
                         CurrentReading = details.CurrentReading,
                         PreviousReading = details.PreviousReading,
                         InvoiceId = details.InvoiceId,
-                        NumberOfCustomer = details.NumberOfCustomer,
+                        NumberOfCustomer = numberOfTenants,
                         ServiceName = details.Service?.ServiceName ?? (details.IsRentRoom ? "Tiền thuê phòng" : "Không xác định"),
                         UnitCost = details.UnitCost,
                     }).ToList()
@@ -320,6 +321,21 @@ namespace HostelFinder.Application.Services
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<Response<bool>> CheckInvoiceExistAsync(Guid roomId, int billingMonth, int billingYear)
+        {
+            var room = await _roomRepository.GetRoomByIdAsync(roomId);
+            if (room == null)
+            {
+                return new Response<bool> { Succeeded = false, Message = "Phòng không tồn tại" };
+            }
+            var invoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear);
+            if (invoice != null)
+            {
+                return new Response<bool>{Succeeded = true, Message = $"Đã có hóa đơn cho tháng {billingMonth}/{billingYear}"};
+            }
+            return new Response<bool>{Succeeded = false, Message = $"Chưa có hóa đơn cho tháng {billingMonth}/{billingYear}"};
         }
     }
 }

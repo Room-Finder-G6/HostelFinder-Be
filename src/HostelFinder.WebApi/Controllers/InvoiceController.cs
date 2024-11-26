@@ -199,6 +199,33 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
+        
+        [HttpGet("{hostel}/{roomId}")]
+        public async Task<IActionResult> GetInvoiceByRoomId(Guid roomId,int month, int year)
+        {
+            try
+            {
+                var response = await _invoiceService.CheckInvoiceExistAsync(roomId, month,year);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(new Response<List<InvoiceResponseDto>>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<InvoiceResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }        
 
 
     }
