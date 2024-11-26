@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Application.Common;
+using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
@@ -16,4 +17,6 @@ public interface IPostRepository : IBaseGenericRepository<Post>
     Task<List<Post>> FilterPostsAsync(string? province, string? district, string? commune, decimal? minSize, decimal? maxSize, decimal? minPrice, decimal? maxPrice, RoomType? roomType);
     Task<List<Post>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync();
     Task<List<Post>> GetAllPostsOrderedAsync();
+    Task<PagedResponse<List<Post>>> GetAllPostsOrderedAsync(int pageIndex, int pageSize);
+    Task<PagedResponse<List<Post>>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync(int pageIndex, int pageSize);
 }
