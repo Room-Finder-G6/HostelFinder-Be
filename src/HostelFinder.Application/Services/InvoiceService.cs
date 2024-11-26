@@ -321,5 +321,20 @@ namespace HostelFinder.Application.Services
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<Response<bool>> CheckInvoiceExistAsync(Guid roomId, int billingMonth, int billingYear)
+        {
+            var room = await _roomRepository.GetRoomByIdAsync(roomId);
+            if (room == null)
+            {
+                return new Response<bool> { Succeeded = false, Message = "Phòng không tồn tại" };
+            }
+            var invoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear);
+            if (invoice != null)
+            {
+                return new Response<bool>{Succeeded = true, Message = $"Đã có hóa đơn cho tháng {billingMonth}/{billingYear}"};
+            }
+            return new Response<bool>{Succeeded = false, Message = $"Chưa có hóa đơn cho tháng {billingMonth}/{billingYear}"};
+        }
     }
 }

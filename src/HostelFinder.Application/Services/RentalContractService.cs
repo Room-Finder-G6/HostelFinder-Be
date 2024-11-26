@@ -6,6 +6,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using Irony.Parsing.Construction;
 
 namespace HostelFinder.Application.Services
 {
@@ -17,13 +18,15 @@ namespace HostelFinder.Application.Services
         private readonly ITenantService _tenantService;
         private readonly IMapper _mapper;
         private readonly IMeterReadingService _meterReadingService;
+        private readonly IMeterReadingRepository _meterReadingRepository;
         public RentalContractService(
             IRentalContractRepository rentalContractRepository,
             IRoomRepository roomRepository,
             IRoomTenancyRepository roomTenancyRepository,
             ITenantService tenantService,
             IMapper mapper,
-            IMeterReadingService meterReadingService)
+            IMeterReadingService meterReadingService,
+            IMeterReadingRepository meterReadingRepository)
         {
             _rentalContractRepository = rentalContractRepository;
             _roomRepository = roomRepository;
@@ -31,6 +34,7 @@ namespace HostelFinder.Application.Services
             _tenantService = tenantService;
             _mapper = mapper;
             _meterReadingService = meterReadingService;
+            _meterReadingRepository = meterReadingRepository;
         }
         public async Task<Response<string>> CreateRentalContractAsync(AddRentalContractDto request)
         {
@@ -73,7 +77,7 @@ namespace HostelFinder.Application.Services
                     CreatedOn = DateTime.Now,
                 };
 
-                await _rentalContractRepository.AddAsync(rentalContract);
+                
 
 
                 // tạo mới roomTenacy cho người thuê chính
@@ -95,13 +99,7 @@ namespace HostelFinder.Application.Services
                    await _roomRepository.UpdateAsync(room);
                 }
 
-                // ghi số dịch vụ tại thời điểm hợp đồng
-                //await _meterReadingService.AddMeterReadingAsync(room.Id, request.ServiceId, request.Reading, DateTime.Now.Month, DateTime.Now.Year);
-                var listMeterReaderingSevice = request.AddMeterReadingServiceDto;
-                foreach(var readingService in listMeterReaderingSevice)
-                {
-                    await _meterReadingService.AddMeterReadingAsync(room.Id, readingService.ServiceId, readingService.Reading, DateTime.Now.Month, DateTime.Now.Year);
-                }
+                await _rentalContractRepository.AddAsync(rentalContract);
 
                 return new Response<string> { Succeeded = true, Message = $"Tạo hợp đồng cho thuê thành công cho phòng {room.RoomName} với người thuê : {tenantCreated.FullName}" };
             }
