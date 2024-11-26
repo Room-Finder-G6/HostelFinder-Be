@@ -234,7 +234,7 @@ namespace HostelFinder.Application.Services
                 {
                     InvoiceId = invoice.Id,
                     Service = null,
-                    UnitCost = 0,
+                    UnitCost = room.MonthlyRentCost,
                     ActualCost = room.MonthlyRentCost,
                     NumberOfCustomer = room.MaxRenters,
                     BillingDate = DateTime.Now,
@@ -287,6 +287,7 @@ namespace HostelFinder.Application.Services
             {
                 // lấy ra hóa đơn cuối cùng
                 var invoice = await _invoiceRepository.GetLastInvoiceByIdAsync(roomId);
+                var numberOfTenants = await _roomTenancyRepository.CountCurrentTenantsAsync(roomId);
                 if (invoice == null)
                 {
                     return null;
@@ -306,7 +307,7 @@ namespace HostelFinder.Application.Services
                         CurrentReading = details.CurrentReading,
                         PreviousReading = details.PreviousReading,
                         InvoiceId = details.InvoiceId,
-                        NumberOfCustomer = details.NumberOfCustomer,
+                        NumberOfCustomer = numberOfTenants,
                         ServiceName = details.Service?.ServiceName ?? (details.IsRentRoom ? "Tiền thuê phòng" : "Không xác định"),
                         UnitCost = details.UnitCost,
                     }).ToList()
