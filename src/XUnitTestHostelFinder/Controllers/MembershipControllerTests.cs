@@ -17,7 +17,7 @@ namespace HostelFinder.UnitTests.Controllers
         public MembershipControllerTests()
         {
             _membershipServiceMock = new Mock<IMembershipService>();
-            _controller = new MembershipController(_membershipServiceMock.Object);
+            //_controller = new MembershipController(_membershipServiceMock.Object);
         }
 
         [Fact]

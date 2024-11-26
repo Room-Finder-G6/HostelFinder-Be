@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Net.payOS;
 using RoomFinder.Domain.Common.Settings;
 using System.Text;
 
@@ -38,11 +39,10 @@ namespace HostelFinder.Application
             services.AddScoped<IRoomTenancyService, RoomTenancyService>();
             services.AddScoped<IRentalContractService, RentalContractService>();
             services.AddScoped<ITenantService, TenantService>();
+            services.AddScoped<IWalletService, WalletService>();
 
             //register validation 
             services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();
-
-
 
             //register automapper
             services.AddAutoMapper(typeof(GeneralProfile).Assembly);

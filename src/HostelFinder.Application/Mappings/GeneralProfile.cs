@@ -150,6 +150,9 @@ public class GeneralProfile : Profile
         CreateMap<AddMembershipRequestDto, Membership>().ReverseMap()
             .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices));
         CreateMap<UpdateMembershipRequestDto, Membership>().ReverseMap();
+        CreateMap<AddUserMembershipRequestDto, UserMembership>()
+              .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+              .ForMember(dest => dest.MembershipId, opt => opt.MapFrom(src => src.MembershipId));
 
         // MembershipServices mappings
         CreateMap<MembershipServices, MembershipServiceResponseDto>()

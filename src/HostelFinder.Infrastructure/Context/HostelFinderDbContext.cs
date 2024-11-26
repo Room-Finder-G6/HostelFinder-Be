@@ -30,8 +30,9 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Vehicle> Vehicles { get; set; }
     public DbSet<RoomTenancy> RoomTenancies { get; set; }
-   
+    public DbSet<Transaction> Transactions { get; set; }
     public DbSet<RentalContract> RentalContracts { get; set; }
+
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
     {
@@ -307,6 +308,19 @@ public class HostelFinderDbContext : DbContext
          .HasForeignKey(m => m.ServiceId)
          .OnDelete(DeleteBehavior.Cascade);
 
+        // Configure User and Transactions relationship
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Transactions)
+            .WithOne(t => t.User)
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Transaction entity
+        modelBuilder.Entity<Transaction>()
+            .HasKey(t => t.Id);
+        modelBuilder.Entity<Transaction>()
+            .Property(t => t.Amount)
+            .HasPrecision(18, 2); // For monetary values
 
     }
 }
