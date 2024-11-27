@@ -11,7 +11,7 @@ namespace HostelFinder.Application.DTOs.Hostel.Responses
         public AddressDto Address { get; set; }
         public int Size { get; set; }
         public int NumberOfRooms { get; set; }
-        public List<ImageResponseDto> Image { get; set; }
+        public string ImageUrl { get; set; }
         public string Coordinates { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
     }

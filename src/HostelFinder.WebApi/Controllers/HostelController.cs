@@ -62,28 +62,33 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddHostel([FromForm] AddHostelRequestDto hostelDto, [FromForm] List<IFormFile> images)
+        public async Task<IActionResult> AddHostel([FromForm] AddHostelRequestDto hostelDto, IFormFile image)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var imageUrls = new List<string>();
+            string imageUrl = null;
 
-            if (images != null && images.Count > 0)
+            // Kiểm tra nếu có hình ảnh
+            if (image != null)
             {
-                foreach (var image in images)
+                try
                 {
-                    var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
-                    var imageUrl = uploadToAWS3;
-                    imageUrls.Add(imageUrl);
+                    // Tải ảnh lên AWS S3 và lấy URL
+                    imageUrl = await _s3Service.UploadFileAsync(image);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Không thể tải ảnh lên: {ex.Message}");
                 }
             }
 
             try
             {
-                var result = await _hostelService.AddHostelAsync(hostelDto, imageUrls);
+                // Gọi phương thức AddHostelAsync với chỉ một hình ảnh
+                var result = await _hostelService.AddHostelAsync(hostelDto, imageUrl);
                 if (result.Succeeded)
                 {
                     return Ok(result);
@@ -96,6 +101,7 @@ namespace HostelFinder.WebApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
 
 
         [HttpPut("{hostelId}")]

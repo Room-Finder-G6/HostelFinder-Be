@@ -7,7 +7,7 @@ namespace HostelFinder.Application.Interfaces.IServices
 {
     public interface IHostelService
     {
-        Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto hostelDto, List<string> imageUrls);
+        Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto hostelDto, string imageUrl);
         Task<Response<bool>> DeleteHostelAsync(Guid hostelId);
         Task<Response<List<ListHostelResponseDto>>> GetHostelsByUserIdAsync(Guid landlordId);
         Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId);

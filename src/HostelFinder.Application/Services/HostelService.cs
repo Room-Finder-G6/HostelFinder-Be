@@ -30,9 +30,9 @@ namespace HostelFinder.Application.Services
             _addressRepository = addressRepository;
         }
 
-        public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request,
-            List<string> imageUrls)
+        public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request, string imageUrl)
         {
+            // Kiểm tra trọ có bị trùng địa chỉ không
             var isDuplicate = await _hostelRepository.CheckDuplicateHostelAsync(
                 request.HostelName,
                 request.Address.Province,
@@ -49,10 +49,13 @@ namespace HostelFinder.Application.Services
             var hostel = _mapper.Map<Hostel>(request);
             hostel.CreatedOn = DateTime.Now;
             hostel.CreatedBy = request.LandlordId.ToString();
+
             try
             {
+                // Thêm Hostel vào cơ sở dữ liệu
                 var hostelAdded = await _hostelRepository.AddAsync(hostel);
 
+                // Thêm các dịch vụ vào Hostel
                 foreach (var serviceId in request.ServiceId)
                 {
                     HostelServices hostelServices = new HostelServices
@@ -66,7 +69,7 @@ namespace HostelFinder.Application.Services
                     await _hostelServiceRepository.AddAsync(hostelServices);
                 }
 
-                foreach (var imageUrl in imageUrls)
+                if (!string.IsNullOrEmpty(imageUrl))
                 {
                     await _imageRepository.AddAsync(new Image
                     {
@@ -75,17 +78,21 @@ namespace HostelFinder.Application.Services
                     });
                 }
 
-                //map domain to Dtos
+                // Map domain object to DTO
                 var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
 
                 return new Response<HostelResponseDto>
-                { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
+                {
+                    Data = hostelResponseDto,
+                    Message = "Thêm trọ mới thành công."
+                };
             }
             catch (Exception ex)
             {
                 return new Response<HostelResponseDto>(message: ex.Message);
             }
         }
+
 
         public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, List<string> imageUrls)
         {
