@@ -82,6 +82,11 @@ app.UseMiddleware<TokenValidationMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseMiddleware<RequestTimeLoggingMiddleware>();
 // Configure the HTTP request pipeline.
+if (app.Environment.IsProduction())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
