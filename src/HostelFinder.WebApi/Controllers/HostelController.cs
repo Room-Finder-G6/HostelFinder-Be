@@ -2,10 +2,12 @@
 using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.WebApi.ActionFilter;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
+    [ServiceFilter(typeof(MembershipExpiryActionFilter))]
     [Route("api/hostels")]
     [ApiController]
     public class HostelController : ControllerBase
