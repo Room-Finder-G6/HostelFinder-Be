@@ -1,6 +1,7 @@
 using Amazon.S3;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Seeders;
+using HostelFinder.WebApi.ActionFilter;
 using HostelFinder.WebApi.Extensions;
 using HostelFinder.WebApi.Middlewares;
 using Net.payOS;
@@ -16,6 +17,11 @@ builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailS
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<MembershipExpiryActionFilter>();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<MembershipExpiryActionFilter>(); 
+});
 builder.Services.AddSingleton<PayOS>(sp =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();

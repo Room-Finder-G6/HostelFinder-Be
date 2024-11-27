@@ -4,12 +4,13 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Mappings;
 using HostelFinder.Application.Services;
 using HostelFinder.Application.Validations.Users;
+using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Net.payOS;
 using RoomFinder.Domain.Common.Settings;
 using System.Text;
 
@@ -28,18 +29,17 @@ namespace HostelFinder.Application
             services.AddScoped<IAmenityService, AmenityService>();
             services.AddScoped<IWishlistService, WishlistService>();
             services.AddScoped<IServiceService, ServiceService>();
-            services.AddScoped<IServiceCostService, ServiceCostService>();
             services.AddScoped<IMembershipService, MembershipService>();
             services.AddScoped<IInvoiceService, InvoiceService>();
             services.AddScoped<IServiceCostService, ServiceCostService>();
             services.AddScoped<IRoomService, RoomService>();
-            services.AddScoped<IHostelService, HostelService>();
             services.AddScoped<IMeterReadingService, MeterReadingService>();
             services.AddScoped<IVehicleService, VehicleService>();
             services.AddScoped<IRoomTenancyService, RoomTenancyService>();
             services.AddScoped<IRentalContractService, RentalContractService>();
             services.AddScoped<ITenantService, TenantService>();
             services.AddScoped<IWalletService, WalletService>();
+            services.AddScoped<PasswordHasher<User>>();
 
             //register validation 
             services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();

@@ -194,5 +194,19 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
+
+        [HttpPost("BuyMembership")]
+        public async Task<IActionResult> BuyMembership(Guid userId, Guid membershipId)
+        {
+            // Gọi dịch vụ để xử lý nghiệp vụ mua/gia hạn membership
+            var response = await _userService.BuyMembershipAsync(userId, membershipId);
+
+            if (!response.Succeeded)
+            {
+                return BadRequest(response.Message);
+            }
+
+            return Ok(response);
+        }
     }
 }
