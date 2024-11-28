@@ -2,11 +2,12 @@
 using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/invoices")]
     [ApiController]
     public class InvoiceController : ControllerBase
     {
@@ -85,7 +86,7 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpPost]
         [Route("monthly-invoice")]
-        public async Task<IActionResult> CreateInvoice([FromForm] AddInVoiceRequestDto invoiceDto)
+        public async Task<IActionResult> CreateInvoice([FromBody] AddInVoiceRequestDto invoiceDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new Response<InvoiceResponseDto>
@@ -115,7 +116,7 @@ namespace HostelFinder.WebApi.Controllers
                 return new ObjectResult(new Response<InvoiceResponseDto>
                 {
                     Succeeded = false,
-                    Message = $"Internal server error: {ex.Message}"
+                    Message = $"{ex.Message}"
                 })
                 {
                     StatusCode = 500
@@ -193,6 +194,60 @@ namespace HostelFinder.WebApi.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
+        
+        [HttpGet("{hostel}/{roomId}")]
+        public async Task<IActionResult> GetInvoiceByRoomId(Guid roomId,int month, int year)
+        {
+            try
+            {
+                var response = await _invoiceService.CheckInvoiceExistAsync(roomId, month,year);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(new Response<List<InvoiceResponseDto>>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<InvoiceResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }        
+        
+        [HttpGet("getInvoicesByHostelId")]
+        public async Task<IActionResult> GetInvoicesByHostelId(Guid hostelId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection)
+        {
+            try
+            {
+                var response = await _invoiceService.GetAllInvoicesByHostelIdAsync(hostelId, searchPhrase, pageNumber, pageSize, sortBy, sortDirection);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(new Response<List<InvoiceResponseDto>>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<InvoiceResponseDto>>
                 {
                     Succeeded = false,
                     Message = $"Internal server error: {ex.Message}"

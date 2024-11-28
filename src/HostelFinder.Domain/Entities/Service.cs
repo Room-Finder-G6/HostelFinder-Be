@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using HostelFinder.Domain.Common;
+using HostelFinder.Domain.Enums;
 using RoomFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
@@ -10,14 +11,8 @@ namespace HostelFinder.Domain.Entities
         public string ServiceName { get; set; }
         [MaxLength(500)]
         public string? Description { get; set; }
-        /// <summary>
-        /// Xem dịch vụ có tính tiền hay không
-        /// </summary>
-        public bool IsBillable { get; set; }
-        /// <summary>
-        /// Dịch vụ có tính theo số người hoặc tính theo số lượng sử dụng
-        /// </summary>
-        public bool IsUsageBased { get; set; }
+        
+        public ChargingMethod ChargingMethod { get; set; }
 
         //Navigation
         public ICollection<HostelServices> HostelServices { get; set; } 

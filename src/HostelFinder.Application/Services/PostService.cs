@@ -314,6 +314,20 @@ public class PostService : IPostService
         };
     }
 
+    public async Task<PagedResponse<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync(int pageIndex, int pageSize)
+    {
+        var pagedPosts = await _postRepository.GetPostsOrderedByMembershipPriceAndCreatedOnAsync(pageIndex, pageSize);
+
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(pagedPosts.Data);
+
+        return PaginationHelper.CreatePagedResponse(
+            postDtos,
+            pageIndex,
+            pageSize,
+            pagedPosts.TotalRecords
+        );
+    }
+
     public async Task<Response<UpdatePostRequestDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request, List<string> imageUrls)
     {
         var post = await _postRepository.GetByIdAsync(postId);
@@ -398,6 +412,20 @@ public class PostService : IPostService
             Succeeded = postDtos.Any(),
             Message = postDtos.Any() ? "Posts retrieved successfully" : "No posts found"
         };
+    }
+
+    public async Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime(int pageIndex, int pageSize)
+    {
+        var pagedPosts = await _postRepository.GetAllPostsOrderedAsync(pageIndex, pageSize);
+
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(pagedPosts.Data);
+
+        return PaginationHelper.CreatePagedResponse(
+            postDtos,
+            pageIndex,
+            pageSize,
+            pagedPosts.TotalRecords
+        );
     }
 
 }

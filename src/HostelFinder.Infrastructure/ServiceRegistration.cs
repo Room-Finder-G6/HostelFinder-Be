@@ -30,7 +30,6 @@ public class ServiceRegistration
         service.AddScoped<IEmailService, EmailService>();
         service.AddScoped<IAuthAccountService, AuthAccountService>();
         service.AddScoped<IServiceRepository, ServiceRepository>();
-        service.AddScoped<IServiceCostRepository, ServiceCostRepository>();
         service.AddScoped<IHostelSeeder, HostelSeeder>();
         service.AddScoped<IMembershipRepository, MembershipRepository>();
         service.AddScoped<IS3Service, S3Service>();
@@ -46,6 +45,7 @@ public class ServiceRegistration
         service.AddScoped<IRoomTenancyRepository, RoomTenancyRepository>();
         service.AddScoped<IVehicleRepository, VehicleRepository>();
         service.AddScoped<ITenantRepository, TenantRepository>();
-        service.AddScoped<IRentalContractRepository, RentalContractRepository>();   
+        service.AddScoped<IRentalContractRepository, RentalContractRepository>();
+        service.AddScoped<ITransactionRepository, TransactionRepository>();
     }
 }

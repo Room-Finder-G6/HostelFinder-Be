@@ -7,6 +7,8 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Storage;
+using HostelFinder.Application.Wrappers;
+using HostelFinder.Application.Helpers;
 
 namespace HostelFinder.Infrastructure.Repositories;
 
@@ -134,6 +136,27 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .ToListAsync();
     }
 
+    public async Task<PagedResponse<List<Post>>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync(int pageIndex, int pageSize)
+    {
+        var query = _dbContext.Posts
+            .Include(x => x.Hostel)
+            .ThenInclude(x => x.Address)
+            .Include(x => x.Images)
+            .Include(p => p.MembershipServices)
+            .ThenInclude(ms => ms.Membership)
+            .OrderByDescending(p => p.MembershipServices.Membership.Price)
+            .ThenByDescending(p => p.CreatedOn)
+            .AsNoTracking();
+
+        var totalRecords = await query.CountAsync();
+        var posts = await query
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return PaginationHelper.CreatePagedResponse(posts, pageIndex, pageSize, totalRecords);
+    }
+
     public async Task<List<Post>> GetAllPostsOrderedAsync()
     {
         return await _dbContext.Posts
@@ -146,6 +169,28 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .ThenByDescending(p => p.Status) 
             .ThenByDescending(p => p.CreatedOn) 
             .ToListAsync();
+    }
+
+    public async Task<PagedResponse<List<Post>>> GetAllPostsOrderedAsync(int pageIndex, int pageSize)
+    {
+        var query = _dbContext.Posts
+            .Include(p => p.Hostel)
+            .ThenInclude(h => h.Address)
+            .Include(p => p.Images)
+            .Include(p => p.MembershipServices)
+            .ThenInclude(ms => ms.Membership)
+            .OrderByDescending(p => p.MembershipServices.Membership.Price)
+            .ThenByDescending(p => p.Status)
+            .ThenByDescending(p => p.CreatedOn)
+            .AsNoTracking();
+
+        var totalRecords = await query.CountAsync();
+        var posts = await query
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return PaginationHelper.CreatePagedResponse(posts, pageIndex, pageSize, totalRecords);
     }
 
 }

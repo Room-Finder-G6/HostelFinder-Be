@@ -28,7 +28,7 @@ namespace HostelFinder.Infrastructure.Repositories
             return meterReading;
         }
 
-        public async Task<MeterReading> GetPreviousMeterReadingAsync(Guid roomId, Guid serviceId, int billingMonth, int billingYear)
+        public async Task<MeterReading?> GetPreviousMeterReadingAsync(Guid roomId, Guid serviceId, int billingMonth, int billingYear)
         {
             int previousMonth = billingMonth == 1 ? 12 : billingMonth - 1;
             int previousYear = billingMonth == 1 ? billingYear - 1 : billingYear;

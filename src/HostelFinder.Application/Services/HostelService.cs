@@ -8,6 +8,7 @@ using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
+using HostelFinder.Domain.Common.Constants;
 
 namespace HostelFinder.Application.Services
 {
@@ -222,16 +223,20 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<List<ListHostelResponseDto>>> GetHostelsByUserIdAsync(Guid landlordId)
+        public async Task<PagedResponse<List<ListHostelResponseDto>>> GetHostelsByUserIdAsync(Guid landlordId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy, SortDirection? sortDirection)
         {
-            var hostels = await _hostelRepository.GetHostelsByUserIdAsync(landlordId);
-
-            var response = new Response<List<ListHostelResponseDto>>()
+            try
             {
-                Data = _mapper.Map<List<ListHostelResponseDto>>(hostels)
-            };
+                var hostels = await _hostelRepository.GetAllMatchingInLandLordAsync(landlordId, searchPhrase, pageSize, pageNumber, sortBy, sortDirection);
 
-            return response;
+                var hostelDtos = _mapper.Map<List<ListHostelResponseDto>>(hostels.Data);
+                var pagedResponse = PaginationHelper.CreatePagedResponse(hostelDtos, pageNumber ?? 1,pageSize ?? 10, hostels.TotalRecords);
+                return pagedResponse;
+            }
+            catch (Exception ex)
+            {
+                return new PagedResponse<List<ListHostelResponseDto>> { Succeeded = false, Errors = { ex.Message } };
+            }
         }
 
         public async Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId)

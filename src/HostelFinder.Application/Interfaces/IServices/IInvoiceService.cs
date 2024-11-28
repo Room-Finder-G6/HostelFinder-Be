@@ -1,7 +1,9 @@
 ﻿using HostelFinder.Application.DTOs.InVoice.Requests;
+using HostelFinder.Application.DTOs.Invoice.Responses;
 using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Interfaces.IServices
@@ -16,5 +18,9 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<InvoiceResponseDto>> GenerateMonthlyInvoicesAsync(Guid roomId, int billingMonth, int billingYear);
 
         Task<RoomInvoiceHistoryDetailsResponseDto?> GetInvoiceDetailInRoomLastestAsyc(Guid roomId);
+        
+        Task<Response<Boolean>> CheckInvoiceExistAsync(Guid roomId, int billingMonth, int billingYear);
+        
+        Task<PagedResponse<List<ListInvoiceResponseDto>>> GetAllInvoicesByHostelIdAsync(Guid hostelId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection);
     }
 }

@@ -31,6 +31,7 @@ using HostelFinder.Application.DTOs.Vehicle.Request;
 using HostelFinder.Application.DTOs.RentalContract.Request;
 using HostelFinder.Application.DTOs.RentalContract.Response;
 using HostelFinder.Application.DTOs.Invoice.Responses;
+using HostelFinder.Application.DTOs.Vehicle.Responses;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -119,8 +120,7 @@ public class GeneralProfile : Profile
         CreateMap<ServiceCost, ServiceCostResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service.ServiceName))
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
-            .ForMember(dest => dest.IsBillable, opt => opt.MapFrom(src => src.Service.IsBillable))
-            .ForMember(dest => dest.IsUsageBased, opt => opt.MapFrom(src => src.Service.IsUsageBased))
+            .ForMember(dest => dest.ChargingMethod, opt => opt.MapFrom(src => src.Service.ChargingMethod))
             .ReverseMap();
         CreateMap<ServiceCost, CreateServiceCostDto>().ReverseMap();
         CreateMap<UpdateServiceCostDto, ServiceCost>().ReverseMap();
@@ -149,6 +149,9 @@ public class GeneralProfile : Profile
         CreateMap<AddMembershipRequestDto, Membership>().ReverseMap()
             .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices));
         CreateMap<UpdateMembershipRequestDto, Membership>().ReverseMap();
+        CreateMap<AddUserMembershipRequestDto, UserMembership>()
+              .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+              .ForMember(dest => dest.MembershipId, opt => opt.MapFrom(src => src.MembershipId));
 
         // MembershipServices mappings
         CreateMap<MembershipServices, MembershipServiceResponseDto>()
@@ -162,6 +165,12 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
             .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))
             .ReverseMap();
+        CreateMap<UpdateMembershipServiceReqDto, MembershipServices>()
+           .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
+           .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
+           .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))
+           .ReverseMap();
+
         CreateMap<MembershipServiceResponseDto, AddMembershipServiceReqDto>().ReverseMap();
 
         CreateMap<MembershipServices, PostingMemberShipServiceDto>()
@@ -178,6 +187,8 @@ public class GeneralProfile : Profile
         CreateMap<Invoice, InvoiceResponseDto>().ReverseMap();
         CreateMap<UpdateInvoiceRequestDto, Invoice>().ReverseMap();
         CreateMap<AddInVoiceRequestDto, Invoice>().ReverseMap();
+        CreateMap<ListInvoiceResponseDto, Invoice>().ReverseMap()
+            .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName));
 
         //Room
         CreateMap<Room, RoomResponseDto>().ReverseMap();
@@ -221,7 +232,12 @@ public class GeneralProfile : Profile
         CreateMap<RoomInfoDetailResponseDto, Room>().ReverseMap();
 
         //Vehicle
-        CreateMap<AddVehicleDto, Vehicle>().ReverseMap();
+        CreateMap<Vehicle, VehicleResponseDto>()
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl))
+            .ReverseMap();
+        CreateMap<AddVehicleDto, Vehicle>()
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Image != null ? "" : null))
+            .ReverseMap(); 
 
         // Terance
         CreateMap<AddTenantDto, Tenant>().ReverseMap();

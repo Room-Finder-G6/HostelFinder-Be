@@ -60,8 +60,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Bảo vệ",
-                    IsBillable = false,
-                    IsUsageBased = false,
+                    ChargingMethod = ChargingMethod.Free,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -69,8 +68,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Bãi để xe",
-                    IsBillable = false,
-                    IsUsageBased = false,
+                    ChargingMethod = ChargingMethod.Free,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -78,8 +76,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Thang máy",
-                    IsBillable = false,
-                    IsUsageBased = false,
+                    ChargingMethod = ChargingMethod.Free,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -87,8 +84,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Internet",
-                    IsBillable = true,
-                    IsUsageBased = false,
+                    ChargingMethod = ChargingMethod.PerPerson,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -96,8 +92,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Giặt là",
-                    IsBillable = true,
-                    IsUsageBased = true,
+                    ChargingMethod = ChargingMethod.PerUsageUnit,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,
@@ -105,8 +100,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Vệ sinh",
-                    IsBillable = true,
-                    IsUsageBased = false,
+                    ChargingMethod = ChargingMethod.FlatFee,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false
@@ -114,8 +108,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Điện",
-                    IsBillable = true,
-                    IsUsageBased = true,
+                    ChargingMethod = ChargingMethod.PerUsageUnit,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false
@@ -123,8 +116,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 new () {
                     Id = Guid.NewGuid(),
                     ServiceName = "Nước",
-                    IsBillable = true,
-                    IsUsageBased = true,
+                    ChargingMethod = ChargingMethod.PerUsageUnit,
                     CreatedBy = "Hệ thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false
@@ -227,6 +219,23 @@ namespace HostelFinder.Infrastructure.Seeders
         {
             var memberships = new List<Membership>
             {
+                new Membership
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Hội viên Dùng Thử",
+                    Description = "Gói hội viên dùng thử có hạn trong 7 ngày",
+                    Price = 0,
+                    Duration = 7,
+                    Tag = "Dùng Thử",
+                    CreatedBy = "Hệ Thống",
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false,
+                    MembershipServices = new List<MembershipServices>
+                    {
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 5, MaxPushTopAllowed = 5, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
+                    }
+                },
                 new Membership
                 {
                     Id = Guid.NewGuid(),

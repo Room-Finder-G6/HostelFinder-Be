@@ -53,7 +53,7 @@ namespace HostelFinder.Application.Services
                 serviceCost = await _serviceCostRepository.UpdateAsync(serviceCost);
 
                 var result = _mapper.Map<ServiceCostResponseDto>(serviceCost);
-                return new Response<ServiceCostResponseDto>(result, "Service cost updated successfully.");
+                return new Response<ServiceCostResponseDto>(result, "Cập nhật giá dịch vụ thành công.");
             }
             catch (Exception ex)
             {
@@ -89,11 +89,20 @@ namespace HostelFinder.Application.Services
                     return new Response<ServiceCostResponseDto> { Succeeded = false, Message = "Dịch vụ không tồn tại" };
                 }
 
-                var existingServiceCost = await _serviceCostRepository.CheckExistingServiceCostAsync(request.HostelId, request.ServiceId, request.EffectiveFrom);
+                var overlappingServiceCost  = await _serviceCostRepository.GetOverlappingServiceCostAsync(request.HostelId, request.ServiceId, request.EffectiveFrom);
 
-                if (existingServiceCost != null)
+                if (overlappingServiceCost != null)
                 {
-                    return new Response<ServiceCostResponseDto> { Succeeded = false, Message = "Đã tồn tại bảng giá dịch vụ cho dịch vụ này tại hostel vào thời điểm này." };
+                    return new Response<ServiceCostResponseDto> { Succeeded = false, Message = $"Đã tồn tại bảng giá dịch vụ cho dịch vụ này tại {hostel.HostelName} vào thời điểm này." };
+                }
+                
+                //update effeactiveTo of the last service cost
+                var lastServiceCost = await _serviceCostRepository.GetLastServiceCostAsync(request.HostelId, request.ServiceId);
+                
+                if (lastServiceCost != null && lastServiceCost.EffectiveTo == null)
+                {
+                    lastServiceCost.EffectiveTo = request.EffectiveFrom.AddDays(-1);
+                    await _serviceCostRepository.UpdateAsync(lastServiceCost);
                 }
                 //map request to domain 
                 var serviceCostDomain = _mapper.Map<ServiceCost>(request);
@@ -112,6 +121,7 @@ namespace HostelFinder.Application.Services
             }
             catch (Exception ex)
             {
+                
                 return new Response<ServiceCostResponseDto> { Succeeded = false, Errors = { ex.Message } };
             }
 

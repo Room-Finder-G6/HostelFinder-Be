@@ -84,7 +84,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateServiceCost([FromForm] CreateServiceCostDto serviceCostDto)
+        public async Task<IActionResult> CreateServiceCost([FromBody] CreateServiceCostDto serviceCostDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new Response<string>

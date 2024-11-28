@@ -17,7 +17,7 @@ namespace HostelFinder.UnitTests.Controllers
         public MembershipControllerTests()
         {
             _membershipServiceMock = new Mock<IMembershipService>();
-            _controller = new MembershipController(_membershipServiceMock.Object);
+            //_controller = new MembershipController(_membershipServiceMock.Object);
         }
 
         [Fact]
@@ -223,16 +223,16 @@ namespace HostelFinder.UnitTests.Controllers
                 Description = "Updated Description",
                 Price = 100.0m,
                 Duration = 30,
-                MembershipServices = new List<AddMembershipServiceReqDto>
-        {
-            new AddMembershipServiceReqDto
-            {
-                Id = Guid.NewGuid(),
-                ServiceName = "New Service",
-                MaxPostsAllowed = 10,
-                MaxPushTopAllowed = 5
-            }
-        }
+                MembershipServices = new List<UpdateMembershipServiceReqDto>()
+                {
+                    new UpdateMembershipServiceReqDto()
+                    {
+                        ServiceName = "New Service",
+                        Id = Guid.NewGuid(),
+                        MaxPushTopAllowed = 10,
+                        MaxPostsAllowed = 4,
+                    }
+                }
             };
 
             var response = new Response<MembershipResponseDto>
