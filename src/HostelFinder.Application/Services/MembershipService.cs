@@ -247,29 +247,50 @@ namespace HostelFinder.Application.Services
         public async Task<Response<string>> AddUserMembershipAsync(AddUserMembershipRequestDto userMembershipDto)
         {
             var existingUserMembership = await _userMembershipRepository.GetByUserIdAsync(userMembershipDto.UserId);
-            if (existingUserMembership != null && existingUserMembership.MembershipId == userMembershipDto.MembershipId)
+            if(existingUserMembership != null)
             {
-                return new Response<string>
+                if (existingUserMembership.MembershipId == userMembershipDto.MembershipId)
                 {
-                    Succeeded = false,
-                    Message = "User is already assigned to this membership."
-                };
+                    if (existingUserMembership.ExpiryDate > DateTime.Now)
+                    {
+                        return new Response<string>
+                        {
+                            Succeeded = false,
+                            Message = "Bạn đang sử dụng gói người dùng thử này và chưa hết hạn."
+                        };
+                    }
+                    else
+                    {
+                        return new Response<string>
+                        {
+                            Succeeded = false,
+                            Message = "Gói người dùng thử đã hết hạn."
+                        };
+                    }
+                }
             }
+            
+            var startDate = DateTime.Now;
+            var membership = await _membershipRepository.GetByIdAsync(userMembershipDto.MembershipId); 
+            var expiryDate = startDate.AddDays(membership.Duration);
 
-            var userMembership = new UserMembership
+            var newUserMembership = new UserMembership
             {
                 UserId = userMembershipDto.UserId,
                 MembershipId = userMembershipDto.MembershipId,
+                StartDate = startDate,
+                ExpiryDate = expiryDate,
                 PostsUsed = 0,
                 PushTopUsed = 0,
+                IsPaid = true,
                 CreatedBy = "System",
                 CreatedOn = DateTime.Now
             };
 
-            await _userMembershipRepository.AddAsync(userMembership);
+            await _userMembershipRepository.AddAsync(newUserMembership);
 
             var user = await _userRepository.GetByIdAsync(userMembershipDto.UserId);
-            if (user != null)
+            if (user.Role == UserRole.User)
             {
                 user.Role = UserRole.Landlord;
                 await _userRepository.UpdateAsync(user);
@@ -278,7 +299,7 @@ namespace HostelFinder.Application.Services
             return new Response<string>
             {
                 Succeeded = true,
-                Data = "User membership added successfully."
+                Message = "Bạn đăng ký gói người dùng thử thành công."
             };
         }
 
