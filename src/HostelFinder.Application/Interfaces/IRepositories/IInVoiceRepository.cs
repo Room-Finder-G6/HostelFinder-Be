@@ -14,5 +14,9 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<List<Invoice>> GetInvoicesByRoomIdAsync(Guid roomId);
         
         Task<(List<Invoice> invoices, int  totalRecord)> GetAllMatchingInvoiceAysnc(Guid hostelId, string? searchPhrase, int pageNumber, int pageSize, string? sortBy, SortDirection sortDirection);
+        
+        Task<decimal> GetRoomRevenueByMonthAsync(Guid roomId, int month, int year);
+        
+        Task<decimal> GetRoomRevenueByYearAsync(Guid roomId, int year);
     }
 }

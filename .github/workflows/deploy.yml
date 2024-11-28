@@ -73,5 +73,14 @@ jobs:
                   -e CONNECTIONSTRINGS__DEFAULTCONNECTION="${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}" \
                   -e JWTSETTINGS__EXPIRYINMINUTES="${{ secrets.JWTSETTINGS__EXPIRYINMINUTES }}" \
                   -e JWTSETTINGS__KEY="${{ secrets.JWTSETTINGS__KEY }}" \
+                  -e AWS__REGION="${{ secrets.AWS__REGION }}" \
+                  -e AWS__ACCESSKEY="${{ secrets.AWS__ACCESSKEY }}" \
+                  -e AWS__SECRETKEY="${{ secrets.AWS__SECRETKEY }}" \
+                  -e AWS__BUCKETNAME="${{ secrets.AWS__BUCKETNAME }}" \
+                  -e MAILSETTINGS__SERVER="${{ secrets.MAILSETTINGS__SERVER }}" \
+                  -e MAILSETTINGS__PORT="${{ secrets.MAILSETTINGS__PORT }}" \
+                  -e MAILSETTINGS__SENDERNAME="${{ secrets.MAILSETTINGS__SENDERNAME }}" \
+                  -e MAILSETTINGS__SENDEREMAIL="${{ secrets.MAILSETTINGS__SENDEREMAIL }}" \
+                  -e MAILSETTINGS__PASSWORD="${{ secrets.MAILSETTINGS__PASSWORD }}" \
                   ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
           EOF
