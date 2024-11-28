@@ -71,6 +71,7 @@ jobs:
                   --name hostel-backend \
                   -p 4001:8080 \
                   -e CONNECTIONSTRINGS__DEFAULTCONNECTION="${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}" \
+                  -e JWT_SETTINGS = "${{ secrets.JWT_SETTINGS }}" \
                   -e NEXT_PUBLIC_API_BASE_URL="${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" \
                   -e NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
                   ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
