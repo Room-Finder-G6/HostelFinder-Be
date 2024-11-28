@@ -205,7 +205,7 @@ namespace HostelFinder.Application.Services
             if (userMembership == null)
             {
                 var startDate = DateTime.Now;
-                var expiryDate = startDate.AddMonths(membership.Duration);
+                var expiryDate = startDate.AddDays(membership.Duration);
 
                 var newUserMembership = new UserMembership
                 {
