@@ -57,7 +57,7 @@ jobs:
       # Step 9: SSH into VPS and deploy the Docker container
       - name: Deploy Docker container on VPS
         run: |
-          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no user@${{ secrets.VPS_IP }} << 'EOF'
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
             # Pull the Docker image from Docker Hub
             docker pull ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
             
