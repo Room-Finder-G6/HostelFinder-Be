@@ -49,7 +49,7 @@ async Task RegisterWebhook(WebApplication app)
 
     try
     {
-        await payOS.confirmWebhook("https://tung.akaking.cloud/api/Webhook/HandlePaymentWebhook");
+        await payOS.confirmWebhook(webhookUrl);
         Console.WriteLine($"Webhook registered successfully: {webhookUrl}");
     }
     catch (Exception ex)
