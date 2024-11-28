@@ -516,13 +516,13 @@ namespace XUnitTestHostelFinder.Controllers
         new ListHostelResponseDto { Id = Guid.NewGuid(), HostelName = "Hostel 2" }
     };
 
-            var response = new Response<List<ListHostelResponseDto>>(hostels);
+            var response = new PagedResponse<List<ListHostelResponseDto>>(hostels, 1,10);
 
-            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId))
+            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId, null, null, null, null, null))
                 .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.GetHostelsByLandlordId(landlordId);
+            var result = await _controller.GetHostelsByLandlordId(landlordId, null, null, null, null, null);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -536,17 +536,17 @@ namespace XUnitTestHostelFinder.Controllers
         {
             // Arrange
             var landlordId = Guid.NewGuid();
-            var response = new Response<List<ListHostelResponseDto>>(null)
+            var response = new PagedResponse<List<ListHostelResponseDto>>
             {
                 Succeeded = false,
                 Errors = new List<string> { "No hostels found" }
             };
 
-            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId))
+            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId,null, null, null, null, null))
                 .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.GetHostelsByLandlordId(landlordId);
+            var result = await _controller.GetHostelsByLandlordId(landlordId, null, null, null, null, null);
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
@@ -559,12 +559,13 @@ namespace XUnitTestHostelFinder.Controllers
         {
             // Arrange
             var landlordId = Guid.NewGuid();
+            var searchPhrase = "Hostel";
 
-            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId))
+            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId,searchPhrase, null, null, null, null))
                 .ThrowsAsync(new Exception("Internal server error"));
 
             // Act
-            var result = await _controller.GetHostelsByLandlordId(landlordId);
+            var result = await _controller.GetHostelsByLandlordId(landlordId, searchPhrase, null, null, null, null);
 
             // Assert
             var objectResult = Assert.IsType<ObjectResult>(result);
@@ -595,8 +596,6 @@ namespace XUnitTestHostelFinder.Controllers
             {
                 TotalRecords = 5,
                 TotalPages = 3,
-                NextPage = new Uri("http://example.com/api/hostels?page=2"),
-                PreviousPage = null // Since this is the first page
             };
 
             _hostelServiceMock.Setup(service => service.GetAllHostelAsync(query))

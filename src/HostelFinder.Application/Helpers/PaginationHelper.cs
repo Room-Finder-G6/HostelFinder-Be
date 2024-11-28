@@ -14,17 +14,6 @@ namespace HostelFinder.Application.Helpers
             response.TotalPages = totalPages;
             response.TotalRecords = totalRecords;
 
-            // Add pagination metadata
-            response.FirstPage = new Uri($"?PageNumber=1&PageSize={pageSize}", UriKind.Relative);
-            response.LastPage = new Uri($"?PageNumber={totalPages}&PageSize={pageSize}", UriKind.Relative);
-
-            response.NextPage = pageNumber < totalPages
-                ? new Uri($"?PageNumber={pageNumber + 1}&PageSize={pageSize}", UriKind.Relative)
-                : null;
-
-            response.PreviousPage = pageNumber > 1
-                ? new Uri($"?PageNumber={pageNumber - 1}&PageSize={pageSize}", UriKind.Relative)
-                : null;
 
             return response;
         }

@@ -79,5 +79,18 @@ namespace HostelFinder.Infrastructure.Repositories
 
             return room;
         }
+
+        public async Task<List<Room>> GetRoomsByHostelAsync(Guid hostelId)
+        {
+            var query =   _dbContext.Rooms
+                .AsNoTracking()
+                .Include(r => r.Hostel)
+                .ThenInclude(h => h.ServiceCosts)
+                .ThenInclude(sc => sc.Service)
+                .Include(r => r.Invoices)
+                .Include(r => r.Images)
+                .Where(r => r.HostelId == hostelId && !r.IsDeleted);
+            return await query.ToListAsync();
+        }
     }
 }

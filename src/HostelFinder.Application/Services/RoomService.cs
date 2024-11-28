@@ -216,7 +216,7 @@ namespace HostelFinder.Application.Services
             var rooms = await _roomRepository.GetRoomsByHostelIdAsync(hostelId, floor);
 
             if (rooms == null || !rooms.Any())
-                return new Response<List<RoomResponseDto>> { Succeeded = false, Message = "Không tìm thấy phòng nào trong trọ" };
+                return new Response<List<RoomResponseDto>> { Succeeded = true, Message = "Hiện tại chưa có phòng trọ nào" };
 
 
             var result = _mapper.Map<List<RoomResponseDto>>(rooms);
