@@ -247,7 +247,7 @@ namespace HostelFinder.Application.Services
                 }
                 else
                 {
-                    userMembership.ExpiryDate = DateTime.Now.AddMonths(membership.Duration); 
+                    userMembership.ExpiryDate = DateTime.Now.AddDays(membership.Duration); 
                     userMembership.PostsUsed = 0;  
                     userMembership.PushTopUsed = 0;
 
@@ -264,7 +264,7 @@ namespace HostelFinder.Application.Services
             if (userMembership.MembershipId != membershipId)
             {
                 var startDate = DateTime.Now;
-                var expiryDate = startDate.AddMonths(membership.Duration);
+                var expiryDate = startDate.AddDays(membership.Duration);
 
                 var newUserMembership = new UserMembership
                 {
