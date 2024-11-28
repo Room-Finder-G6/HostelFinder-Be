@@ -18,11 +18,12 @@ namespace HostelFinder.Application.Services
         private readonly IMapper _mapper;
         private readonly IHostelServiceRepository _hostelServiceRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly IRoomRepository _roomRepository;
         private readonly IAddressRepository _addressRepository;
         private readonly IS3Service _s3Service;
 
         public HostelService(IHostelRepository hostelRepository, IMapper mapper,
-            IHostelServiceRepository hostelServiceRepository, IImageRepository imageRepository, IS3Service s3Service, IAddressRepository addressRepository)
+            IHostelServiceRepository hostelServiceRepository, IImageRepository imageRepository, IS3Service s3Service, IAddressRepository addressRepository, IRoomRepository roomRepository)
         {
             _hostelRepository = hostelRepository;
             _mapper = mapper;
@@ -30,6 +31,7 @@ namespace HostelFinder.Application.Services
             _imageRepository = imageRepository;
             _s3Service = s3Service;
             _addressRepository = addressRepository;
+            _roomRepository = roomRepository;
         }
 
         public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request, string imageUrl)
@@ -129,13 +131,19 @@ namespace HostelFinder.Application.Services
                         await _addressRepository.AddAsync(newAddress);
                     }
 
-                    // Update services
                     var existingServices = await _hostelServiceRepository.GetServicesByHostelIdAsync(hostelId);
                     var existingServiceIds = existingServices.Select(s => s.ServiceId).ToList();
-                    var newServiceIds = request.ServiceId.Where(id => id.HasValue).Select(id => id.Value).Except(existingServiceIds).ToList();
 
-                    // Add new services
-                    foreach (var serviceId in newServiceIds)
+                    var newServiceIds = request.ServiceId.Where(id => id.HasValue).Select(id => id.Value).ToList();
+
+                    var servicesToRemove = existingServices.Where(s => !newServiceIds.Contains(s.ServiceId)).ToList();
+                    foreach (var service in servicesToRemove)
+                    {
+                        await _hostelServiceRepository.DeletePermanentAsync(service.Id);
+                    }
+
+                    var servicesToAdd = newServiceIds.Except(existingServiceIds).ToList();
+                    foreach (var serviceId in servicesToAdd)
                     {
                         var newService = new HostelServices
                         {
@@ -146,17 +154,6 @@ namespace HostelFinder.Application.Services
                             IsDeleted = false,
                         };
                         await _hostelServiceRepository.AddAsync(newService);
-                    }
-
-                    // Remove old services
-                    var removedServiceIds = existingServiceIds.Except(request.ServiceId.Where(id => id.HasValue).Select(id => id.Value)).ToList();
-                    foreach (var serviceId in removedServiceIds)
-                    {
-                        var serviceToRemove = existingServices.FirstOrDefault(s => s.ServiceId == serviceId);
-                        if (serviceToRemove != null)
-                        {
-                            await _hostelServiceRepository.DeleteAsync(serviceToRemove.Id);
-                        }
                     }
 
                     // Update images
@@ -214,14 +211,28 @@ namespace HostelFinder.Application.Services
 
             try
             {
-                await _hostelRepository.DeleteAsync(hostel.Id);
-                return new Response<bool>(true, "Delete successful.");
+                // Kiểm tra xem có phòng nào còn người thuê không
+                var roomsWithTenancies = await _roomRepository.GetRoomsByHostelIdAsync(hostelId);  // Lấy danh sách phòng của hostel
+                foreach (var room in roomsWithTenancies)
+                {
+                    // Kiểm tra xem phòng có người thuê không (người thuê còn chưa trả phòng)
+                    var roomTenancy = room.RoomTenancies.FirstOrDefault(rt => rt.MoveOutDate == null || rt.MoveOutDate > DateTime.Now);  // Chỉ lấy những roomTenancy chưa có MoveOutDate (người thuê chưa trả phòng)
+                    if (roomTenancy != null)
+                    {
+                        // Nếu có người thuê đang còn trong phòng, không cho phép xóa hostel
+                        return new Response<bool>(false, "Nhà trọ vẫn còn phòng thuê, nên không thể xóa");
+                    }
+                }
+
+                await _hostelRepository.DeleteAsync(hostelId);
+                return new Response<bool>(true, "Xóa nhà trọ thành công.");
             }
             catch (Exception ex)
             {
                 return new Response<bool>(false, message: ex.Message);
             }
         }
+
 
         public async Task<PagedResponse<List<ListHostelResponseDto>>> GetHostelsByUserIdAsync(Guid landlordId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy, SortDirection? sortDirection)
         {

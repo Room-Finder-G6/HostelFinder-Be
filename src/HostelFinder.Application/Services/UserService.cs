@@ -284,7 +284,7 @@ namespace HostelFinder.Application.Services
                 return new Response<string>
                 {
                     Succeeded = true,
-                    Message = "Gói thành viên mới đã được thêm thành công."
+                    Message = "Gói thành viên mới đã đăng ký thành công."
                 };
             }
 
