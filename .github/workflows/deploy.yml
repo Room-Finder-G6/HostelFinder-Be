@@ -66,9 +66,5 @@ jobs:
             docker rm hostel-backend || true
             
             # Run the new container with environment variables
-            docker run -d \
-              --name hostel-backend \
-              -p 4001:8080 \
-              -e CONNECTIONSTRINGS__DEFAULTCONNECTION=${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }} \
-              ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
+            docker run -d --name hostel-backend -p 4001:8080 -e CONNECTIONSTRINGS__DEFAULTCONNECTION=${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }} ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
           EOF
