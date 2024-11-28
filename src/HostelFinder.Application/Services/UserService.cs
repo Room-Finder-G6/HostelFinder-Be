@@ -9,7 +9,6 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace HostelFinder.Application.Services
@@ -18,6 +17,8 @@ namespace HostelFinder.Application.Services
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
+        private readonly IUserMembershipRepository _userMembershipRepository;
+        private readonly IMembershipRepository _membershipRepository;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly IValidator<CreateUserRequestDto> _createUserValidator;
         private readonly IS3Service _s3Service;
@@ -26,8 +27,10 @@ namespace HostelFinder.Application.Services
         (
             IMapper mapper,
             IUserRepository userRepository,
+            IMembershipRepository membershipRepository,
             IValidator<CreateUserRequestDto> createUserValidator,
-            IS3Service s3Service
+            IS3Service s3Service, 
+            IUserMembershipRepository userMembershipRepository
         )
         {
             _mapper = mapper;
@@ -35,6 +38,8 @@ namespace HostelFinder.Application.Services
             _passwordHasher = new PasswordHasher<User>();
             _createUserValidator = createUserValidator;
             _s3Service = s3Service;
+            _membershipRepository = membershipRepository;
+            _userMembershipRepository = userMembershipRepository;
         }
 
         public async Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request)
@@ -159,6 +164,135 @@ namespace HostelFinder.Application.Services
             var user = await _userRepository.GetUserByHostelIdAsync(hostelId);
             var userDto = _mapper.Map<UserProfileResponse>(user);
             return new Response<UserProfileResponse>(userDto);
+        }
+
+        public async Task<Response<string>> BuyMembershipAsync(Guid userId, Guid membershipId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "User not found."
+                };
+            }
+
+            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
+
+            var membership = await _membershipRepository.GetByIdAsync(membershipId);
+            if (membership == null)
+            {
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Membership not found."
+                };
+            }
+
+            if (user.WalletBalance < membership.Price)
+            {
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Số dư không đủ! Vui lòng nạp tiền thêm vào ví."
+                };
+            }
+
+            user.WalletBalance -= membership.Price;
+            await _userRepository.UpdateAsync(user);
+
+            if (userMembership == null)
+            {
+                var startDate = DateTime.Now;
+                var expiryDate = startDate.AddMonths(membership.Duration);
+
+                var newUserMembership = new UserMembership
+                {
+                    UserId = userId,
+                    MembershipId = membershipId,
+                    StartDate = startDate,
+                    ExpiryDate = expiryDate,
+                    PostsUsed = 0,
+                    PushTopUsed = 0,
+                    IsPaid = true,
+                    CreatedBy = "System",
+                    CreatedOn = DateTime.Now
+                };
+
+                await _userMembershipRepository.AddAsync(newUserMembership);
+
+                if (user.Role == UserRole.User)
+                {
+                    user.Role = UserRole.Landlord;
+                    await _userRepository.UpdateAsync(user);
+                }
+
+                return new Response<string>
+                {
+                    Succeeded = true,
+                    Message = "Mua gói thành viên thành công."
+                };
+            }
+
+            if (userMembership.MembershipId == membershipId)
+            {
+                if (userMembership.ExpiryDate > DateTime.Now)
+                {
+                    return new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "Bạn đang sử dụng gói thành viên này. Không thể mua thêm!"
+                    };
+                }
+                else
+                {
+                    userMembership.ExpiryDate = DateTime.Now.AddMonths(membership.Duration); 
+                    userMembership.PostsUsed = 0;  
+                    userMembership.PushTopUsed = 0;
+
+                    await _userMembershipRepository.UpdateAsync(userMembership);
+
+                    return new Response<string>
+                    {
+                        Succeeded = true,
+                        Message = "Gói thành viên dược gia hạn thành công."
+                    };
+                }
+            }
+
+            if (userMembership.MembershipId != membershipId)
+            {
+                var startDate = DateTime.Now;
+                var expiryDate = startDate.AddMonths(membership.Duration);
+
+                var newUserMembership = new UserMembership
+                {
+                    UserId = userId,
+                    MembershipId = membershipId,
+                    StartDate = startDate,
+                    ExpiryDate = expiryDate,
+                    PostsUsed = 0,
+                    PushTopUsed = 0,
+                    IsPaid = true,
+                    CreatedBy = "System",
+                    CreatedOn = DateTime.Now
+                };
+
+                await _userMembershipRepository.AddAsync(newUserMembership);
+
+                return new Response<string>
+                {
+                    Succeeded = true,
+                    Message = "Gói thành viên mới đã được thêm thành công."
+                };
+            }
+
+            return new Response<string>
+            {
+                Succeeded = false,
+                Message = "Không xác định được trạng thái của membership."
+            };
         }
     }
 }

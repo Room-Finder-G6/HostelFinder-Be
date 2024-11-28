@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.Interfaces.IRepositories;
+﻿using DocumentFormat.OpenXml.InkML;
+using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
@@ -19,6 +20,14 @@ namespace HostelFinder.Infrastructure.Repositories
                 .ThenInclude(m => m.MembershipServices)
                 .FirstOrDefaultAsync(um => um.UserId == userId);
         }
+
+        public async Task<List<UserMembership>> GetExpiredMembershipsAsync()
+        {
+            return await _dbContext.UserMemberships
+                 .Where(um => um.ExpiryDate < DateTime.Now)
+                 .ToListAsync();
+        }
+
     }
 
 }
