@@ -82,5 +82,11 @@ jobs:
                   -e MAILSETTINGS__SENDERNAME="${{ secrets.MAILSETTINGS__SENDERNAME }}" \
                   -e MAILSETTINGS__SENDEREMAIL="${{ secrets.MAILSETTINGS__SENDEREMAIL }}" \
                   -e MAILSETTINGS__PASSWORD="${{ secrets.MAILSETTINGS__PASSWORD }}" \
+                  -e PayOS__ClientId="${{ secrets.PayOS__ClientId }}" \
+                  -e PayOS__ApiKey="${{ secrets.PayOS__ApiKey }}" \
+                  -e PayOS__ChecksumKey="${{ secrets.PayOS__ChecksumKey }}" \
+                  -e PayOS__ReturnUrl="${{ secrets.PayOS__ReturnUrl }}" \
+                  -e PayOS__CancelUrl="${{ secrets.PayOS__CancelUrl }}" \
+                  -e PayOS__WebhookUrl="${{ secrets.PayOS__WebhookUrl }}" \
                   ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
           EOF
