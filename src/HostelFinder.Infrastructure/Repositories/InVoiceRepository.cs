@@ -97,5 +97,27 @@ namespace HostelFinder.Infrastructure.Repositories
 
             return (invoices: invoices, totalRecord: totalRecords);
         }
+
+        public async Task<decimal> GetRoomRevenueByMonthAsync(Guid roomId, int month, int year)
+        {
+            var invoices = _dbContext.InVoices
+                .AsNoTracking()
+                .Include(x => x.Room)
+                .Where(invoice => !invoice.IsDeleted && invoice.RoomId == roomId && invoice.BillingMonth == month &&
+                                  invoice.BillingYear == year && invoice.IsPaid == true);
+            
+            decimal totalRevenue = await invoices.SumAsync(invoice => invoice.TotalAmount);
+            return totalRevenue;
+        }
+
+        public Task<decimal> GetRoomRevenueByYearAsync(Guid roomId, int year)
+        {
+            var invoices = _dbContext.InVoices
+                .AsNoTracking()
+                .Include(x => x.Room)
+                .Where(invoice => !invoice.IsDeleted && invoice.RoomId == roomId && invoice.BillingYear == year && invoice.IsPaid == true);
+            
+            return invoices.SumAsync(invoice => invoice.TotalAmount);
+        }
     }
 }
