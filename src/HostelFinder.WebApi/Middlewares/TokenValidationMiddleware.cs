@@ -18,23 +18,14 @@ namespace HostelFinder.WebApi.Middlewares
 
         public async Task InvokeAsync(HttpContext context, HostelFinderDbContext _dbContext)
         {
-            if (context.Request.Path.StartsWithSegments("/api/v1/auth/login"))
+            if (context.Request.Path.StartsWithSegments("/api/auth/login"))
             {
                 await _next(context);
                 return;
             }
-
-            //if (!context.Request.Headers.ContainsKey("Authorization"))
-            //{
-            //    context.Response.StatusCode = 401;
-            //    await context.Response.WriteAsync("Unauthorized request: Missing token");
-            //    _logger.LogInformation("Unauthorized request: Missing token");
-
-            //    return;
-            //}
+            
 
             var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
             var blackListToken = await _dbContext.BlackListTokens.FirstOrDefaultAsync(x => x.Token == token);
             if (blackListToken != null)
             {

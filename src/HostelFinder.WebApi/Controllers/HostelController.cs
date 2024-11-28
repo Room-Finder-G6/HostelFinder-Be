@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -43,11 +44,11 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("GetHostelsByLandlordId/{landlordId}")]
-        public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId)
+        public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId, string? searchPhrase, int? pageNumber, int? pageSize,string? sortBy, SortDirection? sortDirection)
         {
             try
             {
-                var hostels = await _hostelService.GetHostelsByUserIdAsync(landlordId);
+                var hostels = await _hostelService.GetHostelsByUserIdAsync(landlordId,searchPhrase, pageNumber, pageSize, sortBy, sortDirection);
                 if (hostels.Succeeded && hostels.Data != null)
                 {
                     return Ok(hostels);

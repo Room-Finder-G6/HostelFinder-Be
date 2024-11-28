@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Application.Common;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Interfaces.IRepositories
@@ -10,5 +11,8 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<Room> GetRoomWithDetailsAndServiceCostsByIdAsync(Guid roomId);
         Task<List<Room>> GetRoomsByHostelIdAsync(Guid hostelId, int? floor);
         Task<Room> GetRoomByIdAsync(Guid roomId);
+        
+        Task<List<Room>> GetRoomsByHostelAsync(Guid hostelId);
+
     }
 }

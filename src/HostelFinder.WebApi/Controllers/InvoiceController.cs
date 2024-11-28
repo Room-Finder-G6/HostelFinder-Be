@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -226,6 +227,33 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }        
+        
+        [HttpGet("getInvoicesByHostelId")]
+        public async Task<IActionResult> GetInvoicesByHostelId(Guid hostelId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection)
+        {
+            try
+            {
+                var response = await _invoiceService.GetAllInvoicesByHostelIdAsync(hostelId, searchPhrase, pageNumber, pageSize, sortBy, sortDirection);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(new Response<List<InvoiceResponseDto>>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<List<InvoiceResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
 
 
     }

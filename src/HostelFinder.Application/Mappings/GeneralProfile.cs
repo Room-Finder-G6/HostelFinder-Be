@@ -188,6 +188,8 @@ public class GeneralProfile : Profile
         CreateMap<Invoice, InvoiceResponseDto>().ReverseMap();
         CreateMap<UpdateInvoiceRequestDto, Invoice>().ReverseMap();
         CreateMap<AddInVoiceRequestDto, Invoice>().ReverseMap();
+        CreateMap<ListInvoiceResponseDto, Invoice>().ReverseMap()
+            .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName));
 
         //Room
         CreateMap<Room, RoomResponseDto>().ReverseMap();

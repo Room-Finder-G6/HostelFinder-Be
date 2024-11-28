@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Application.Common;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -9,5 +10,9 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<IDbContextTransaction> BeginTransactionAsync();
 
         Task<Invoice?> GetLastInvoiceByIdAsync(Guid roomId);
+        
+        Task<List<Invoice>> GetInvoicesByRoomIdAsync(Guid roomId);
+        
+        Task<(List<Invoice> invoices, int  totalRecord)> GetAllMatchingInvoiceAysnc(Guid hostelId, string? searchPhrase, int pageNumber, int pageSize, string? sortBy, SortDirection sortDirection);
     }
 }

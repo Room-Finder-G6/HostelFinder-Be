@@ -3,9 +3,11 @@ using HostelFinder.Application.DTOs.Invoice.Responses;
 using HostelFinder.Application.DTOs.InVoice.Requests;
 using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.DTOs.Room.Responses;
+using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using Microsoft.Extensions.Logging;
@@ -336,6 +338,22 @@ namespace HostelFinder.Application.Services
                 return new Response<bool>{Succeeded = true, Message = $"Đã có hóa đơn cho tháng {billingMonth}/{billingYear}"};
             }
             return new Response<bool>{Succeeded = false, Message = $"Chưa có hóa đơn cho tháng {billingMonth}/{billingYear}"};
+        }
+
+        public async Task<PagedResponse<List<ListInvoiceResponseDto>>> GetAllInvoicesByHostelIdAsync(Guid hostelId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy,
+            SortDirection sortDirection)
+        {
+            try
+            {
+                var listInvoices = await _invoiceRepository.GetAllMatchingInvoiceAysnc(hostelId, searchPhrase,pageNumber ?? 1, pageSize ?? 10, sortBy, sortDirection);
+                var result = _mapper.Map<List<ListInvoiceResponseDto>>(listInvoices.invoices);
+                var pagedResponse = PaginationHelper.CreatePagedResponse(result, pageNumber ?? 1, pageSize ?? 10, listInvoices.totalRecord);
+                return pagedResponse;
+            }
+            catch (Exception ex)
+            {
+                return new PagedResponse<List<ListInvoiceResponseDto>> { Message = ex.Message };
+            }
         }
     }
 }
