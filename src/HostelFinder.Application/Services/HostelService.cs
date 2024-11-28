@@ -7,6 +7,7 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using HostelFinder.Domain.Common.Constants;
 
 namespace HostelFinder.Application.Services
@@ -31,9 +32,9 @@ namespace HostelFinder.Application.Services
             _addressRepository = addressRepository;
         }
 
-        public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request,
-            List<string> imageUrls)
+        public async Task<Response<HostelResponseDto>> AddHostelAsync(AddHostelRequestDto request, string imageUrl)
         {
+            // Kiểm tra trọ có bị trùng địa chỉ không
             var isDuplicate = await _hostelRepository.CheckDuplicateHostelAsync(
                 request.HostelName,
                 request.Address.Province,
@@ -50,10 +51,13 @@ namespace HostelFinder.Application.Services
             var hostel = _mapper.Map<Hostel>(request);
             hostel.CreatedOn = DateTime.Now;
             hostel.CreatedBy = request.LandlordId.ToString();
+
             try
             {
+                // Thêm Hostel vào cơ sở dữ liệu
                 var hostelAdded = await _hostelRepository.AddAsync(hostel);
 
+                // Thêm các dịch vụ vào Hostel
                 foreach (var serviceId in request.ServiceId)
                 {
                     HostelServices hostelServices = new HostelServices
@@ -67,7 +71,7 @@ namespace HostelFinder.Application.Services
                     await _hostelServiceRepository.AddAsync(hostelServices);
                 }
 
-                foreach (var imageUrl in imageUrls)
+                if (!string.IsNullOrEmpty(imageUrl))
                 {
                     await _imageRepository.AddAsync(new Image
                     {
@@ -76,11 +80,14 @@ namespace HostelFinder.Application.Services
                     });
                 }
 
-                //map domain to Dtos
+                // Map domain object to DTO
                 var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
 
                 return new Response<HostelResponseDto>
-                { Data = hostelResponseDto, Message = "Thêm trọ mới thành công." };
+                {
+                    Data = hostelResponseDto,
+                    Message = "Thêm trọ mới thành công."
+                };
             }
             catch (Exception ex)
             {
@@ -88,7 +95,8 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, List<string> imageUrls)
+
+        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, IFormFile? image)
         {
             var hostel = await _hostelRepository.GetByIdAsync(hostelId);
             if (hostel == null)
@@ -152,15 +160,18 @@ namespace HostelFinder.Application.Services
                     }
 
                     // Update images
-                    var existingImages = await _imageRepository.GetImagesByHostelIdAsync(hostelId);
-                    foreach (var image in existingImages)
+                    if (image != null)
                     {
-                        await _s3Service.DeleteFileAsync(image.Url);
-                        await _imageRepository.DeletePermanentAsync(image.Id);
-                    }
+                        // Xóa hình ảnh cũ
+                        var existingImages = await _imageRepository.GetImagesByHostelIdAsync(hostelId);
+                        foreach (var existingImage in existingImages)
+                        {
+                            await _s3Service.DeleteFileAsync(existingImage.Url);
+                            await _imageRepository.DeletePermanentAsync(existingImage.Id);
+                        }
 
-                    foreach (var imageUrl in imageUrls)
-                    {
+                        // Lưu hình ảnh mới
+                        var imageUrl = await _s3Service.UploadFileAsync(image);  // Upload hình ảnh lên S3 (hoặc nơi lưu trữ)
                         var newImage = new Image
                         {
                             HostelId = hostelId,
@@ -169,6 +180,7 @@ namespace HostelFinder.Application.Services
                         };
                         await _imageRepository.AddAsync(newImage);
                     }
+
 
                     // Save hostel details
                     await _hostelRepository.UpdateAsync(hostel);

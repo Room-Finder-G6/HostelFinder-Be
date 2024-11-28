@@ -82,12 +82,10 @@ public class GeneralProfile : Profile
         // Hostel Mapping
         CreateMap<Hostel, HostelResponseDto>()
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
-            .ForMember(dest => dest.Image, opt =>
-                opt.MapFrom(src => src.Images.Select(img => new ImageResponseDto
-                {
-                    Id = img.Id,
-                    Url = img.Url
-                }).ToList()))
+            .ForMember(dest => dest.ImageUrl, opt =>
+                opt.MapFrom(src => src.Images.FirstOrDefault().Url))
+            .ForMember(dest => dest.Services, opt =>
+                opt.MapFrom(src => src.HostelServices))
             .ReverseMap();
 
         CreateMap<Hostel, AddHostelRequestDto>()

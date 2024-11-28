@@ -1,6 +1,7 @@
 ﻿using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
@@ -19,6 +20,7 @@ namespace HostelFinder.Domain.Entities
         [Required]
         public int NumberOfRooms { get; set; }
         public string? Coordinates { get; set; }
+        [JsonIgnore]
         public virtual ICollection<HostelServices> HostelServices { get; set; } 
         public virtual ICollection<Post> Posts { get; set; }
         public virtual ICollection<Room> Rooms { get; set; }
