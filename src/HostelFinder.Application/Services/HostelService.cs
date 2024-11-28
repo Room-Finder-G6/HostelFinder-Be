@@ -95,7 +95,7 @@ namespace HostelFinder.Application.Services
         }
 
 
-        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, IFormFile image)
+        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, IFormFile? image)
         {
             var hostel = await _hostelRepository.GetByIdAsync(hostelId);
             if (hostel == null)

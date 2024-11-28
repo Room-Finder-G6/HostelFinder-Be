@@ -105,7 +105,7 @@ namespace HostelFinder.WebApi.Controllers
 
 
         [HttpPut("{hostelId}")]
-        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromForm] UpdateHostelRequestDto request, IFormFile image)
+        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromForm] UpdateHostelRequestDto request, IFormFile? image)
         {
             try
             {
