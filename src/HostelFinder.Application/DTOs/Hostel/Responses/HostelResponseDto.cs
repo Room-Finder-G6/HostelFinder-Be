@@ -1,5 +1,5 @@
 ﻿using HostelFinder.Application.DTOs.Address;
-using HostelFinder.Application.DTOs.Image.Responses;
+using HostelFinder.Application.DTOs.Service.Response;
 
 namespace HostelFinder.Application.DTOs.Hostel.Responses
 {
@@ -13,6 +13,7 @@ namespace HostelFinder.Application.DTOs.Hostel.Responses
         public int NumberOfRooms { get; set; }
         public string ImageUrl { get; set; }
         public string Coordinates { get; set; }
+        public List<HostelServiceResponseDto> Services { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
     }
 }

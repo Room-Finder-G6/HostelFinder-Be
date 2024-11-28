@@ -1,6 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.Hostel.Requests;
 using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace HostelFinder.Application.Interfaces.IServices
@@ -12,7 +13,7 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<List<ListHostelResponseDto>>> GetHostelsByUserIdAsync(Guid landlordId);
         Task<Response<HostelResponseDto>> GetHostelByIdAsync(Guid hostelId);
         Task<PagedResponse<List<ListHostelResponseDto>>> GetAllHostelAsync(GetAllHostelQuery request);
-        Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, List<string> imageUrls);
+        Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, IFormFile image);
 
     }
 }

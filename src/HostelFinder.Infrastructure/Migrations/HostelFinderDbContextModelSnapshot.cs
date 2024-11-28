@@ -70,7 +70,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasKey("HostelId");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Amenity", b =>
@@ -106,7 +106,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Amenities");
+                    b.ToTable("Amenities", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.BlackListToken", b =>
@@ -142,7 +142,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BlackListTokens");
+                    b.ToTable("BlackListTokens", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Hostel", b =>
@@ -198,7 +198,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("LandlordId");
 
-                    b.ToTable("Hostels");
+                    b.ToTable("Hostels", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.HostelServices", b =>
@@ -240,7 +240,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("HostelServices");
+                    b.ToTable("HostelServices", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Image", b =>
@@ -292,7 +292,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Images");
+                    b.ToTable("Images", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Invoice", b =>
@@ -341,7 +341,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("InVoices");
+                    b.ToTable("InVoices", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.InvoiceDetail", b =>
@@ -404,7 +404,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("InvoiceDetail");
+                    b.ToTable("InvoiceDetail", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Membership", b =>
@@ -455,7 +455,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Memberships");
+                    b.ToTable("Memberships", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.MembershipServices", b =>
@@ -502,7 +502,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("MembershipId");
 
-                    b.ToTable("MembershipServices");
+                    b.ToTable("MembershipServices", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.MeterReading", b =>
@@ -553,7 +553,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("MeterReadings");
+                    b.ToTable("MeterReadings", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Post", b =>
@@ -616,7 +616,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.RentalContract", b =>
@@ -676,7 +676,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("RentalContracts");
+                    b.ToTable("RentalContracts", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Room", b =>
@@ -744,7 +744,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("HostelId");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.RoomAmenities", b =>
@@ -783,7 +783,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("AmenityId");
 
-                    b.ToTable("RoomAmenities");
+                    b.ToTable("RoomAmenities", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.RoomDetails", b =>
@@ -829,7 +829,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasKey("RoomId");
 
-                    b.ToTable("RoomDetails");
+                    b.ToTable("RoomDetails", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.RoomTenancy", b =>
@@ -877,7 +877,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("RoomTenancies");
+                    b.ToTable("RoomTenancies", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Service", b =>
@@ -923,7 +923,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Services");
+                    b.ToTable("Services", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.ServiceCost", b =>
@@ -977,7 +977,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("ServiceCosts");
+                    b.ToTable("ServiceCosts", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Tenant", b =>
@@ -1062,7 +1062,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tenants");
+                    b.ToTable("Tenants", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.User", b =>
@@ -1140,7 +1140,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.UserMembership", b =>
@@ -1185,7 +1185,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("MembershipId");
 
-                    b.ToTable("UserMemberships");
+                    b.ToTable("UserMemberships", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Vehicle", b =>
@@ -1240,7 +1240,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Wishlist", b =>
@@ -1278,7 +1278,7 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Wishlists");
+                    b.ToTable("Wishlists", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.WishlistPost", b =>
@@ -1296,7 +1296,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("WishlistPosts");
+                    b.ToTable("WishlistPosts", (string)null);
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Address", b =>

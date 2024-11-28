@@ -7,6 +7,7 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace HostelFinder.Application.Services
 {
@@ -94,7 +95,7 @@ namespace HostelFinder.Application.Services
         }
 
 
-        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, List<string> imageUrls)
+        public async Task<Response<HostelResponseDto>> UpdateHostelAsync(Guid hostelId, UpdateHostelRequestDto request, IFormFile image)
         {
             var hostel = await _hostelRepository.GetByIdAsync(hostelId);
             if (hostel == null)
@@ -158,15 +159,18 @@ namespace HostelFinder.Application.Services
                     }
 
                     // Update images
-                    var existingImages = await _imageRepository.GetImagesByHostelIdAsync(hostelId);
-                    foreach (var image in existingImages)
+                    if (image != null)
                     {
-                        await _s3Service.DeleteFileAsync(image.Url);
-                        await _imageRepository.DeletePermanentAsync(image.Id);
-                    }
+                        // Xóa hình ảnh cũ
+                        var existingImages = await _imageRepository.GetImagesByHostelIdAsync(hostelId);
+                        foreach (var existingImage in existingImages)
+                        {
+                            await _s3Service.DeleteFileAsync(existingImage.Url);
+                            await _imageRepository.DeletePermanentAsync(existingImage.Id);
+                        }
 
-                    foreach (var imageUrl in imageUrls)
-                    {
+                        // Lưu hình ảnh mới
+                        var imageUrl = await _s3Service.UploadFileAsync(image);  // Upload hình ảnh lên S3 (hoặc nơi lưu trữ)
                         var newImage = new Image
                         {
                             HostelId = hostelId,
@@ -175,6 +179,7 @@ namespace HostelFinder.Application.Services
                         };
                         await _imageRepository.AddAsync(newImage);
                     }
+
 
                     // Save hostel details
                     await _hostelRepository.UpdateAsync(hostel);
