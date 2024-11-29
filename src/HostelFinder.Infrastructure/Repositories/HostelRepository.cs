@@ -24,7 +24,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
             && h.Address.District == district
             && h.Address.Commune == commune
             && h.Address.DetailAddress == detailAddress
-        );
+            && !h.IsDeleted);
     }
 
     public async Task<IEnumerable<Hostel>> GetHostelsByUserIdAsync(Guid landlordId)
@@ -41,7 +41,8 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
         var searchPhraseLower = searchPhrase?.ToLower();
         var baseQuery = _dbContext.Hostels.Include(h => h.Landlord)
             .Where(x => searchPhraseLower == null || (x.HostelName.ToLower().Contains(searchPhraseLower)
-                                                      || x.Landlord.Username.ToLower().Contains(searchPhraseLower)));
+                                                      || x.Landlord.Username.ToLower().Contains(searchPhraseLower)
+                                                      && !x.IsDeleted));
 
         var totalRecords = await baseQuery.CountAsync();
 
@@ -70,7 +71,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     public Task<Hostel> GetHostelByIdAndUserIdAsync(Guid hostelId, Guid userId)
     {
         return Task.FromResult(_dbContext.Hostels.Include(h => h.Address)
-            .FirstOrDefault(h => h.Id == hostelId && h.LandlordId == userId));
+            .FirstOrDefault(h => h.Id == hostelId && h.LandlordId == userId && !h.IsDeleted));
     }
 
     public async Task<Hostel> GetHostelWithReviewsByPostIdAsync(Guid postId)
@@ -109,7 +110,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
             .Include(h => h.Address)
             .Include(h => h.Images)
              .Where(x => x.LandlordId == landlordId);
-        baseQuery = baseQuery.Where(x => searchPhraseLower == null || (x.HostelName.ToLower().Contains(searchPhraseLower)
+        baseQuery = baseQuery.Where(x =>!x.IsDeleted && searchPhraseLower == null || (x.HostelName.ToLower().Contains(searchPhraseLower)
                                                                       || x.Landlord.Username.ToLower().Contains(searchPhraseLower)));
 
         var totalRecords = await baseQuery.CountAsync();
@@ -156,6 +157,6 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
             .Include(s => s.HostelServices)
             .ThenInclude(s => s.Services)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(h => h.Id == hostelId);
+            .FirstOrDefaultAsync(h => h.Id == hostelId && !h.IsDeleted);
     }
 }

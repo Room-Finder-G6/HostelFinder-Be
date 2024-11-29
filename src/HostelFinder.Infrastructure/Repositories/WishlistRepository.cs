@@ -17,7 +17,7 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.Wishlists
                 .Include(w => w.WishlistPosts)
                 .ThenInclude(wr => wr.Post)
-                .FirstOrDefaultAsync(w => w.UserId == userId);
+                .FirstOrDefaultAsync(w => w.UserId == userId && !w.IsDeleted);
         }
 
         public async Task AddRoomToWishlistAsync(WishlistPost wishlistRoom)

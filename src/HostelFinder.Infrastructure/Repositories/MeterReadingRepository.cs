@@ -19,7 +19,8 @@ namespace HostelFinder.Infrastructure.Repositories
                                                                 mr => mr.RoomId == roomId &&
                                                                 mr.ServiceId == serviceId &&
                                                                 mr.BillingMonth == billingMonth &&
-                                                                mr.BillingYear == billingYear);
+                                                                mr.BillingYear == billingYear &&
+                                                                !mr.IsDeleted);
             //if (meterReading == null)
             //{
             //    throw new NotFoundException($"Không tìm thấy số điện và số nước ở phòng {roomId} ");
@@ -38,7 +39,8 @@ namespace HostelFinder.Infrastructure.Repositories
                 mr.RoomId == roomId &&
                 mr.ServiceId == serviceId &&
                 mr.BillingMonth == previousMonth
-                && mr.BillingYear == previousYear);
+                && mr.BillingYear == previousYear
+                && !mr.IsDeleted);
             //if (meterReading == null)
             //{
             //    throw new NotFoundException($"Không tìm thấy số điện và số nước ở phòng {roomId} ");

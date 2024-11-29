@@ -14,7 +14,7 @@ public class AddressRepository : BaseGenericRepository<Address>, IAddressReposit
     public async Task<Address> GetAddressByHostelIdAsync(Guid hostelId)
     {
         return await _dbContext.Addresses
-            .FirstOrDefaultAsync(a => a.HostelId == hostelId);
+            .FirstOrDefaultAsync(a => a.HostelId == hostelId && !a.IsDeleted);
     }
 
 }

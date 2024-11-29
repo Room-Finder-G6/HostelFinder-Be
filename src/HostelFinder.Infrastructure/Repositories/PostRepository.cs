@@ -25,7 +25,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
         var baseQuery = _dbContext
             .Posts
-            .Where(p => searchPhraseLower == null || (p.Title.ToLower().Contains(searchPhraseLower)
+            .Where(p => !p.IsDeleted && searchPhraseLower == null || (p.Title.ToLower().Contains(searchPhraseLower)
                                                       || p.Description.ToLower().Contains(searchPhraseLower)));
 
         var totalCount = await baseQuery.CountAsync();
@@ -57,12 +57,12 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
         return _dbContext.Posts
             .Include(x => x.Images)
-            .FirstOrDefaultAsync(x => x.Id == postId);
+            .FirstOrDefaultAsync(x => x.Id == postId && !x.IsDeleted);
     }
 
     public Task<Post?> GetPostByIdWithHostelAsync(Guid postId)
     {
-        return _dbContext.Posts.Include(p => p.Hostel).FirstOrDefaultAsync(x => x.Id == postId);
+        return _dbContext.Posts.Include(p => p.Hostel).FirstOrDefaultAsync(x => x.Id == postId && !x.IsDeleted);
     }
 
     public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(Guid userId)
@@ -72,7 +72,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .ThenInclude(h => h.Address)
             .Include(x => x.Room)
             .Include(x => x.Images)
-            .Where(x => x.Hostel.LandlordId == userId)
+            .Where(x => x.Hostel.LandlordId == userId && !x.IsDeleted)
             .AsNoTracking() // Tăng hiệu suất cho truy vấn chỉ đọc
             .ToListAsync();
         return posts;

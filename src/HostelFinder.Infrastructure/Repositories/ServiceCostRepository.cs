@@ -17,7 +17,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<ServiceCost> CheckExistingServiceCostAsync(Guid hostelId, Guid serviceId, DateTime effectiveFrom)
         {
             return await _dbContext.ServiceCosts.SingleOrDefaultAsync(sc => sc.HostelId == hostelId &&
-                                                                        sc.ServiceId == serviceId
+                                                                        sc.ServiceId == serviceId && !sc.IsDeleted
                                                                          );
         }
 
@@ -58,12 +58,13 @@ namespace HostelFinder.Infrastructure.Repositories
                     && sc.ServiceId == serviceId
                     && sc.EffectiveFrom <= effectiveFrom
                     && (sc.EffectiveTo == null || sc.EffectiveTo >= effectiveFrom)
+                    && !sc.IsDeleted
                 );
         }
 
         public async Task<ServiceCost> GetLastServiceCostAsync(Guid hostelId, Guid serviceId)
         {
-            return await _dbContext.ServiceCosts.Where(sc => sc.HostelId == hostelId && sc.ServiceId == serviceId)
+            return await _dbContext.ServiceCosts.Where(sc => sc.HostelId == hostelId && sc.ServiceId == serviceId && !sc.IsDeleted)
                 .OrderByDescending(sc => sc.EffectiveFrom)
                 .FirstOrDefaultAsync();
         }
@@ -73,7 +74,8 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.ServiceCosts
                 .Where(sc => sc.HostelId == hostelId
                              && sc.EffectiveFrom <= date
-                             && (sc.EffectiveTo == null || sc.EffectiveTo >= date))
+                             && (sc.EffectiveTo == null || sc.EffectiveTo >= date)
+                             && !sc.IsDeleted)
                 .ToListAsync();
         }
     }

@@ -48,7 +48,7 @@ namespace HostelFinder.Infrastructure.Repositories
         {
             var membership = await _dbContext.Memberships
                 .Include(m => m.MembershipServices)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
             return membership;
         }
 
@@ -71,7 +71,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<List<MembershipServices?>> GetMembershipServicesByMembershipIdAsync(Guid membershipId)
         {
             return await _dbContext.MembershipServices
-                .Where(ms => ms.MembershipId == membershipId)
+                .Where(ms => ms.MembershipId == membershipId && !ms.IsDeleted)
                 .ToListAsync();
         }
 
@@ -80,7 +80,7 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.UserMemberships
                 .Include(um => um.Membership)
                 .ThenInclude(m => m.MembershipServices)
-                .Where(um => um.UserId == userId)
+                .Where(um => um.UserId == userId && !um.IsDeleted)
                 .ToListAsync();
         }
 

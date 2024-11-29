@@ -16,7 +16,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<int> CountCurrentTenantsAsync(Guid roomId)
         {
             return await _dbContext.RoomTenancies
-                .Where(rt => rt.RoomId == roomId && (rt.MoveOutDate == null || rt.MoveOutDate > DateTime.Now))
+                .Where(rt => rt.RoomId == roomId && (rt.MoveOutDate == null || rt.MoveOutDate > DateTime.Now) && !rt.IsDeleted)
                 .CountAsync();
         }
         // lấy ra danh sách người đang thuê trọ hiện tại
@@ -26,7 +26,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(x => x.Tenant)
                 .Include(x => x.Room)
                 .Where(x => x.RoomId == roomId && x.MoveInDate <=DateTime.Now
-                                    &&(x.MoveOutDate == null || x.MoveOutDate > DateTime.Now))
+                                    &&(x.MoveOutDate == null || x.MoveOutDate > DateTime.Now) && !x.IsDeleted)
                 .AsNoTracking()
                 .ToListAsync();
             
@@ -40,7 +40,8 @@ namespace HostelFinder.Infrastructure.Repositories
                .Where(x => x.RoomId == roomId 
                                     && endDate.HasValue 
                                         && x.MoveOutDate.HasValue 
-                                            && startDate <= x.MoveInDate && x.MoveInDate <= endDate)
+                                            && startDate <= x.MoveInDate && x.MoveInDate <= endDate
+                                                && !x.IsDeleted)
                .ToListAsync();
             if(tanecyCurrentInRoomList.Count == 0)
             {
