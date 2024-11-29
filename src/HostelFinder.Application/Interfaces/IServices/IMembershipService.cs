@@ -13,7 +13,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<bool>> DeleteMembershipAsync(Guid id);
         Task<Response<string>> UpdatePostCountAsync(Guid userId);
         Task<Response<string>> UpdatePushTopCountAsync(Guid userId);
-        Task<Response<string>> AddUserMembershipAsync(AddUserMembershipRequestDto userMembershipDto);
         Task<Response<List<PostingMemberShipServiceDto>>> GetMembershipServicesForUserAsync(Guid userId);
     }
 }

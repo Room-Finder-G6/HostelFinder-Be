@@ -199,7 +199,7 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> BuyMembership(Guid userId, Guid membershipId)
         {
             // Gọi dịch vụ để xử lý nghiệp vụ mua/gia hạn membership
-            var response = await _userService.BuyMembershipAsync(userId, membershipId);
+            var response = await _userService.ManageUserMembershipAsync(userId, membershipId);
 
             if (!response.Succeeded)
             {
