@@ -14,7 +14,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<Image> GetImageUrlByRoomId(Guid roomId)
         {
-            var imageUrl = await _dbContext.Images.FirstOrDefaultAsync(x => x.RoomId == roomId);
+            var imageUrl = await _dbContext.Images.FirstOrDefaultAsync(x => x.RoomId == roomId && !x.IsDeleted);
             if (imageUrl == null)
             {
                 return null;
@@ -25,21 +25,21 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<List<Image>> GetImagesByHostelIdAsync(Guid hostelId)
         {
             return await _dbContext.Images
-                .Where(img => img.HostelId == hostelId)
+                .Where(img => img.HostelId == hostelId && !img.IsDeleted)
                 .ToListAsync();
         }
 
         public async Task<List<Image>> GetImagesByPostIdAsync(Guid postId)
         {
             return await _dbContext.Images
-                .Where(img => img.PostId == postId)
+                .Where(img => img.PostId == postId && !img.IsDeleted)
                 .ToListAsync();
         }
 
         public async Task<List<string>> GetAllUrlRoomPicture(Guid roomId)
         {
             var urlImages = await _dbContext.Images
-                .Where(img => img.RoomId == roomId)
+                .Where(img => img.RoomId == roomId && !img.IsDeleted)
                 .Select(img => img.Url)
                 .ToListAsync();
             if(!urlImages.Any() || urlImages == null)

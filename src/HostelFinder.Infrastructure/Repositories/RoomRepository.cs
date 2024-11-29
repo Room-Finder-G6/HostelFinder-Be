@@ -74,7 +74,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<bool> RoomExistsAsync(string roomName, Guid hostelId)
         {
-            return await _dbContext.Rooms.AnyAsync(r => r.RoomName == roomName && r.HostelId == hostelId);
+            return await _dbContext.Rooms.AnyAsync(r => r.RoomName == roomName && r.HostelId == hostelId && !r.IsDeleted);
         }
 
         public async Task<Room> GetRoomByIdAsync(Guid roomId)

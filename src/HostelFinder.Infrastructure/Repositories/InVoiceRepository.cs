@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
@@ -26,7 +26,7 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.InVoices
                 .Include(x => x.InvoiceDetails)
                 .ThenInclude(details => details.Service)
-                .Where(x => x.RoomId == roomId)
+                .Where(x => x.RoomId == roomId && !x.IsDeleted)
                 .OrderByDescending(x => x.BillingYear)
                 .ThenByDescending(x => x.BillingMonth)
                 .FirstOrDefaultAsync();
@@ -38,7 +38,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 .AsNoTracking()
                 .Include(x => x.InvoiceDetails)
                 .ThenInclude(details => details.Service)
-                .Where(x => x.RoomId == roomId)
+                .Where(x => x.RoomId == roomId && !x.IsDeleted)
                 .OrderByDescending(x => x.BillingYear)
                 .ThenByDescending(x => x.BillingMonth)
                 .ToListAsync();
@@ -60,7 +60,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(x => x.Room)
                 .Include(x => x.InvoiceDetails)
                 .ThenInclude(details => details.Service)
-                .Where(x => roomsQuery.Contains(x.RoomId));
+                .Where(x => roomsQuery.Contains(x.RoomId) && !x.IsDeleted);
 
             if (!string.IsNullOrEmpty(searchPhrase))
             {
@@ -104,7 +104,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 .AsNoTracking()
                 .Include(x => x.Room)
                 .Where(invoice => !invoice.IsDeleted && invoice.RoomId == roomId && invoice.BillingMonth == month &&
-                                  invoice.BillingYear == year && invoice.IsPaid == true);
+                                  invoice.BillingYear == year && invoice.IsPaid == true && !invoice.IsDeleted);
             
             decimal totalRevenue = await invoices.SumAsync(invoice => invoice.TotalAmount);
             return totalRevenue;
@@ -115,9 +115,18 @@ namespace HostelFinder.Infrastructure.Repositories
             var invoices = _dbContext.InVoices
                 .AsNoTracking()
                 .Include(x => x.Room)
-                .Where(invoice => !invoice.IsDeleted && invoice.RoomId == roomId && invoice.BillingYear == year && invoice.IsPaid == true);
+                .Where(invoice => !invoice.IsDeleted && invoice.RoomId == roomId && invoice.BillingYear == year && invoice.IsPaid == true && !invoice.IsDeleted);
             
             return invoices.SumAsync(invoice => invoice.TotalAmount);
         }
+
+        public async Task<Invoice?> GetInvoiceByIdAsync(Guid invoiceId)
+        {
+            return await _dbContext.InVoices
+                .Include(x => x.InvoiceDetails)
+                .ThenInclude(details => details.Service)
+                .FirstOrDefaultAsync(x => x.Id == invoiceId && !x.IsDeleted);
+        }
+
     }
 }

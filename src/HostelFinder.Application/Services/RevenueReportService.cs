@@ -51,7 +51,8 @@ public class RevenueReportService : IRevenueReportService
                 reports.RoomRevenueDetail.Add(new RoomRevenueDetailReport()
                 {
                     RoomName = room.RoomName,
-                    TotalRevenue = roomRevenue
+                    TotalRevenue = roomRevenue,
+                    Year = year
                 });
                 totalAllRevenue += roomRevenue;
             }
@@ -86,7 +87,9 @@ public class RevenueReportService : IRevenueReportService
                 reports.RoomRevenueDetail.Add(new RoomRevenueDetailReport()
                 {
                     RoomName = room.RoomName,
-                    TotalRevenue = roomRevenue
+                    TotalRevenue = roomRevenue,
+                    Month = month,
+                    Year = year
                 });
                 totalAllRevenue += roomRevenue;
             }
@@ -101,4 +104,10 @@ public class RevenueReportService : IRevenueReportService
             return new Response<RoomRevenueReport> { Succeeded = false, Message = ex.Message };
         }
     }
+
+    public Task<Response<RoomRevenueReport>> GetEmptyRoomReport(Guid hostelId)
+    {
+        throw new NotImplementedException();
+    }
+
 }

@@ -18,7 +18,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<RentalContract?> CheckExpiredContractAsync(Guid roomId, DateTime startDate, DateTime? endDate)
         {
             var roomExists = await _dbContext.RentalContracts
-                        .AnyAsync(rt => rt.RoomId == roomId);
+                        .AnyAsync(rt => rt.RoomId == roomId && !rt.IsDeleted);
 
             if (!roomExists)
             {
@@ -28,6 +28,7 @@ namespace HostelFinder.Infrastructure.Repositories
             .FirstOrDefaultAsync(rt => rt.RoomId == roomId
                                         && rt.EndDate.HasValue
                                         && (rt.StartDate <= endDate) && (rt.EndDate >= startDate)
+                                        && !rt.IsDeleted
                                         );
             return rentalContract;
         }
@@ -41,7 +42,8 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(rt => rt.Tenant)
                 .Where(rt => rt.RoomId == roomId
                         && rt.StartDate.Date <= currentDate
-                            && (rt.EndDate == null || rt.EndDate >= currentDate))
+                            && (rt.EndDate == null || rt.EndDate >= currentDate)
+                                && !rt.IsDeleted)
                 .FirstOrDefaultAsync();
         }
     }

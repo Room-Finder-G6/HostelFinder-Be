@@ -15,7 +15,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<Tenant> GetByIdentityCardNumber(string identityCardNumber)
         {
-            var tenant = await _dbContext.Tenants.FirstOrDefaultAsync(x => x.IdentityCardNumber == identityCardNumber);
+            var tenant = await _dbContext.Tenants.FirstOrDefaultAsync(x => x.IdentityCardNumber == identityCardNumber && !x.IsDeleted);
             return tenant;
         }
     }

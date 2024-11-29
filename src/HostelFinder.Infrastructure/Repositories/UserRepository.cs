@@ -15,7 +15,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<bool> CheckEmailExistAsync(string email)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email && !x.IsDeleted);
             if (user == null)
             {
                 return false;
@@ -25,7 +25,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<bool> CheckPhoneNumberAsync(string phoneNumber)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Phone == phoneNumber);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Phone == phoneNumber && !x.IsDeleted);
             if (user == null)
             {
                 return false;
@@ -35,7 +35,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<bool> CheckUserNameExistAsync(string userName)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Username == userName);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Username == userName && !x.IsDeleted);
             if (user == null)
             {
                 return false;
@@ -66,7 +66,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<UserRole> GetRoleAsync(Guid userId)
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
             if (user == null)
             {
                 throw new Exception("User not found");
@@ -94,7 +94,7 @@ namespace HostelFinder.Infrastructure.Repositories
         {
             var hostel = await _dbContext.Hostels
                 .Include(h => h.Landlord)
-                .FirstOrDefaultAsync(h => h.Id == hostelId);
+                .FirstOrDefaultAsync(h => h.Id == hostelId && !h.IsDeleted);
 
             return hostel?.Landlord;
         }
@@ -104,7 +104,7 @@ namespace HostelFinder.Infrastructure.Repositories
             var post = await _dbContext.Posts
                 .Include(p => p.Hostel)
                 .ThenInclude(h => h.Landlord)
-                .FirstOrDefaultAsync(p => p.Id == postId);
+                .FirstOrDefaultAsync(p => p.Id == postId && !p.IsDeleted);
 
             return post?.Hostel;
         }

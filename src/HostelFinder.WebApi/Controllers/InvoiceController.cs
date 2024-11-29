@@ -254,6 +254,29 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
+        
+        [HttpGet("detail")]
+        public async Task<IActionResult> GetInvoiceDetail(Guid invoiceId)
+        {
+            try
+            {
+                var response = await _invoiceService.GetDetailInvoiceByIdAsync(invoiceId);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<InvoiceResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
 
 
     }

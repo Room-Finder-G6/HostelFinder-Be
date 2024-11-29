@@ -20,7 +20,7 @@ public class AmenityRepository : BaseGenericRepository<Amenity>, IAmenityReposit
     public async Task<IEnumerable<Amenity>> GetAmenitysByRoomIdAsync(Guid roomId)
     {
         var amenities = await _dbContext.RoomAmenities
-            .Where(ra => ra.RoomId == roomId)
+            .Where(ra => ra.RoomId == roomId && !ra.IsDeleted)
             .Include(ra => ra.Amenity)
             .Select(ra => ra.Amenity)
             .ToListAsync();

@@ -18,13 +18,13 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.UserMemberships
                 .Include(um => um.Membership)
                 .ThenInclude(m => m.MembershipServices)
-                .FirstOrDefaultAsync(um => um.UserId == userId);
+                .FirstOrDefaultAsync(um => um.UserId == userId && !um.IsDeleted);
         }
 
         public async Task<List<UserMembership>> GetExpiredMembershipsAsync()
         {
             return await _dbContext.UserMemberships
-                 .Where(um => um.ExpiryDate < DateTime.Now)
+                 .Where(um => um.ExpiryDate < DateTime.Now && !um.IsDeleted)
                  .ToListAsync();
         }
 
