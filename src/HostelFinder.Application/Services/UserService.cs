@@ -29,7 +29,7 @@ namespace HostelFinder.Application.Services
             IUserRepository userRepository,
             IMembershipRepository membershipRepository,
             IValidator<CreateUserRequestDto> createUserValidator,
-            IS3Service s3Service, 
+            IS3Service s3Service,
             IUserMembershipRepository userMembershipRepository
         )
         {
@@ -56,19 +56,19 @@ namespace HostelFinder.Application.Services
                 if (await _userRepository.CheckUserNameExistAsync(request.Username))
                 {
                     return new Response<UserDto>
-                        { Succeeded = false, Message = "Tên người dùng đã tồn tại. Vui lòng nhập tên khác" };
+                    { Succeeded = false, Message = "Tên người dùng đã tồn tại. Vui lòng nhập tên khác" };
                 }
 
                 if (await _userRepository.CheckEmailExistAsync(request.Email))
                 {
                     return new Response<UserDto>
-                        { Succeeded = false, Message = "Email đã tồn tại. Vui lòng nhập email khác." };
+                    { Succeeded = false, Message = "Email đã tồn tại. Vui lòng nhập email khác." };
                 }
 
                 if (await _userRepository.CheckPhoneNumberAsync(request.Phone))
                 {
                     return new Response<UserDto>
-                        { Succeeded = false, Message = "Số điện thoại đã tồn tại. Vui lòng nhập số điện thoại khác." };
+                    { Succeeded = false, Message = "Số điện thoại đã tồn tại. Vui lòng nhập số điện thoại khác." };
                 }
 
                 var userDomain = _mapper.Map<User>(request);
@@ -86,7 +86,7 @@ namespace HostelFinder.Application.Services
                 var userDto = _mapper.Map<UserDto>(user);
 
                 return new Response<UserDto>
-                    { Succeeded = true, Data = userDto, Message = "Bạn đã đăng ký thành công tài khoản" };
+                { Succeeded = true, Data = userDto, Message = "Bạn đã đăng ký thành công tài khoản" };
             }
             catch (Exception ex)
             {
@@ -100,7 +100,7 @@ namespace HostelFinder.Application.Services
             if (users == null || !users.Any())
             {
                 return new Response<List<UserDto>>
-                    { Succeeded = false, Errors = new List<string> { "No users found." } };
+                { Succeeded = false, Errors = new List<string> { "No users found." } };
             }
 
             var userDtos = _mapper.Map<List<UserDto>>(users);
@@ -113,7 +113,7 @@ namespace HostelFinder.Application.Services
             if (user == null)
             {
                 return new Response<UserProfileResponse>
-                    { Succeeded = false, Errors = new List<string> { "User not found." } };
+                { Succeeded = false, Errors = new List<string> { "User not found." } };
             }
 
             var userProfileResponse = _mapper.Map<UserProfileResponse>(user);
@@ -178,8 +178,6 @@ namespace HostelFinder.Application.Services
                 };
             }
 
-            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
-
             var membership = await _membershipRepository.GetByIdAsync(membershipId);
             if (membership == null)
             {
@@ -190,38 +188,29 @@ namespace HostelFinder.Application.Services
                 };
             }
 
-            if (user.WalletBalance < membership.Price)
+            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
+
+            // Nếu người dùng chưa có membership hoặc membership đã hết hạn, tiếp tục mua
+            if (userMembership == null || userMembership.ExpiryDate <= DateTime.Now)
             {
-                return new Response<string>
+                // Kiểm tra ví của người dùng
+                if (user.WalletBalance < membership.Price)
                 {
-                    Succeeded = false,
-                    Message = "Số dư không đủ! Vui lòng nạp tiền thêm vào ví."
-                };
-            }
+                    return new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "Số dư không đủ! Vui lòng nạp tiền thêm vào ví."
+                    };
+                }
 
-            user.WalletBalance -= membership.Price;
-            await _userRepository.UpdateAsync(user);
+                // Trừ tiền từ ví người dùng
+                user.WalletBalance -= membership.Price;
+                await _userRepository.UpdateAsync(user);
 
-            if (userMembership == null)
-            {
-                var startDate = DateTime.Now;
-                var expiryDate = startDate.AddDays(membership.Duration);
+                // Tạo hoặc cập nhật membership mới
+                await CreateOrUpdateMembership(userId, membershipId, membership.Duration);
 
-                var newUserMembership = new UserMembership
-                {
-                    UserId = userId,
-                    MembershipId = membershipId,
-                    StartDate = startDate,
-                    ExpiryDate = expiryDate,
-                    PostsUsed = 0,
-                    PushTopUsed = 0,
-                    IsPaid = true,
-                    CreatedBy = "System",
-                    CreatedOn = DateTime.Now
-                };
-
-                await _userMembershipRepository.AddAsync(newUserMembership);
-
+                // Nếu người dùng chưa có gói thành viên (User -> Landlord), nâng cấp role
                 if (user.Role == UserRole.User)
                 {
                     user.Role = UserRole.Landlord;
@@ -231,55 +220,38 @@ namespace HostelFinder.Application.Services
                 return new Response<string>
                 {
                     Succeeded = true,
-                    Message = "Mua gói thành viên thành công."
+                    Message = userMembership == null ? "Mua gói thành viên thành công." : "Gói thành viên mới đã đăng ký thành công."
                 };
             }
 
-            if (userMembership.MembershipId == membershipId)
+            // Nếu người dùng đã có gói membership này và còn hạn
+            if (userMembership.MembershipId == membershipId && userMembership.ExpiryDate > DateTime.Now)
             {
-                if (userMembership.ExpiryDate > DateTime.Now)
+                return new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "Bạn đang sử dụng gói thành viên này. Không thể mua thêm!"
+                };
+            }
+
+            // Nếu người dùng có gói membership khác, thay thế bằng gói mới
+            if (userMembership.MembershipId != membershipId)
+            {
+                // Trừ tiền từ ví người dùng
+                if (user.WalletBalance < membership.Price)
                 {
                     return new Response<string>
                     {
                         Succeeded = false,
-                        Message = "Bạn đang sử dụng gói thành viên này. Không thể mua thêm!"
+                        Message = "Số dư không đủ! Vui lòng nạp tiền thêm vào ví."
                     };
                 }
-                else
-                {
-                    userMembership.ExpiryDate = DateTime.Now.AddDays(membership.Duration); 
-                    userMembership.PostsUsed = 0;  
-                    userMembership.PushTopUsed = 0;
 
-                    await _userMembershipRepository.UpdateAsync(userMembership);
+                user.WalletBalance -= membership.Price;
+                await _userRepository.UpdateAsync(user);
 
-                    return new Response<string>
-                    {
-                        Succeeded = true,
-                        Message = "Gói thành viên dược gia hạn thành công."
-                    };
-                }
-            }
-
-            if (userMembership.MembershipId != membershipId)
-            {
-                var startDate = DateTime.Now;
-                var expiryDate = startDate.AddDays(membership.Duration);
-
-                var newUserMembership = new UserMembership
-                {
-                    UserId = userId,
-                    MembershipId = membershipId,
-                    StartDate = startDate,
-                    ExpiryDate = expiryDate,
-                    PostsUsed = 0,
-                    PushTopUsed = 0,
-                    IsPaid = true,
-                    CreatedBy = "System",
-                    CreatedOn = DateTime.Now
-                };
-
-                await _userMembershipRepository.AddAsync(newUserMembership);
+                // Tạo hoặc cập nhật membership mới
+                await CreateOrUpdateMembership(userId, membershipId, membership.Duration);
 
                 return new Response<string>
                 {
@@ -294,5 +266,27 @@ namespace HostelFinder.Application.Services
                 Message = "Không xác định được trạng thái của membership."
             };
         }
+
+        private async Task CreateOrUpdateMembership(Guid userId, Guid membershipId, int duration)
+        {
+            var startDate = DateTime.Now;
+            var expiryDate = startDate.AddDays(duration);
+
+            var userMembership = new UserMembership
+            {
+                UserId = userId,
+                MembershipId = membershipId,
+                StartDate = startDate,
+                ExpiryDate = expiryDate,
+                PostsUsed = 0,
+                PushTopUsed = 0,
+                IsPaid = true,
+                CreatedBy = "System",
+                CreatedOn = DateTime.Now
+            };
+
+            await _userMembershipRepository.AddAsync(userMembership);
+        }
+
     }
 }
