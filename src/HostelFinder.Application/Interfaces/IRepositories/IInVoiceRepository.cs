@@ -18,10 +18,8 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<decimal> GetRoomRevenueByMonthAsync(Guid roomId, int month, int year);
         
         Task<decimal> GetRoomRevenueByYearAsync(Guid roomId, int year);
-<<<<<<< HEAD
         
         Task<Invoice?> GetInvoiceByIdAsync(Guid invoiceId);
-=======
->>>>>>> a0e9f765ede81673312ee26662b1b07e7eba57c1
+
     }
 }
