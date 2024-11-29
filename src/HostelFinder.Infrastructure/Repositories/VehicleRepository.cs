@@ -16,7 +16,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<IEnumerable<Vehicle>> GetByTenantAsync(Guid tenantId)
         {
             return await _dbContext.Vehicles
-                .Where(v => v.TenantId == tenantId)
+                .Where(v => v.TenantId == tenantId && !v.IsDeleted)
                 .ToListAsync();
         }
     }
