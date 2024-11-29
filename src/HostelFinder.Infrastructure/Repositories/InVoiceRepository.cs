@@ -119,6 +119,7 @@ namespace HostelFinder.Infrastructure.Repositories
             
             return invoices.SumAsync(invoice => invoice.TotalAmount);
         }
+<<<<<<< HEAD
 
         public async Task<Invoice?> GetInvoiceByIdAsync(Guid invoiceId)
         {
@@ -127,5 +128,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 .ThenInclude(details => details.Service)
                 .FirstOrDefaultAsync(x => x.Id == invoiceId);
         }
+=======
+>>>>>>> a0e9f765ede81673312ee26662b1b07e7eba57c1
     }
 }

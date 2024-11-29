@@ -222,6 +222,23 @@ namespace HostelFinder.Infrastructure.Seeders
                 new Membership
                 {
                     Id = Guid.NewGuid(),
+                    Name = "Hội viên Dùng Thử",
+                    Description = "Gói hội viên dùng thử có hạn trong 7 ngày",
+                    Price = 0,
+                    Duration = 7,
+                    Tag = "Dùng Thử",
+                    CreatedBy = "Hệ Thống",
+                    CreatedOn = DateTime.Now,
+                    IsDeleted = false,
+                    MembershipServices = new List<MembershipServices>
+                    {
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 5, MaxPushTopAllowed = 5, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
+                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
+                    }
+                },
+                new Membership
+                {
+                    Id = Guid.NewGuid(),
                     Name = "Hội viên Cơ bản",
                     Description = "Phù hợp với quy mô nhà trọ nhỏ",
                     Price = 100000,

@@ -76,7 +76,7 @@ public class PostService : IPostService
         return landlordDto;
     }
 
-    public async Task<HostelResponseDto> GetHostelByPostIdAsync(Guid postId)
+    /*public async Task<HostelResponseDto> GetHostelByPostIdAsync(Guid postId)
     {
         var hostel = await _hostelRepository.GetHostelWithReviewsByPostIdAsync(postId);
 
@@ -93,7 +93,7 @@ public class PostService : IPostService
         }
 
         return hostelResponseDto;
-    }
+    }*/
 
     public async Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request)
     {

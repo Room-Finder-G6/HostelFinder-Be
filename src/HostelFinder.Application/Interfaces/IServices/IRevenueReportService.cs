@@ -26,9 +26,12 @@ public interface IRevenueReportService
     
     Task<Wrappers.Response<RoomRevenueReport>> GetMonthlyRevenueReportByHostel(Guid hostelId, int month, int year);
     
+<<<<<<< HEAD
     // Report những phòng đang trống
     Task<Wrappers.Response<RoomRevenueReport>> GetEmptyRoomReport(Guid hostelId);
     
+=======
+>>>>>>> a0e9f765ede81673312ee26662b1b07e7eba57c1
     
 
 }

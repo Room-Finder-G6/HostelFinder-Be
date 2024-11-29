@@ -1,7 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.Membership.Requests;
 using HostelFinder.Application.DTOs.Payment.Requests;
 using HostelFinder.Application.Interfaces.IServices;
-using HostelFinder.Application.Services;
 using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 

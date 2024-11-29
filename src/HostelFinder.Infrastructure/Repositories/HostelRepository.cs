@@ -150,8 +150,12 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     public async Task<Hostel?> GetHostelByIdAsync(Guid hostelId)
     {
         return await _dbContext.Hostels
+            .Where(x => x.IsDeleted == false)
             .Include(h => h.Address)
             .Include(i => i.Images)
+            .Include(s => s.HostelServices)
+            .ThenInclude(s => s.Services)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(h => h.Id == hostelId);
     }
 }

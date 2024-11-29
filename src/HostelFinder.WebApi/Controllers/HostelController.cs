@@ -63,28 +63,33 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddHostel([FromForm] AddHostelRequestDto hostelDto, [FromForm] List<IFormFile> images)
+        public async Task<IActionResult> AddHostel([FromForm] AddHostelRequestDto hostelDto, IFormFile image)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var imageUrls = new List<string>();
+            string imageUrl = null;
 
-            if (images != null && images.Count > 0)
+            // Kiểm tra nếu có hình ảnh
+            if (image != null)
             {
-                foreach (var image in images)
+                try
                 {
-                    var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
-                    var imageUrl = uploadToAWS3;
-                    imageUrls.Add(imageUrl);
+                    // Tải ảnh lên AWS S3 và lấy URL
+                    imageUrl = await _s3Service.UploadFileAsync(image);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Không thể tải ảnh lên: {ex.Message}");
                 }
             }
 
             try
             {
-                var result = await _hostelService.AddHostelAsync(hostelDto, imageUrls);
+                // Gọi phương thức AddHostelAsync với chỉ một hình ảnh
+                var result = await _hostelService.AddHostelAsync(hostelDto, imageUrl);
                 if (result.Succeeded)
                 {
                     return Ok(result);
@@ -99,39 +104,20 @@ namespace HostelFinder.WebApi.Controllers
         }
 
 
+
         [HttpPut("{hostelId}")]
-        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromForm] UpdateHostelRequestDto request, [FromForm] List<IFormFile> images)
+        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromForm] UpdateHostelRequestDto request, IFormFile? image)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new Response<HostelResponseDto>
-                {
-                    Succeeded = false,
-                    Message = "Invalid model state."
-                });
-            }
-
-            var imageUrls = new List<string>();
-
-            if (images != null && images.Count > 0)
-            {
-                foreach (var image in images)
-                {
-                    var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
-                    var imageUrl = uploadToAWS3;
-                    imageUrls.Add(imageUrl);
-                }
-            }
-
             try
             {
-                var result = await _hostelService.UpdateHostelAsync(hostelId, request, imageUrls);
-
+                var result = await _hostelService.UpdateHostelAsync(hostelId, request, image);
+        
                 if (result.Succeeded)
                 {
-                    return Ok(result);
+                    return Ok(result);  // Trả về 200 OK nếu thành công
                 }
 
+                // Trả về 400 nếu có lỗi về dữ liệu yêu cầu
                 return BadRequest(new Response<HostelResponseDto>
                 {
                     Succeeded = false,
@@ -140,6 +126,7 @@ namespace HostelFinder.WebApi.Controllers
             }
             catch (Exception ex)
             {
+                // Trả về lỗi 500 khi có ngoại lệ
                 return StatusCode(500, new Response<HostelResponseDto>
                 {
                     Succeeded = false,
@@ -147,6 +134,7 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
+
 
         [HttpDelete("DeleteHostel/{id}")]
         public async Task<IActionResult> DeleteHostel(Guid id)
