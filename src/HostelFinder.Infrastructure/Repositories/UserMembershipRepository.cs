@@ -48,6 +48,13 @@ namespace HostelFinder.Infrastructure.Repositories
                 .FirstOrDefaultAsync(um => um.UserId == userId && um.MembershipId == membershipId && !um.IsDeleted);
         }
 
+        public async Task<List<UserMembership>> GetActiveUserMembershipsByMembershipIdAsync(Guid membershipId)
+        {
+            return await _dbContext.UserMemberships
+                .Where(um => um.MembershipId == membershipId && um.ExpiryDate > DateTime.Now && !um.IsDeleted)
+                .ToListAsync();
+        }
+
     }
 
 }

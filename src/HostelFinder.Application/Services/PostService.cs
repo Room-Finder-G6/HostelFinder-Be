@@ -208,7 +208,7 @@ public class PostService : IPostService
             {
                 Data = postResponseDto,
                 Succeeded = true,
-                Message = "Post added successfully"
+                Message = "Thêm bài đăng thành công."
             };
         }
         catch (Exception ex)
@@ -288,7 +288,7 @@ public class PostService : IPostService
             return new Response<PostResponseDto>
             {
                 Succeeded = true,
-                Message = "Post pushed to the top successfully.",
+                Message = "Đẩy bài đăng lên thành công.",
                 Data = postResponseDto
             };
         }
@@ -382,7 +382,7 @@ public class PostService : IPostService
             {
                 Data = postResponseDto,
                 Succeeded = true,
-                Message = "Post updated successfully"
+                Message = "Cập nhật bài đăng thành công."
             };
         }
         catch (Exception ex)

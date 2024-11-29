@@ -154,6 +154,13 @@ namespace HostelFinder.Application.Services
                 return new Response<bool>(false, "Membership not found.");
             }
 
+            // Kiểm tra xem có user nào đang sử dụng membership này và chưa hết hạn không
+            var activeUserMemberships = await _userMembershipRepository.GetActiveUserMembershipsByMembershipIdAsync(id);
+            if (activeUserMemberships.Any())
+            {
+                return new Response<bool>(false, "Có người dùng đang sử dụng gói thành viên này, không thể xóa!");
+            }
+            
             var membershipServices = await _membershipRepository.GetMembershipServicesByMembershipIdAsync(id);
             if (membershipServices != null)
             {

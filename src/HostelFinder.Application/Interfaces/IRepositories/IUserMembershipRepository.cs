@@ -1,6 +1,5 @@
 ﻿using HostelFinder.Application.Common;
 using HostelFinder.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace HostelFinder.Application.Interfaces.IRepositories
 {
@@ -11,6 +10,7 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<List<UserMembership>> GetExpiredMembershipsAsync();
         Task<UserMembership> GetTrialMembershipByUserIdAsync(Guid userId);
         Task<UserMembership> GetByUserIdAndMembershipIdAsync(Guid userId, Guid membershipId);
+        Task<List<UserMembership>> GetActiveUserMembershipsByMembershipIdAsync(Guid membershipId);
     }
 }
 
