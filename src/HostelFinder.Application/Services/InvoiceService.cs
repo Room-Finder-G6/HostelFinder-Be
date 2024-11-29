@@ -61,6 +61,49 @@ namespace HostelFinder.Application.Services
             return new Response<InvoiceResponseDto>(result);
         }
 
+        public async Task<Response<InvoiceResponseDto>> GetDetailInvoiceByIdAsync(Guid id)
+        {
+            try
+            {
+                // lấy ra hóa đơn cuối cùng
+                var invoice = await _invoiceRepository.GetInvoiceByIdAsync(id); if (invoice == null)
+                {
+                    return null;
+                }
+                var numberOfTenants = await _roomTenancyRepository.CountCurrentTenantsAsync(invoice.RoomId);
+               
+
+                InvoiceResponseDto invoiceResponseDto = new InvoiceResponseDto()
+                {
+                    Id = invoice.Id,
+                    TotalAmount = invoice.TotalAmount,
+                    BillingMonth = invoice.BillingMonth,
+                    BillingYear = invoice.BillingYear,
+                    IsPaid = invoice.IsPaid,
+                    InvoiceDetails = invoice.InvoiceDetails.Select(details => new InvoiceDetailResponseDto
+                    {
+                        ActualCost = details.ActualCost,
+                        BillingDate = details.BillingDate,
+                        CurrentReading = details.CurrentReading,
+                        PreviousReading = details.PreviousReading,
+                        InvoiceId = details.InvoiceId,
+                        NumberOfCustomer = numberOfTenants,
+                        ServiceName = details.Service?.ServiceName ??
+                                      (details.IsRentRoom ? "Tiền thuê phòng" : "Không xác định"),
+                        UnitCost = details.UnitCost,
+                    }).ToList()
+                };
+
+
+                return new Response<InvoiceResponseDto>{Data = invoiceResponseDto, Succeeded = true};
+            }
+            catch (Exception ex)
+            {
+
+                return new Response<InvoiceResponseDto>() { Succeeded = false, Message = ex.Message };
+            }
+        }
+
         public async Task<Response<InvoiceResponseDto>> CreateAsync(AddInVoiceRequestDto invoiceDto)
         {
             var invoice = _mapper.Map<Invoice>(invoiceDto);

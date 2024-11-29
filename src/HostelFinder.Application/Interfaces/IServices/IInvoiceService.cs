@@ -22,5 +22,7 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<Boolean>> CheckInvoiceExistAsync(Guid roomId, int billingMonth, int billingYear);
         
         Task<PagedResponse<List<ListInvoiceResponseDto>>> GetAllInvoicesByHostelIdAsync(Guid hostelId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection);
+        
+        Task<Response<InvoiceResponseDto>> GetDetailInvoiceByIdAsync(Guid id);
     }
 }
