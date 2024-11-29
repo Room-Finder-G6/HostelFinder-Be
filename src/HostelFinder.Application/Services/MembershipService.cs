@@ -7,7 +7,6 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
-using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.Services
 {
@@ -170,7 +169,7 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<string>> UpdatePostCountAsync(Guid userId)
         {
-            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
+            var userMembership = await _userMembershipRepository.GetUserMembershipByUserIdAsync(userId);
             if (userMembership != null && userMembership.Membership != null)
             {
                 var membershipService = userMembership.Membership.MembershipServices
@@ -206,7 +205,7 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<string>> UpdatePushTopCountAsync(Guid userId)
         {
-            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
+            var userMembership = await _userMembershipRepository.GetUserMembershipByUserIdAsync(userId);
             if (userMembership != null && userMembership.Membership != null)
             {
                 // Find the membership service that supports push-to-top functionality
