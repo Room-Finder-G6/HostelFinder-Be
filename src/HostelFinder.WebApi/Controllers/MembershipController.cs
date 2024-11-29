@@ -107,7 +107,6 @@ namespace HostelFinder.WebApi.Controllers
                         Message = response.Message
                     });
                 }
-
                 return Ok(response);
             }
             catch (Exception ex)

@@ -158,7 +158,7 @@ namespace HostelFinder.Application.Services
             var activeUserMemberships = await _userMembershipRepository.GetActiveUserMembershipsByMembershipIdAsync(id);
             if (activeUserMemberships.Any())
             {
-                return new Response<bool>(false, "Có người dùng đang sử dụng gói thành viên này, không thể xóa!");
+                return new Response<bool>("Có người dùng đang sử dụng gói thành viên này, không thể xóa!");
             }
             
             var membershipServices = await _membershipRepository.GetMembershipServicesByMembershipIdAsync(id);
