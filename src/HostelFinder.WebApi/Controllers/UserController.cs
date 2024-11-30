@@ -157,7 +157,7 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
-        
+
         [HttpGet("GetUserByHostelId/{hostelId}")]
         public async Task<IActionResult> GetUserByHostelId(Guid hostelId)
         {
@@ -203,7 +203,7 @@ namespace HostelFinder.WebApi.Controllers
 
             if (!response.Succeeded)
             {
-                return BadRequest(response.Message);
+                return BadRequest(new { response.Message });
             }
 
             return Ok(response);
