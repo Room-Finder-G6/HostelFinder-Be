@@ -1,5 +1,7 @@
-﻿using HostelFinder.Application.DTOs.Room.Requests;
+﻿using HostelFinder.Application.DTOs.RentalContract.Request;
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Room.Responses;
+using HostelFinder.Application.DTOs.RoomTenancies.Request;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +14,14 @@ namespace HostelFinder.WebApi.Controllers
     {
         private readonly IRoomService _roomService;
         private readonly ITenantService _tenantService;
+        private readonly IRoomTenancyService _roomTenancyService;
         public RoomController(IRoomService roomService,
-            ITenantService tenantService)
+            ITenantService tenantService,
+            IRoomTenancyService roomTenancyService)
         {
             _roomService = roomService;
             _tenantService = tenantService;
+            _roomTenancyService = roomTenancyService;
         }
 
         [HttpGet]
@@ -192,6 +197,51 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(response);
 
             return Ok(response);
+        }
+
+        [HttpPost("AddTenantToRoom")]
+        public async Task<IActionResult> AddTenantToRoom([FromForm] AddRoomTenacyDto request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Dữ liệu yêu cầu không hợp lệ.");
+            }
+
+            try
+            {
+                var response = await _roomTenancyService.AddTenantToRoomAsync(request);
+
+                if (response.Succeeded)
+                {
+                    return Ok(response);  
+                }
+                else
+                {
+                    return BadRequest(response.Message); 
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Có lỗi xảy ra: {ex.Message}");
+            }
+        }
+
+        [HttpPost("AddRoommate")]
+        public async Task<IActionResult> AddRoommate([FromForm] AddRoommateDto request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Dữ liệu yêu cầu không hợp lệ.");
+            }
+
+            var response = await _tenantService.AddRoommateAsync(request);
+
+            if (response.Succeeded)
+            {
+                return Ok(response.Message); // Trả về thông báo thành công
+            }
+
+            return BadRequest(response.Message); // Trả về thông báo lỗi nếu không thành công
         }
     }
 }

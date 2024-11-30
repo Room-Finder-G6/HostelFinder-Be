@@ -15,19 +15,22 @@ namespace HostelFinder.Application.Services
         private readonly IMapper _mapper;
         private readonly IS3Service _s3Service;
         private readonly IRoomTenancyRepository _roomTenancyRepository;
+        private readonly IRoomRepository _roomRepository;
         private readonly IRentalContractRepository _rentalContractRepository;
 
         public TenantService(ITenantRepository tenantRepository,
             IMapper mapper,
             IS3Service s3Service,
             IRoomTenancyRepository roomTenancyRepository,
-            IRentalContractRepository rentalContractRepository)
+            IRentalContractRepository rentalContractRepository,
+            IRoomRepository roomRepository)
         {
             _tenantRepository = tenantRepository;
             _mapper = mapper;
             _s3Service = s3Service;
             _roomTenancyRepository = roomTenancyRepository;
             _rentalContractRepository = rentalContractRepository;
+            _roomRepository = roomRepository;
         }
 
         public async Task<TenantResponse> AddTenentServiceAsync(AddTenantDto request)
@@ -80,6 +83,52 @@ namespace HostelFinder.Application.Services
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<Response<string>> AddRoommateAsync(AddRoommateDto request)
+        {
+            // Kiểm tra phòng tồn tại
+            var room = await _roomRepository.GetByIdAsync(request.RoomId);
+            if (room == null)
+            {
+                return new Response<string> { Message = "Phòng không tồn tại", Succeeded = false };
+            }
+
+            // Kiểm tra số lượng tenant hiện tại trong phòng
+            var currentTenantsCount = await _roomTenancyRepository.CountCurrentTenantsAsync(request.RoomId);
+            if (currentTenantsCount >= room.MaxRenters)
+            {
+                return new Response<string> { Message = "Phòng đã đầy, không thể thêm người thuê", Succeeded = false };
+            }
+
+            // Tạo tenant mới từ DTO
+            var tenant = _mapper.Map<Tenant>(request);
+            tenant.CreatedOn = DateTime.Now;
+
+            // Upload ảnh (giả sử bạn sử dụng AWS S3)
+            if (request.AvatarImage != null)
+            {
+                tenant.AvatarUrl = await _s3Service.UploadFileAsync(request.AvatarImage);
+            }
+
+            tenant.FrontImageUrl = await _s3Service.UploadFileAsync(request.FrontImageImage);
+            tenant.BackImageUrl = await _s3Service.UploadFileAsync(request.BackImageImage);
+
+            // Thêm tenant vào database
+            var tenantCreated = await _tenantRepository.AddAsync(tenant);
+
+            // Tạo bản ghi RoomTenancy để liên kết tenant và room
+            var roomTenancy = new RoomTenancy
+            {
+                TenantId = tenantCreated.Id,
+                RoomId = request.RoomId,
+                MoveInDate = DateTime.Now
+            };
+
+            // Thêm bản ghi RoomTenancy
+            await _roomTenancyRepository.AddAsync(roomTenancy);
+
+            return new Response<string> { Message = "Thêm người thuê vào phòng thành công", Succeeded = true };
         }
     }
 }
