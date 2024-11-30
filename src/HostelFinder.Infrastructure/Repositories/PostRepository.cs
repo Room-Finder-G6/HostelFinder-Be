@@ -88,12 +88,15 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         decimal? minSize, decimal? maxSize, decimal? minPrice, decimal? maxPrice, RoomType? roomType)
     {
         var query = _dbContext.Posts
+            .AsNoTracking()
             .Include(p => p.Hostel)
             .ThenInclude(h => h.Address)
             .Include(p => p.Room)
             .Include(p => p.Images)
             .Include(p => p.MembershipServices)
             .ThenInclude(p => p.Membership)
+            .OrderByDescending(p => p.MembershipServices.Membership.Price)
+            .ThenByDescending(p => p.CreatedOn)
             .AsQueryable();
 
         if (!string.IsNullOrEmpty(province))
@@ -126,6 +129,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     public async Task<List<Post>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync()
     {
         return await _dbContext.Posts
+            .AsNoTracking()
             .Include(x => x.Hostel)
             .ThenInclude(x => x.Address)
             .Include(x => x.Images)
@@ -160,6 +164,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     public async Task<List<Post>> GetAllPostsOrderedAsync()
     {
         return await _dbContext.Posts
+            .AsNoTracking()
             .Include(p => p.Hostel)
             .ThenInclude(h => h.Address)
             .Include(p => p.Images)
