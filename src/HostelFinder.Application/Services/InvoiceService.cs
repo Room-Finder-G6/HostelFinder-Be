@@ -104,6 +104,39 @@ namespace HostelFinder.Application.Services
             }
         }
 
+        public async Task<Response<string>> CollectMoneyInvoice(CollectMoneyInvoiceRequest request)
+        {
+            try
+            {
+                var invoice = await _invoiceRepository.GetInvoiceByIdAsync(request.InvoiceId);
+                if (invoice == null)
+                {
+                    return new Response<string>() { Message = "Hóa đơn không tồn tại", Succeeded = false };
+                }
+                // kiểm tra xem hóa đơn đã thanh toán chưa
+                if (invoice.IsPaid == true)
+                {
+                    return new Response<string>() { Message = "Hóa đơn đã đựợc thanh toán", Succeeded = false };
+                }
+
+                if (request.AmountPaid == null)
+                {
+                    request.AmountPaid = invoice.TotalAmount;
+                }
+                invoice.IsPaid = true;
+                invoice.AmountPaid = request.AmountPaid;
+                invoice.LastModifiedOn = request.DateOfSubmit;
+                invoice.FormOfTransfer = request.FormOfTransfer;
+                
+                await _invoiceRepository.UpdateAsync(invoice);
+                return new Response<string>(){Message = "Thu tiền hóa đơn thành công", Succeeded = true};
+            }
+            catch (Exception ex)
+            {
+                return new Response<string>() { Message = ex.Message };
+            }
+        }
+
         public async Task<Response<InvoiceResponseDto>> CreateAsync(AddInVoiceRequestDto invoiceDto)
         {
             var invoice = _mapper.Map<Invoice>(invoiceDto);

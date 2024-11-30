@@ -9,5 +9,7 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<string>> CreateRentalContractAsync(AddRentalContractDto request);
 
         Task<RoomContractHistoryResponseDto> GetRoomContractHistoryLasest(Guid roomId);
+
+        Task<Response<string>> TerminationOfContract(Guid rentalContractId);
     }
 }

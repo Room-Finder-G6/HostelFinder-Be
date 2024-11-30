@@ -26,6 +26,8 @@ namespace HostelFinder.Domain.Entities
         
         public string? FormOfTransfer { get; set; }
         
+        public decimal? AmountPaid { get; set; }
+        
         //Navigation
         public virtual Room Room { get; set; }
         public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>();
