@@ -24,5 +24,8 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<PagedResponse<List<ListInvoiceResponseDto>>> GetAllInvoicesByHostelIdAsync(Guid hostelId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection);
         
         Task<Response<InvoiceResponseDto>> GetDetailInvoiceByIdAsync(Guid id);
+
+        Task<Response<string>> CollectMoneyInvoice (CollectMoneyInvoiceRequest request);
+
     }
 }

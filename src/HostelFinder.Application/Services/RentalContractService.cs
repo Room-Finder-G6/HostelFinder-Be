@@ -51,6 +51,10 @@ namespace HostelFinder.Application.Services
 
                 // Kiểm tra số người thuê trọ hiện tại trong phòng
                 var room = await _roomRepository.GetRoomByIdAsync(request.RoomId);
+                if (room.IsAvailable = false)
+                {
+                    return new Response<string>() { Succeeded = false, Message = "Hiện tại phòng chưa sẵn sàng để cho thuê" };
+                }
                 var currentTenantsCount = await _roomTenancyRepository.CountCurrentTenantsAsync(room.Id);
                 if (currentTenantsCount >= room.MaxRenters)
                 {
@@ -61,6 +65,7 @@ namespace HostelFinder.Application.Services
               
 
                 // tạo người thuê phòng
+                
                 var tenantCreated = await _tenantService.AddTenentServiceAsync(request.AddTenantDto);
 
                 // tạo hợp đồng
@@ -87,6 +92,7 @@ namespace HostelFinder.Application.Services
                     RoomId = room.Id,
                     MoveInDate = rentalContract.StartDate,
                     MoveOutDate = rentalContract.EndDate,
+                    CreatedOn = DateTime.Now
                 };
 
                 await _roomTenancyRepository.AddAsync(roomTenacy);
@@ -128,5 +134,49 @@ namespace HostelFinder.Application.Services
             }
         }
 
+        public async Task<Response<string>> TerminationOfContract(Guid rentalContractId)
+        {
+            try
+            {
+                var rentalContract = await _rentalContractRepository.GetByIdAsync(rentalContractId);
+                if (rentalContract == null)
+                {
+                    return new Response<string>() { Succeeded = false, Message = "Hiện tại không có hợp đồng nào" };
+                }
+                if (rentalContract.EndDate < DateTime.Now.Date)
+                {
+                    return new Response<string>()
+                    {
+                        Succeeded = false,
+                        Message = $"Hợp đồng đã chấm dứt vào ngày {rentalContract.EndDate.Value.ToString("dd/MM/yyyy")}"
+                    };
+                }
+                // Cập nhật lại trạng thái hợp đồng
+                rentalContract.EndDate = DateTime.Now;
+                rentalContract.LastModifiedOn = DateTime.Now;
+                await _rentalContractRepository.UpdateAsync(rentalContract);
+                
+                //cập nhật lại trạng thái của phòng
+                var room = await _roomRepository.GetRoomByIdAsync(rentalContract.RoomId);
+                room.IsAvailable = true;
+                room.LastModifiedOn = DateTime.Now;
+                await _roomRepository.UpdateAsync(room);
+                
+                // cập nhật lại trạng thái người thuê phòng theo phòng
+                var listTenacyInRoom = await _roomTenancyRepository.GetRoomTenacyByIdAsync(rentalContract.RoomId);
+                foreach (var tenancy in listTenacyInRoom)
+                {
+                    tenancy.MoveOutDate = DateTime.Now;
+                    tenancy.LastModifiedOn = DateTime.Now;
+                    await _roomTenancyRepository.UpdateAsync(tenancy);
+                }
+
+                return new Response<string>() { Succeeded = true, Message = $"Chấm dứt hợp đồng với phòng trọ {room.RoomName} vào ngày {DateTime.Now.ToString("dd/MM/yyyy")}"};
+            }
+            catch (Exception ex)
+            {
+                return new Response<string> { Succeeded = false, Message = ex.Message };
+            }
+        }
     }
 }

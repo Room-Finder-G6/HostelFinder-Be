@@ -277,6 +277,29 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
+        
+        [HttpPost("collect-money")]
+        public async Task<IActionResult> CollectMoneyInvoice([FromBody] CollectMoneyInvoiceRequest request)
+        {
+            try
+            {
+                var response = await _invoiceService.CollectMoneyInvoice(request);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
 
 
     }
