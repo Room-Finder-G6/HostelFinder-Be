@@ -119,6 +119,11 @@ namespace HostelFinder.Application.Services
                     return new Response<string>() { Message = "Hóa đơn đã đựợc thanh toán", Succeeded = false };
                 }
 
+                if (request.AmountPaid < 0)
+                {
+                    return new Response<string>() {Succeeded = false, Message = "Số tiền thanh toán không hợp lệ"};
+                }
+
                 if (request.AmountPaid == null)
                 {
                     request.AmountPaid = invoice.TotalAmount;

@@ -91,6 +91,7 @@ namespace HostelFinder.Infrastructure.Repositories
             }
 
             var invoices = await query
+                .OrderByDescending(x => x.CreatedOn)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
