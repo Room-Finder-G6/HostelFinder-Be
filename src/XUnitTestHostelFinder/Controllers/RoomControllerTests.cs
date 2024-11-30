@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using HostelFinder.WebApi.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -14,12 +15,13 @@ namespace XUnitTestHostelFinder.Controllers
     {
         private readonly Mock<IRoomService> _roomServiceMock;
         private readonly Mock<ITenantService> _tenantServiceMock;
+        private readonly Mock<IRoomTenancyService> _roomTenacyServiceMock;
         private readonly RoomController _controller;
 
         public RoomControllerTests()
         {
             _roomServiceMock = new Mock<IRoomService>();
-            _controller = new RoomController(_roomServiceMock.Object, _tenantServiceMock.Object);
+            _controller = new RoomController(_roomServiceMock.Object, _tenantServiceMock.Object, _roomTenacyServiceMock.Object);
 
         }
 
