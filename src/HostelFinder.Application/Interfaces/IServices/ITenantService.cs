@@ -11,5 +11,6 @@ namespace HostelFinder.Application.Interfaces.IServices
 
         //Lấy ra thông tin thông tin của người thuê phòng của từng phòng
         Task<List<InformationTenacyReponseDto>> GetInformationTenacyAsync(Guid roomId);
+        Task<Response<string>> AddRoommateAsync(AddRoommateDto request);
     }
 }

@@ -166,104 +166,133 @@ namespace HostelFinder.Application.Services
             return new Response<UserProfileResponse>(userDto);
         }
 
-        public async Task<Response<string>> BuyMembershipAsync(Guid userId, Guid membershipId)
+        public async Task<Response<string>> ManageUserMembershipAsync(Guid userId, Guid membershipId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                return new Response<string>
-                {
-                    Succeeded = false,
-                    Message = "User not found."
-                };
+                return CreateErrorResponse("User not found.");
             }
 
             var membership = await _membershipRepository.GetByIdAsync(membershipId);
             if (membership == null)
             {
-                return new Response<string>
-                {
-                    Succeeded = false,
-                    Message = "Membership not found."
-                };
+                return CreateErrorResponse("Membership not found.");
             }
 
-            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
-
-            // Nếu người dùng chưa có membership hoặc membership đã hết hạn, tiếp tục mua
-            if (userMembership == null || userMembership.ExpiryDate <= DateTime.Now)
+            var userMemberships = await _userMembershipRepository.GetByUserIdAsync(userId);
+            bool isTrial = membership.Duration <= 7;
+            // Kiểm tra nếu người dùng đã có gói thành viên nào, nếu có, tìm gói tương ứng
+            var existingUserMembership = userMemberships.FirstOrDefault(um => um.MembershipId == membershipId && !um.IsDeleted);
+            if (existingUserMembership != null)
             {
-                // Kiểm tra ví của người dùng
-                if (user.WalletBalance < membership.Price)
+                return await HandleExistingMembership(user, existingUserMembership, membership, isTrial);
+            }
+
+            return await HandleNewMembership(user, membership, isTrial);
+        }
+
+        private async Task<Response<string>> HandleExistingMembership(User user, UserMembership userMembership, Membership membership, bool isTrial)
+        {
+            // Xử lý gói thử nghiệm
+            if (isTrial)
+            {
+                var existingTrialMembership = await _userMembershipRepository.GetTrialMembershipByUserIdAsync(user.Id);
+                if (existingTrialMembership != null)
                 {
-                    return new Response<string>
+                    if (existingTrialMembership.ExpiryDate > DateTime.Now)
                     {
-                        Succeeded = false,
-                        Message = "Số dư không đủ! Vui lòng nạp tiền thêm vào ví."
-                    };
-                }
-
-                // Trừ tiền từ ví người dùng
-                user.WalletBalance -= membership.Price;
-                await _userRepository.UpdateAsync(user);
-
-                // Tạo hoặc cập nhật membership mới
-                await CreateOrUpdateMembership(userId, membershipId, membership.Duration);
-
-                // Nếu người dùng chưa có gói thành viên (User -> Landlord), nâng cấp role
-                if (user.Role == UserRole.User)
-                {
-                    user.Role = UserRole.Landlord;
-                    await _userRepository.UpdateAsync(user);
-                }
-
-                return new Response<string>
-                {
-                    Succeeded = true,
-                    Message = userMembership == null ? "Mua gói thành viên thành công." : "Gói thành viên mới đã đăng ký thành công."
-                };
-            }
-
-            // Nếu người dùng đã có gói membership này và còn hạn
-            if (userMembership.MembershipId == membershipId && userMembership.ExpiryDate > DateTime.Now)
-            {
-                return new Response<string>
-                {
-                    Succeeded = false,
-                    Message = "Bạn đang sử dụng gói thành viên này. Không thể mua thêm!"
-                };
-            }
-
-            // Nếu người dùng có gói membership khác, thay thế bằng gói mới
-            if (userMembership.MembershipId != membershipId)
-            {
-                // Trừ tiền từ ví người dùng
-                if (user.WalletBalance < membership.Price)
-                {
-                    return new Response<string>
+                        return CreateErrorResponse("Bạn đã sử dụng gói người dùng thử này và chưa hết hạn.");
+                    }
+                    else
                     {
-                        Succeeded = false,
-                        Message = "Số dư không đủ! Vui lòng nạp tiền thêm vào ví."
-                    };
+                        return CreateErrorResponse("Gói người dùng thử đã hết hạn.");
+                    }
                 }
-
-                user.WalletBalance -= membership.Price;
-                await _userRepository.UpdateAsync(user);
-
-                // Tạo hoặc cập nhật membership mới
-                await CreateOrUpdateMembership(userId, membershipId, membership.Duration);
-
-                return new Response<string>
-                {
-                    Succeeded = true,
-                    Message = "Gói thành viên mới đã đăng ký thành công."
-                };
+                return await RegisterTrialMembership(user.Id, membership.Id, membership.Duration);
             }
 
+            // Xử lý gói trả phí
+            if (userMembership.MembershipId == membership.Id && userMembership.ExpiryDate > DateTime.Now)
+            {
+                return CreateErrorResponse("Bạn đang sử dụng gói thành viên này. Không thể mua thêm!");
+            }
+            
+            // Kiểm tra ví và trừ tiền nếu là gói trả phí
+            return await HandlePaidMembership(user, membership);
+        }
+
+        private async Task<Response<string>> HandleNewMembership(User user, Membership membership, bool isTrial)
+        {
+            if (isTrial) // Đăng ký gói thử nghiệm cho người dùng mới
+            {
+                return await RegisterTrialMembership(user.Id, membership.Id, membership.Duration);
+            }
+
+            // Kiểm tra ví và trừ tiền nếu là gói trả phí
+            return await HandlePaidMembership(user, membership);
+        }
+
+        private async Task<Response<string>> HandlePaidMembership(User user, Membership membership)
+        {
+            if (user.WalletBalance < membership.Price)
+            {
+                return CreateErrorResponse("Số dư không đủ! Vui lòng nạp tiền thêm vào ví.");
+            }
+
+            user.WalletBalance -= membership.Price;
+            await _userRepository.UpdateAsync(user);
+
+            // Tạo hoặc cập nhật membership mới
+            await CreateOrUpdateMembership(user.Id, membership.Id, membership.Duration);
+
+            if (user.Role == UserRole.User)
+            {
+                user.Role = UserRole.Landlord;
+                await _userRepository.UpdateAsync(user);
+            }
+
+            return CreateSuccessResponse("Gói thành viên mới đã đăng ký thành công.");
+        }
+
+        private async Task<Response<string>> RegisterTrialMembership(Guid userId, Guid membershipId, int duration)
+        {
+            // Không cần trừ tiền nếu là gói thử nghiệm
+            var startDate = DateTime.Now;
+            var expiryDate = startDate.AddDays(duration);
+            var newUserMembership = new UserMembership
+            {
+                UserId = userId,
+                MembershipId = membershipId,
+                StartDate = startDate,
+                ExpiryDate = expiryDate,
+                PostsUsed = 0,
+                PushTopUsed = 0,
+                IsPaid = false, // Gói thử nghiệm không phải trả tiền
+                CreatedBy = "System",
+                CreatedOn = DateTime.Now
+            };
+
+            await _userMembershipRepository.AddAsync(newUserMembership);
+
+            return CreateSuccessResponse("Gói người dùng thử đã đăng ký thành công.");
+        }
+
+        private Response<string> CreateErrorResponse(string message)
+        {
             return new Response<string>
             {
                 Succeeded = false,
-                Message = "Không xác định được trạng thái của membership."
+                Message = message
+            };
+        }
+
+        private Response<string> CreateSuccessResponse(string message)
+        {
+            return new Response<string>
+            {
+                Succeeded = true,
+                Message = message
             };
         }
 
@@ -272,20 +301,32 @@ namespace HostelFinder.Application.Services
             var startDate = DateTime.Now;
             var expiryDate = startDate.AddDays(duration);
 
-            var userMembership = new UserMembership
+            // Kiểm tra xem người dùng đã có gói thành viên này chưa
+            var existingMembership = await _userMembershipRepository.GetByUserIdAndMembershipIdAsync(userId, membershipId);
+            if (existingMembership != null)
             {
-                UserId = userId,
-                MembershipId = membershipId,
-                StartDate = startDate,
-                ExpiryDate = expiryDate,
-                PostsUsed = 0,
-                PushTopUsed = 0,
-                IsPaid = true,
-                CreatedBy = "System",
-                CreatedOn = DateTime.Now
-            };
-
-            await _userMembershipRepository.AddAsync(userMembership);
+                existingMembership.ExpiryDate = expiryDate;
+                existingMembership.PostsUsed = 0; 
+                existingMembership.PushTopUsed = 0; 
+                await _userMembershipRepository.UpdateAsync(existingMembership);
+            }
+            else
+            {
+                // Nếu chưa có gói thành viên, tạo mới như hiện tại
+                var newUserMembership = new UserMembership
+                {
+                    UserId = userId,
+                    MembershipId = membershipId,
+                    StartDate = startDate,
+                    ExpiryDate = expiryDate,
+                    PostsUsed = 0,
+                    PushTopUsed = 0,
+                    IsPaid = true,  // Đây là gói trả phí, nếu là gói thử sẽ set IsPaid = false
+                    CreatedBy = "System",
+                    CreatedOn = DateTime.Now
+                };
+                await _userMembershipRepository.AddAsync(newUserMembership);
+            }
         }
 
     }

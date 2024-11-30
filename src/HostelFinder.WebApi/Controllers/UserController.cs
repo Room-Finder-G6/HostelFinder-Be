@@ -157,7 +157,7 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
-        
+
         [HttpGet("GetUserByHostelId/{hostelId}")]
         public async Task<IActionResult> GetUserByHostelId(Guid hostelId)
         {
@@ -199,11 +199,11 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> BuyMembership(Guid userId, Guid membershipId)
         {
             // Gọi dịch vụ để xử lý nghiệp vụ mua/gia hạn membership
-            var response = await _userService.BuyMembershipAsync(userId, membershipId);
+            var response = await _userService.ManageUserMembershipAsync(userId, membershipId);
 
             if (!response.Succeeded)
             {
-                return BadRequest(response.Message);
+                return BadRequest(new { response.Message });
             }
 
             return Ok(response);

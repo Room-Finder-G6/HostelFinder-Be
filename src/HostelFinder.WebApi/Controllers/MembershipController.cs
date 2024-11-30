@@ -107,40 +107,7 @@ namespace HostelFinder.WebApi.Controllers
                         Message = response.Message
                     });
                 }
-
                 return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new Response<string>
-                {
-                    Succeeded = false,
-                    Message = $"Internal server error: {ex.Message}"
-                });
-            }
-        }
-
-        [HttpPost("AddUserMembership")]
-        public async Task<IActionResult> AddUserMembership([FromForm] AddUserMembershipRequestDto userMembershipDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new Response<string>
-                {
-                    Succeeded = false,
-                    Message = "Invalid request model."
-                });
-            }
-
-            try
-            {
-                var response = await _membershipService.AddUserMembershipAsync(userMembershipDto);
-                if (response.Succeeded)
-                {
-                    return Ok(response);
-                }
-
-                return BadRequest(response);
             }
             catch (Exception ex)
             {

@@ -7,7 +7,6 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
-using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Application.Services
 {
@@ -155,6 +154,13 @@ namespace HostelFinder.Application.Services
                 return new Response<bool>(false, "Membership not found.");
             }
 
+            // Kiểm tra xem có user nào đang sử dụng membership này và chưa hết hạn không
+            var activeUserMemberships = await _userMembershipRepository.GetActiveUserMembershipsByMembershipIdAsync(id);
+            if (activeUserMemberships.Any())
+            {
+                return new Response<bool>("Có người dùng đang sử dụng gói thành viên này, không thể xóa!");
+            }
+            
             var membershipServices = await _membershipRepository.GetMembershipServicesByMembershipIdAsync(id);
             if (membershipServices != null)
             {
@@ -170,7 +176,7 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<string>> UpdatePostCountAsync(Guid userId)
         {
-            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
+            var userMembership = await _userMembershipRepository.GetUserMembershipByUserIdAsync(userId);
             if (userMembership != null && userMembership.Membership != null)
             {
                 var membershipService = userMembership.Membership.MembershipServices
@@ -206,7 +212,7 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<string>> UpdatePushTopCountAsync(Guid userId)
         {
-            var userMembership = await _userMembershipRepository.GetByUserIdAsync(userId);
+            var userMembership = await _userMembershipRepository.GetUserMembershipByUserIdAsync(userId);
             if (userMembership != null && userMembership.Membership != null)
             {
                 // Find the membership service that supports push-to-top functionality
@@ -241,65 +247,6 @@ namespace HostelFinder.Application.Services
             {
                 Succeeded = false,
                 Message = "User membership not found."
-            };
-        }
-
-        public async Task<Response<string>> AddUserMembershipAsync(AddUserMembershipRequestDto userMembershipDto)
-        {
-            var existingUserMembership = await _userMembershipRepository.GetByUserIdAsync(userMembershipDto.UserId);
-            if(existingUserMembership != null)
-            {
-                if (existingUserMembership.MembershipId == userMembershipDto.MembershipId)
-                {
-                    if (existingUserMembership.ExpiryDate > DateTime.Now)
-                    {
-                        return new Response<string>
-                        {
-                            Succeeded = false,
-                            Message = "Bạn đang sử dụng gói người dùng thử này và chưa hết hạn."
-                        };
-                    }
-                    else
-                    {
-                        return new Response<string>
-                        {
-                            Succeeded = false,
-                            Message = "Gói người dùng thử đã hết hạn."
-                        };
-                    }
-                }
-            }
-            
-            var startDate = DateTime.Now;
-            var membership = await _membershipRepository.GetByIdAsync(userMembershipDto.MembershipId); 
-            var expiryDate = startDate.AddDays(membership.Duration);
-
-            var newUserMembership = new UserMembership
-            {
-                UserId = userMembershipDto.UserId,
-                MembershipId = userMembershipDto.MembershipId,
-                StartDate = startDate,
-                ExpiryDate = expiryDate,
-                PostsUsed = 0,
-                PushTopUsed = 0,
-                IsPaid = true,
-                CreatedBy = "System",
-                CreatedOn = DateTime.Now
-            };
-
-            await _userMembershipRepository.AddAsync(newUserMembership);
-
-            var user = await _userRepository.GetByIdAsync(userMembershipDto.UserId);
-            if (user.Role == UserRole.User)
-            {
-                user.Role = UserRole.Landlord;
-                await _userRepository.UpdateAsync(user);
-            }
-
-            return new Response<string>
-            {
-                Succeeded = true,
-                Message = "Bạn đăng ký gói người dùng thử thành công."
             };
         }
 
