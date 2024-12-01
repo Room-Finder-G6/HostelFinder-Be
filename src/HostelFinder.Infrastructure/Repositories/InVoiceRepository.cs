@@ -124,6 +124,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<Invoice?> GetInvoiceByIdAsync(Guid invoiceId)
         {
             return await _dbContext.InVoices
+                .Include(x => x.Room)
                 .Include(x => x.InvoiceDetails)
                 .ThenInclude(details => details.Service)
                 .FirstOrDefaultAsync(x => x.Id == invoiceId && !x.IsDeleted);
