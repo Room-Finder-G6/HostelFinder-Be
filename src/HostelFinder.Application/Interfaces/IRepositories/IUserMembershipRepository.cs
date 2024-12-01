@@ -11,6 +11,7 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<UserMembership> GetTrialMembershipByUserIdAsync(Guid userId);
         Task<UserMembership> GetByUserIdAndMembershipIdAsync(Guid userId, Guid membershipId);
         Task<List<UserMembership>> GetActiveUserMembershipsByMembershipIdAsync(Guid membershipId);
+        Task<List<UserMembership>> GetUserMembershipsAsync(DateTime startDate, DateTime endDate);
     }
 }
 

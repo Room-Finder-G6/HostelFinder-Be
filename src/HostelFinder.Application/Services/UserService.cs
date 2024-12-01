@@ -9,6 +9,7 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
+using HostelFinder.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace HostelFinder.Application.Services
@@ -22,6 +23,7 @@ namespace HostelFinder.Application.Services
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly IValidator<CreateUserRequestDto> _createUserValidator;
         private readonly IS3Service _s3Service;
+        private readonly IEmailService _emailService;
 
         public UserService
         (
@@ -30,7 +32,8 @@ namespace HostelFinder.Application.Services
             IMembershipRepository membershipRepository,
             IValidator<CreateUserRequestDto> createUserValidator,
             IS3Service s3Service,
-            IUserMembershipRepository userMembershipRepository
+            IUserMembershipRepository userMembershipRepository,
+            IEmailService emailService
         )
         {
             _mapper = mapper;
@@ -40,6 +43,7 @@ namespace HostelFinder.Application.Services
             _s3Service = s3Service;
             _membershipRepository = membershipRepository;
             _userMembershipRepository = userMembershipRepository;
+            _emailService = emailService;
         }
 
         public async Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request)
@@ -242,6 +246,10 @@ namespace HostelFinder.Application.Services
 
             user.WalletBalance -= membership.Price;
             await _userRepository.UpdateAsync(user);
+
+            var emailBody = $"{user.Email} đã đăng ký thành công Gói Hội Viên. Chúc bạn một ngày vui vẻ!";
+            var emailSubject = "Đăng Ký Hội Viên";
+            await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
 
             // Tạo hoặc cập nhật membership mới
             await CreateOrUpdateMembership(user.Id, membership.Id, membership.Duration);
