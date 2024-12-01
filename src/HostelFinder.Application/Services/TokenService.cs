@@ -42,7 +42,7 @@ namespace HostelFinder.Application.Services
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
+                expires: DateTime.UtcNow.AddHours(_jwtSettings.ExpiryInMinutes),
                 signingCredentials: credentials
             );
 

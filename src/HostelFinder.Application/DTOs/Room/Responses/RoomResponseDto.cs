@@ -8,8 +8,8 @@ namespace HostelFinder.Application.DTOs.Room.Responses
     public class RoomResponseDto 
     {
         public Guid Id { get; set; }
-        public string HostelName { get; set; }
-        public string RoomName { get; set; }
+        public string? HostelName { get; set; }
+        public string? RoomName { get; set; }
         public int? Floor { get; set; }
         public int MaxRenters { get; set; }
         public float Size { get; set; }
@@ -18,7 +18,7 @@ namespace HostelFinder.Application.DTOs.Room.Responses
         public RoomType RoomType { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
 
-        public string ImageRoom { get; set; }
+        public string? ImageRoom { get; set; }
 
     }
 }

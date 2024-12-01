@@ -225,7 +225,7 @@ namespace HostelFinder.Application.Services
             foreach (var room in result)
             {
                 var imageRoom = await _imageRepository.GetImageUrlByRoomId(room.Id);
-                room.ImageRoom = imageRoom.Url;
+                room.ImageRoom = imageRoom?.Url ?? "https://hostel-finder-images.s3.amazonaws.com/download%20(3)-9443562d-b4cf-41b5-b053-807457b0047c.jpg";
             }
             return new Response<List<RoomResponseDto>>(result);
         }
