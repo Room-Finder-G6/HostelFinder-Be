@@ -1,5 +1,7 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
+﻿using System.Linq.Expressions;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using HostelFinder.Application.Interfaces.IRepositories;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
@@ -33,6 +35,77 @@ namespace HostelFinder.Infrastructure.Repositories
             return rentalContract;
         }
 
+        public async Task<(List<RentalContract> rentalContracts, int totalRecord)> GetAllMatchingRentalContractAysnc(Guid hostelId, string? searchPhrase,string? statusFilter, int pageNumber, int pageSize,
+            string? sortBy, SortDirection sortDirection)
+        {
+            // lấy ra những phòng thuộc hostel
+            var rooms =  _dbContext.Rooms
+                .AsNoTracking()
+                .Include(x => x.Invoices)
+                .Where(r => r.HostelId == hostelId && !r.IsDeleted)
+                .Select(r => r.Id);  
+            var searchPhraseLower = searchPhrase?.ToLower();
+
+            var query = _dbContext.RentalContracts
+                .AsNoTracking()
+                .Include(x => x.Room)
+                .Include(x => x.Tenant)
+                .Where(rt => rooms.Contains(rt.RoomId) && !rt.IsDeleted);
+            if (!string.IsNullOrEmpty(searchPhrase))
+            {
+                query = query.Where(x => x.Room.RoomName.ToLower().Contains(searchPhraseLower)
+                || x.Tenant.FullName.ToLower().Contains(searchPhraseLower));
+            }
+            if(statusFilter != null)
+            {
+                if (statusFilter == "Hợp đồng đã kết thúc")
+                {
+                    query = query.Where(x => x.EndDate.HasValue && x.EndDate.Value.Date < DateTime.Now.Date);
+                }
+                else if (statusFilter == "Hợp đồng đang trong thời hạn")
+                {
+                    query = query.Where(x => x.StartDate.Date <= DateTime.Now.Date && (x.EndDate == null || x.EndDate.Value.Date > DateTime.Now.Date));
+                }
+                else if(statusFilter == "Hợp đồng sắp kết thúc")
+                {
+                    query = query.Where(x => x.EndDate.HasValue && x.EndDate.Value.AddDays(-7) <= DateTime.Now.Date && x.EndDate.Value.Date > DateTime.Now.Date);
+                }
+                else if(statusFilter == "Hợp đồng chưa bắt đầu")
+                {
+                    query = query.Where(x => x.StartDate.Date <= DateTime.Now.Date && x.StartDate.AddDays(7) > DateTime.Now.Date);
+                }
+            }
+            var totalRecords = await query.CountAsync();
+            
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                var columnsSelector = new Dictionary<string, Expression<Func<RentalContract, object>>>
+                {
+                    { nameof(Room.RoomName), x => x.Room.RoomName},
+                    { nameof(Tenant.FullName), x => x.Tenant.FullName},
+                    { nameof(RentalContract.StartDate), x => x.StartDate},
+                    { nameof(RentalContract.EndDate.HasValue), x => x.EndDate.Value},
+                    { nameof(RentalContract.LastModifiedOn), x => x.LastModifiedOn},
+                    { nameof(RentalContract.CreatedOn), x => x.CreatedOn},
+                };
+
+                if (columnsSelector.ContainsKey(sortBy))
+                {
+                    var selectedColumn = columnsSelector[sortBy];
+                    query = sortDirection == SortDirection.Ascending
+                        ? query.OrderBy(selectedColumn)
+                        : query.OrderByDescending(selectedColumn);
+                }
+            }
+            var rentalContracts = await query
+                .OrderByDescending(x => x.CreatedOn)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (rentalContracts: rentalContracts, totalRecord: totalRecords);
+        }
+
 
         public async Task<RentalContract?> GetRoomRentalContrctByRoom(Guid roomId)
         {
@@ -42,7 +115,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(rt => rt.Tenant)
                 .Where(rt => rt.RoomId == roomId
                         && rt.StartDate.Date <= currentDate
-                            && (rt.EndDate == null || rt.EndDate >= currentDate)
+                            && (rt.EndDate == null || rt.EndDate.Value.Date > currentDate)
                                 && !rt.IsDeleted)
                 .FirstOrDefaultAsync();
         }

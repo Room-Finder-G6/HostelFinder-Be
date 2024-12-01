@@ -236,11 +236,7 @@ namespace HostelFinder.WebApi.Controllers
                 var response = await _invoiceService.GetAllInvoicesByHostelIdAsync(hostelId, searchPhrase, pageNumber, pageSize, sortBy, sortDirection);
                 if (!response.Succeeded)
                 {
-                    return BadRequest(new Response<List<InvoiceResponseDto>>
-                    {
-                        Succeeded = false,
-                        Message = response.Message
-                    });
+                    return BadRequest(response);
                 }
 
                 return Ok(response);
