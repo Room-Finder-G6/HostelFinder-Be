@@ -20,7 +20,7 @@ namespace HostelFinder.WebApi.Controllers
             var result = await _userMembershipService.GetMembershipStatisticsAsync(timeRange, customStartDate, customEndDate);
             if (!result.Succeeded)
             {
-                return BadRequest(result.Message);
+                return BadRequest(new { result.Message });
             }
             return Ok(result);
         }
