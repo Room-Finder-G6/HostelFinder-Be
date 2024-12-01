@@ -36,23 +36,22 @@ namespace HostelFinder.WebApi.ActionFilter
                 return;
             }
 
-            // Kiểm tra membership
-            var userMembership = await _dbContext.UserMemberships
+            // Lấy tất cả các gói thành viên của người dùng
+            var userMemberships = await _dbContext.UserMemberships
                 .Where(um => um.UserId == user.Id)
-                .FirstOrDefaultAsync();
+                .ToListAsync();
 
-            if (userMembership != null)
+            // Kiểm tra nếu tất cả các gói thành viên đều hết hạn
+            bool allMembershipsExpired = userMemberships.All(um => um.ExpiryDate < DateTime.Now);
+
+            if (allMembershipsExpired)
             {
-                // Kiểm tra nếu membership đã hết hạn
-                if (userMembership.ExpiryDate < DateTime.Now)
+                // Nếu tất cả các gói thành viên hết hạn và role là Landlord, từ chối truy cập
+                if (user.Role == UserRole.Landlord)
                 {
-                    // Nếu membership hết hạn và role là Landlord, từ chối truy cập
-                    if (user.Role == UserRole.Landlord)
-                    {
-                        context.HttpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
-                        await context.HttpContext.Response.WriteAsync("Gói thành viên đã hết hạn!");
-                        return;
-                    }
+                    context.HttpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    await context.HttpContext.Response.WriteAsync("Gói thành viên đã hết hạn!");
+                    return;
                 }
             }
 
