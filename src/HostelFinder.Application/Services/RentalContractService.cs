@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using HostelFinder.Application.DTOs.RentalContract.Request;
+using HostelFinder.Application.DTOs.RentalContract.Response;
 using HostelFinder.Application.DTOs.Room.Responses;
+using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using Irony.Parsing.Construction;
 
@@ -99,7 +102,7 @@ namespace HostelFinder.Application.Services
 
 
                 // kiểm tra số lượng trong phòng
-                if(currentTenantsCount + 1 >= 1)
+                if(currentTenantsCount + 1 >= 1 && rentalContract.StartDate <= DateTime.Now.Date &&(rentalContract ==null || rentalContract.EndDate >= DateTime.Now.Date))
                 {
                     room.IsAvailable = false;
                    await _roomRepository.UpdateAsync(room);
@@ -177,6 +180,46 @@ namespace HostelFinder.Application.Services
             {
                 return new Response<string> { Succeeded = false, Message = ex.Message };
             }
+        }
+
+        public async Task<PagedResponse<List<RentalContractResponseDto>>> GetRentalContractsByHostelIdAsync(Guid hostelId, string? searchPhrase,string? statusFilter, int? pageNumber, int? pageSize,
+            string? sortBy, SortDirection sortDirection)
+        {
+            try
+            {
+                var listRentalContracts = await _rentalContractRepository.GetAllMatchingRentalContractAysnc(hostelId, searchPhrase,statusFilter, pageNumber ?? 1, pageSize ?? 10, sortBy, sortDirection);
+                var result = _mapper.Map<List<RentalContractResponseDto>>(listRentalContracts.rentalContracts);
+                foreach (var rentalContract in result)
+                {
+                    rentalContract.Status = GetContractStatus(rentalContract.StartDate, rentalContract.EndDate);
+                }
+                var pagedResponse = PaginationHelper.CreatePagedResponse(result, pageNumber ?? 1, pageSize ?? 10, listRentalContracts.totalRecord);
+                return pagedResponse;
+                
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        private string GetContractStatus(DateTime startDate, DateTime? endDate)
+        {
+            var currentDate = DateTime.Now.Date;
+            if(endDate.HasValue && endDate.Value.Date < currentDate)
+            {
+                return "Hợp đồng đã kết thúc";
+            }
+            if(startDate.Date <= currentDate && (!endDate.HasValue || endDate.Value.Date > currentDate))
+            {
+                return "Hợp đồng đang trong thời hạn";
+            }
+            //hợp đồng sắp hết hạn sau 7 ngày
+            if(endDate.HasValue && endDate.Value.Date.AddDays(-7) <= currentDate && endDate.Value.Date >= currentDate)
+            {
+                return "Hợp đồng sắp kết thúc";
+            }
+            return "Hợp đồng chưa bắt đầu";
         }
     }
 }

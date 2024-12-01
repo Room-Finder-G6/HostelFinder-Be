@@ -251,6 +251,10 @@ public class GeneralProfile : Profile
         // Rental Contract
         CreateMap<AddRentalContractDto, RentalContract>().ReverseMap();
         CreateMap<RoomContractHistoryResponseDto, RentalContract>().ReverseMap();
+        CreateMap<RentalContract, RentalContractResponseDto>()
+            .ForMember(dest => dest.TenantName, opt => opt.MapFrom(src => src.Tenant.FullName))
+            .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName))
+            .ReverseMap();
 
         //Invoice Detail
         CreateMap<InvoiceDetailResponseDto, InvoiceDetail>().ReverseMap();

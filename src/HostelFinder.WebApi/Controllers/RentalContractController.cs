@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.RentalContract.Request;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Domain.Common.Constants;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,11 +38,30 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpPost]
         [Route("termination-of-contract")]
-        public async Task<IActionResult> TerminationOfContract([FromBody] Guid rentalContractId)
+        public async Task<IActionResult> TerminationOfContract([FromBody] ContractTerminationRequest request)
         {
             try
             {
-                var response = await _rentalContractService.TerminationOfContract(rentalContractId);
+                var response = await _rentalContractService.TerminationOfContract(request.ContractId);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+        
+        [HttpGet("getRentalContractsByHostel")]
+        public async Task<IActionResult> GetRentalContractsByHostelId(Guid hostelId, string? searchPhrase,string? statusFilter, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection)
+        {
+            try
+            {
+                var response = await _rentalContractService.GetRentalContractsByHostelIdAsync(hostelId, searchPhrase,statusFilter, pageNumber, pageSize, sortBy, sortDirection);
                 if (!response.Succeeded)
                 {
                     return BadRequest(response);

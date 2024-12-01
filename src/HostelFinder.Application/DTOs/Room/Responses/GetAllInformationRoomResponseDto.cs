@@ -18,7 +18,7 @@ namespace HostelFinder.Application.DTOs.Room.Responses
         //thông tin hóa đơn mới nhất
         public RoomInvoiceHistoryDetailsResponseDto? InvoiceDetailInRoom { get; set; }
 
-        //thông tin hợp đồng mới nhất
+        //thông tin hợp đồng hiện tại
 
         public RoomContractHistoryResponseDto? ContractDetailInRoom { get; set; }
 

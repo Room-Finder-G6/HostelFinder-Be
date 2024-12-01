@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Application.Common;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Interfaces.IRepositories
@@ -14,5 +15,16 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         /// <param name="endDate"></param>
         /// <returns></returns>
         Task<RentalContract?> CheckExpiredContractAsync(Guid roomId,DateTime startDate, DateTime? endDate);
+        /// <summary>
+        /// Pagaing and filter
+        /// </summary>
+        /// <param name="hostelId"></param>
+        /// <param name="searchPhrase"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="sortBy"></param>
+        /// <param name="sortDirection"></param>
+        /// <returns></returns>
+        Task<(List<RentalContract> rentalContracts, int  totalRecord)> GetAllMatchingRentalContractAysnc(Guid hostelId, string? searchPhrase,string? statusFilter, int pageNumber, int pageSize, string? sortBy, SortDirection sortDirection);
     }
 }
