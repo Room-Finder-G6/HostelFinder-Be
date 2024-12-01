@@ -134,7 +134,7 @@ namespace HostelFinder.Application.Services
                 invoice.FormOfTransfer = request.FormOfTransfer;
                 
                 await _invoiceRepository.UpdateAsync(invoice);
-                return new Response<string>(){Message = "Thu tiền hóa đơn thành công", Succeeded = true};
+                return new Response<string>(){Message = $"Thu tiền hóa đơn tháng {invoice.BillingMonth}/{invoice.BillingYear} ở {invoice.Room.RoomName} thành công ", Succeeded = true};
             }
             catch (Exception ex)
             {
