@@ -247,7 +247,10 @@ namespace HostelFinder.Application.Services
             user.WalletBalance -= membership.Price;
             await _userRepository.UpdateAsync(user);
 
-            var emailBody = $"{user.Email} đã đăng ký thành công Gói Hội Viên. Chúc bạn một ngày vui vẻ!";
+            var emailBody = $@"
+                                <p>Kính gửi khách hàng {user.Email},</p>
+                                <p>PhongTro247 xin thông báo, {user.Email} đã đăng ký thành công Gói Hội Viên. Chúc bạn một ngày vui vẻ!</p>
+                                <p>Trân trọng, <br>PhongTro247 Team</p>";
             var emailSubject = "Đăng Ký Hội Viên";
             await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
 
