@@ -346,7 +346,7 @@ namespace HostelFinder.Application.Services
                 return new Response<EditRoomDtoResponse>() { Succeeded = false, Message = ex.Message };
             }
         }
-<<<<<<< HEAD
+
 
         public async Task<Response<bool>> CheckDeleteRoom(Guid roomId)
         {
@@ -379,7 +379,5 @@ namespace HostelFinder.Application.Services
                 return new Response<bool>() { Succeeded = false, Message = ex.Message };
             }
         }
-=======
->>>>>>> 5755d97ecb8f31642233e8928d0fc78866045f26
     }
 }
