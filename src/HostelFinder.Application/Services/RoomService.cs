@@ -56,14 +56,19 @@ namespace HostelFinder.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<Response<RoomResponseDto>> GetByIdAsync(Guid id)
+        public async Task<Response<RoomByIdDto>> GetByIdAsync(Guid id)
         {
-            var room = await _roomRepository.GetRoomByIdAsync(id);
-            if (room == null)
-                return new Response<RoomResponseDto>("Room not found.");
-
-            var result = _mapper.Map<RoomResponseDto>(room);
-            return new Response<RoomResponseDto>(result);
+            try
+            {
+                var room = await _roomRepository.GetRoomByIdAsync(id);
+                var result = _mapper.Map<RoomByIdDto>(room);
+                result.ImageRoom = await _imageRepository.GetAllUrlRoomPicture(room.Id);
+                return new Response<RoomByIdDto>(result);
+            }
+            catch (Exception ex)
+            {
+                return new Response<RoomByIdDto>() { Succeeded = false, Message = ex.Message };
+            }
         }
         /// <summary>
         /// Tạo phòng theo từng trọ, chung cư
@@ -145,50 +150,92 @@ namespace HostelFinder.Application.Services
         /// <param name="id"></param>
         /// <param name="roomDto"></param>
         /// <returns></returns>
-        public async Task<Response<RoomResponseDto>> UpdateAsync(Guid id, UpdateRoomRequestDto roomDto)
+        public async Task<Response<RoomResponseDto>> UpdateAsync(Guid id, UpdateRoomRequestDto roomDto, List<IFormFile> roomImages)
         {
-            var room = await _roomRepository.GetRoomWithDetailsAndServiceCostsByIdAsync(id);
-            if (room == null)
-                return new Response<RoomResponseDto>("Room not found.");
-
-            room.RoomName = roomDto.RoomName;
-            room.IsAvailable = roomDto.IsAvailable;
-            room.MonthlyRentCost = roomDto.MonthlyRentCost;
-            room.RoomType = roomDto.RoomType;
-            room.LastModifiedBy = room.LastModifiedBy;
-            room.LastModifiedOn = DateTime.UtcNow;
-
-            if (roomDto.UpdateRoomDetailsDto != null && room.RoomDetails != null)
+            try
             {
-                _mapper.Map(roomDto.UpdateRoomDetailsDto, room.RoomDetails);
-                room.RoomDetails.LastModifiedBy = room.LastModifiedBy;
-                room.RoomDetails.LastModifiedOn = DateTime.UtcNow;
+                var room = await _roomRepository.GetRoomByIdAsync(id);
+                if (room == null)
+                    return new Response<RoomResponseDto>("Phòng không tồn tại");
+                bool roomExists = await _roomRepository.RoomExistsAsync(roomDto.RoomName, roomDto.HostelId);
+                if (roomExists)
+                {
+                    return new Response<RoomResponseDto>("Tên phòng đã tồn tại trong trọ.");
+                }
+
+                room.RoomName = roomDto.RoomName;
+                room.Floor = roomDto.Floor;
+                room.MaxRenters = roomDto.MaxRenters;
+                room.Deposit = roomDto.Deposit;
+                room.MonthlyRentCost = roomDto.MonthlyRentCost;
+                room.Size = roomDto.Size;
+                room.RoomType = roomDto.RoomType;
+                room.IsAvailable = roomDto.IsAvailable;
+                var updatedRoom = await _roomRepository.UpdateAsync(room);
+                // Xử lý hình ảnh phòng
+                var imageUrls = new List<string>();
+                if (roomImages != null && roomImages.Count > 0)
+                {
+                    // Xóa hình ảnh cũ của phòng
+                    await _imageRepository.DeleteByRoomId(updatedRoom.Id);
+
+                    // Tải lên hình ảnh mới lên AWS và lưu lại URL
+                    foreach (var image in roomImages)
+                    {
+                        var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
+                        var imageUrl = uploadToAWS3;
+                        imageUrls.Add(imageUrl);
+                    }
+
+                    // Thêm hình ảnh mới vào DB
+                    foreach (var imageUrl in imageUrls)
+                    {
+                        await _imageRepository.AddAsync(new Image
+                        {
+                            RoomId = updatedRoom.Id,
+                            Url = imageUrl,
+                            CreatedOn = DateTime.Now,
+                            CreatedBy = updatedRoom.HostelId.ToString(),
+                            HostelId = updatedRoom.HostelId
+                        });
+                    }
+                }
+
+                // Cập nhật tiện ích phòng
+                List<Guid> amentityIds = roomDto.AmenityId.ToList();
+                // Xóa các tiện ích cũ của phòng
+                await _roomAmentityRepository.DeleteByRoomIdAsync(room.Id);
+                // var roomAmenitiesList = amentityIds.Select(amentityId => new RoomAmenities
+                // {
+                //     AmenityId = amentityId,
+                //     RoomId = updatedRoom.Id,
+                //     LastModifiedOn = DateTime.Now,
+                //     CreatedBy = updatedRoom.HostelId.ToString(),
+                //     IsDeleted = false
+                // }).ToList();
+                var roomAmenitiesList = new List<RoomAmenities>();
+                foreach (var amentityId in amentityIds)
+                {
+                    roomAmenitiesList.Add(new RoomAmenities()
+                    {
+                        AmenityId = amentityId,
+                        RoomId = updatedRoom.Id,
+                        LastModifiedOn = DateTime.Now,
+                        CreatedBy = updatedRoom.HostelId.ToString(),
+                        IsDeleted = false
+                    });
+                }
+
+                // Thêm tiện ích vào DB
+                await _roomAmentityRepository.AddRangeAsync(roomAmenitiesList);  
+                var roomResponseDto = _mapper.Map<RoomResponseDto>(updatedRoom);
+                
+                return new Response<RoomResponseDto>(roomResponseDto, "Room updated successfully.");
             }
-            //if (roomDto.UpdateServiceCostDtos != null)
-            //{
-            //    var incomingServiceCosts = roomDto.UpdateServiceCostDtos
-            //        .Where(dto => dto. != Guid.Empty)
-            //        .ToDictionary(sc => sc.ServiceCostId);
-
-            //    foreach (var serviceCost in room.Hostel.ServiceCosts)
-            //    {
-            //        if (incomingServiceCosts.TryGetValue(serviceCost.Id, out var updateDto))
-            //        {
-            //            _mapper.Map(updateDto, serviceCost);
-            //            serviceCost.LastModifiedBy = room.LastModifiedBy;
-            //            serviceCost.LastModifiedOn = DateTime.UtcNow;
-            //            incomingServiceCosts.Remove(serviceCost.Id);
-            //        }
-            //        else
-            //        {
-            //            Console.WriteLine("No matching ServiceCost ID found for: " + serviceCost.Id);
-            //        }
-            //    }
-
-            //}
-            room = await _roomRepository.UpdateAsync(room);
-            var result = _mapper.Map<RoomResponseDto>(room);
-            return new Response<RoomResponseDto>(result, "Room updated successfully.");
+            catch (Exception ex)
+            {
+                return new Response<RoomResponseDto>() { Succeeded = false, Message = ex.Message};
+            }
         }
 
         /// <summary>
@@ -274,6 +321,24 @@ namespace HostelFinder.Application.Services
             catch (Exception ex)
             {
                 return new Response<GetAllInformationRoomResponseDto> { Succeeded = false, Message = ex.Message };   
+            }
+        }
+
+        public async Task<Response<EditRoomDtoResponse>> GetRoomWithAmentitesAndImageAsync(Guid roomId)
+        {
+            try
+            {
+                var room = await _roomRepository.GetRoomByIdAsync(roomId);
+                var result = _mapper.Map<EditRoomDtoResponse>(room);
+                result.ImageRoom = await _imageRepository.GetAllUrlRoomPicture(room.Id);
+                var getAmentitesByRoom = await _roomAmentityRepository.GetAmenitiesByRoomIdAsync(room.Id);
+                result.AmenityIds = getAmentitesByRoom.Select(x => x.AmenityId).ToList();
+                return new Response<EditRoomDtoResponse>(){Succeeded = true, Data = result};
+                
+            }
+            catch (Exception ex)
+            {
+                return new Response<EditRoomDtoResponse>() { Succeeded = false, Message = ex.Message };
             }
         }
     }

@@ -145,12 +145,13 @@ namespace XUnitTestHostelFinder.Controllers
             // Arrange
             var roomId = Guid.NewGuid();
             var roomDto = new UpdateRoomRequestDto { RoomName = "Updated Room" };
+            var images = new List<IFormFile>();
             _roomServiceMock
-                .Setup(service => service.UpdateAsync(roomId, roomDto))
+                .Setup(service => service.UpdateAsync(roomId, roomDto, images))
                 .ThrowsAsync(new Exception("Internal server error"));
 
             // Act
-            var result = await _controller.UpdateRoom(roomId, roomDto);
+            var result = await _controller.UpdateRoom(roomId, roomDto,images);
 
             // Assert
             var objectResult = Assert.IsType<ObjectResult>(result);
@@ -166,7 +167,7 @@ namespace XUnitTestHostelFinder.Controllers
         [InlineData("", 0, 0, 0, 0, false, "Model is invalid", 400)] // Invalid input case
         [InlineData(null, 3, 2, 500, 15, false, "Model is invalid", 400)] // Missing RoomName
         public async Task CreateRoom_WithDifferentData_ReturnsExpectedResult(
-     string roomName, int floor, int maxRenters, decimal monthlyRentCost, float size,
+     string roomName, int floor, int maxRenters, decimal monthlyRentCost, decimal size,
      bool success, string message, int expectedStatusCode)
         {
             // Arrange
@@ -347,7 +348,7 @@ namespace XUnitTestHostelFinder.Controllers
         {
             // Arrange
             var roomId = Guid.NewGuid();
-            var roomResponse = new RoomResponseDto
+            var roomResponse = new RoomByIdDto()
             {
                 Id = roomId,
                 HostelName = "Hostel A",
@@ -359,9 +360,13 @@ namespace XUnitTestHostelFinder.Controllers
                 MonthlyRentCost = 500,
                 RoomType = RoomType.Chung_cư,
                 CreatedOn = DateTimeOffset.Now,
-                ImageRoom = "room101.jpg"
+                ImageRoom =  new List<string>()
+                {
+                    "http://example.com/room101.jpg",
+                    "http://example.com/room101_2.jpg"
+                }
             };
-            var response = new Response<RoomResponseDto>(roomResponse);
+            var response = new Response<RoomByIdDto>(roomResponse);
 
             _roomServiceMock.Setup(service => service.GetByIdAsync(roomId))
                 .ReturnsAsync(response);
@@ -383,7 +388,7 @@ namespace XUnitTestHostelFinder.Controllers
         {
             // Arrange
             var roomId = Guid.NewGuid();
-            var response = new Response<RoomResponseDto>("Room not found.")
+            var response = new Response<RoomByIdDto>("Room not found.")
             {
                 Succeeded = false
             };
@@ -426,7 +431,6 @@ namespace XUnitTestHostelFinder.Controllers
             var updateDto = new UpdateRoomRequestDto
             {
                 RoomName = "Updated Room",
-                IsAvailable = true,
                 MonthlyRentCost = 1200,
                 RoomType = RoomType.Chung_cư_mini
             };
@@ -438,13 +442,14 @@ namespace XUnitTestHostelFinder.Controllers
                 MonthlyRentCost = 1200,
                 RoomType = RoomType.Chung_cư_mini
             };
+            var images = new List<IFormFile>();
             var response = new Response<RoomResponseDto>(roomResponse, "Room updated successfully.");
 
-            _roomServiceMock.Setup(service => service.UpdateAsync(roomId, updateDto))
+            _roomServiceMock.Setup(service => service.UpdateAsync(roomId, updateDto, images))
                 .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.UpdateRoom(roomId, updateDto);
+            var result = await _controller.UpdateRoom(roomId, updateDto, images);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -458,9 +463,9 @@ namespace XUnitTestHostelFinder.Controllers
         {
             // Arrange
             _controller.ModelState.AddModelError("RoomName", "RoomName is required");
-
+            var images = new List<IFormFile>();
             // Act
-            var result = await _controller.UpdateRoom(Guid.NewGuid(), new UpdateRoomRequestDto());
+            var result = await _controller.UpdateRoom(Guid.NewGuid(), new UpdateRoomRequestDto(), images);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -477,20 +482,20 @@ namespace XUnitTestHostelFinder.Controllers
             var updateDto = new UpdateRoomRequestDto
             {
                 RoomName = "Updated Room",
-                IsAvailable = true,
                 MonthlyRentCost = 1200,
                 RoomType = RoomType.Chung_cư_mini
             };
+            var images = new List<IFormFile>();
             var response = new Response<RoomResponseDto>("Room not found.")
             {
                 Succeeded = false
             };
 
-            _roomServiceMock.Setup(service => service.UpdateAsync(roomId, updateDto))
+            _roomServiceMock.Setup(service => service.UpdateAsync(roomId, updateDto, images))
                 .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.UpdateRoom(roomId, updateDto);
+            var result = await _controller.UpdateRoom(roomId, updateDto, images);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -507,16 +512,16 @@ namespace XUnitTestHostelFinder.Controllers
             var updateDto = new UpdateRoomRequestDto
             {
                 RoomName = "Updated Room",
-                IsAvailable = true,
                 MonthlyRentCost = 1200,
                 RoomType = RoomType.Chung_cư_mini
             };
+            var images = new List<IFormFile>();
 
-            _roomServiceMock.Setup(service => service.UpdateAsync(roomId, updateDto))
+            _roomServiceMock.Setup(service => service.UpdateAsync(roomId, updateDto, images))
                 .ThrowsAsync(new Exception("Internal server error"));
 
             // Act
-            var result = await _controller.UpdateRoom(roomId, updateDto);
+            var result = await _controller.UpdateRoom(roomId, updateDto, images);
 
             // Assert
             var objectResult = Assert.IsType<ObjectResult>(result);
