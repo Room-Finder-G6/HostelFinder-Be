@@ -274,6 +274,7 @@ namespace HostelFinder.WebApi.Controllers
                     Message = $"Internal server error: {ex.Message}"
                 });
             }
+<<<<<<< HEAD
         }
 
         [HttpGet("check-delete-room")]
@@ -295,6 +296,8 @@ namespace HostelFinder.WebApi.Controllers
                     Message = $"Internal server error: {ex.Message}"
                 });
             }
+=======
+>>>>>>> 5755d97ecb8f31642233e8928d0fc78866045f26
         }
     }
 }
