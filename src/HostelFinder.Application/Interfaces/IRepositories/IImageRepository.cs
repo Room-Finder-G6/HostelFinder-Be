@@ -10,5 +10,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<List<Image>> GetImagesByPostIdAsync(Guid postId);
 
         Task<List<string>> GetAllUrlRoomPicture(Guid roomId);
+        Task DeleteByRoomId(Guid roomId);
     }
 }
