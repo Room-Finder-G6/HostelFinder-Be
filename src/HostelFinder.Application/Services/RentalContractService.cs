@@ -203,6 +203,16 @@ namespace HostelFinder.Application.Services
             }
         }
 
+        public async Task<bool> CheckContractExistAsync(Guid roomId)
+        {
+            var checkContract = await _rentalContractRepository.GetRoomRentalContrctByRoom(roomId);
+            if (checkContract == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
         private string GetContractStatus(DateTime startDate, DateTime? endDate)
         {
             var currentDate = DateTime.Now.Date;
