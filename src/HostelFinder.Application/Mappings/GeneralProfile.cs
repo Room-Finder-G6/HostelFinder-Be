@@ -152,6 +152,19 @@ public class GeneralProfile : Profile
         CreateMap<AddUserMembershipRequestDto, UserMembership>()
               .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
               .ForMember(dest => dest.MembershipId, opt => opt.MapFrom(src => src.MembershipId));
+        // Chuyển từ UserMembership sang UserMembershipStatistics
+        CreateMap<UserMembership, UserMembershipStatistics>()
+            .ForMember(dest => dest.MembershipDetails, opt => opt.MapFrom(src => src.Membership));
+        // Chuyển từ UserMembership sang MembershipDetail
+        CreateMap<UserMembership, MembershipDetail>()
+            .ForMember(dest => dest.MembershipName, opt => opt.MapFrom(src => src.Membership.Name))
+            .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Membership.Price * (src.IsPaid ? 1 : 0)))
+            .ForMember(dest => dest.TotalUsers, opt => opt.MapFrom(src => 1)); // Tổng số người dùng cho mỗi Membership
+        // Chuyển từ Membership sang MembershipDetail (có thể dùng nếu cần)
+        CreateMap<Membership, MembershipDetail>()
+            .ForMember(dest => dest.MembershipName, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Price))
+            .ForMember(dest => dest.TotalUsers, opt => opt.Ignore()); // Không tính total users ở đây
 
         // MembershipServices mappings
         CreateMap<MembershipServices, MembershipServiceResponseDto>()
