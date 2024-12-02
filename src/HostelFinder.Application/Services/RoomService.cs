@@ -157,11 +157,11 @@ namespace HostelFinder.Application.Services
                 var room = await _roomRepository.GetRoomByIdAsync(id);
                 if (room == null)
                     return new Response<RoomResponseDto>("Phòng không tồn tại");
-                bool roomExists = await _roomRepository.RoomExistsAsync(roomDto.RoomName, roomDto.HostelId);
-                if (roomExists)
-                {
-                    return new Response<RoomResponseDto>("Tên phòng đã tồn tại trong trọ.");
-                }
+                // bool roomExists = await _roomRepository.RoomExistsAsync(roomDto.RoomName, roomDto.HostelId);
+                // if (roomExists)
+                // {
+                //     return new Response<RoomResponseDto>("Tên phòng đã tồn tại trong trọ.");
+                // }
 
                 room.RoomName = roomDto.RoomName;
                 room.Floor = roomDto.Floor;
@@ -170,6 +170,16 @@ namespace HostelFinder.Application.Services
                 room.MonthlyRentCost = roomDto.MonthlyRentCost;
                 room.Size = roomDto.Size;
                 room.RoomType = roomDto.RoomType;
+                // kiểm tra xem phòng có người thuê không
+                if (roomDto.IsAvailable == true)
+                {
+                    // kiểm tra xem có hợp đồng không thì mới cho chuyển thành true 
+                    var checkContract = await _rentalContractService.CheckContractExistAsync(room.Id);
+                    if (checkContract)
+                    {
+                        return new Response<RoomResponseDto>("Phòng đang có hợp đồng không thể chuyển trạng thái trống");
+                    }
+                }
                 room.IsAvailable = roomDto.IsAvailable;
                 var updatedRoom = await _roomRepository.UpdateAsync(room);
                 // Xử lý hình ảnh phòng
