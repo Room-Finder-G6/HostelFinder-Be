@@ -15,5 +15,8 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<string>> TerminationOfContract(Guid rentalContractId);
         
         Task<PagedResponse<List<RentalContractResponseDto>>> GetRentalContractsByHostelIdAsync(Guid hostelId, string? searchPhrase,string statusFilter, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection);
+        
+        //Kiểm tra phòng ở hiện tại có hợp đồng nào hay không
+        Task<bool> CheckContractExistAsync(Guid roomId);
     }
 }

@@ -274,6 +274,28 @@ namespace HostelFinder.WebApi.Controllers
                     Message = $"Internal server error: {ex.Message}"
                 });
             }
+
+        }
+
+        [HttpGet("check-delete-room")]
+        public async Task<IActionResult> CheckDeleteRoom(Guid roomId)
+        {
+            try
+            {
+                var response = await _roomService.CheckDeleteRoom(roomId);
+                if (!response.Succeeded)
+                    return BadRequest(response);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
     }
 }
