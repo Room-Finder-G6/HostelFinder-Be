@@ -142,6 +142,23 @@ namespace HostelFinder.Application.Services
             }
         }
 
+        public async Task<bool> CheckInvoiceNotPaidAsync(Guid roomId)
+        {
+            var invoices = await _invoiceRepository.GetInvoicesByRoomIdAsync(roomId);
+            if(invoices.Count() == 0)
+            {
+                return false;
+            }
+            foreach (var invoice in invoices)
+            {
+                if (invoice.IsPaid == false)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public async Task<Response<InvoiceResponseDto>> CreateAsync(AddInVoiceRequestDto invoiceDto)
         {
             var invoice = _mapper.Map<Invoice>(invoiceDto);

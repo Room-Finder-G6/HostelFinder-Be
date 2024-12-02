@@ -245,12 +245,17 @@ namespace HostelFinder.Application.Services
         /// <returns></returns>
         public async Task<Response<bool>> DeleteAsync(Guid id)
         {
-            var room = await _roomRepository.GetByIdAsync(id);
-            if (room == null)
-                return new Response<bool>("Room not found.");
+            try
+            {
+                var room = await _roomRepository.GetRoomByIdAsync(id);
 
-            await _roomRepository.DeletePermanentAsync(id);
-            return new Response<bool>(true, "Room deleted successfully.");
+                await _roomRepository.DeleteAsync(id);
+                return new Response<bool>(true, "Xóa phòng thành công.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>() { Succeeded = false, Message = ex.Message };
+            }
         }
         /// <summary>
         /// Lấy phòng theo id của trọ, theo tầng
@@ -339,6 +344,38 @@ namespace HostelFinder.Application.Services
             catch (Exception ex)
             {
                 return new Response<EditRoomDtoResponse>() { Succeeded = false, Message = ex.Message };
+            }
+        }
+
+        public async Task<Response<bool>> CheckDeleteRoom(Guid roomId)
+        {
+            try
+            {
+                var room = await _roomRepository.GetRoomByIdAsync(roomId);
+                // kiểm tra xem phòng có người thuê không
+                var countCurrentTenants = await _roomTenancyRepository.CountCurrentTenantsAsync(roomId);
+                if(countCurrentTenants > 0)
+                {
+                    return new Response<bool>() { Succeeded = true, Message = "Phòng hiện tại đang có người thuê.", Data = false};
+                }
+                // kiểm tra xem phòng có hóa đơn chưa thanh toán không
+                var checkInvoice = await _invoiceService.CheckInvoiceNotPaidAsync(roomId);
+                if(checkInvoice)
+                {
+                    return new Response<bool>() { Succeeded = true, Message = "Phòng đang có hóa đơn chưa thanh toán, vui lòng kiểm tra lại", Data = false};
+                }
+                // kiểm tra xem phòng có hợp đồng không
+                var checkContract = await _rentalContractService.CheckContractExistAsync(roomId);
+                if(checkContract )
+                {
+                    return new Response<bool>() { Succeeded = true, Message = "Phòng đang có hợp đồng không thể xóa", Data = false};
+                }
+                // xóa phòng
+                return new Response<bool>() { Succeeded = true, Message = "Có thể xóa phòng", Data = true};
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>() { Succeeded = false, Message = ex.Message };
             }
         }
     }

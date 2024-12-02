@@ -18,6 +18,8 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<GetAllInformationRoomResponseDto>> GetInformationDetailRoom(Guid roomId);
 
         Task<Response<EditRoomDtoResponse>> GetRoomWithAmentitesAndImageAsync(Guid roomId);
+        
+        Task<Response<bool>> CheckDeleteRoom(Guid roomId);
 
     }
 }
