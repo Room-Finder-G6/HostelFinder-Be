@@ -102,7 +102,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRoom(Guid id, [FromBody] UpdateRoomRequestDto roomDto)
+        public async Task<IActionResult> UpdateRoom(Guid id, [FromForm] UpdateRoomRequestDto roomDto, [FromForm] List<IFormFile> roomImages)
         {
             if (!ModelState.IsValid)
             {
@@ -110,7 +110,7 @@ namespace HostelFinder.WebApi.Controllers
             }
             try
             {
-                var response = await _roomService.UpdateAsync(id, roomDto);
+                var response = await _roomService.UpdateAsync(id, roomDto, roomImages);
                 if (!response.Succeeded)
                     return BadRequest(response);
 
@@ -229,19 +229,51 @@ namespace HostelFinder.WebApi.Controllers
         [HttpPost("AddRoommate")]
         public async Task<IActionResult> AddRoommate([FromForm] AddRoommateDto request)
         {
-            if (request == null)
+            try
             {
-                return BadRequest("Dữ liệu yêu cầu không hợp lệ.");
+                if (request == null)
+                {
+                    return BadRequest("Dữ liệu yêu cầu không hợp lệ.");
+                }
+
+                var response = await _tenantService.AddRoommateAsync(request);
+
+                if (response.Succeeded)
+                {
+                    return Ok(response.Message); // Trả về thông báo thành công
+                }
+
+                return BadRequest(response.Message); // Trả về thông báo lỗi nếu không thành công
             }
-
-            var response = await _tenantService.AddRoommateAsync(request);
-
-            if (response.Succeeded)
+            catch (Exception ex)
             {
-                return Ok(response.Message); // Trả về thông báo thành công
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
             }
+        }
+        
+        [HttpGet("get-room-with-amentities-and-image")]
+        public async Task<IActionResult> GetRoomWithAmentitiesAndImage(Guid roomId)
+        {
+            try
+            {
+                var response = await _roomService.GetRoomWithAmentitesAndImageAsync(roomId);
+                if (!response.Succeeded)
+                    return BadRequest(response);
 
-            return BadRequest(response.Message); // Trả về thông báo lỗi nếu không thành công
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ namespace HostelFinder.Application.DTOs.Room.Requests
         public decimal Deposit { get; set; }
         public decimal MonthlyRentCost { get; set; }
 
-        public float Size { get; set; }
+        public decimal Size { get; set; }
         public RoomType RoomType { get; set; }
         public List<Guid> AmenityId{ get; set; }
     }

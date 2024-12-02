@@ -49,5 +49,24 @@ namespace HostelFinder.Infrastructure.Repositories
             return urlImages;
 
         }
+
+        public async Task DeleteByRoomId(Guid roomId)
+        {
+            try
+            {
+                var imageRooms = await _dbContext.Images
+                    .Where(x => x.RoomId == roomId).ToListAsync();
+                // xóa hết image của roomId 
+                foreach (var imageRoom in imageRooms)
+                {
+                    _dbContext.Images.Remove(imageRoom);
+                }
+            }
+            catch (Exception)
+            {
+                throw new Exception("Lỗi xảy ra khi xóa ảnh");
+            }
+            
+        }
     }
 }

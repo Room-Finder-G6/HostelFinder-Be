@@ -53,6 +53,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 query = query.Where(r => r.Floor == floor);
             }
 
+            query = query.OrderByDescending(x => x.CreatedOn);
             return await query.ToListAsync();
 
         }

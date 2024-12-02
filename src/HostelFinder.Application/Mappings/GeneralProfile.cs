@@ -180,17 +180,17 @@ public class GeneralProfile : Profile
                 => opt.Ignore())
             .ForMember(dest => dest.NumberOfPushTopRemaining, opt
                 => opt.Ignore());
-        //Image
+        //Image Mapping
         CreateMap<Image, ImageResponseDto>().ReverseMap();
 
-        //InVoice
+        //InVoice Mapping
         CreateMap<Invoice, InvoiceResponseDto>().ReverseMap();
         CreateMap<UpdateInvoiceRequestDto, Invoice>().ReverseMap();
         CreateMap<AddInVoiceRequestDto, Invoice>().ReverseMap();
         CreateMap<ListInvoiceResponseDto, Invoice>().ReverseMap()
             .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName));
 
-        //Room
+        //Room Mapping
         CreateMap<Room, RoomResponseDto>().ReverseMap();
         CreateMap<UpdateRoomRequestDto, Room>();
         CreateMap<AddRoomRequestDto, Room>().ReverseMap();
@@ -203,6 +203,12 @@ public class GeneralProfile : Profile
         CreateMap<AddRoomRequestDto, Room>()
             .ReverseMap();
         CreateMap<UpdateRoomRequestDto, Room>()
+            .ReverseMap();
+        CreateMap<Room, RoomByIdDto>()
+            .ForMember(dest => dest.HostelName, opt =>
+                opt.MapFrom(src => src.Hostel.HostelName))
+            .ReverseMap();
+        CreateMap<EditRoomDtoResponse, Room>()
             .ReverseMap();
 
 
