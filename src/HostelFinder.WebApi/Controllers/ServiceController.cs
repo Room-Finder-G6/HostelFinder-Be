@@ -82,7 +82,7 @@ namespace HostelFinder.WebApi.Controllers
             var response = await _serviceService.DeleteServiceAsync(id);
             if (response.Succeeded)
             {
-                return NoContent();
+                return Ok(response);
             }
             return NotFound(response.Message);
         }

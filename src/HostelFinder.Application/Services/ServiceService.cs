@@ -110,15 +110,17 @@ namespace HostelFinder.Application.Services
                 var service = await _hostelServiceRepository.GetByIdAsync(id);
                 if (service == null)
                 {
-                    return new Response<string>("Service not found.");
+                    return new Response<string>("Service not found.") { Succeeded = false };
                 }
-                await _serviceRepository.DeletePermanentAsync(id);
-                return new Response<string>("Service deleted successfully.");
+
+                await _hostelServiceRepository.DeletePermanentAsync(id);
+                return new Response<string>("Service deleted successfully.") { Succeeded = true };
             }
             catch (Exception ex)
             {
-                return new Response<string>(message: ex.Message);
+                return new Response<string>(message: ex.Message) { Succeeded = false };
             }
+
         }
 
         public async Task<Response<List<HostelServiceResponseDto>>> GetAllServiceByHostelAsync(Guid hostelId)
