@@ -4,6 +4,7 @@ namespace HostelFinder.Application.DTOs.Service.Response
 {
     public class HostelServiceResponseDto
     {
+        public Guid Id { get; set; }
         public Guid ServiceId { get; set; }
 
         public Guid HostelId { get; set; }
