@@ -7,16 +7,14 @@ namespace HostelFinder.Domain.Entities
 {
     public class User : BaseEntity
     {
-        [Required]
         [MaxLength(100)]
-        public string Username { get; set; }
+        public string? Username { get; set; }
 
-        [Required]
         [MaxLength(100)]
         public string FullName { get; set; }
-        [Required]
+        
         [MaxLength(100)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         [Required]
         [EmailAddress]
@@ -24,9 +22,8 @@ namespace HostelFinder.Domain.Entities
         public string Email { get; set; }
 
         [Phone]
-        [Required]
         [MaxLength(20)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [MaxLength(255)]
         public string? AvatarUrl { get; set; } =

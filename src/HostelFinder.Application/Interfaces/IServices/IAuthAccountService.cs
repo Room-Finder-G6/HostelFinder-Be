@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.Auth.Responses;
 using HostelFinder.Application.DTOs.Auths.Requests;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Interfaces.IServices
 {
@@ -14,5 +15,8 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<string>> ForgotPasswordAsync(ForgotPasswordRequest request);
 
         Task<Response<string>> ResetPasswordAsync(ResetPasswordRequest request);
+        
+        Task<Response<AuthenticationResponse>> LoginWithGoogleAsync(LoginWithGoogleRequest request);
+        
     }
 }
