@@ -13,6 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using RoomFinder.Domain.Common.Settings;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace HostelFinder.Application
 {
@@ -72,6 +74,17 @@ namespace HostelFinder.Application
                         IssuerSigningKey =
                             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"]))
                     };
+                });
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                })
+                .AddGoogle(options =>
+                {
+                    options.ClientId = configuration["Google:ClientId"];
+                    options.ClientSecret = configuration["Google:ClientSecret"];
                 });
 
             services.AddAuthorization(options =>

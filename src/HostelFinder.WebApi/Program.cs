@@ -4,6 +4,8 @@ using HostelFinder.Infrastructure.Seeders;
 using HostelFinder.WebApi.ActionFilter;
 using HostelFinder.WebApi.Extensions;
 using HostelFinder.WebApi.Middlewares;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Net.payOS;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -100,6 +102,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 //app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
