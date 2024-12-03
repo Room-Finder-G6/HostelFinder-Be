@@ -88,7 +88,7 @@ jobs:
                   -e PayOS__ReturnUrl="${{ secrets.PayOS__ReturnUrl }}" \
                   -e PayOS__CancelUrl="${{ secrets.PayOS__CancelUrl }}" \
                   -e PayOS__WebhookUrl="${{ secrets.PayOS__WebhookUrl }}" \
-                  -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
-                  -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+                  -e Google__ClientId="${{ secrets.Google__ClientId }}" \
+                  -e Google__ClientSecret="${{ secrets.Google__ClientSecret }}" \
                   ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
           EOF
