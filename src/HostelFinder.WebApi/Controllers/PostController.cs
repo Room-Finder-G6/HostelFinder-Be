@@ -13,11 +13,13 @@ public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
     private readonly IS3Service _s3Service;
+    private readonly IOpenAiService _openAiService;
 
-    public PostController(IPostService postService, IS3Service s3Service)
+    public PostController(IPostService postService, IS3Service s3Service, IOpenAiService openAiService)
     {
         _postService = postService;
         _s3Service = s3Service;
+        _openAiService = openAiService;
     }
 
     [HttpGet("GetAllPostWithPriceAndStatusAndTime")]
@@ -137,7 +139,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPut("{postId}")]
-    public async Task<IActionResult> UpdatePost(Guid postId, [FromForm] UpdatePostRequestDto request, [FromForm] List<IFormFile> images)
+    public async Task<IActionResult> UpdatePost(Guid postId, [FromForm] UpdatePostRequestDto request, [FromForm] List<IFormFile>? images, [FromForm] List<string>? imageUrls)
     {
         try
         {
@@ -146,29 +148,8 @@ public class PostController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            var imageUrls = new List<string>();
-
-            if (images != null && images.Any())
-            {
-                foreach (var image in images)
-                {
-                    try
-                    {
-                        var imageUrl = await _s3Service.UploadFileAsync(image);
-                        imageUrls.Add(imageUrl);
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        return BadRequest(new Response<string>
-                        {
-                            Succeeded = false,
-                            Message = $"Image upload failed: {ex.Message}"
-                        });
-                    }
-                }
-            }
-
-            var result = await _postService.UpdatePostAsync(postId, request, imageUrls);
+            // Nếu có hình ảnh, truyền vào request. Nếu không có hình ảnh, truyền null.
+            var result = await _postService.UpdatePostAsync(postId, request, images?.Any() == true ? images : null, imageUrls);
 
             if (!result.Succeeded)
             {
@@ -447,6 +428,21 @@ public class PostController : ControllerBase
                 Succeeded = false,
                 Message = $"Internal server error: {ex.Message}"
             });
+        }
+    }
+
+    [HttpPost]
+    [Route("generate-description-post")]
+    public async Task<IActionResult> GenarateDescriptionPost(PostGenerationRequest request)
+    {
+        try
+        {
+            var response = await _openAiService.GeneratePostDescriptionsAsync(request);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }

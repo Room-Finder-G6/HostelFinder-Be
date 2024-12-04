@@ -8,7 +8,6 @@ namespace HostelFinder.Domain.Entities;
 public class Image : BaseEntity
 {
     [Required]
-    [MaxLength(255)]
     public string Url { get; set; }
 
     [ForeignKey("Hostel")]

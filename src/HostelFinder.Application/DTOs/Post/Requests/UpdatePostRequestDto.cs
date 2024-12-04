@@ -1,4 +1,4 @@
-﻿namespace HostelFinder.Application.DTOs.Room.Requests;
+﻿namespace HostelFinder.Application.DTOs.Post.Requests;
 
 public class UpdatePostRequestDto
 {
