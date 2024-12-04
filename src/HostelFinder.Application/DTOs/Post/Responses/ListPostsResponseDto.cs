@@ -13,4 +13,5 @@ public class ListPostsResponseDto
     public string MembershipTag { get; set; }
     public string FirstImage { get; set; }
     public DateTimeOffset CreatedOn { get; set; }
+    public bool status { get; set; }
 }

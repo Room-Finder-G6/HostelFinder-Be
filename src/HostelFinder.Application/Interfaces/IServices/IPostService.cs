@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Http;
 
 namespace HostelFinder.Application.Interfaces.IServices;
 
@@ -12,7 +13,7 @@ public interface IPostService
     Task<Response<bool>> DeletePostAsync(Guid postId, Guid userId);
     Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request);
     Task<Response<PostResponseDto>> GetPostByIdAsync(Guid postId);
-    Task<Response<UpdatePostRequestDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request, List<string> imageUrls);
+    Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request, List<IFormFile>? images, List<string>? imageUrls);
     Task<Response<List<ListPostsResponseDto>>> FilterPostsAsync(FilterPostsRequestDto filter);
     Task<Response<PostResponseDto>> PushPostOnTopAsync(Guid postId, DateTime newDate, Guid userId);
     Task<Response<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync();
