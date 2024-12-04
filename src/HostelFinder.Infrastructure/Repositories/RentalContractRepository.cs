@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.InkML;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
@@ -119,5 +120,21 @@ namespace HostelFinder.Infrastructure.Repositories
                                 && !rt.IsDeleted)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<RentalContract> GetActiveRentalContractAsync(Guid roomId)
+        {
+            return await _dbContext.RentalContracts
+                .AsNoTracking()
+                .Where(rc => rc.RoomId == roomId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<RentalContract> GetRentalContractByRoomIdAsync(Guid roomId)
+        {
+            return await _dbContext.RentalContracts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(rc => rc.RoomId == roomId);
+        }
+
     }
 }
