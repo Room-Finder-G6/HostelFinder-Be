@@ -33,9 +33,9 @@ namespace HostelFinder.Infrastructure.Services
                 await smtpClient.SendMailAsync(message);
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
-                return false;
+                throw new Exception(ex.Message) ;
             }
         }
     }

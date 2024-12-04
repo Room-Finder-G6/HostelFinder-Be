@@ -7,6 +7,7 @@ using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using HostelFinder.Infrastructure.Services.Interfaces;
@@ -247,11 +248,8 @@ namespace HostelFinder.Application.Services
             user.WalletBalance -= membership.Price;
             await _userRepository.UpdateAsync(user);
 
-            var emailBody = $@"
-                                <p>Kính gửi khách hàng {user.Email},</p>
-                                <p>PhongTro247 xin thông báo, {user.Email} đã đăng ký thành công Gói Hội Viên. Chúc bạn một ngày vui vẻ!</p>
-                                <p>Trân trọng, <br>PhongTro247 Team</p>";
-            var emailSubject = "Đăng Ký Hội Viên";
+            var emailBody = EmailConstants.BodyRegisterMembership(user, membership);
+            var emailSubject = EmailConstants.SUBJECT_REGISTER_MEMBERSHIP;
             await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
 
             // Tạo hoặc cập nhật membership mới
