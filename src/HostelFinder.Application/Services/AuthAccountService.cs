@@ -1,3 +1,4 @@
+using Google.Apis.Auth;
 using HostelFinder.Application.DTOs.Auth.Requests;
 using HostelFinder.Application.DTOs.Auth.Responses;
 using HostelFinder.Application.DTOs.Auths.Requests;
@@ -6,8 +7,11 @@ using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
+using HostelFinder.Domain.Enums;
 using HostelFinder.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace HostelFinder.Application.Services
 {
@@ -106,6 +110,75 @@ namespace HostelFinder.Application.Services
 
             await _userRepository.UpdateAsync(user);
             return new Response<string> { Succeeded = true, Message = "Đặt lại mật khẩu thành công!" };
+        }
+
+        public async Task<Response<AuthenticationResponse>> LoginWithGoogleAsync(LoginWithGoogleRequest request)
+        {
+            try
+            {
+                // Logging để kiểm tra idToken
+                Console.WriteLine($"Received idToken: {request.IdToken}");
+
+                var googleUser = await AuthenticateWithGoogle(request.IdToken);
+                if (googleUser == null)
+                    throw new Exception("Invalid Google Token.");
+
+                var user = await _userRepository.FindByEmailAsync(googleUser.Email);
+                if (user == null)
+                {
+                    user = new User
+                    {
+                        FullName = googleUser.Name,
+                        Email = googleUser.Email,
+                        AvatarUrl = "https://hostel-finder-images.s3.ap-southeast-1.amazonaws.com/Default-Avatar.png",
+                        Role = UserRole.User, 
+                        IsActive = true,
+                        IsEmailConfirmed = true,
+                        WalletBalance = 0,
+                        CreatedOn = DateTime.Now,
+                        CreatedBy = "Google",
+                        Username = googleUser.Name
+                    };
+
+                    await _userRepository.AddAsync(user);
+                }
+                var role = await _userRepository.GetRoleAsync(user.Id);
+                var token =  _tokenService.GenerateJwtToken(user, role);
+                var response = new AuthenticationResponse
+                {
+                    UserName = user.FullName,
+                    Role = role.ToString(),
+                    Token = token
+                };
+                return new Response<AuthenticationResponse> { Data = response, Succeeded = true, Message = "Đăng nhập thành công" };
+                
+            }
+            catch (Exception ex)
+            {
+                // Logging lỗi để dễ dàng kiểm tra
+                Console.WriteLine($"Error in GoogleLogin: {ex.Message}");
+                throw new Exception($"Error: {ex.Message}");
+            }
+        }
+        private async Task<GoogleJsonWebSignature.Payload> AuthenticateWithGoogle(string idToken)
+        {
+            try
+            {
+                IConfiguration configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.Development.json")
+                    .Build();
+                var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings()
+                {
+                    Audience = new List<string>() { configuration["Google:ClientId"] }
+                });
+                return payload;
+            }
+            catch (Exception ex)
+            {
+                // Logging để kiểm tra lỗi xác thực
+                Console.WriteLine($"Invalid JWT: {ex.Message}");
+                return null;
+            }
         }
     }
 }

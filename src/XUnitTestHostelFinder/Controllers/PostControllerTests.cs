@@ -19,12 +19,13 @@ namespace XUnitTestHostelFinder.Controllers
         private readonly PostController _controller;
         private readonly Mock<IPostService> _postServiceMock;
         private readonly Mock<IS3Service> _s3ServiceMock;
+        private readonly Mock<IOpenAiService> _openAiService;
 
         public PostControllerTests()
         {
             _postServiceMock = new Mock<IPostService>();
             _s3ServiceMock = new Mock<IS3Service>();
-            _controller = new PostController(_postServiceMock.Object, _s3ServiceMock.Object);
+            _controller = new PostController(_postServiceMock.Object, _s3ServiceMock.Object, _openAiService.Object);
         }
 
         [Fact]

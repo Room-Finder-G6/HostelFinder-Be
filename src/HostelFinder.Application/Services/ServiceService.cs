@@ -11,12 +11,14 @@ namespace HostelFinder.Application.Services
     public class ServiceService : IServiceService
     {
         private readonly IServiceRepository _serviceRepository;
+        private readonly IHostelServiceRepository _hostelServiceRepository;
         private readonly IMapper _mapper;
 
-        public ServiceService(IServiceRepository serviceRepository, IMapper mapper)
+        public ServiceService(IServiceRepository serviceRepository, IMapper mapper, IHostelServiceRepository hostelServiceRepository)
         {
             _serviceRepository = serviceRepository;
             _mapper = mapper;
+            _hostelServiceRepository = hostelServiceRepository;
         }
 
         public async Task<Response<List<ServiceResponseDTO>>> GetAllServicesAsync()
@@ -52,8 +54,27 @@ namespace HostelFinder.Application.Services
             try
             {
                 await _serviceRepository.AddAsync(service);
+
+                var hostelService = new HostelServices
+                {
+                    HostelId = serviceCreateRequestDTO.HostelId,
+                    ServiceId = service.Id,
+                    CreatedOn = DateTime.Now,
+                    CreatedBy = "System"
+                };
+
+                // Add the HostelService to the corresponding repository
+                await _hostelServiceRepository.AddAsync(hostelService);
+
+                // Map the newly added service to the response DTO
                 var serviceResponseDto = _mapper.Map<ServiceResponseDTO>(service);
-                return new Response<ServiceResponseDTO> { Succeeded = true, Data = serviceResponseDto, Message = "Dịch vụ đã được thêm thành công." };
+
+                return new Response<ServiceResponseDTO>
+                {
+                    Succeeded = true,
+                    Data = serviceResponseDto,
+                    Message = $"Dịch vụ {serviceCreateRequestDTO.ServiceName} đã được thêm thành công."
+                };
             }
             catch (Exception ex)
             {
@@ -86,18 +107,20 @@ namespace HostelFinder.Application.Services
         {
             try
             {
-                var service = await _serviceRepository.GetByIdAsync(id);
+                var service = await _hostelServiceRepository.GetByIdAsync(id);
                 if (service == null)
                 {
-                    return new Response<string>("Service not found.");
+                    return new Response<string>("Service not found.") { Succeeded = false };
                 }
-                await _serviceRepository.DeletePermanentAsync(id);
-                return new Response<string>("Service deleted successfully.");
+
+                await _hostelServiceRepository.DeletePermanentAsync(id);
+                return new Response<string>("Service deleted successfully.") { Succeeded = true };
             }
             catch (Exception ex)
             {
-                return new Response<string>(message: ex.Message);
+                return new Response<string>(message: ex.Message) { Succeeded = false };
             }
+
         }
 
         public async Task<Response<List<HostelServiceResponseDto>>> GetAllServiceByHostelAsync(Guid hostelId)
