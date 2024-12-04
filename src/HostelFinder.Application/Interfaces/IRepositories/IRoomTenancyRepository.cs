@@ -19,5 +19,7 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         /// <param name="roomId"></param>
         /// <returns></returns>
         Task<List<RoomTenancy>> GetTenacyCurrentlyByRoom(Guid roomId, DateTime startDate, DateTime? endDate);
+        Task<RoomTenancy?> GetRoomTenancyByTenantIdAsync(Guid tenantId);
+        Task<RoomTenancy?> GetEarliestRoomTenancyByRoomIdAsync(Guid roomId);
     }
 }
