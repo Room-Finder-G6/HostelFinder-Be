@@ -114,7 +114,7 @@ namespace HostelFinder.WebApi.Controllers
         
                 if (result.Succeeded)
                 {
-                    return Ok(result);  // Trả về 200 OK nếu thành công
+                    return Ok(result);  
                 }
 
                 // Trả về 400 nếu có lỗi về dữ liệu yêu cầu
