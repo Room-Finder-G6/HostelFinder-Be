@@ -42,6 +42,7 @@ public class OpenAiController : ControllerBase
         }
         catch (Exception ex)
         {
+            // Bắt các ngoại lệ khác nếu cần
             return StatusCode(500, $"An unexpected error occurred: {ex.Message}");
         }
     }

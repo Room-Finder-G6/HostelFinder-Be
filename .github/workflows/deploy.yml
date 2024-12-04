@@ -90,5 +90,6 @@ jobs:
                   -e PayOS__WebhookUrl="${{ secrets.PayOS__WebhookUrl }}" \
                   -e Google__ClientId="${{ secrets.Google__ClientId }}" \
                   -e Google__ClientSecret="${{ secrets.Google__ClientSecret }}" \
+                  -e OpenAI__ApiKey="${{ secrets.OpenAI__ApiKey }}" \
                   ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
           EOF
