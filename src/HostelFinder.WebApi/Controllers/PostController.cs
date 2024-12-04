@@ -13,11 +13,13 @@ public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
     private readonly IS3Service _s3Service;
+    private readonly IOpenAiService _openAiService;
 
-    public PostController(IPostService postService, IS3Service s3Service)
+    public PostController(IPostService postService, IS3Service s3Service, IOpenAiService openAiService)
     {
         _postService = postService;
         _s3Service = s3Service;
+        _openAiService = openAiService;
     }
 
     [HttpGet("GetAllPostWithPriceAndStatusAndTime")]
@@ -447,6 +449,21 @@ public class PostController : ControllerBase
                 Succeeded = false,
                 Message = $"Internal server error: {ex.Message}"
             });
+        }
+    }
+
+    [HttpPost]
+    [Route("generate-description-post")]
+    public async Task<IActionResult> GenarateDescriptionPost(PostGenerationRequest request)
+    {
+        try
+        {
+            var response = await _openAiService.GeneratePostDescriptionsAsync(request);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }
