@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using FluentValidation;
 using HostelFinder.Application.DTOs.Image.Requests;
 using HostelFinder.Application.DTOs.Users;
@@ -264,14 +265,14 @@ namespace HostelFinder.Application.Services
             return CreateSuccessResponse("Gói thành viên mới đã đăng ký thành công.");
         }
 
-        private async Task<Response<string>> RegisterTrialMembership(Guid userId, Guid membershipId, int duration)
+        private async Task<Response<string>> RegisterTrialMembership(User user, Guid membershipId, int duration)
         {
             // Không cần trừ tiền nếu là gói thử nghiệm
             var startDate = DateTime.Now;
             var expiryDate = startDate.AddDays(duration);
             var newUserMembership = new UserMembership
             {
-                UserId = userId,
+                UserId = user.Id,
                 MembershipId = membershipId,
                 StartDate = startDate,
                 ExpiryDate = expiryDate,
@@ -283,6 +284,11 @@ namespace HostelFinder.Application.Services
             };
 
             await _userMembershipRepository.AddAsync(newUserMembership);
+            if (user.Role == UserRole.User)
+            {
+                user.Role = UserRole.Landlord;
+                await _userRepository.UpdateAsync(user);
+            }
 
             return CreateSuccessResponse("Gói người dùng thử đã đăng ký thành công.");
         }
