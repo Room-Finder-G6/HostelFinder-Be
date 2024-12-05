@@ -308,14 +308,14 @@ namespace HostelFinder.WebApi.Controllers
                     return BadRequest(new Response<string>
                     {
                         Succeeded = false,
-                        Message = "Send email failed"
+                        Message = "Gửi email thất bại"
                     });
                 }
 
                 return Ok(new Response<string>
                 {
                     Succeeded = true,
-                    Message = "Send email successfully"
+                    Message = "Gửi email thành công"
                 });
             }
             catch (Exception ex)
