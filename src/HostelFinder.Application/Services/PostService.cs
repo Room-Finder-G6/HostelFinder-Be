@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
-using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
