@@ -3,6 +3,7 @@ using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers;
@@ -23,6 +24,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("GetAllPostWithPriceAndStatusAndTime")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetAllPostWithPriceAndStatusAndTime()
     {
         try
@@ -53,6 +55,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("GetAllPostWithPriceAndStatusAndTimePaging")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetAllPostWithPriceAndStatusAndTimePaging([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
     {
         try
@@ -83,6 +86,7 @@ public class PostController : ControllerBase
 
 
     [HttpPost]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> AddPost(Guid userId, [FromForm] AddPostRequestDto postDto,
         [FromForm] List<IFormFile> images)
     {
@@ -139,6 +143,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPut("{postId}")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> UpdatePost(Guid postId, [FromForm] UpdatePostRequestDto request, [FromForm] List<IFormFile>? images, [FromForm] List<string>? imageUrls)
     {
         try
@@ -169,6 +174,7 @@ public class PostController : ControllerBase
     }
 
     [HttpDelete]
+    [Authorize(Roles = "Landlord,Admin")]
     [Route("{postId}")]
     public async Task<IActionResult> DeletePost(Guid postId)
     {
@@ -200,6 +206,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPost("get-all")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> Get(GetAllPostsQuery request)
     {
         try
@@ -228,6 +235,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("user/{userId}")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetPostsByUserId(Guid userId)
     {
         try
@@ -265,6 +273,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("{postId}")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetPostById(Guid postId)
     {
         try
@@ -301,6 +310,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPost("filter")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> FilterPosts([FromForm] FilterPostsRequestDto filter)
     {
         try
@@ -338,6 +348,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPatch]
+    [Authorize(Roles = "Landlord,Admin")]
     [Route("{postId}/push")]
     public async Task<IActionResult> PushPost(Guid postId, Guid userId)
     {
@@ -376,6 +387,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("ordered")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetPostsOrderedByPriority()
     {
         try
@@ -404,6 +416,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("GetPostsOrderedPaging")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetPostsOrderedByPriorityPaging([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
     {
         try
@@ -433,6 +446,7 @@ public class PostController : ControllerBase
 
     [HttpPost]
     [Route("generate-description-post")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GenarateDescriptionPost(PostGenerationRequest request)
     {
         try

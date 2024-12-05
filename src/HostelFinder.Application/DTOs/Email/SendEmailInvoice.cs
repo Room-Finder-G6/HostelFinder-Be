@@ -102,7 +102,7 @@ public class SendEmailInvoice
                             {invoiceDetailsRows}
                             <tr>
                                 <td colspan='2' class='total'>Tổng Cộng</td>
-                                <td style='text-align: right;' class='total'>{invoice.TotalAmount:N0} VND</td>
+                                <td style='text-align: right;' class='total'>{invoice.TotalAmount} VND</td>
                             </tr>
                         </tbody>
                     </table>
@@ -207,7 +207,7 @@ public class SendEmailInvoice
                     <p>Thông tin chi tiêt hóa đơn thanh toán <strong>{billingPeriod}</strong>:</p>
                     <p><strong>Ngày Lập Hóa Đơn:</strong> {invoiceDate}</p>
                     <p><strong>Trạng Thái:</strong> {statusHtml}</p>
-                    <p><strong>Số tiền:</strong> {invoice.TotalAmount:NO} VNĐ</p>
+                    <p><strong>Số tiền:</strong> {invoice.TotalAmount} VNĐ</p>
                     <p><strong> Hình thức thành toán : {invoice.FormOfTransfer} </strong></p>
                     <table>
                         <thead>

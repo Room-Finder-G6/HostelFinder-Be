@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.ServiceCost.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -18,6 +19,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetServiceCosts()
         {
             try
@@ -45,6 +47,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetServiceCost(Guid id)
         {
             try
@@ -84,6 +87,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> CreateServiceCost([FromBody] CreateServiceCostDto serviceCostDto)
         {
             if (!ModelState.IsValid)
@@ -122,6 +126,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> UpdateServiceCost(Guid id, [FromBody] UpdateServiceCostDto serviceCostDto)
         {
             if (!ModelState.IsValid)
@@ -142,6 +147,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> DeleteServiceCost(Guid id)
         {
             try
@@ -170,6 +176,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Landlord,Admin")]
         [Route("hostels")]
         public async Task<IActionResult> GetServiceCostsByHostel(Guid hostelId)
         {

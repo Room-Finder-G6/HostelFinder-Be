@@ -1,6 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.MeterReading.Request;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddMeterReading([FromBody] CreateMeterReadingDto createMeterReadingDto)
         {
             try
@@ -31,6 +33,7 @@ namespace HostelFinder.WebApi.Controllers
         }
         
         [HttpPost("list")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddMeterReadingList([FromBody] List<CreateMeterReadingDto> createMeterReadingDtos)
         {
             try
@@ -49,6 +52,7 @@ namespace HostelFinder.WebApi.Controllers
         }
         
         [HttpGet("{hostelId}/{roomId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetServiceCostReading(Guid hostelId, Guid roomId, int? billingMonth, int? billingYear)
         {
             try

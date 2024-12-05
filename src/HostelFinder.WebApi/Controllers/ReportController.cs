@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -15,6 +16,7 @@ namespace HostelFinder.WebApi.Controllers
           }
 
           [HttpGet("yearly-revenue")]
+          [Authorize(Roles = "Landlord,Admin")]
           public async Task<IActionResult> GetYearlyRevenueReport(Guid hostelId, int year)
           {
                try
@@ -34,6 +36,7 @@ namespace HostelFinder.WebApi.Controllers
           }
 
           [HttpGet("monthly-revenue")]
+          [Authorize(Roles = "Landlord,Admin")]
           public async Task<IActionResult> GetMonthlyRevenueReport(Guid hostelId, int month, int year)
           {
                try

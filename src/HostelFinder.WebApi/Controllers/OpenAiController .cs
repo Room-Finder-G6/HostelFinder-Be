@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.ChatAI.Request;
 using HostelFinder.Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers;
@@ -16,6 +17,7 @@ public class OpenAiController : ControllerBase
     }
 
     [HttpPost("generate")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> Generate([FromBody] OpenAiChatRequest request)
     {
         if (request == null || request.Messages == null || request.Messages.Count == 0)

@@ -3,6 +3,7 @@ using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Common.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -21,6 +22,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("{hostelId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetHostelById(Guid hostelId)
         {
             try
@@ -44,6 +46,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("GetHostelsByLandlordId/{landlordId}")]
+        [Authorize(Roles = "Landlord")]
         public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId, string? searchPhrase, int? pageNumber, int? pageSize,string? sortBy, SortDirection? sortDirection)
         {
             try
@@ -63,6 +66,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddHostel([FromForm] AddHostelRequestDto hostelDto, IFormFile image)
         {
             if (!ModelState.IsValid)
@@ -106,6 +110,7 @@ namespace HostelFinder.WebApi.Controllers
 
 
         [HttpPut("{hostelId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromForm] UpdateHostelRequestDto request, IFormFile? image)
         {
             try
@@ -137,6 +142,7 @@ namespace HostelFinder.WebApi.Controllers
 
 
         [HttpDelete("DeleteHostel/{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> DeleteHostel(Guid id)
         {
             try
@@ -160,6 +166,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost("get-all")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetAll([FromBody] GetAllHostelQuery request)
         {
             try
