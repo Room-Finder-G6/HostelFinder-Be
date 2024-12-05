@@ -60,6 +60,24 @@ namespace HostelFinder.Infrastructure.Repositories
                 .FirstOrDefaultAsync(); 
         }
 
+        public Task<int> CountCurrentTenantsByRoomsInMonthAsync(Guid roomId, int month, int year)
+        {
+            return  _dbContext.RoomTenancies
+                .AsNoTracking()
+                .Where(rt => rt.RoomId == roomId && rt.MoveInDate.Month == month && rt.MoveInDate.Year == year && (rt.MoveOutDate == null || rt.MoveOutDate.Value.Date > DateTime.Now.Date) && !rt.IsDeleted)
+                .CountAsync();        
+        }
+
+        public async Task<RoomTenancy?> GetRoomTenancyRepresentativeAsync(Guid roomId)
+        {
+            return await _dbContext.RoomTenancies
+                .AsNoTracking()
+                .Include(x => x.Tenant)
+                .Where(x => x.RoomId == roomId && !x.IsDeleted)
+                .OrderBy(x => x.CreatedOn)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<RoomTenancy?> GetRoomTenancyByTenantIdAsync(Guid tenantId)
         {
             return await _dbContext.RoomTenancies
