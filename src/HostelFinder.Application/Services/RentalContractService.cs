@@ -48,7 +48,7 @@ namespace HostelFinder.Application.Services
                 // Nếu khác null là thì không nằm trong thời gian hợp đồng
                 if (checkExpiredContract != null)
                 {
-                    return new Response<string> { Succeeded = false, Message = $"Hiện tại đã có hợp đồng tồn tại trong khoảng thời gian {checkExpiredContract.StartDate} - {checkExpiredContract.EndDate}." +
+                    return new Response<string> { Succeeded = false, Message = $"Hiện tại đã có hợp đồng tồn tại trong khoảng thời gian {checkExpiredContract.StartDate.ToString("dd/MM/yyyy")} - {checkExpiredContract.EndDate.Value.ToString("dd/MM/yyyy")}." +
                         $" Hoặc bạn có thể cập nhập lại thời hạn hợp đồng " };
                 }
 
@@ -127,7 +127,8 @@ namespace HostelFinder.Application.Services
                 if(getRoomContract == null)
                 {
                     return null;
-                } 
+                }
+             
                 var roomrentalContractResponseDto = _mapper.Map<RoomContractHistoryResponseDto>(getRoomContract);
                 return roomrentalContractResponseDto;
                     
@@ -179,6 +180,46 @@ namespace HostelFinder.Application.Services
             catch (Exception ex)
             {
                 return new Response<string> { Succeeded = false, Message = ex.Message };
+            }
+        }
+
+        public async Task<Response<string>> ContractExtension(Guid rentalContractId, DateTime newEndDate)
+        {
+            try
+            {
+                var contract = await _rentalContractRepository.GetByIdAsync(rentalContractId);
+                if (contract == null)
+                {
+                    return new Response<string>() { Succeeded = false, Message = "Không tìm thấy hợp đồng" };
+                }
+
+                if (newEndDate < DateTime.Now.Date)
+                {
+                    return new Response<string>() { Succeeded = false, Message = "Ngày gia hạn hợp đồng không hợp lệ" };
+                }
+                if (newEndDate <= contract.EndDate)
+                {
+                    return new Response<string>() { Succeeded = false, Message = "Ngày gia hạn phải lớn hơn ngày kết thúc hợp đồng" };
+                }
+                contract.EndDate = newEndDate;
+                contract.LastModifiedOn = DateTime.Now;
+                await _rentalContractRepository.UpdateAsync(contract);
+
+                var roomTenacies =
+                    await _roomTenancyRepository.GetTenacyCurrentlyByRoom(contract.RoomId, contract.StartDate,
+                        contract.EndDate);
+                foreach (var roomTenacy in roomTenacies)
+                {
+                    roomTenacy.MoveOutDate = newEndDate;
+                    roomTenacy.LastModifiedOn = DateTime.Now;
+                    await _roomTenancyRepository.UpdateAsync(roomTenacy);
+                }
+                return new Response<string>() { Succeeded = true, Message = $"Gia hạn hợp đồng thành công đến ngày {newEndDate.ToString("dd/MM/yyyy")}" };
+                
+                
+            }catch(Exception ex)
+            {
+                return new Response<string>() { Succeeded = false, Message = ex.Message };
             }
         }
 
