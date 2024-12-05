@@ -8,6 +8,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
     public interface ITenantRepository : IBaseGenericRepository<Tenant>
     {
         Task<Tenant> GetByIdentityCardNumber(string identityCardNumber);
-        Task<PagedResponse<List<InformationTenanciesResponseDto>>> GetTenantsByHostelAsync(Guid hostelId, string? roomName, int pageNumber, int pageSize);
+        Task<PagedResponse<List<InformationTenanciesResponseDto>>> GetTenantsByHostelAsync(Guid hostelId, string? roomName, int pageNumber, int pageSize, string? status);
     }
 }

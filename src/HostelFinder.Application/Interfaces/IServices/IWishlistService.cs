@@ -9,5 +9,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<bool>> AddPostToWishlistAsync(AddPostToWishlistRequestDto request);
         Task<Response<WishlistResponseDto>> GetWishlistByUserIdAsync(Guid userId);
         Task<Response<bool>> DeleteRoomFromWishlistAsync(Guid id);
+        Task<int> GetWishlistPostCountAsync(Guid userId);
     }
 }
