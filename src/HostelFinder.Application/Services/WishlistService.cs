@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.DTOs.Post.Responses;
+﻿using Google.Apis.Util;
+using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Wishlist.Request;
 using HostelFinder.Application.DTOs.Wishlist.Response;
@@ -68,7 +69,14 @@ namespace HostelFinder.Application.Services
                 Posts = wishlist.WishlistPosts.Select(wr => new PostResponseDto
                 {
                     Id = wr.Post.Id,
+                    HostelId = wr.Post.HostelId,
+                    RoomId = wr.Post.RoomId,
                     Title = wr.Post.Title,
+                    Description = wr.Post.Description,
+                    ImageUrls = wr.Post.Images.Select(image => image.Url).ToList(),
+                    Status = wr.Post.Status,
+                    DateAvailable = wr.Post.DateAvailable,
+                    MembershipServiceId = wr.Post.MembershipServiceId,
                 }).ToList()
             };
             return new Response<WishlistResponseDto>(response);

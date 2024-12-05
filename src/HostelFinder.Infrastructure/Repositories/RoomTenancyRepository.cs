@@ -16,6 +16,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<int> CountCurrentTenantsAsync(Guid roomId)
         {
             return await _dbContext.RoomTenancies
+                .AsNoTracking()
                 .Where(rt => rt.RoomId == roomId && (rt.MoveOutDate == null || rt.MoveOutDate.Value.Date > DateTime.Now.Date) && !rt.IsDeleted)
                 .CountAsync();
         }
@@ -49,5 +50,23 @@ namespace HostelFinder.Infrastructure.Repositories
             }
             return tanecyCurrentInRoomList;
         }
+
+        public async Task<RoomTenancy?> GetEarliestRoomTenancyByRoomIdAsync(Guid roomId)
+        {
+            return await _dbContext.RoomTenancies
+                .AsNoTracking()
+                .Where(rt => rt.RoomId == roomId)
+                .OrderBy(rt => rt.CreatedOn) 
+                .FirstOrDefaultAsync(); 
+        }
+
+        public async Task<RoomTenancy?> GetRoomTenancyByTenantIdAsync(Guid tenantId)
+        {
+            return await _dbContext.RoomTenancies
+                .AsNoTracking()
+                .Where(rt => rt.TenantId == tenantId)
+                .FirstOrDefaultAsync(); 
+        }
+
     }
 }

@@ -11,7 +11,7 @@ public class S3Service : IS3Service
     private readonly IAmazonS3 _s3Client;
     private readonly string _bucketName;
 
-    public S3Service(IAmazonS3 s3Client, IConfiguration configuration)
+    public S3Service(IConfiguration configuration)
     {
         var awsAccessKey = configuration["AWS:AccessKey"];
         var awsSecretKey = configuration["AWS:SecretKey"];
@@ -59,6 +59,40 @@ public class S3Service : IS3Service
         };
 
         await _s3Client.DeleteObjectAsync(deleteObjectRequest);
+    }
+    
+    public async Task<string> UploadFileFromUrlAsync(string fileUrl)
+    {
+        if (string.IsNullOrEmpty(fileUrl))
+            throw new ArgumentException("URL không hợp lệ.");
+
+        // Tải file từ URL
+        using (var httpClient = new HttpClient())
+        using (var response = await httpClient.GetAsync(fileUrl))
+        {
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("Không thể tải file từ URL.");
+
+            var fileStream = await response.Content.ReadAsStreamAsync();
+
+            // Tạo tên file cho file mới upload lên S3
+            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(fileUrl)}";
+
+            // Tạo yêu cầu upload file lên S3
+            var uploadRequest = new TransferUtilityUploadRequest
+            {
+                InputStream = fileStream,
+                Key = fileName,
+                BucketName = _bucketName,
+                ContentType = "image/jpeg", // Có thể thay đổi loại content type tùy thuộc vào loại file bạn tải lên
+            };
+
+            var transferUtility = new TransferUtility(_s3Client);
+            await transferUtility.UploadAsync(uploadRequest);
+
+            // Trả về URL của file trên S3
+            return $"https://{_bucketName}.s3.amazonaws.com/{fileName}";
+        }
     }
 
 }

@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    partial class HostelFinderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241204160423_RemoveLimitLengthOfUrl")]
+    partial class RemoveLimitLengthOfUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -578,8 +581,8 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(3000)
-                        .HasColumnType("nvarchar(3000)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<Guid>("HostelId")
                         .HasColumnType("uniqueidentifier");
@@ -610,8 +613,8 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
 
@@ -1156,6 +1159,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -1167,6 +1171,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Phone")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -1180,6 +1185,7 @@ namespace HostelFinder.Infrastructure.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -1346,29 +1352,8 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Property<Guid>("PostId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("LastModifiedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.HasKey("WishlistId", "PostId");
 

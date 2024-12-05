@@ -163,7 +163,6 @@ namespace HostelFinder.Application.Services
                         var existingImages = await _imageRepository.GetImagesByHostelIdAsync(hostelId);
                         foreach (var existingImage in existingImages)
                         {
-                            await _s3Service.DeleteFileAsync(existingImage.Url);
                             await _imageRepository.DeletePermanentAsync(existingImage.Id);
                         }
 
