@@ -73,6 +73,8 @@ jobs:
                   -e CONNECTIONSTRINGS__DEFAULTCONNECTION="${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}" \
                   -e JWTSETTINGS__EXPIRYINMINUTES="${{ secrets.JWTSETTINGS__EXPIRYINMINUTES }}" \
                   -e JWTSETTINGS__KEY="${{ secrets.JWTSETTINGS__KEY }}" \
+                  -e JWTSETTINGS__Issuer="${{ secrets.JWTSETTINGS__Issuer }}" \
+                  -e JWTSETTINGS__Audience="${{ secrets.JWTSETTINGS__Audience }}" \
                   -e AWS__REGION="${{ secrets.AWS__REGION }}" \
                   -e AWS__ACCESSKEY="${{ secrets.AWS__ACCESSKEY }}" \
                   -e AWS__SECRETKEY="${{ secrets.AWS__SECRETKEY }}" \

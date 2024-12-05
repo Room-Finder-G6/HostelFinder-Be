@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.DTOs.Vehicle.Request;
 using HostelFinder.Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("tenant/{tenantId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetVehicleByTenant(Guid tenantId)
         {
             var response = await _vehicleService.GetVehicleByTenantAsync(tenantId);
@@ -28,6 +30,7 @@ namespace HostelFinder.WebApi.Controllers
 
         // Thêm xe mới
         [HttpPost]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddVehicle([FromForm] AddVehicleDto request)
         {
             var response = await _vehicleService.AddVehicleAsync(request);
@@ -50,6 +53,7 @@ namespace HostelFinder.WebApi.Controllers
 
         // Lấy danh sách tất cả xe
         [HttpGet]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetAllVehicles()
         {
             var response = await _vehicleService.GetAllVehiclesAsync();
@@ -58,6 +62,7 @@ namespace HostelFinder.WebApi.Controllers
 
         // Cập nhật xe
         [HttpPut("{vehicleId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> UpdateVehicle(Guid vehicleId, [FromForm] AddVehicleDto request)
         {
             var response = await _vehicleService.UpdateVehicleAsync(vehicleId, request);
@@ -69,6 +74,7 @@ namespace HostelFinder.WebApi.Controllers
 
         // Xóa xe
         [HttpDelete("{vehicleId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> DeleteVehicle(Guid vehicleId)
         {
             var response = await _vehicleService.DeleteVehicleAsync(vehicleId);

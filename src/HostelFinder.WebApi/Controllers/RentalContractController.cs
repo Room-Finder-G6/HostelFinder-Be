@@ -1,6 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.RentalContract.Request;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Domain.Common.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> CreateRentalContract([FromForm] AddRentalContractDto request)
         {
             try
@@ -37,6 +39,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Landlord,Admin")]
         [Route("termination-of-contract")]
         public async Task<IActionResult> TerminationOfContract([FromBody] ContractTerminationRequest request)
         {
@@ -57,6 +60,7 @@ namespace HostelFinder.WebApi.Controllers
         }
         
         [HttpGet("getRentalContractsByHostel")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetRentalContractsByHostelId(Guid hostelId, string? searchPhrase,string? statusFilter, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection)
         {
             try
@@ -76,6 +80,7 @@ namespace HostelFinder.WebApi.Controllers
         }
         
         [HttpPost]
+        [Authorize(Roles = "Landlord,Admin")]
         [Route("contract-extension")]
         public async Task<IActionResult> ContractExtension([FromBody] ContractExtensionRequest request)
         {

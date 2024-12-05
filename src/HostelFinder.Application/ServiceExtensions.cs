@@ -75,23 +75,22 @@ namespace HostelFinder.Application
                         IssuerSigningKey =
                             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"]))
                     };
-                });
-            services.AddAuthentication(options =>
+                })
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
-                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
                 })
                 .AddGoogle(options =>
                 {
                     options.ClientId = configuration["Google:ClientId"];
                     options.ClientSecret = configuration["Google:ClientSecret"];
-                });
+                })
+                ;
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy($"{UserRole.Admin}", policy => policy.RequireRole("Admin"));
-                options.AddPolicy($"{UserRole.User}", policy => policy.RequireRole("User"));
+                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("User", policy => policy.RequireRole("User"));
+                options.AddPolicy("Landlord", policy => policy.RequireRole("Landlord"));
             });
         }
     }
