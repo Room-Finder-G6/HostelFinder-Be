@@ -73,7 +73,7 @@ namespace HostelFinder.Application.Services
                     RoomId = wr.Post.RoomId,
                     Title = wr.Post.Title,
                     Description = wr.Post.Description,
-                    ImageUrls = wr.Post.Images.Select(image => image.Url).ToList(),
+                    ImageUrls = wr.Post?.Images?.Select(image => image.Url).ToList() ?? new List<string>(),
                     Status = wr.Post.Status,
                     DateAvailable = wr.Post.DateAvailable,
                     MembershipServiceId = wr.Post.MembershipServiceId,
