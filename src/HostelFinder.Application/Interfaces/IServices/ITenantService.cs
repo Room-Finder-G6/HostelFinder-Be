@@ -11,7 +11,7 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<TenantResponse> AddTenentServiceAsync(AddTenantDto request);
         Task<List<InformationTenacyReponseDto>> GetInformationTenacyAsync(Guid roomId);
         Task<Response<string>> AddRoommateAsync(AddRoommateDto request);
-        Task<PagedResponse<List<InformationTenanciesResponseDto>>> GetAllTenantsByHostelAsync(Guid hostelId, string? roomName, int pageNumber, int pageSize);
+        Task<PagedResponse<List<InformationTenanciesResponseDto>>> GetAllTenantsByHostelAsync(Guid hostelId, string? roomName, int pageNumber, int pageSize, string? status);
         Task<Response<string>> MoveOutAsync(Guid tenantId, Guid roomId);
     }
 }

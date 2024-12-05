@@ -19,10 +19,12 @@ namespace HostelFinder.WebApi.Controllers
         public async Task<IActionResult> GetAllTenantsByHostelAsync(
             [FromRoute] Guid hostelId,
             [FromQuery] string? roomName,
+            [FromQuery] string? status,
             [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10
+            )
         {
-            var result = await _tenantService.GetAllTenantsByHostelAsync(hostelId, roomName, pageNumber, pageSize);
+            var result = await _tenantService.GetAllTenantsByHostelAsync(hostelId, roomName, pageNumber, pageSize, status);
 
             if (result.Succeeded)
             {
