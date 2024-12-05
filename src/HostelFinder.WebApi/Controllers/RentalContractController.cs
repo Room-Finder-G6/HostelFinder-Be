@@ -74,5 +74,25 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
+        
+        [HttpPost]
+        [Route("contract-extension")]
+        public async Task<IActionResult> ContractExtension([FromBody] ContractExtensionRequest request)
+        {
+            try
+            {
+                var response = await _rentalContractService.ContractExtension(request.rentalContractId, request.newEndDate);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
     }
 }

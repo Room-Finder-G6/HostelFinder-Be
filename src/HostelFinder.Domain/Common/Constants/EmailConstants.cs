@@ -143,7 +143,7 @@ namespace HostelFinder.Domain.Common.Constants
 
         public static string BodyRegisterMembership(User user, Membership membership)
         {
-            return @"
+            return $@"
         <!DOCTYPE html>
         <html lang='vi'>
         <head>

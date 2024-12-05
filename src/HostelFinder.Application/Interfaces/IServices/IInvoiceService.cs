@@ -28,6 +28,8 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<string>> CollectMoneyInvoice (CollectMoneyInvoiceRequest request);
         
         Task<bool> CheckInvoiceNotPaidAsync(Guid roomId);
+        
+        Task<bool> SendEmailInvoiceToTenantAsync(Guid invoiceId);
 
     }
 }
