@@ -297,6 +297,36 @@ namespace HostelFinder.WebApi.Controllers
             }
         }
 
+        [HttpPost("send-email")]
+        public async Task<IActionResult> SendEmailInvoice(Guid invoiceId)
+        {
+            try
+            {
+                var response = await _invoiceService.SendEmailInvoiceToTenantAsync(invoiceId);
+                if (!response)
+                {
+                    return BadRequest(new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "Send email failed"
+                    });
+                }
+
+                return Ok(new Response<string>
+                {
+                    Succeeded = true,
+                    Message = "Send email successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
 
     }
 }
