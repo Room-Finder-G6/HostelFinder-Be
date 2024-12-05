@@ -21,7 +21,13 @@ namespace HostelFinder.Infrastructure.Repositories
             return tenant;
         }
 
-        public async Task<PagedResponse<List<InformationTenanciesResponseDto>>> GetTenantsByHostelAsync(Guid hostelId, string? roomName, int pageNumber, int pageSize)
+        public async Task<PagedResponse<List<InformationTenanciesResponseDto>>> GetTenantsByHostelAsync(
+          Guid hostelId,
+          string? roomName,
+          int pageNumber,
+          int pageSize,
+          string? status 
+        )
         {
             var query = _dbContext.RoomTenancies
                 .AsNoTracking()
@@ -29,13 +35,29 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(rt => rt.Tenant)
                 .Where(rt => rt.Room.HostelId == hostelId);
 
+            // Nếu có tên phòng, lọc theo tên phòng
             if (!string.IsNullOrEmpty(roomName))
             {
                 query = query.Where(rt => rt.Room.RoomName.Contains(roomName));
             }
 
+            // Lọc theo status
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (status == "Đã rời phòng")
+                {
+                    query = query.Where(rt => rt.MoveOutDate.HasValue && rt.MoveOutDate < DateTime.Now);
+                }
+                else if (status == "Đang thuê")
+                {
+                    query = query.Where(rt => !rt.MoveOutDate.HasValue || rt.MoveOutDate >= DateTime.Now);
+                }
+            }
+
+            // Sắp xếp theo ngày tạo
             query = query.OrderBy(rt => rt.CreatedOn);
 
+            // Lấy dữ liệu
             var tenants = await query
                 .Select(rt => new InformationTenanciesResponseDto
                 {
@@ -48,10 +70,12 @@ namespace HostelFinder.Infrastructure.Repositories
                     Email = rt.Tenant.Email,
                     Phone = rt.Tenant.Phone,
                     MoveInDate = rt.MoveInDate,
+                    // Trạng thái sẽ được tính trong Select
                     Status = rt.MoveOutDate.HasValue && rt.MoveOutDate < DateTime.Now ? "Đã rời phòng" : "Đang thuê"
                 })
                 .ToListAsync();
 
+            // Tính tổng số bản ghi và phân trang
             var totalRecords = tenants.Count();
             var pagedData = tenants.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
@@ -59,5 +83,6 @@ namespace HostelFinder.Infrastructure.Repositories
 
             return pagedResponse;
         }
+
     }
 }

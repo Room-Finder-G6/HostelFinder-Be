@@ -153,10 +153,10 @@ namespace HostelFinder.Application.Services
             return new Response<string> { Message = "Thêm người thuê vào phòng thành công", Succeeded = true };
         }
 
-        public async Task<PagedResponse<List<InformationTenanciesResponseDto>>> GetAllTenantsByHostelAsync(Guid hostelId, string? roomName, int pageNumber, int pageSize)
+        public async Task<PagedResponse<List<InformationTenanciesResponseDto>>> GetAllTenantsByHostelAsync(Guid hostelId, string? roomName, int pageNumber, int pageSize, string? status)
         {
             // Lấy danh sách tất cả RoomTenancy liên quan đến hostel
-            var tenants = await _tenantRepository.GetTenantsByHostelAsync(hostelId, roomName, pageNumber, pageSize);
+            var tenants = await _tenantRepository.GetTenantsByHostelAsync(hostelId, roomName, pageNumber, pageSize, status);
 
             // Trả về kết quả phân trang
             return tenants;
