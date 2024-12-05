@@ -4,6 +4,7 @@ using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.DTOs.RoomTenancies.Request;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -25,6 +26,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetRooms()
         {
             try
@@ -63,6 +65,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetRoom(Guid id)
         {
             try
@@ -80,6 +83,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> CreateRoom([FromForm] AddRoomRequestDto roomDto, [FromForm] List<IFormFile> roomImages)
         {
             if (!ModelState.IsValid)
@@ -102,6 +106,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> UpdateRoom(Guid id, [FromForm] UpdateRoomRequestDto roomDto, [FromForm] List<IFormFile> roomImages)
         {
             if (!ModelState.IsValid)
@@ -123,6 +128,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> DeleteRoom(Guid id)
         {
             try
@@ -160,6 +166,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("hostels/{hostelId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetRoomsByHostelId(Guid hostelId, int? floor)
         {
             try
@@ -182,6 +189,7 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpGet]
         [Route("info-retancy")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetInfoRentacyRoom(Guid roomId)
         {
             var response = await _tenantService.GetInformationTenacyAsync(roomId);
@@ -190,6 +198,7 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpGet]
         [Route("info-detail")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetInfoDetailRoom(Guid roomId)
         {
             var response = await _roomService.GetInformationDetailRoom(roomId);
@@ -200,6 +209,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost("AddTenantToRoom")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddTenantToRoom([FromForm] AddRoomTenacyDto request)
         {
             if (request == null)
@@ -227,6 +237,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost("AddRoommate")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddRoommate([FromForm] AddRoommateDto request)
         {
             try
@@ -256,6 +267,7 @@ namespace HostelFinder.WebApi.Controllers
         }
         
         [HttpGet("get-room-with-amentities-and-image")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetRoomWithAmentitiesAndImage(Guid roomId)
         {
             try
@@ -278,6 +290,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("check-delete-room")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> CheckDeleteRoom(Guid roomId)
         {
             try

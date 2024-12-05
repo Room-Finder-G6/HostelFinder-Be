@@ -53,7 +53,7 @@ public class PostService : IPostService
             };
         }
 
-        await _postRepository.DeletePermanentAsync(postId);
+        await _postRepository.DeleteAsync(postId);
         return new Response<bool> { Succeeded = true, Message = "Xóa bài đăng thành công." };
     }
 

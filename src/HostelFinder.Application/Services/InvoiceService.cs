@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HostelFinder.Application.DTOs.Email;
 using HostelFinder.Application.DTOs.Invoice.Responses;
 using HostelFinder.Application.DTOs.InVoice.Requests;
 using HostelFinder.Application.DTOs.InVoice.Responses;
@@ -10,6 +11,7 @@ using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
+using HostelFinder.Infrastructure.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace HostelFinder.Application.Services
@@ -24,6 +26,7 @@ namespace HostelFinder.Application.Services
         private readonly IServiceRepository _serviceRepository;
         private readonly IRoomTenancyRepository _roomTenancyRepository;
         private readonly IServiceCostRepository _serviceCostRepository;
+        private readonly IEmailService _emailService;
 
         public InvoiceService(IInVoiceRepository invoiceRepository,
             IRoomRepository roomRepository,
@@ -32,7 +35,8 @@ namespace HostelFinder.Application.Services
             ILogger<InvoiceService> logger,
             IServiceRepository serviceRepository,
             IRoomTenancyRepository roomTenancyRepository,
-            IServiceCostRepository serviceCostRepository)
+            IServiceCostRepository serviceCostRepository,
+            IEmailService emailService)
         {
             _invoiceRepository = invoiceRepository;
             _roomRepository = roomRepository;
@@ -42,6 +46,7 @@ namespace HostelFinder.Application.Services
             _serviceRepository = serviceRepository;
             _roomTenancyRepository = roomTenancyRepository;
             _serviceCostRepository = serviceCostRepository;
+            _emailService = emailService;
         }
 
         public async Task<Response<List<InvoiceResponseDto>>> GetAllAsync()
@@ -66,20 +71,25 @@ namespace HostelFinder.Application.Services
             try
             {
                 // lấy ra hóa đơn cuối cùng
-                var invoice = await _invoiceRepository.GetInvoiceByIdAsync(id); if (invoice == null)
+                var invoice = await _invoiceRepository.GetInvoiceByIdAsync(id); 
+                if (invoice == null)
                 {
                     return null;
                 }
-                var numberOfTenants = await _roomTenancyRepository.CountCurrentTenantsAsync(invoice.RoomId);
+                var numberOfTenants = await _roomTenancyRepository.CountCurrentTenantsByRoomsInMonthAsync(invoice.RoomId, invoice.BillingMonth, invoice.BillingYear);
                
 
                 InvoiceResponseDto invoiceResponseDto = new InvoiceResponseDto()
                 {
                     Id = invoice.Id,
+                    RoomId = invoice.RoomId,
+                    RoomName = invoice.Room.RoomName,
                     TotalAmount = invoice.TotalAmount,
                     BillingMonth = invoice.BillingMonth,
                     BillingYear = invoice.BillingYear,
                     IsPaid = invoice.IsPaid,
+                    FormOfTransfer = invoice.FormOfTransfer,
+                    AmountPaid = invoice.AmountPaid,
                     InvoiceDetails = invoice.InvoiceDetails.Select(details => new InvoiceDetailResponseDto
                     {
                         ActualCost = details.ActualCost,
@@ -159,6 +169,43 @@ namespace HostelFinder.Application.Services
             return false;
         }
 
+        public async Task<bool> SendEmailInvoiceToTenantAsync(Guid invoiceId)
+        {
+            try
+            {
+                var invoiceDetails = await GetDetailInvoiceByIdAsync(invoiceId);
+                if (invoiceDetails == null)
+                {
+                    return false;
+                }
+                // gửi email thông báo hóa đơn
+                if (invoiceDetails.Data.IsPaid)
+                {
+                    var emailSubject = SendEmailInvoice.SUBJECT_INVOICE_SUCCESS;
+                    var emailBody = SendEmailInvoice.BodyInvoiceSuccessEmail(invoiceDetails.Data);
+                    // lấy ra email của người thuê trọ
+                    var tenant = await _roomTenancyRepository.GetRoomTenancyRepresentativeAsync(invoiceDetails.Data.RoomId);
+                    var email = tenant.Tenant.Email;
+                    await _emailService.SendEmailAsync(email, emailSubject, emailBody);
+                }
+                else
+                {
+                    var emailSubject = SendEmailInvoice.SUBJECT_INVOICE;
+                    var emailBody = SendEmailInvoice.BodyInvoiceEmail(invoiceDetails.Data);
+                    // lấy ra email của người thuê trọ
+                    var tenant = await _roomTenancyRepository.GetRoomTenancyRepresentativeAsync(invoiceDetails.Data.RoomId);
+                    var email = tenant.Tenant.Email;
+                    await _emailService.SendEmailAsync(email, emailSubject, emailBody);
+                }
+                return true;
+
+            }catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while sending email invoice to tenant");
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<Response<InvoiceResponseDto>> CreateAsync(AddInVoiceRequestDto invoiceDto)
         {
             var invoice = _mapper.Map<Invoice>(invoiceDto);
@@ -217,7 +264,7 @@ namespace HostelFinder.Application.Services
 
                 if (existingInvoice != null)
                 {
-                    return new Response<InvoiceResponseDto> { Message = "Đã có hóa đơn cho tháng này", Succeeded = false };
+                    return new Response<InvoiceResponseDto> { Message = "Đã có hóa đơn cho tháng này, nếu có sai sót trong quá trình nhập liệu bạn có thể chỉnh sửa", Succeeded = false };
                 }
 
                 //Tạo hóa đơn mới
@@ -247,7 +294,7 @@ namespace HostelFinder.Application.Services
                         ServiceId = service.Id,
                         UnitCost = serviceCost.UnitCost,
                         ActualCost = 0,
-                        NumberOfCustomer = await _roomTenancyRepository.CountCurrentTenantsAsync(room.Id),
+                        NumberOfCustomer = await _roomTenancyRepository.CountCurrentTenantsByRoomsInMonthAsync(room.Id, billingMonth, billingYear),
                         BillingDate = DateTime.Now,
                         CreatedOn = DateTime.Now,
                         IsRentRoom = false,
@@ -291,7 +338,7 @@ namespace HostelFinder.Application.Services
                             invoiceDetail.NumberOfCustomer = null; // Not applicable
                             break;
                         case ChargingMethod.PerPerson:
-                            var numberOfTenants = await _roomTenancyRepository.CountCurrentTenantsAsync(room.Id);
+                            var numberOfTenants = await _roomTenancyRepository.CountCurrentTenantsByRoomsInMonthAsync(room.Id, billingMonth,billingYear);
                             invoiceDetail.NumberOfCustomer = numberOfTenants;
                             detailTotalAmount = invoiceDetail.UnitCost * numberOfTenants;
 

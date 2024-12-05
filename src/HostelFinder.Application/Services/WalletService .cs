@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Net.payOS.Types;
 using Net.payOS;
 using HostelFinder.Application.Wrappers;
-using HostelFinder.Domain.Entities;
 using HostelFinder.Application.DTOs.WalletDeposit.Responses;
 
 namespace HostelFinder.Application.Services
@@ -98,7 +97,7 @@ namespace HostelFinder.Application.Services
             var paymentData = new PaymentData(
                 orderCode: orderCode,
                 amount: (int)(depositRequest.Amount), // Convert amount to smallest unit
-                description: $"Deposit for {user.FullName}",
+                description: $"Nạp tiền: {user.FullName}",
                 items: new List<ItemData> { new ItemData("Wallet Deposit", 1, (int)(depositRequest.Amount)) },
                 returnUrl: _configuration["PayOS:ReturnUrl"],
                 cancelUrl: _configuration["PayOS:CancelUrl"]

@@ -17,6 +17,7 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.Wishlists
                 .Include(w => w.WishlistPosts)
                 .ThenInclude(wr => wr.Post)
+                .OrderByDescending(o => o.CreatedOn)
                 .FirstOrDefaultAsync(w => w.UserId == userId && !w.IsDeleted);
         }
 
@@ -26,10 +27,5 @@ namespace HostelFinder.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task RemoveRoomFromWishlistAsync(WishlistPost wishlistRoom)
-        {
-            _dbContext.Set<WishlistPost>().Remove(wishlistRoom);
-            await _dbContext.SaveChangesAsync();
-        }
     }
 }

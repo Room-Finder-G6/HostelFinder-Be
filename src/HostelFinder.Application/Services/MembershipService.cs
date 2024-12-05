@@ -7,6 +7,7 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace HostelFinder.Application.Services
 {
@@ -109,6 +110,10 @@ namespace HostelFinder.Application.Services
                     if (existingService != null)
                     {
                         existingService.ServiceName = newServiceDto.ServiceName;
+                        existingService.MaxPostsAllowed = newServiceDto.MaxPostsAllowed;
+                        existingService.MaxPushTopAllowed = newServiceDto.MaxPushTopAllowed;
+                        existingService.CreatedOn = DateTime.Now;
+                        existingService.CreatedBy = "System";
                         existingService.LastModifiedOn = DateTime.Now;
                         existingService.LastModifiedBy = "System";
                     }
@@ -117,6 +122,8 @@ namespace HostelFinder.Application.Services
                         var newService = new MembershipServices
                         {
                             ServiceName = newServiceDto.ServiceName,
+                            MaxPostsAllowed = newServiceDto.MaxPostsAllowed,
+                            MaxPushTopAllowed = newServiceDto.MaxPushTopAllowed,
                             Membership = membership,
                             CreatedOn = DateTime.Now,
                             CreatedBy = "System"
@@ -160,7 +167,7 @@ namespace HostelFinder.Application.Services
             {
                 return new Response<bool>("Có người dùng đang sử dụng gói thành viên này, không thể xóa!");
             }
-            
+
             var membershipServices = await _membershipRepository.GetMembershipServicesByMembershipIdAsync(id);
             if (membershipServices != null)
             {

@@ -1,5 +1,4 @@
 ﻿using HostelFinder.Application.DTOs.MembershipService.Requests;
-using HostelFinder.Application.DTOs.MembershipService.Responses;
 
 namespace HostelFinder.Application.DTOs.Membership.Requests
 {

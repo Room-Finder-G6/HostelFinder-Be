@@ -1,7 +1,4 @@
-﻿using HostelFinder.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
-
-namespace HostelFinder.Application.DTOs.Room.Responses
+﻿namespace HostelFinder.Application.DTOs.Room.Responses
 {
     public class InformationTenacyReponseDto
     {

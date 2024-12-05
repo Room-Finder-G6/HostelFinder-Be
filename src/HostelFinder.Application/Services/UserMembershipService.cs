@@ -92,6 +92,8 @@ namespace HostelFinder.Application.Services
         private DateTime GetEndOfWeek(DateTime date)
         {
             var diff = DayOfWeek.Sunday - date.DayOfWeek;
+            if (diff < 0) 
+                diff += 7; 
             return date.AddDays(diff).Date.AddDays(1).AddTicks(-1);
         }
     }

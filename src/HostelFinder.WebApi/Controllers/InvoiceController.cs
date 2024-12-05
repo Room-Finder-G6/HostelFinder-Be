@@ -3,6 +3,7 @@ using HostelFinder.Application.DTOs.InVoice.Responses;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Common.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -19,6 +20,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetInvoices()
         {
             try
@@ -47,6 +49,7 @@ namespace HostelFinder.WebApi.Controllers
 
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetInvoice(Guid id)
         {
             try
@@ -86,6 +89,7 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpPost]
         [Route("monthly-invoice")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> CreateInvoice([FromBody] AddInVoiceRequestDto invoiceDto)
         {
             if (!ModelState.IsValid)
@@ -125,6 +129,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> UpdateInvoice(Guid id, [FromForm] UpdateInvoiceRequestDto invoiceDto)
         {
             try
@@ -166,6 +171,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> DeleteInvoice(Guid id)
         {
             try
@@ -202,6 +208,7 @@ namespace HostelFinder.WebApi.Controllers
         }
         
         [HttpGet("{hostel}/{roomId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetInvoiceByRoomId(Guid roomId,int month, int year)
         {
             try
@@ -229,6 +236,7 @@ namespace HostelFinder.WebApi.Controllers
         }        
         
         [HttpGet("getInvoicesByHostelId")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetInvoicesByHostelId(Guid hostelId, string? searchPhrase, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection)
         {
             try
@@ -252,6 +260,7 @@ namespace HostelFinder.WebApi.Controllers
         }
         
         [HttpGet("detail")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetInvoiceDetail(Guid invoiceId)
         {
             try
@@ -275,6 +284,7 @@ namespace HostelFinder.WebApi.Controllers
         }
         
         [HttpPost("collect-money")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> CollectMoneyInvoice([FromBody] CollectMoneyInvoiceRequest request)
         {
             try
@@ -297,6 +307,37 @@ namespace HostelFinder.WebApi.Controllers
             }
         }
 
+        [HttpPost("send-email")]
+        [Authorize(Roles = "Landlord,Admin")]
+        public async Task<IActionResult> SendEmailInvoice(Guid invoiceId)
+        {
+            try
+            {
+                var response = await _invoiceService.SendEmailInvoiceToTenantAsync(invoiceId);
+                if (!response)
+                {
+                    return BadRequest(new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "Gửi email thất bại"
+                    });
+                }
+
+                return Ok(new Response<string>
+                {
+                    Succeeded = true,
+                    Message = "Gửi email thành công"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
 
     }
 }

@@ -83,7 +83,7 @@ public class OpenAiService : IOpenAiService
                                     $"Diện tích: {room.Size}m²\n" +
                                     $"Tầng: {room.Floor}\n" +
                                     $"Giá: {room.MonthlyRentCost} VND\n";
-            var promptDescription = $"Viết một mô tả chi tiết cho bài đăng cho thuê phòng trọ hấp dẫn, sinh động, hiện thị các ý rõ ràng cho người thuê, " +
+            var promptDescription = $"Viết một mô tả chi tiết cho bài đăng cho thuê phòng trọ hấp dẫn, sinh động, thêm các icon cho người dùng dễ nhìn, hiện thị các ý rõ ràng cho người thuê, " +
                                     $"chú ý tối đa 3000 kí tự và kết quả trả về chỉ là mô tả chi tiết về phòng trọ cho thuê " +
                                     $"với các thông tin sau :\n" +
                          $"Tên nhà trọ: {hostel.HostelName}\n" +

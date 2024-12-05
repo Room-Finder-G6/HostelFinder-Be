@@ -1,11 +1,9 @@
-﻿
-using RoomFinder.Domain.Common;
+﻿using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {
-    public class WishlistPost 
+    public class WishlistPost : BaseEntity
     {
-        public Guid Id { get; set; }
         public Guid WishlistId { get; set; }
         public Wishlist Wishlist { get; set; }
 

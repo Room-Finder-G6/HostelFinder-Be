@@ -26,5 +26,7 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         /// <param name="sortDirection"></param>
         /// <returns></returns>
         Task<(List<RentalContract> rentalContracts, int  totalRecord)> GetAllMatchingRentalContractAysnc(Guid hostelId, string? searchPhrase,string? statusFilter, int pageNumber, int pageSize, string? sortBy, SortDirection sortDirection);
+        Task<RentalContract> GetActiveRentalContractAsync(Guid roomId);
+        Task<RentalContract> GetRentalContractByRoomIdAsync(Guid roomId);
     }
 }

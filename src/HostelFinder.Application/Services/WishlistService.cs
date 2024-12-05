@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.DTOs.Post.Responses;
+﻿using Google.Apis.Util;
+using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Wishlist.Request;
 using HostelFinder.Application.DTOs.Wishlist.Response;
@@ -13,10 +14,12 @@ namespace HostelFinder.Application.Services
     {
 
         private readonly IWishlistRepository _wishlistRepository;
+        private readonly IWishlistPostRepository _wishlistPostRepository;
 
-        public WishlistService(IWishlistRepository wishlistRepository)
+        public WishlistService(IWishlistRepository wishlistRepository, IWishlistPostRepository wishlistPostRepository)
         {
             _wishlistRepository = wishlistRepository;
+            _wishlistPostRepository = wishlistPostRepository;
         }
 
         public async Task<Response<bool>> AddPostToWishlistAsync(AddPostToWishlistRequestDto request)
@@ -30,12 +33,13 @@ namespace HostelFinder.Application.Services
                 };
             }
 
-            var wishlist = await _wishlistRepository.GetWishlistByUserIdAsync(request.UserId);
+             var wishlist = await _wishlistRepository.GetWishlistByUserIdAsync(request.UserId);
             if (wishlist == null)
             {
                 wishlist = new Wishlist
                 {
                     UserId = request.UserId,
+                    CreatedOn = DateTime.Now,
                     WishlistPosts = new List<WishlistPost>()
                 };
                 await _wishlistRepository.AddAsync(wishlist);
@@ -44,7 +48,8 @@ namespace HostelFinder.Application.Services
             var wishlistRoom = new WishlistPost
             {
                 WishlistId = wishlist.Id,
-                PostId = request.PostId
+                PostId = request.PostId,
+                CreatedOn= DateTime.Now
             };
 
             await _wishlistRepository.AddRoomToWishlistAsync(wishlistRoom);
@@ -68,21 +73,41 @@ namespace HostelFinder.Application.Services
                 Posts = wishlist.WishlistPosts.Select(wr => new PostResponseDto
                 {
                     Id = wr.Post.Id,
+                    HostelId = wr.Post.HostelId,
+                    RoomId = wr.Post.RoomId,
+                    WishlistPostId = wr.Id,
                     Title = wr.Post.Title,
+                    Description = wr.Post.Description,
+                    ImageUrls = wr.Post?.Images?.Select(image => image.Url).ToList() ?? new List<string>(),
+                    Status = wr.Post.Status,
+                    DateAvailable = wr.Post.DateAvailable,
+                    MembershipServiceId = wr.Post.MembershipServiceId,
                 }).ToList()
             };
             return new Response<WishlistResponseDto>(response);
         }
 
+        public async Task<int> GetWishlistPostCountAsync(Guid userId)
+        {
+            var wishlist = await _wishlistRepository.GetWishlistByUserIdAsync(userId);
+            if (wishlist == null)
+            {
+                throw new Exception("Wishlist not found.");
+            }
+
+            return wishlist.WishlistPosts.Count;
+        }
+
+
         public async Task<Response<bool>> DeleteRoomFromWishlistAsync(Guid id)
         {
-            var wishlist = await _wishlistRepository.GetByIdAsync(id);
+            var wishlist = await _wishlistPostRepository.GetByIdAsync(id);
             if (wishlist == null)
             {
                 return new Response<bool>(false, "Wishlist not found");
             }
 
-            await _wishlistRepository.DeletePermanentAsync(wishlist.Id);
+            await _wishlistPostRepository.DeletePermanentAsync(wishlist.Id);
             return new Response<bool>(true, "Đã xóa khỏi danh sách yêu thích.");
         }
 

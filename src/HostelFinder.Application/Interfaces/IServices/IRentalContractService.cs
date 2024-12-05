@@ -13,6 +13,7 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<RoomContractHistoryResponseDto> GetRoomContractHistoryLasest(Guid roomId);
 
         Task<Response<string>> TerminationOfContract(Guid rentalContractId);
+        Task<Response<string>> ContractExtension(Guid rentalContractId, DateTime newEndDate);
         
         Task<PagedResponse<List<RentalContractResponseDto>>> GetRentalContractsByHostelIdAsync(Guid hostelId, string? searchPhrase,string statusFilter, int? pageNumber, int? pageSize, string? sortBy, SortDirection sortDirection);
         
