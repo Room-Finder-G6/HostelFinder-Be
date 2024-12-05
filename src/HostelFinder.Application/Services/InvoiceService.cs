@@ -179,12 +179,24 @@ namespace HostelFinder.Application.Services
                     return false;
                 }
                 // gửi email thông báo hóa đơn
-                var emailSubject = SendEmailInvoice.SUBJECT_INVOICE;
-                var emailBody = SendEmailInvoice.BodyInvoiceEmail(invoiceDetails.Data);
-                // lấy ra email của người thuê trọ
-                var tenant = await _roomTenancyRepository.GetRoomTenancyRepresentativeAsync(invoiceDetails.Data.RoomId);
-                var email = tenant.Tenant.Email;
-                await _emailService.SendEmailAsync(email, emailSubject, emailBody);
+                if (invoiceDetails.Data.IsPaid)
+                {
+                    var emailSubject = SendEmailInvoice.SUBJECT_INVOICE_SUCCESS;
+                    var emailBody = SendEmailInvoice.BodyInvoiceSuccessEmail(invoiceDetails.Data);
+                    // lấy ra email của người thuê trọ
+                    var tenant = await _roomTenancyRepository.GetRoomTenancyRepresentativeAsync(invoiceDetails.Data.RoomId);
+                    var email = tenant.Tenant.Email;
+                    await _emailService.SendEmailAsync(email, emailSubject, emailBody);
+                }
+                else
+                {
+                    var emailSubject = SendEmailInvoice.SUBJECT_INVOICE;
+                    var emailBody = SendEmailInvoice.BodyInvoiceEmail(invoiceDetails.Data);
+                    // lấy ra email của người thuê trọ
+                    var tenant = await _roomTenancyRepository.GetRoomTenancyRepresentativeAsync(invoiceDetails.Data.RoomId);
+                    var email = tenant.Tenant.Email;
+                    await _emailService.SendEmailAsync(email, emailSubject, emailBody);
+                }
                 return true;
 
             }catch(Exception ex)
