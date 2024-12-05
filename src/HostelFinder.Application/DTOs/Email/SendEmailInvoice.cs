@@ -118,6 +118,7 @@ public class SendEmailInvoice
         </body>
         </html>";
     }
+
         public static string BodyInvoiceSuccessEmail(InvoiceResponseDto invoice)
     {
     var invoiceDate = DateTime.Now.ToString("dd/MM/yyyy");
