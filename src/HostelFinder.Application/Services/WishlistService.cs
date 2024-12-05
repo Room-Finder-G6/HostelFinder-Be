@@ -75,6 +75,7 @@ namespace HostelFinder.Application.Services
                     Id = wr.Post.Id,
                     HostelId = wr.Post.HostelId,
                     RoomId = wr.Post.RoomId,
+                    WishlistPostId = wr.Id,
                     Title = wr.Post.Title,
                     Description = wr.Post.Description,
                     ImageUrls = wr.Post?.Images?.Select(image => image.Url).ToList() ?? new List<string>(),
@@ -85,6 +86,18 @@ namespace HostelFinder.Application.Services
             };
             return new Response<WishlistResponseDto>(response);
         }
+
+        public async Task<int> GetWishlistPostCountAsync(Guid userId)
+        {
+            var wishlist = await _wishlistRepository.GetWishlistByUserIdAsync(userId);
+            if (wishlist == null)
+            {
+                throw new Exception("Wishlist not found.");
+            }
+
+            return wishlist.WishlistPosts.Count;
+        }
+
 
         public async Task<Response<bool>> DeleteRoomFromWishlistAsync(Guid id)
         {
