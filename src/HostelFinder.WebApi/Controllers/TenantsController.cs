@@ -1,5 +1,6 @@
 ﻿using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -16,6 +17,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("GetAllTenantsByHostel/{hostelId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetAllTenantsByHostelAsync(
             [FromRoute] Guid hostelId,
             [FromQuery] string? roomName,
@@ -33,6 +35,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost("moveout")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> MoveOut(Guid tenantId, Guid roomId)
         {
             if (tenantId == Guid.Empty || roomId == Guid.Empty)
