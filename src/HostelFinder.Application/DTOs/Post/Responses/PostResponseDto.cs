@@ -5,6 +5,7 @@ public class PostResponseDto
     public Guid Id { get; set; }
     public Guid HostelId { get; set; }
     public Guid RoomId { get; set; }
+    public Guid WishlistPostId { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
     public List<string> ImageUrls { get; set; }

@@ -128,5 +128,23 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
+
+        // GET: api/wishlist/count/{userId}
+        [HttpGet("count/{userId}")]
+        public async Task<IActionResult> GetWishlistPostCountAsync(Guid userId)
+        {
+            try
+            {
+                // Lấy số lượng bài viết trong Wishlist của người dùng
+                var count = await _wishlistService.GetWishlistPostCountAsync(userId);
+
+                // Trả về số lượng dưới dạng JSON
+                return Ok(new { count });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
     }
 }
