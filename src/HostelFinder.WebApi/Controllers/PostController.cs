@@ -275,7 +275,6 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("{postId}")]
-    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetPostById(Guid postId)
     {
         try
