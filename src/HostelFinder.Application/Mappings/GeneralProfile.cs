@@ -31,6 +31,8 @@ using HostelFinder.Application.DTOs.Vehicle.Request;
 using HostelFinder.Application.DTOs.RentalContract.Request;
 using HostelFinder.Application.DTOs.RentalContract.Response;
 using HostelFinder.Application.DTOs.Invoice.Responses;
+using HostelFinder.Application.DTOs.MaintenanceRecord.Request;
+using HostelFinder.Application.DTOs.MaintenanceRecord.Response;
 using HostelFinder.Application.DTOs.Vehicle.Responses;
 
 namespace HostelFinder.Application.Mappings;
@@ -278,5 +280,12 @@ public class GeneralProfile : Profile
 
         //Invoice Detail
         CreateMap<InvoiceDetailResponseDto, InvoiceDetail>().ReverseMap();
+        
+        //MaintenanceRecord
+        CreateMap<CreateMaintenanceRecordRequest, MaintenanceRecord>().ReverseMap();
+        CreateMap<MaintenanceRecord, ListMaintenanceRecordResponseDto>()
+            .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
+            .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName))
+            .ReverseMap();
     }
 }

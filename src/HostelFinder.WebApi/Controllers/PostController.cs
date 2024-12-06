@@ -208,6 +208,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPost("get-all")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> Get(GetAllPostsQuery request)
     {
         try
@@ -311,6 +312,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPost("filter")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> FilterPosts([FromForm] FilterPostsRequestDto filter)
     {
         try
@@ -387,6 +389,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("ordered")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetPostsOrderedByPriority()
     {
         try
@@ -415,6 +418,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("GetPostsOrderedPaging")]
+    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetPostsOrderedByPriorityPaging([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
     {
         try
