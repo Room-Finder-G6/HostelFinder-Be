@@ -505,4 +505,18 @@ public class PostController : ControllerBase
             });
         }
     }
+
+    [HttpGet("top/{topCount}")]
+    public async Task<IActionResult> GetTopPosts(int topCount)
+    {
+        var result = await _postService.GetTopPostsAsync(topCount);
+
+        if (result.Data == null || !result.Data.Any())
+        {
+            return NotFound("No posts found.");
+        }
+
+        return Ok(result);
+    }
+
 }

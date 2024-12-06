@@ -277,4 +277,19 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         // Trả về kết quả dưới dạng phân trang
         return PaginationHelper.CreatePagedResponse(posts, pageIndex, pageSize, totalRecords);
     }
+
+    public async Task<List<Post>> GetTopPostsAsync(int topCount)
+    {
+        return await _dbContext.Posts
+            .Include(p => p.Hostel)
+                .ThenInclude(h => h.Address)
+            .Include(p => p.Room)
+            .Include(p => p.Images)
+            .Include(p => p.MembershipServices)
+                .ThenInclude(ms => ms.Membership)
+            .OrderByDescending(p => p.MembershipServices.Membership.Price)
+            .ThenByDescending(p => p.CreatedOn)
+            .Take(topCount)
+            .ToListAsync();
+    }
 }
