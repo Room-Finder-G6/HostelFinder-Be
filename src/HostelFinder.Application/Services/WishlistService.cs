@@ -1,4 +1,6 @@
-﻿using Google.Apis.Util;
+﻿using AutoMapper;
+using Google.Apis.Util;
+using HostelFinder.Application.DTOs.Address;
 using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Wishlist.Request;
@@ -15,11 +17,13 @@ namespace HostelFinder.Application.Services
 
         private readonly IWishlistRepository _wishlistRepository;
         private readonly IWishlistPostRepository _wishlistPostRepository;
+        private readonly IMapper _mapper;
 
-        public WishlistService(IWishlistRepository wishlistRepository, IWishlistPostRepository wishlistPostRepository)
+        public WishlistService(IWishlistRepository wishlistRepository, IWishlistPostRepository wishlistPostRepository, IMapper mapper)
         {
             _wishlistRepository = wishlistRepository;
             _wishlistPostRepository = wishlistPostRepository;
+            _mapper = mapper;
         }
 
         public async Task<Response<bool>> AddPostToWishlistAsync(AddPostToWishlistRequestDto request)
@@ -33,7 +37,7 @@ namespace HostelFinder.Application.Services
                 };
             }
 
-             var wishlist = await _wishlistRepository.GetWishlistByUserIdAsync(request.UserId);
+            var wishlist = await _wishlistRepository.GetWishlistByUserIdAsync(request.UserId);
             if (wishlist == null)
             {
                 wishlist = new Wishlist
@@ -49,7 +53,7 @@ namespace HostelFinder.Application.Services
             {
                 WishlistId = wishlist.Id,
                 PostId = request.PostId,
-                CreatedOn= DateTime.Now
+                CreatedOn = DateTime.Now
             };
 
             await _wishlistRepository.AddRoomToWishlistAsync(wishlistRoom);
@@ -76,11 +80,13 @@ namespace HostelFinder.Application.Services
                     HostelId = wr.Post.HostelId,
                     RoomId = wr.Post.RoomId,
                     WishlistPostId = wr.Id,
+                    Address = _mapper.Map<AddressDto>(wr.Post.Hostel.Address),
                     Title = wr.Post.Title,
+                    Size = wr.Post.Room.Size,
                     Description = wr.Post.Description,
-                    ImageUrls = wr.Post?.Images?.Select(image => image.Url).ToList() ?? new List<string>(),
+                    ImageUrls = wr.Post.Hostel?.Images?.FirstOrDefault()?.Url,
                     Status = wr.Post.Status,
-                    DateAvailable = wr.Post.DateAvailable,
+                    CreatedOn = wr.Post.CreatedOn,
                     MembershipServiceId = wr.Post.MembershipServiceId,
                 }).ToList()
             };

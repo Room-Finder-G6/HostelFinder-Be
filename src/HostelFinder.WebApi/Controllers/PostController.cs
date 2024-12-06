@@ -23,6 +23,8 @@ public class PostController : ControllerBase
         _openAiService = openAiService;
     }
 
+
+
     [HttpGet("GetAllPostWithPriceAndStatusAndTime")]
     [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetAllPostWithPriceAndStatusAndTime()
