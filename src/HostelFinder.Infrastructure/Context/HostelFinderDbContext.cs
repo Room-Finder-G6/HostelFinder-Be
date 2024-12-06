@@ -284,6 +284,10 @@ public class HostelFinderDbContext : DbContext
          .WithMany(r => r.Invoices)
          .HasForeignKey(i => i.RoomId);
 
+        modelBuilder.Entity<Invoice>()
+            .Property(i => i.AmountPaid)
+            .HasColumnType("decimal(18, 2)"); 
+        
         //config invoice - invoiceDetails
         modelBuilder.Entity<InvoiceDetail>()
             .HasOne(id => id.Invoice)

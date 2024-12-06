@@ -20,4 +20,5 @@ public interface IPostService
     Task <Response<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime();
     Task<PagedResponse<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync(int pageIndex, int pageSize);
     Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime(int pageIndex, int pageSize);
+    Task<PagedResponse<List<ListPostsResponseDto>>> GetFilteredAndPagedPostsAsync(FilterPostsRequestDto filter, int pageIndex, int pageSize);
 }

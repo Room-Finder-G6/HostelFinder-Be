@@ -23,6 +23,8 @@ public class PostController : ControllerBase
         _openAiService = openAiService;
     }
 
+
+
     [HttpGet("GetAllPostWithPriceAndStatusAndTime")]
     [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> GetAllPostWithPriceAndStatusAndTime()
@@ -457,6 +459,54 @@ public class PostController : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(ex.Message);
+        }
+    }
+    
+    [HttpGet("filtered-paged")]
+    public async Task<IActionResult> GetFilteredAndPagedPosts(
+        [FromQuery] FilterPostsRequestDto filter,
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        // Kiểm tra tính hợp lệ của pageIndex và pageSize
+        if (pageIndex <= 0)
+        {
+            return BadRequest(new PagedResponse<List<ListPostsResponseDto>>
+            {
+                Succeeded = false,
+                Errors = new List<string> { "PageIndex phải lớn hơn 0." }
+            });
+        }
+
+        if (pageSize <= 0)
+        {
+            return BadRequest(new PagedResponse<List<ListPostsResponseDto>>
+            {
+                Succeeded = false,
+                Errors = new List<string> { "PageSize phải lớn hơn 0." }
+            });
+        }
+
+        try
+        {
+            // Gọi đến service để lấy dữ liệu
+            var pagedPosts = await _postService.GetFilteredAndPagedPostsAsync(filter, pageIndex, pageSize);
+
+            if (!pagedPosts.Succeeded)
+            {
+                return BadRequest(pagedPosts);
+            }
+
+            return Ok(pagedPosts);
+        }
+        catch (Exception ex)
+        {
+            // Xử lý ngoại lệ và trả về phản hồi lỗi
+            return StatusCode(StatusCodes.Status500InternalServerError, new PagedResponse<List<ListPostsResponseDto>>
+            {
+                Succeeded = false,
+                Errors = new List<string> { "Đã xảy ra lỗi khi xử lý yêu cầu.", ex.Message }
+            });
         }
     }
 }
