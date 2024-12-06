@@ -17,6 +17,10 @@ namespace HostelFinder.Infrastructure.Repositories
             return await _dbContext.Wishlists
                 .Include(w => w.WishlistPosts)
                 .ThenInclude(wr => wr.Post)
+                 .ThenInclude(p => p.Room)
+                .Include(w => w.WishlistPosts)
+                    .ThenInclude(wr => wr.Post)
+                        .ThenInclude(p => p.Hostel)
                 .OrderByDescending(o => o.CreatedOn)
                 .FirstOrDefaultAsync(w => w.UserId == userId && !w.IsDeleted);
         }
