@@ -30,5 +30,6 @@ namespace HostelFinder.Domain.Entities
 
         public virtual ICollection<ServiceCost> ServiceCosts { get; set; } = new List<ServiceCost>();
 
+        public virtual ICollection<MaintenanceRecord>? MaintenanceRecords { get; set; }
     }
 }
