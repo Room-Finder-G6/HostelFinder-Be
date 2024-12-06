@@ -7,10 +7,10 @@ namespace HostelFinder.Application.DTOs.Post.Requests
         public string? Province { get; set; }
         public string? District { get; set; }
         public string? Commune { get; set; }
-        public decimal? minSize { get; set; }
-        public decimal? maxSize { get; set; }
-        public decimal? minPrice { get; set; }
-        public decimal? maxPrice { get; set; }
+        public decimal? MinSize { get; set; }
+        public decimal? MaxSize { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
         public RoomType? RoomType { get; set; }
     }
 }

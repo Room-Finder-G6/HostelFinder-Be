@@ -6,6 +6,8 @@ using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using HostelFinder.Application.DTOs.Post.Requests;
 using Microsoft.EntityFrameworkCore.Storage;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Application.Helpers;
@@ -26,7 +28,8 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         var baseQuery = _dbContext
             .Posts
             .Where(p => !p.IsDeleted && searchPhraseLower == null || (p.Title.ToLower().Contains(searchPhraseLower)
-                                                      || p.Description.ToLower().Contains(searchPhraseLower)));
+                                                                      || p.Description.ToLower()
+                                                                          .Contains(searchPhraseLower)));
 
         var totalCount = await baseQuery.CountAsync();
 
@@ -140,7 +143,8 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .ToListAsync();
     }
 
-    public async Task<PagedResponse<List<Post>>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync(int pageIndex, int pageSize)
+    public async Task<PagedResponse<List<Post>>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync(int pageIndex,
+        int pageSize)
     {
         var query = _dbContext.Posts
             .Include(x => x.Hostel)
@@ -171,8 +175,8 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .Include(p => p.MembershipServices)
             .ThenInclude(ms => ms.Membership)
             .OrderByDescending(p => p.MembershipServices.Membership.Price)
-            .ThenByDescending(p => p.Status) 
-            .ThenByDescending(p => p.CreatedOn) 
+            .ThenByDescending(p => p.Status)
+            .ThenByDescending(p => p.CreatedOn)
             .ToListAsync();
     }
 
@@ -198,4 +202,79 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         return PaginationHelper.CreatePagedResponse(posts, pageIndex, pageSize, totalRecords);
     }
 
+    public async Task<PagedResponse<List<Post>>> GetFilteredAndPagedPostsAsync(
+        FilterPostsRequestDto filter,
+        int pageIndex,
+        int pageSize)
+    {
+        // Bắt đầu với tập dữ liệu Posts và thêm các liên kết cần thiết
+        var query = _dbContext.Posts
+            .AsNoTracking()
+            .Where(p => p.Status)
+            .Include(p => p.Hostel)
+            .ThenInclude(h => h.Address)
+            .Include(p => p.Room)
+            .Include(p => p.Images)
+            .Include(p => p.MembershipServices)
+            .ThenInclude(ms => ms.Membership)
+            .AsQueryable();
+
+        // Áp dụng các bộ lọc dựa trên các tham số đầu vào
+        if (!string.IsNullOrEmpty(filter.Province))
+        {
+            query = query.Where(p => p.Hostel.Address.Province == filter.Province);
+        }
+
+        if (!string.IsNullOrEmpty(filter.District))
+        {
+            query = query.Where(p => p.Hostel.Address.District == filter.District);
+        }
+
+        if (!string.IsNullOrEmpty(filter.Commune))
+        {
+            query = query.Where(p => p.Hostel.Address.Commune == filter.Commune);
+        }
+
+        if (filter.MinSize.HasValue)
+        {
+            query = query.Where(p => p.Room.Size >= filter.MinSize.Value);
+        }
+
+        if (filter.MaxSize.HasValue)
+        {
+            query = query.Where(p => p.Room.Size <= filter.MaxSize.Value);
+        }
+
+        if (filter.RoomType.HasValue)
+        {
+            query = query.Where(p => p.Room.RoomType == filter.RoomType);
+        }
+
+        if (filter.MinPrice.HasValue)
+        {
+            query = query.Where(p => p.Room.MonthlyRentCost >= filter.MinSize!.Value);
+        }
+
+        if (filter.MaxSize.HasValue)
+        {
+            query = query.Where(p => p.Room.MonthlyRentCost <= filter.MaxPrice!.Value);
+        }
+
+        // Áp dụng sắp xếp sau khi đã lọc
+        query = query
+            .OrderByDescending(p => p.MembershipServices.Membership.Price)
+            .ThenByDescending(p => p.CreatedOn);
+
+        // Tính tổng số bản ghi sau khi lọc
+        var totalRecords = await query.CountAsync();
+
+        // Áp dụng phân trang
+        var posts = await query
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        // Trả về kết quả dưới dạng phân trang
+        return PaginationHelper.CreatePagedResponse(posts, pageIndex, pageSize, totalRecords);
+    }
 }

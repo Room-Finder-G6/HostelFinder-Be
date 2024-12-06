@@ -1031,8 +1031,8 @@ namespace XUnitTestHostelFinder.Controllers
             {
                 Province = "Province1",
                 District = "District1",
-                minPrice = 1000,
-                maxPrice = 2000
+                MinPrice = 1000,
+                MaxPrice = 2000
             };
 
             var mockResponse = new Response<List<ListPostsResponseDto>>

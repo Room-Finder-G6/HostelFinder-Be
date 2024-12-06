@@ -222,10 +222,10 @@ public class PostService : IPostService
             filter.Province,
             filter.District,
             filter.Commune,
-            filter.minSize,
-            filter.maxSize,
-            filter.minPrice,
-            filter.maxPrice,
+            filter.MinSize,
+            filter.MaxSize,
+            filter.MinPrice,
+            filter.MaxPrice,
             filter.RoomType
         );
 
@@ -478,6 +478,20 @@ public class PostService : IPostService
             pageIndex,
             pageSize,
             pagedPosts.TotalRecords
+        );
+    }
+    
+    public async Task<PagedResponse<List<ListPostsResponseDto>>> GetFilteredAndPagedPostsAsync(FilterPostsRequestDto filter, int pageIndex, int pageSize)
+    {
+        var posts = await _postRepository.GetFilteredAndPagedPostsAsync(filter, pageIndex, pageSize);
+        
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts.Data);
+
+        return PaginationHelper.CreatePagedResponse(
+            postDtos,
+            pageIndex,
+            pageSize,
+            posts.TotalPages
         );
     }
 }

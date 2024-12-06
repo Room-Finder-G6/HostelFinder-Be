@@ -13,8 +13,7 @@ namespace HostelFinder.Application.Helpers
 
             response.TotalPages = totalPages;
             response.TotalRecords = totalRecords;
-
-
+            
             return response;
         }
     }
