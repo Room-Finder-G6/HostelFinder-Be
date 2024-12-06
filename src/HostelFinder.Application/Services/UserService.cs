@@ -281,8 +281,14 @@ namespace HostelFinder.Application.Services
                 CreatedBy = "System",
                 CreatedOn = DateTime.Now
             };
-
             await _userMembershipRepository.AddAsync(newUserMembership);
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user != null && user.Role == UserRole.User)
+            {
+                user.Role = UserRole.Landlord;
+                await _userRepository.UpdateAsync(user);
+            }
 
             return CreateSuccessResponse("Gói người dùng thử đã đăng ký thành công.");
         }
