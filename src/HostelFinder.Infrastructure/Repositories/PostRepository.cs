@@ -207,7 +207,6 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
         int pageIndex,
         int pageSize)
     {
-        // Bắt đầu với tập dữ liệu Posts và thêm các liên kết cần thiết
         var query = _dbContext.Posts
             .AsNoTracking()
             .Where(p => p.Status)
@@ -219,7 +218,6 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .ThenInclude(ms => ms.Membership)
             .AsQueryable();
 
-        // Áp dụng các bộ lọc dựa trên các tham số đầu vào
         if (!string.IsNullOrEmpty(filter.Province))
         {
             query = query.Where(p => p.Hostel.Address.Province == filter.Province);
@@ -255,7 +253,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             query = query.Where(p => p.Room.MonthlyRentCost >= filter.MinSize!.Value);
         }
 
-        if (filter.MaxSize.HasValue)
+        if (filter.MaxPrice.HasValue)
         {
             query = query.Where(p => p.Room.MonthlyRentCost <= filter.MaxPrice!.Value);
         }

@@ -456,9 +456,9 @@ public class PostController : ControllerBase
         }
     }
     
-    [HttpGet("filtered-paged")]
+    [HttpPost("filtered-paged")]
     public async Task<IActionResult> GetFilteredAndPagedPosts(
-        [FromQuery] FilterPostsRequestDto filter,
+        [FromForm] FilterPostsRequestDto filter,
         [FromQuery] int pageIndex = 1,
         [FromQuery] int pageSize = 10)
     {
