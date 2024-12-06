@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using DocumentFormat.OpenXml.InkML;
 using HostelFinder.Application.Interfaces.IRepositories;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Exceptions;
 using HostelFinder.Infrastructure.Common;
@@ -107,6 +108,12 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(r => r.Images)
                 .Where(r => r.HostelId == hostelId && !r.IsDeleted);
             return await query.ToListAsync();
+        }
+
+        public Task<(IEnumerable<Room> Data, int TotalRecords)> GetAllMatchingInLandLordAsync(Guid landlordId, string? searchPhrase, int pageSize, int pageNumber, string? sortBy,
+            SortDirection? sortDirection)
+        {
+            throw new NotImplementedException();
         }
     }
 }
