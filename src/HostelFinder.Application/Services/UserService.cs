@@ -277,7 +277,7 @@ namespace HostelFinder.Application.Services
                 ExpiryDate = expiryDate,
                 PostsUsed = 0,
                 PushTopUsed = 0,
-                IsPaid = false, // Gói thử nghiệm không phải trả tiền
+                IsPaid = true, // Gói thử nghiệm không phải trả tiền
                 CreatedBy = "System",
                 CreatedOn = DateTime.Now
             };
