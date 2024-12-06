@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HostelFinder.Application.DTOs.Address;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Users.Response;
@@ -493,5 +494,14 @@ public class PostService : IPostService
             pageSize,
             posts.TotalPages
         );
+    }
+
+    public async Task<Response<List<ListPostsResponseDto>>> GetTopPostsAsync(int topCount)
+    {
+        // Get the top posts from the repository
+        var posts = await _postRepository.GetTopPostsAsync(topCount);
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts);
+
+        return new Response<List<ListPostsResponseDto>>(postDtos);
     }
 }
