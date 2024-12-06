@@ -74,21 +74,7 @@ namespace HostelFinder.Application.Services
             var response = new WishlistResponseDto
             {
                 WishlistId = wishlist.Id,
-                Posts = wishlist.WishlistPosts.Select(wr => new PostResponseDto
-                {
-                    Id = wr.Post.Id,
-                    HostelId = wr.Post.HostelId,
-                    RoomId = wr.Post.RoomId,
-                   // WishlistPostId = wr.Id,
-                   // Address = _mapper.Map<AddressDto>(wr.Post.Hostel.Address),
-                    Title = wr.Post.Title,
-                   // Size = wr.Post.Room.Size,
-                    Description = wr.Post.Description,
-                  //  ImageUrls = wr.Post.Hostel?.Images?.FirstOrDefault()?.Url,
-                    Status = wr.Post.Status,
-                  //  CreatedOn = wr.Post.CreatedOn,
-                    MembershipServiceId = wr.Post.MembershipServiceId,
-                }).ToList()
+                Posts = wishlist.WishlistPosts.Select(wr => _mapper.Map<WishlistPostResponseDto>(wr.Post)).ToList()
             };
             return new Response<WishlistResponseDto>(response);
         }
