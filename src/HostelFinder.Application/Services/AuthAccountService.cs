@@ -40,29 +40,29 @@ namespace HostelFinder.Application.Services
                 var user = await _userRepository.FindByUserNameAsync(request.Username);
                 if (user == null)
                 {
-                    return new Response<string> { Succeeded = false, Message = "User not found" };
+                    return new Response<string> { Succeeded = false, Message = "Người dùng không tồn tại" };
                 }
 
                 var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, request.CurrentPassword);
                 if (verificationResult == PasswordVerificationResult.Failed)
                 {
-                    return new Response<string> { Succeeded = false, Message = "Current password is incorrect" };
+                    return new Response<string> { Succeeded = false, Message = "Mật khẩu cũ không đúng" };
                 }
 
                 if (request.NewPassword != request.ConfirmPassword)
                 {
-                    return new Response<string> { Succeeded = false, Message = "New password and confirm password do not match" };
+                    return new Response<string> { Succeeded = false, Message = "Mật khẩu mới và xác nhận mật khẩu không giống nhau" };
                 }
 
                 if (string.Equals(request.CurrentPassword, request.NewPassword))
                 {
-                    return new Response<string> { Succeeded = false, Message = "New password cannot be the same as the current password" };
+                    return new Response<string> { Succeeded = false, Message = "Mật khẩu mới không thể trùng mật khẩu cũ" };
                 }
 
                 user.Password = _passwordHasher.HashPassword(user, request.NewPassword);
                 await _userRepository.UpdateAsync(user);
 
-                return new Response<string> { Succeeded = true, Message = "Password changed successfully" };
+                return new Response<string> { Succeeded = true, Message = "Đổi mật khẩu thành công" };
             }
             catch (Exception ex)
             {
