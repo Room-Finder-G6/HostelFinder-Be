@@ -32,7 +32,7 @@ namespace HostelFinder.Application.Services
             try
             {
                 var story = _mapper.Map<Story>(request);
-                story.CreatedBy = story.User.Username;
+                story.CreatedBy = request.UserId.ToString();
                 story.CreatedOn = DateTime.Now;
                 var address = _mapper.Map<AddressStory>(request.AddressStory);
                 story.AddressStory = address;
@@ -53,6 +53,10 @@ namespace HostelFinder.Application.Services
                         };
                         images.Add(image);
                     }
+                }
+                foreach (var image in images)
+                {
+                    await _imageRepository.AddAsync(image); 
                 }
                 story.Images = images;
 

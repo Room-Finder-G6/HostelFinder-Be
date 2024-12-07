@@ -47,8 +47,8 @@ public class HostelFinderDbContext : DbContext
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                //.AddJsonFile("appsettings.Development.json");
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.Development.json");
             IConfigurationRoot configurationRoot = builder.Build();
             optionsBuilder.UseSqlServer(configurationRoot.GetConnectionString("DefaultConnection"));
         }
@@ -56,7 +56,7 @@ public class HostelFinderDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-            base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(modelBuilder);
 
         // Configure Address entity
         modelBuilder.Entity<Address>()
@@ -288,8 +288,8 @@ public class HostelFinderDbContext : DbContext
 
         modelBuilder.Entity<Invoice>()
             .Property(i => i.AmountPaid)
-            .HasColumnType("decimal(18, 2)"); 
-        
+            .HasColumnType("decimal(18, 2)");
+
         //config invoice - invoiceDetails
         modelBuilder.Entity<InvoiceDetail>()
             .HasOne(id => id.Invoice)
@@ -329,6 +329,33 @@ public class HostelFinderDbContext : DbContext
         modelBuilder.Entity<Transaction>()
             .Property(t => t.Amount)
             .HasPrecision(18, 2); // For monetary values
+
+        // Configure the relationship between Story and Address
+        modelBuilder.Entity<Story>()
+            .HasOne(s => s.AddressStory)
+            .WithOne(a => a.Story)
+            .HasForeignKey<AddressStory>(a => a.StoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure the relationship between Story and Image
+        modelBuilder.Entity<Story>()
+            .HasMany(s => s.Images)
+            .WithOne(i => i.Story)
+            .HasForeignKey(i => i.StoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure the relationship between Story and User
+        modelBuilder.Entity<Story>()
+            .HasOne(s => s.User)
+            .WithMany(u => u.Stories)
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+       
+        modelBuilder.Entity<AddressStory>()
+           .HasOne(a => a.Story)
+           .WithOne(s => s.AddressStory)
+           .HasForeignKey<AddressStory>(a => a.StoryId)
+           .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Story>(entity =>
         {
