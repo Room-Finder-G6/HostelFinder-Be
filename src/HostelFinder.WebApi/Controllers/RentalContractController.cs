@@ -99,5 +99,23 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
+        
+        //kiểm tra hợp đồng có người thuê chưa 
+        [HttpGet("check-contract")]
+        [Authorize(Roles = "Landlord,Admin")]
+        
+        public async Task<IActionResult> CheckContract(Guid roomId)
+        {
+            try
+            {
+                var response = await _rentalContractService.CheckContractExistAsync(roomId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+            
     }
 }
