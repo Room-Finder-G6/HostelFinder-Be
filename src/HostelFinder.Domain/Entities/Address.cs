@@ -7,10 +7,12 @@ namespace HostelFinder.Domain.Entities;
 public class Address : BaseEntity
 {
     public Guid? HostelId { get; set; }
+    public Guid? StoryId { get; set; }
     public string Province { get; set; }
     public string District { get; set; }
     public string Commune { get; set; }
     [MaxLength(255)]
     public string DetailAddress { get; set; }
     public virtual Hostel? Hostel { get; set; }
+    public virtual Story? Story { get; set; }
 }

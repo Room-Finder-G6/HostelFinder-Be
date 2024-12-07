@@ -328,28 +328,7 @@ public class HostelFinderDbContext : DbContext
             .HasKey(t => t.Id);
         modelBuilder.Entity<Transaction>()
             .Property(t => t.Amount)
-            .HasPrecision(18, 2);
-
-        // Configure the relationship between Story and Address
-        modelBuilder.Entity<Story>()
-            .HasOne(s => s.AddressStory)
-            .WithOne(a => a.Story)
-            .HasForeignKey<AddressStory>(a => a.StoryId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // Configure the relationship between Story and Image
-        modelBuilder.Entity<Story>()
-            .HasMany(s => s.Images)
-            .WithOne(i => i.Story)
-            .HasForeignKey(i => i.StoryId)
-            .OnDelete(DeleteBehavior.Cascade);
-       
-        // Configure the relationship between Story and User
-        modelBuilder.Entity<Story>()
-            .HasOne(s => s.User)          
-            .WithMany(u => u.Stories)     
-            .HasForeignKey(s => s.UserId) 
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasPrecision(18, 2); // For monetary values
 
         modelBuilder.Entity<Story>(entity =>
         {
