@@ -46,6 +46,7 @@ namespace HostelFinder.Application
             services.AddScoped<IUserMembershipService, UserMembershipService>();
             services.AddScoped<IOpenAiService, OpenAiService>();
             services.AddScoped<IMaintenanceRecordService, MaintenanceRecordService>();
+            services.AddScoped<IStoryService, StoryService>();
 
             //register validation 
             services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();

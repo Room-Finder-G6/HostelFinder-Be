@@ -49,5 +49,7 @@ public class ServiceRegistration
         service.AddScoped<ITransactionRepository, TransactionRepository>();
         service.AddScoped<IWishlistPostRepository, WishlistPostRepository>();
         service.AddScoped<IMaintenanceRecordRepository, MaintenanceRecordRepository>();
+        service.AddScoped<IStoryRepository, StoryRepository>();
+        service.AddScoped<IAddressStoryRepository, AddressStoryRepository>();
     }
 }

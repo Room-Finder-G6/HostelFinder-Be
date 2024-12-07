@@ -19,7 +19,7 @@ namespace HostelFinder.Domain.Entities
         public BookingStatus BookingStatus { get; set; } = 0;
         public DateTime DateAvailable { get; set; }
         public virtual ICollection<Image> Images { get; set; }
-        public virtual Address Address { get; set; }
+        public virtual AddressStory AddressStory { get; set; }
         public virtual User User { get; set; }
     }
 }

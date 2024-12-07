@@ -34,7 +34,9 @@ using HostelFinder.Application.DTOs.Invoice.Responses;
 using HostelFinder.Application.DTOs.MaintenanceRecord.Request;
 using HostelFinder.Application.DTOs.MaintenanceRecord.Response;
 using HostelFinder.Application.DTOs.Vehicle.Responses;
-using HostelFinder.Application.DTOs.Wishlist.Response;
+using HostelFinder.Application.DTOs.Story.Requests;
+using HostelFinder.Application.DTOs.AddressStory;
+using HostelFinder.Application.DTOs.Story.Responses;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -107,6 +109,7 @@ public class GeneralProfile : Profile
 
         // Address Mapping
         CreateMap<Address, AddressDto>().ReverseMap();
+        CreateMap<AddressStory, AddressStoryDto>().ReverseMap();
         CreateMap<Hostel, UpdateHostelRequestDto>().ReverseMap();
 
         // RoomDetails Mapping
@@ -254,9 +257,9 @@ public class GeneralProfile : Profile
             .ReverseMap();
         CreateMap<RoomInfoDetailResponseDto, Room>().ReverseMap();
         CreateMap<AddRoommateDto, Tenant>()
-               .ForMember(dest => dest.AvatarUrl, opt => opt.Ignore()) 
-               .ForMember(dest => dest.FrontImageUrl, opt => opt.Ignore()) 
-               .ForMember(dest => dest.BackImageUrl, opt => opt.Ignore()) 
+               .ForMember(dest => dest.AvatarUrl, opt => opt.Ignore())
+               .ForMember(dest => dest.FrontImageUrl, opt => opt.Ignore())
+               .ForMember(dest => dest.BackImageUrl, opt => opt.Ignore())
                .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => DateTime.Now));
 
         //Vehicle
@@ -265,7 +268,7 @@ public class GeneralProfile : Profile
             .ReverseMap();
         CreateMap<AddVehicleDto, Vehicle>()
             .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Image != null ? "" : null))
-            .ReverseMap(); 
+            .ReverseMap();
 
         // Terance
         CreateMap<AddTenantDto, Tenant>().ReverseMap();
@@ -281,12 +284,24 @@ public class GeneralProfile : Profile
 
         //Invoice Detail
         CreateMap<InvoiceDetailResponseDto, InvoiceDetail>().ReverseMap();
-        
+
         //MaintenanceRecord
         CreateMap<CreateMaintenanceRecordRequest, MaintenanceRecord>().ReverseMap();
         CreateMap<MaintenanceRecord, ListMaintenanceRecordResponseDto>()
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
             .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName))
             .ReverseMap();
+
+        // Ánh xạ từ AddStoryRequestDto sang Story entity
+        CreateMap<AddStoryRequestDto, Story>()
+                .ForMember(dest => dest.Images, opt => opt.Ignore())
+               .ForMember(dest => dest.AddressStory, opt => opt.Ignore());
+        // Cấu hình ánh xạ từ Story entity sang StoryResponseDto
+        CreateMap<Story, StoryResponseDto>()
+            .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Select(i => i.Url).ToList()))
+            .ForMember(dest => dest.AddressStory, opt => opt.MapFrom(src => src.AddressStory));
+        CreateMap<Story, ListStoryResponseDto>()
+           .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Select(i => i.Url).FirstOrDefault()))
+           .ForMember(dest => dest.AddressStory, opt => opt.MapFrom(src => src.AddressStory));
     }
 }
