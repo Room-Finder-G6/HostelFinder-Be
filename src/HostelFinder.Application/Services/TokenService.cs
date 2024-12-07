@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 namespace HostelFinder.Application.Services
 {
@@ -16,11 +17,13 @@ namespace HostelFinder.Application.Services
     {
         private readonly JWTSettings _jwtSettings;
         private readonly IUserRepository _userRepository;
+        private readonly PasswordHasher<User> _passwordHasher;
 
-        public TokenService(IOptions<JWTSettings> jwtSettings, IUserRepository userRepository)
+        public TokenService(IOptions<JWTSettings> jwtSettings, IUserRepository userRepository, PasswordHasher<User> passwordHasher)
         {
             _jwtSettings = jwtSettings.Value;
             _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
         }
 
         public string GenerateJwtToken(User user, UserRole role)
@@ -49,32 +52,26 @@ namespace HostelFinder.Application.Services
             // Return serialized JWT
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        
 
-        public async Task<string> GenerateResetPasswordToken(User user)
+        public async Task<string> GenerateNewPasswordRandom(User user)
         {
-            var tokenBytes = new byte[64];
-            using (var rng = RandomNumberGenerator.Create())
+            try
             {
-                rng.GetBytes(tokenBytes);
+                var passwordBytes = new byte[8];
+                using (var rng = RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(passwordBytes);
+                }
+                var newPassword = Convert.ToBase64String(passwordBytes);
+                user.Password = _passwordHasher.HashPassword(user, newPassword);
+                await _userRepository.UpdateAsync(user);
+                return newPassword;
             }
-
-            var token = Convert.ToBase64String(tokenBytes);
-
-            user.PasswordResetToken = token;
-            user.PasswordResetTokenExpires = DateTime.Now.AddHours(1);
-
-            await _userRepository.UpdateAsync(user);
-            return token;
-        }
-
-        public Task<bool> ValidateResetPasswordToken(User user, string token)
-        {
-            if (user.PasswordResetToken == null || user.PasswordResetTokenExpires == null)
+            catch (Exception ex)
             {
-                return Task.FromResult(false);
+                throw new Exception(ex.Message);
             }
-
-            return Task.FromResult(user.PasswordResetToken == token && user.PasswordResetTokenExpires > DateTime.Now);
         }
 
         public int? ValidateToken(string token)
