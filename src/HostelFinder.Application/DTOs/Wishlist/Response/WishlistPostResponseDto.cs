@@ -4,7 +4,6 @@ namespace HostelFinder.Application.DTOs.Wishlist.Response
 {
     public class WishlistPostResponseDto
     {
-        public Guid Id { get; set; }
         public Guid HostelId { get; set; }
         public Guid RoomId { get; set; }
         public Guid WishlistPostId { get; set; }

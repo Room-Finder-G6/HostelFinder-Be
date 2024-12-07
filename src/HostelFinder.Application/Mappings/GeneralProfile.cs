@@ -67,23 +67,6 @@ public class GeneralProfile : Profile
                 opt.MapFrom(src => src.MembershipServices.Membership.Tag))
             .ReverseMap();
 
-        CreateMap<Post, WishlistPostResponseDto>()
-           .ForMember(dest => dest.WishlistPostId, opt => 
-              opt.MapFrom(src => src.Id))
-           .ForMember(dest => dest.Address, opt =>
-               opt.MapFrom(src => src.Hostel.Address))
-           .ForMember(dest => dest.MonthlyRentCost, opt =>
-               opt.MapFrom(src => src.Room.MonthlyRentCost))
-           .ForMember(dest => dest.Size, opt =>
-               opt.MapFrom(src => src.Room.Size))
-           .ForMember(dest => dest.FirstImage, opt =>
-               opt.MapFrom(src => src.Images.Any()
-                   ? src.Images.First().Url
-                   : null))
-           .ForMember(dest => dest.MembershipTag, opt =>
-               opt.MapFrom(src => src.MembershipServices.Membership.Tag))
-           .ReverseMap();
-
         CreateMap<UpdatePostRequestDto, Post>()
             .ForMember(dest => dest.HostelId, opt =>
                 opt.MapFrom(src => src.HostelId))

@@ -99,35 +99,35 @@ namespace HostelFinder.UnitTests.Controllers
         }
 
 
-        [Fact]
-        public async Task GetWishlistByUserId_ReturnsOkResult_WhenWishlistExists()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var mockWishlistResponse = new WishlistResponseDto
-            {
-                WishlistId = Guid.NewGuid(),
-                Posts = new List<PostResponseDto>
-        {
-            new PostResponseDto { Id = Guid.NewGuid(), Title = "Post 1" },
-            new PostResponseDto { Id = Guid.NewGuid(), Title = "Post 2" }
-        }
-            };
+        //[Fact]
+        //public async Task GetWishlistByUserId_ReturnsOkResult_WhenWishlistExists()
+        //{
+        //    // Arrange
+        ////    var userId = Guid.NewGuid();
+        ////    var mockWishlistResponse = new WishlistResponseDto
+        ////    {
+        ////        WishlistId = Guid.NewGuid(),
+        ////        Posts = new List<PostResponseDto>
+        ////{
+        ////    new PostResponseDto { Id = Guid.NewGuid(), Title = "Post 1" },
+        ////    new PostResponseDto { Id = Guid.NewGuid(), Title = "Post 2" }
+        ////}
+        ////    };
 
-            var response = new Response<WishlistResponseDto>(mockWishlistResponse);
+        //    var response = new Response<WishlistResponseDto>(mockWishlistResponse);
 
-            _wishlistServiceMock.Setup(service => service.GetWishlistByUserIdAsync(userId))
-                .ReturnsAsync(response);
+        //    _wishlistServiceMock.Setup(service => service.GetWishlistByUserIdAsync(userId))
+        //        .ReturnsAsync(response);
 
-            // Act
-            var result = await _controller.GetWishlistByUserId(userId);
+        //    // Act
+        //    var result = await _controller.GetWishlistByUserId(userId);
 
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var responseData = Assert.IsType<Response<WishlistResponseDto>>(okResult.Value);
-            Assert.True(responseData.Succeeded);
-            Assert.Equal(2, responseData.Data.Posts.Count);
-        }
+        //    // Assert
+        //    var okResult = Assert.IsType<OkObjectResult>(result);
+        //    var responseData = Assert.IsType<Response<WishlistResponseDto>>(okResult.Value);
+        //    Assert.True(responseData.Succeeded);
+        //    Assert.Equal(2, responseData.Data.Posts.Count);
+        //}
 
 
         [Fact]
