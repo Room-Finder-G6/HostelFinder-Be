@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using HostelFinder.Application.DTOs.Address;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
 using HostelFinder.Application.DTOs.Users.Response;
@@ -71,25 +70,6 @@ public class PostService : IPostService
 
         return landlordDto;
     }
-
-    /*public async Task<HostelResponseDto> GetHostelByPostIdAsync(Guid postId)
-    {
-        var hostel = await _hostelRepository.GetHostelWithReviewsByPostIdAsync(postId);
-
-        if (hostel == null)
-        {
-            throw new NullReferenceException("Hostel not found for the provided Post ID.");
-        }
-
-        var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
-
-        if (hostel.Images != null && hostel.Images.Any())
-        {
-            hostelResponseDto.Image = _mapper.Map<List<ImageResponseDto>>(hostel.Images);
-        }
-
-        return hostelResponseDto;
-    }*/
 
     public async Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request)
     {

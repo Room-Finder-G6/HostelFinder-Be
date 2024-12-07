@@ -32,8 +32,9 @@ public class HostelFinderDbContext : DbContext
     public DbSet<RoomTenancy> RoomTenancies { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<RentalContract> RentalContracts { get; set; }
-    public DbSet<Story> Storys { get; set; }
+    public DbSet<Story> Stories { get; set; }
     public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
+    public DbSet<AddressStory> AddressStories { get; set; }
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -59,7 +60,7 @@ public class HostelFinderDbContext : DbContext
 
         // Configure Address entity
         modelBuilder.Entity<Address>()
-            .HasKey(a => a.HostelId);
+            .HasKey(a => a.Id);
         modelBuilder.Entity<Address>()
             .HasOne(a => a.Hostel)
             .WithOne(h => h.Address)
@@ -331,9 +332,9 @@ public class HostelFinderDbContext : DbContext
 
         // Configure the relationship between Story and Address
         modelBuilder.Entity<Story>()
-            .HasOne(s => s.Address)
+            .HasOne(s => s.AddressStory)
             .WithOne(a => a.Story)
-            .HasForeignKey<Address>(a => a.StoryId)
+            .HasForeignKey<AddressStory>(a => a.StoryId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Configure the relationship between Story and Image
