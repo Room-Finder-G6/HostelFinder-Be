@@ -110,17 +110,9 @@ namespace HostelFinder.Application.Services
             {
                 return new Response<string> { Succeeded = false, Message = "Email không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới." };
             }
-
-            var isValidToken = await _tokenService.ValidateResetPasswordToken(user, request.Token);
-            if (!isValidToken)
-            {
-                return new Response<string> { Succeeded = false, Message = "Token không hợp lệ. Vui lòng check và thử lại" };
-            }
+            
 
             user.Password = _passwordHasher.HashPassword(user, request.NewPassword);
-
-            user.PasswordResetToken = null;
-            user.PasswordResetTokenExpires = null;
 
             await _userRepository.UpdateAsync(user);
             return new Response<string> { Succeeded = true, Message = "Đặt lại mật khẩu thành công!" };
