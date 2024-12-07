@@ -33,10 +33,43 @@ namespace HostelFinder.Application.Services
             _passwordHasher = new PasswordHasher<User>();
         }
 
-        public Task<Response<string>> ChangePasswordAsync(ChangePasswordRequest request)
+        public async Task<Response<string>> ChangePasswordAsync(ChangePasswordRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _userRepository.FindByUserNameAsync(request.Username);
+                if (user == null)
+                {
+                    return new Response<string> { Succeeded = false, Message = "User not found" };
+                }
+
+                var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, request.CurrentPassword);
+                if (verificationResult == PasswordVerificationResult.Failed)
+                {
+                    return new Response<string> { Succeeded = false, Message = "Current password is incorrect" };
+                }
+
+                if (request.NewPassword != request.ConfirmPassword)
+                {
+                    return new Response<string> { Succeeded = false, Message = "New password and confirm password do not match" };
+                }
+
+                if (string.Equals(request.CurrentPassword, request.NewPassword))
+                {
+                    return new Response<string> { Succeeded = false, Message = "New password cannot be the same as the current password" };
+                }
+
+                user.Password = _passwordHasher.HashPassword(user, request.NewPassword);
+                await _userRepository.UpdateAsync(user);
+
+                return new Response<string> { Succeeded = true, Message = "Password changed successfully" };
+            }
+            catch (Exception ex)
+            {
+                return new Response<string> { Succeeded = false, Message = $"Error: {ex.Message}" };
+            }
         }
+
 
         public async Task<Response<string>> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
