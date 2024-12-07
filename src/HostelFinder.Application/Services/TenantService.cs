@@ -192,6 +192,16 @@ namespace HostelFinder.Application.Services
                     };
                 }
 
+                if (tenantTenancy.MoveOutDate < DateTime.Now)
+                {
+                    return new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = $"{tenantTenancy.Tenant.FullName} đã rời phòng vào ngày {tenantTenancy.MoveOutDate}."
+                    };
+                }
+
+
                 // Cập nhật MoveOutDate của tenant yêu cầu
                 tenantTenancy.MoveOutDate = DateTime.Now;
                 tenantTenancy.LastModifiedOn = DateTime.Now;
@@ -213,6 +223,15 @@ namespace HostelFinder.Application.Services
                     {
                         Succeeded = false,
                         Message = "Hiện tại không có hợp đồng nào cho phòng này."
+                    };
+                }
+
+                if (rentalContract.EndDate < DateTime.Now)
+                {
+                    return new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = $"Hợp đồng cho phòng này đã kết thúc vào ngày {rentalContract.EndDate}."
                     };
                 }
 
@@ -248,7 +267,7 @@ namespace HostelFinder.Application.Services
                 return new Response<string>
                 {
                     Succeeded = true,
-                    Message = $"{rentalContract.Tenant.FullName} đã trả phòng thành công."
+                    Message = $"Đã trả phòng {room.RoomName} thành công."
                 };
             }
         }

@@ -82,6 +82,7 @@ namespace HostelFinder.Infrastructure.Repositories
         {
             return await _dbContext.RoomTenancies
                 .AsNoTracking()
+                .Include(x => x.Tenant)
                 .Where(rt => rt.TenantId == tenantId)
                 .FirstOrDefaultAsync(); 
         }
