@@ -250,7 +250,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
 
         if (filter.MinPrice.HasValue)
         {
-            query = query.Where(p => p.Room.MonthlyRentCost >= filter.MinSize!.Value);
+            query = query.Where(p => p.Room.MonthlyRentCost >= filter.MinPrice!.Value);
         }
 
         if (filter.MaxPrice.HasValue)
