@@ -40,19 +40,33 @@ namespace HostelFinder.Application.Services
 
         public async Task<Response<string>> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
-            var user = await _userRepository.FindByEmailAsync(request.Email);
-            if (user == null)
+            try
             {
-                return new Response<string> { Succeeded = false, Message = "Email không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới." };
+                var user = await _userRepository.FindByEmailAsync(request.Email);
+                if (user == null)
+                {
+                    return new Response<string>
+                    {
+                        Succeeded = false, Message = "Email không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới."
+                    };
+                }
+
+                var newPassword = await _tokenService.GenerateNewPasswordRandom(user);
+
+                var emailBody = EmailConstants.BodyResetPasswordEmail(user.Email, newPassword);
+                var emailSubject = "Mật khẩu mới của bạn";
+                await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+
+                return new Response<string>
+                {
+                    Succeeded = true,
+                    Message = "Mật khẩu mới gửi tới email của bạn. Vui lòng check email!"
+                };
             }
-            var resetToken = await _tokenService.GenerateResetPasswordToken(user);
-
-            var emailBody = EmailConstants.BodyResetPasswordEmail(user.Email, resetToken);
-            var emailSubject = "Đặt lại mật khẩu";
-
-            await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
-
-            return new Response<string> { Succeeded = true, Message = "Link đặt lại mật khẩu đã được gửi tới email của bạn. Vui lòng check email!" };
+            catch (Exception ex)
+            {
+                return new Response<string>{Succeeded = false, Message = ex.Message};
+            }
         }
 
         public async Task<Response<AuthenticationResponse>> LoginAsync(AuthenticationRequest request)
