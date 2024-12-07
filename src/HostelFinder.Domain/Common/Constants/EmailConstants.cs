@@ -74,76 +74,76 @@ namespace HostelFinder.Domain.Common.Constants
                 </html>
               ";
 
-     public static string BodyResetPasswordEmail(User user, string email, string newPassword)
-{
-    return $@"
-<html>
-<head>
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f6f6f6;
-        }}
-        .container {{
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }}
-        h2 {{
-            color: #333333;
-        }}
-        p {{
-            color: #666666;
-            line-height: 1.6;
-        }}
-        .highlight {{
-            font-weight: bold;
-            color: #e74c3c;
-        }}
-        a.button {{
-            display: inline-block;
-            padding: 10px 20px;
-            margin-top: 20px;
-            background-color: #28a745;
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 5px;
-        }}
-        a.button:hover {{
-            background-color: #218838;
-        }}
-        .footer {{
-            margin-top: 20px;
-            font-size: 12px;
-            color: #999999;
-            text-align: center;
-        }}
-    </style>
-</head>
-<body>
-    <div class='container'>
-        <h2>Thông báo mật khẩu mới</h2>
-        <p>Xin chào, <span class='highlight'>{user.FullName}</span></p>
-        <p>Chúng tôi đã nhận được yêu cầu thay đổi mật khẩu cho tài khoản của bạn với email <strong>{email}</strong>.</p>
-        <p>Đây là mật khẩu mới của bạn:</p>
-        <p><span class='highlight'>Tên đăng nhập: {user.Username}</span></p>
-        <p><span class='highlight'>Mật khẩu mới: {newPassword}</span></p>
-        <p>Vui lòng sử dụng mật khẩu mới để đăng nhập vào tài khoản của bạn. Bạn có thể thay đổi mật khẩu sau khi đăng nhập vào phần cài đặt tài khoản của mình.</p>
-        <p>Nếu bạn không yêu cầu thay đổi mật khẩu này, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ.</p>
-        <p>Trân trọng,<br/>Đội ngũ hỗ trợ khách hàng</p>
-        <div class='footer'>
-            <p>© 2024 Công ty của bạn. Tất cả quyền được bảo lưu.</p>
-        </div>
-    </div>
-</body>
-</html>";
-}
+        public static string BodyResetPasswordEmail(User user, string email, string newPassword)
+        {
+            return $@"
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f6f6f6;
+                }}
+                .container {{
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background-color: #ffffff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }}
+                h2 {{
+                    color: #333333;
+                }}
+                p {{
+                    color: #666666;
+                    line-height: 1.6;
+                }}
+                .highlight {{
+                    font-weight: bold;
+                    color: #e74c3c;
+                }}
+                a.button {{
+                    display: inline-block;
+                    padding: 10px 20px;
+                    margin-top: 20px;
+                    background-color: #28a745;
+                    color: #ffffff;
+                    text-decoration: none;
+                    font-weight: bold;
+                    border-radius: 5px;
+                }}
+                a.button:hover {{
+                    background-color: #218838;
+                }}
+                .footer {{
+                    margin-top: 20px;
+                    font-size: 12px;
+                    color: #999999;
+                    text-align: center;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <h2>Thông báo mật khẩu mới</h2>
+                <p>Xin chào, <span class='highlight'>{user.FullName}</span></p>
+                <p>Chúng tôi đã nhận được yêu cầu thay đổi mật khẩu cho tài khoản của bạn với email <strong>{email}</strong>.</p>
+                <p>Đây là mật khẩu mới của bạn:</p>
+                <p><span class='highlight'>Tên đăng nhập: {user.Username}</span></p>
+                <p><span class='highlight'>Mật khẩu mới: {newPassword}</span></p>
+                <p>Vui lòng sử dụng mật khẩu mới để đăng nhập vào tài khoản của bạn. Bạn có thể thay đổi mật khẩu sau khi đăng nhập vào phần cài đặt tài khoản của mình.</p>
+                <p>Nếu bạn không yêu cầu thay đổi mật khẩu này, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ.</p>
+                <p>Trân trọng,<br/>Đội ngũ hỗ trợ khách hàng</p>
+                <div class='footer'>
+                    <p>© 2024 Công ty của bạn. Tất cả quyền được bảo lưu.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+        }
 
 
         public static string BodyRegisterMembership(User user, Membership membership)
@@ -228,6 +228,7 @@ namespace HostelFinder.Domain.Common.Constants
         </html>
         ";
         }
+
         public const string SUBJECT_REGISTER_MEMBERSHIP = "Đăng ký thành công gói hội viên";
         public const string SUBJECT_RESET_PASSWORD = "Reset Password";
         public const string SUBJECT_ACTIVE_ACCOUNT = "Active Email";
