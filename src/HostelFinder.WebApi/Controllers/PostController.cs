@@ -311,7 +311,6 @@ public class PostController : ControllerBase
     }
 
     [HttpPost("filter")]
-    [Authorize(Roles = "Landlord,Admin")]
     public async Task<IActionResult> FilterPosts([FromForm] FilterPostsRequestDto filter)
     {
         try
