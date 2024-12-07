@@ -74,9 +74,9 @@ namespace HostelFinder.Domain.Common.Constants
                 </html>
               ";
 
-        public static string BodyResetPasswordEmail(string email, string newPassword)
-        {
-            return $@"
+     public static string BodyResetPasswordEmail(User user, string email, string newPassword)
+{
+    return $@"
 <html>
 <head>
     <style>
@@ -101,6 +101,10 @@ namespace HostelFinder.Domain.Common.Constants
             color: #666666;
             line-height: 1.6;
         }}
+        .highlight {{
+            font-weight: bold;
+            color: #e74c3c;
+        }}
         a.button {{
             display: inline-block;
             padding: 10px 20px;
@@ -124,20 +128,22 @@ namespace HostelFinder.Domain.Common.Constants
 </head>
 <body>
     <div class='container'>
-        <h2>Your New Password</h2>
-        <p>Hello, {email}</p>
-        <p>We have successfully reset the password for the account associated with <strong>{email}</strong>.</p>
-        <p>Your new password is: <strong>{newPassword}</strong></p>
-        <p>Please use this password to log in to your account. You can change your password later from your account settings.</p>
-        <p>If you didn't request this, please contact our support team immediately.</p>
-        <p>Thank you,<br/>Your Company Team</p>
+        <h2>Thông báo mật khẩu mới</h2>
+        <p>Xin chào, <span class='highlight'>{user.FullName}</span></p>
+        <p>Chúng tôi đã nhận được yêu cầu thay đổi mật khẩu cho tài khoản của bạn với email <strong>{email}</strong>.</p>
+        <p>Đây là mật khẩu mới của bạn:</p>
+        <p><span class='highlight'>Tên đăng nhập: {user.Username}</span></p>
+        <p><span class='highlight'>Mật khẩu mới: {newPassword}</span></p>
+        <p>Vui lòng sử dụng mật khẩu mới để đăng nhập vào tài khoản của bạn. Bạn có thể thay đổi mật khẩu sau khi đăng nhập vào phần cài đặt tài khoản của mình.</p>
+        <p>Nếu bạn không yêu cầu thay đổi mật khẩu này, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ.</p>
+        <p>Trân trọng,<br/>Đội ngũ hỗ trợ khách hàng</p>
         <div class='footer'>
-            <p>© 2024 Your Company. All rights reserved.</p>
+            <p>© 2024 Công ty của bạn. Tất cả quyền được bảo lưu.</p>
         </div>
     </div>
 </body>
 </html>";
-        }
+}
 
 
         public static string BodyRegisterMembership(User user, Membership membership)

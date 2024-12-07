@@ -53,7 +53,7 @@ namespace HostelFinder.Application.Services
 
                 var newPassword = await _tokenService.GenerateNewPasswordRandom(user);
 
-                var emailBody = EmailConstants.BodyResetPasswordEmail(user.Email, newPassword);
+                var emailBody = EmailConstants.BodyResetPasswordEmail(user,user.Email, newPassword);
                 var emailSubject = "Mật khẩu mới của bạn";
                 await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
 
