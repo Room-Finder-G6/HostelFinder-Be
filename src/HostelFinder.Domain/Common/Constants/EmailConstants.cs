@@ -138,7 +138,7 @@ namespace HostelFinder.Domain.Common.Constants
                 <p>Nếu bạn không yêu cầu thay đổi mật khẩu này, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ.</p>
                 <p>Trân trọng,<br/>Đội ngũ hỗ trợ khách hàng</p>
                 <div class='footer'>
-                    <p>© 2024 Công ty của bạn. Tất cả quyền được bảo lưu.</p>
+                    <p>© 2024 Phongtro247.</p>
                 </div>
             </div>
         </body>

@@ -46,7 +46,8 @@ public class HostelFinderDbContext : DbContext
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("appsettings.Development.json");
             IConfigurationRoot configurationRoot = builder.Build();
             optionsBuilder.UseSqlServer(configurationRoot.GetConnectionString("DefaultConnection"));
         }

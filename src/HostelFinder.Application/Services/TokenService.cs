@@ -33,7 +33,9 @@ namespace HostelFinder.Application.Services
                 new ("UserId", user.Id.ToString()),
                 new (ClaimTypes.Name, user.Username),
                 new (ClaimTypes.Email, user.Email),
-                new (ClaimTypes.Role, role.ToString())
+                new (ClaimTypes.Role, role.ToString()),
+                new ("Role", role.ToString()),
+                new ("Username", user.Username),
             };
 
             // Generate signing credentials
