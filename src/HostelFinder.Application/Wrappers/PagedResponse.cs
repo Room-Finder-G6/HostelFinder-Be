@@ -13,7 +13,7 @@
             this.PageSize = pageSize;
             this.Data = data;
             this.Message = null;
-            this.Succeeded = true;
+            this.Succeeded = true;      
             this.Errors = null;
         }
 

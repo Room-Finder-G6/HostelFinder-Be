@@ -47,5 +47,7 @@ namespace HostelFinder.Domain.Entities
         public virtual ICollection<Transaction>? Transactions { get; set; }
         public virtual Wishlist? Wishlists { get; set; }
         public virtual ICollection<UserMembership> UserMemberships { get; set; }
+        public virtual ICollection<Story> Stories { get; set; }
+        public virtual ICollection<Notification> Notifications { get; set; }
     }
 }

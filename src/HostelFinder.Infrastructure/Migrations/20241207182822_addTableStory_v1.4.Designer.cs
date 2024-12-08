@@ -4,6 +4,7 @@ using HostelFinder.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HostelFinder.Infrastructure.Migrations
 {
     [DbContext(typeof(HostelFinderDbContext))]
-    partial class HostelFinderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241207182822_addTableStory_v1.4")]
+    partial class addTableStory_v14
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,69 +72,20 @@ namespace HostelFinder.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<Guid?>("StoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("HostelId")
                         .IsUnique()
                         .HasFilter("[HostelId] IS NOT NULL");
 
-                    b.ToTable("Addresses");
-                });
-
-            modelBuilder.Entity("HostelFinder.Domain.Entities.AddressStory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Commune")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("DetailAddress")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("District")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("LastModifiedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Province")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<Guid?>("StoryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("StoryId")
                         .IsUnique()
                         .HasFilter("[StoryId] IS NOT NULL");
 
-                    b.ToTable("AddressStories");
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Amenity", b =>
@@ -687,47 +641,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.ToTable("MeterReadings");
                 });
 
-            modelBuilder.Entity("HostelFinder.Domain.Entities.Notification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("LastModifiedOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Notifications");
-                });
-
             modelBuilder.Entity("HostelFinder.Domain.Entities.Post", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1209,7 +1122,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Stories");
+                    b.ToTable("Storys");
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Tenant", b =>
@@ -1607,15 +1520,12 @@ namespace HostelFinder.Infrastructure.Migrations
                         .HasForeignKey("HostelFinder.Domain.Entities.Address", "HostelId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("Hostel");
-                });
-
-            modelBuilder.Entity("HostelFinder.Domain.Entities.AddressStory", b =>
-                {
                     b.HasOne("HostelFinder.Domain.Entities.Story", "Story")
-                        .WithOne("AddressStory")
-                        .HasForeignKey("HostelFinder.Domain.Entities.AddressStory", "StoryId")
+                        .WithOne("Address")
+                        .HasForeignKey("HostelFinder.Domain.Entities.Address", "StoryId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Hostel");
 
                     b.Navigation("Story");
                 });
@@ -1752,17 +1662,6 @@ namespace HostelFinder.Infrastructure.Migrations
                     b.Navigation("Room");
 
                     b.Navigation("Service");
-                });
-
-            modelBuilder.Entity("HostelFinder.Domain.Entities.Notification", b =>
-                {
-                    b.HasOne("HostelFinder.Domain.Entities.User", "User")
-                        .WithMany("Notifications")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Post", b =>
@@ -2051,7 +1950,7 @@ namespace HostelFinder.Infrastructure.Migrations
 
             modelBuilder.Entity("HostelFinder.Domain.Entities.Story", b =>
                 {
-                    b.Navigation("AddressStory")
+                    b.Navigation("Address")
                         .IsRequired();
 
                     b.Navigation("Images");
@@ -2067,8 +1966,6 @@ namespace HostelFinder.Infrastructure.Migrations
             modelBuilder.Entity("HostelFinder.Domain.Entities.User", b =>
                 {
                     b.Navigation("Hostels");
-
-                    b.Navigation("Notifications");
 
                     b.Navigation("Stories");
 

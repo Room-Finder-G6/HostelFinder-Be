@@ -19,8 +19,11 @@ public class Image : BaseEntity
     [ForeignKey("Room")]
     public Guid? RoomId { get; set; }
 
+    [ForeignKey("Story")]
+    public Guid? StoryId { get; set; }
+
     public virtual Hostel? Hostel   { get; set; }
     public virtual Post? Post   { get; set; }
-
+    public virtual Story? Story   { get; set; }
     public virtual Room? Room { get; set; }
 }
