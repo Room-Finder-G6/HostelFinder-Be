@@ -1,6 +1,5 @@
 ﻿using HostelFinder.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 
 namespace HostelFinder.Infrastructure.Context;
@@ -32,8 +31,10 @@ public class HostelFinderDbContext : DbContext
     public DbSet<RoomTenancy> RoomTenancies { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<RentalContract> RentalContracts { get; set; }
-    
+    public DbSet<Story> Stories { get; set; }
     public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
+    public DbSet<AddressStory> AddressStories { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -56,11 +57,11 @@ public class HostelFinderDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-            base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(modelBuilder);
 
         // Configure Address entity
         modelBuilder.Entity<Address>()
-            .HasKey(a => a.HostelId);
+            .HasKey(a => a.Id);
         modelBuilder.Entity<Address>()
             .HasOne(a => a.Hostel)
             .WithOne(h => h.Address)
@@ -288,8 +289,8 @@ public class HostelFinderDbContext : DbContext
 
         modelBuilder.Entity<Invoice>()
             .Property(i => i.AmountPaid)
-            .HasColumnType("decimal(18, 2)"); 
-        
+            .HasColumnType("decimal(18, 2)");
+
         //config invoice - invoiceDetails
         modelBuilder.Entity<InvoiceDetail>()
             .HasOne(id => id.Invoice)
@@ -330,5 +331,44 @@ public class HostelFinderDbContext : DbContext
             .Property(t => t.Amount)
             .HasPrecision(18, 2); // For monetary values
 
+        // Configure the relationship between Story and Address
+        modelBuilder.Entity<Story>()
+            .HasOne(s => s.AddressStory)
+            .WithOne(a => a.Story)
+            .HasForeignKey<AddressStory>(a => a.StoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure the relationship between Story and Image
+        modelBuilder.Entity<Story>()
+            .HasMany(s => s.Images)
+            .WithOne(i => i.Story)
+            .HasForeignKey(i => i.StoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure the relationship between Story and User
+        modelBuilder.Entity<Story>()
+            .HasOne(s => s.User)
+            .WithMany(u => u.Stories)
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+       
+        modelBuilder.Entity<AddressStory>()
+           .HasOne(a => a.Story)
+           .WithOne(s => s.AddressStory)
+           .HasForeignKey<AddressStory>(a => a.StoryId)
+           .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Story>(entity =>
+        {
+            entity.Property(e => e.MonthlyRentCost)
+                .HasPrecision(18, 2);
+        });
+
+        // Cấu hình mối quan hệ giữa User và Notification
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)                
+            .WithMany(u => u.Notifications)   
+            .HasForeignKey(n => n.UserId)     
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
