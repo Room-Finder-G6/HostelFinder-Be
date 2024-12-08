@@ -10,7 +10,6 @@ using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using HostelFinder.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace HostelFinder.Application.Services
@@ -21,16 +20,19 @@ namespace HostelFinder.Application.Services
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
         private readonly PasswordHasher<User> _passwordHasher;
+        private readonly INotificationRepository _notificationRepository;
 
         public AuthAccountService(IUserRepository userRepository
             , ITokenService tokenService,
-            IEmailService emailService
+            IEmailService emailService,
+            INotificationRepository notificationRepository
             )
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
             _emailService = emailService;
             _passwordHasher = new PasswordHasher<User>();
+            _notificationRepository = notificationRepository;
         }
 
         public async Task<Response<string>> ChangePasswordAsync(ChangePasswordRequest request)
@@ -62,6 +64,14 @@ namespace HostelFinder.Application.Services
                 user.Password = _passwordHasher.HashPassword(user, request.NewPassword);
                 await _userRepository.UpdateAsync(user);
 
+                var notificationMessage = $"{user.Username} đã thay đổi mật khẩu.";
+                var notification = new Notification
+                {
+                    Message = notificationMessage,
+                    UserId = user.Id,
+                    CreatedOn = DateTime.Now
+                };
+                await _notificationRepository.AddAsync(notification);
                 return new Response<string> { Succeeded = true, Message = "Đổi mật khẩu thành công" };
             }
             catch (Exception ex)
@@ -90,6 +100,14 @@ namespace HostelFinder.Application.Services
                 var emailSubject = "Mật khẩu mới của bạn";
                 await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
 
+                var notificationMessage = $"{user.Username} đã yêu cầu lấy lại mật khẩu.";
+                var notification = new Notification
+                {
+                    Message = notificationMessage,
+                    UserId = user.Id, 
+                    CreatedOn = DateTime.Now
+                };
+                await _notificationRepository.AddAsync(notification);
                 return new Response<string>
                 {
                     Succeeded = true,
@@ -128,6 +146,14 @@ namespace HostelFinder.Application.Services
                     Token = token
                 };
 
+                var notificationMessage = $"Chào mừng {user.Username} đến với PhongTro247!!!";
+                var notification = new Notification
+                {
+                    Message = notificationMessage,
+                    UserId = user.Id,
+                    CreatedOn = DateTime.Now
+                };
+                await _notificationRepository.AddAsync(notification);
                 return new Response<AuthenticationResponse> { Data = response, Succeeded = true, Message = "Đăng nhập thành công" };
             }
             catch (Exception ex)
@@ -148,6 +174,7 @@ namespace HostelFinder.Application.Services
             user.Password = _passwordHasher.HashPassword(user, request.NewPassword);
 
             await _userRepository.UpdateAsync(user);
+
             return new Response<string> { Succeeded = true, Message = "Đặt lại mật khẩu thành công!" };
         }
 
@@ -189,6 +216,15 @@ namespace HostelFinder.Application.Services
                     Role = role.ToString(),
                     Token = token
                 };
+
+                var notificationMessage = $"Chào mừng {user.Username} đến với PhongTro247!!!";
+                var notification = new Notification
+                {
+                    Message = notificationMessage,
+                    UserId = user.Id,
+                    CreatedOn = DateTime.Now
+                };
+                await _notificationRepository.AddAsync(notification);
                 return new Response<AuthenticationResponse> { Data = response, Succeeded = true, Message = "Đăng nhập thành công" };
                 
             }

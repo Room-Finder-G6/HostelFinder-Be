@@ -6,6 +6,7 @@ using Net.payOS.Types;
 using Net.payOS;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Application.DTOs.WalletDeposit.Responses;
+using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.Services
 {
@@ -13,10 +14,11 @@ namespace HostelFinder.Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ITransactionRepository _transactionRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly PayOS _payOS;
         private readonly IConfiguration _configuration;
 
-        public WalletService(IUserRepository userRepository, IConfiguration configuration, ITransactionRepository transactionRepository)
+        public WalletService(IUserRepository userRepository, IConfiguration configuration, ITransactionRepository transactionRepository, INotificationRepository notificationRepository)
         {
             _userRepository = userRepository;
             _transactionRepository = transactionRepository;
@@ -25,6 +27,7 @@ namespace HostelFinder.Application.Services
                 configuration["PayOS:ClientId"],
                 configuration["PayOS:ApiKey"],
                 configuration["PayOS:ChecksumKey"]);
+            _notificationRepository = notificationRepository;
         }
 
         public async Task<Response<string>> CheckTransactionStatusAsync(long orderCode)
@@ -51,6 +54,13 @@ namespace HostelFinder.Application.Services
 
                     await _userRepository.UpdateAsync(user);
                     await _transactionRepository.UpdateAsync(transaction);
+                    var notification = new Notification
+                    {
+                        Message = $"Bạn đã chuyển thành công {transaction.Amount} vào ví.",
+                        UserId = user.Id,
+                        CreatedOn = DateTime.Now
+                    };
+                    await _notificationRepository.AddAsync(notification);
 
                     return new Response<string>("Completed");
                 }

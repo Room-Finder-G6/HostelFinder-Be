@@ -37,6 +37,7 @@ using HostelFinder.Application.DTOs.Vehicle.Responses;
 using HostelFinder.Application.DTOs.Story.Requests;
 using HostelFinder.Application.DTOs.AddressStory;
 using HostelFinder.Application.DTOs.Story.Responses;
+using HostelFinder.Application.DTOs.Notification;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -306,6 +307,11 @@ public class GeneralProfile : Profile
         CreateMap<UpdateStoryRequestDto, Story>()
             .ForMember(dest => dest.LastModifiedOn, opt => opt.Ignore())  
             .ForMember(dest => dest.Images, opt => opt.Ignore()) 
-            .ForMember(dest => dest.AddressStory, opt => opt.MapFrom(src => src.AddressStory)); 
+            .ForMember(dest => dest.AddressStory, opt => opt.MapFrom(src => src.AddressStory));
+
+        //Mapping Notification - NotificationResponseDto
+        CreateMap<Notification, NotificationResponseDto>()
+                .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.Message))
+                .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => src.CreatedOn));
     }
 }
