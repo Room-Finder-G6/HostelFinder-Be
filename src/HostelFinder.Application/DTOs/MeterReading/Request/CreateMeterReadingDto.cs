@@ -12,5 +12,10 @@
         public int billingMonth { get; set; }
 
         public int billingYear { get; set;}
+        
+        
+        
+        
     }
+    
 }
