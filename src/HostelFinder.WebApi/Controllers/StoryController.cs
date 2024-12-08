@@ -1,5 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.Story.Requests;
+using HostelFinder.Application.DTOs.Story.Responses;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -44,35 +46,49 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("GetAllStoryIndex")]
-        public async Task<IActionResult> GetAllStory()
+        public async Task<IActionResult> GetAllStoriesAsync([FromQuery] StoryFilterDto filter, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
-            var response = await _storyService.GetAllStoryAsync();
-
-            if (response.Succeeded)
+            try
             {
-                return Ok(response);
-            }
+                var response = await _storyService.GetAllStoriesAsync(pageIndex, pageSize, filter);
 
-            return BadRequest(response);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+                else
+                {
+                    return BadRequest(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<PagedResponse<ListStoryResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = $"Lỗi server: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpGet("GetAllStoryForAdmin")]
-        public async Task<IActionResult> GetAllStoryForAdmin()
+        public async Task<IActionResult> GetAllStoryForAdmin([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
-            var response = await _storyService.GetAllStoryForAdminAsync();
+            var pagedResponse = await _storyService.GetAllStoryForAdminAsync(pageIndex, pageSize);
 
-            if (response.Succeeded)
+            if (pagedResponse.Succeeded)
             {
-                return Ok(response);
+                return Ok(pagedResponse);
             }
 
-            return BadRequest(response);
+            return BadRequest(pagedResponse);
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetStoryByUserId(Guid userId)
+        public async Task<IActionResult> GetStoryByUserId(Guid userId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
-            var response = await _storyService.GetStoryByUserIdAsync(userId);
+            var response = await _storyService.GetStoryByUserIdAsync(userId, pageIndex, pageSize);
 
             if (response.Succeeded)
             {
@@ -81,5 +97,63 @@ namespace HostelFinder.WebApi.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpDelete("{storyId}")]
+        public async Task<IActionResult> DeleteStory(Guid storyId)
+        {
+            var response = await _storyService.DeleteStoryAsync(storyId);
+
+            if (response.Succeeded)
+            {
+                return Ok(response);
+            }
+
+            return BadRequest(response);
+        }
+
+        [HttpPut("{storyId}")]
+        public async Task<IActionResult> UpdateStory(Guid storyId, [FromForm] UpdateStoryRequestDto request, [FromForm] List<IFormFile>? images, [FromForm] List<string>? imageUrls)
+        {
+            if (request == null)
+            {
+                return BadRequest(new Response<StoryResponseDto>("Invalid input data."));
+            }
+
+            var response = await _storyService.UpdateStoryAsync(storyId, request, images, imageUrls);
+
+            if (response.Succeeded)
+            {
+                return Ok(response);
+            }
+
+            return BadRequest(response);
+        }
+
+        [HttpPatch("deny/{storyId}")]
+        public async Task<IActionResult> DenyStory(Guid storyId)
+        {
+            var response = await _storyService.DenyStoryAsync(storyId);
+
+            if (response.Succeeded)
+            {
+                return Ok(response);
+            }
+
+            return BadRequest(response);
+        }
+
+        [HttpPatch("accept/{storyId}")]
+        public async Task<IActionResult> AcceptStory(Guid storyId)
+        {
+            var response = await _storyService.AcceptStoryAsync(storyId);
+
+            if (response.Succeeded)
+            {
+                return Ok(response);
+            }
+
+            return BadRequest(response);
+        }
+
     }
 }

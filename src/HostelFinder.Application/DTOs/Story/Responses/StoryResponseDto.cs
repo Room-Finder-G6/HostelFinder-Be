@@ -15,6 +15,7 @@ namespace HostelFinder.Application.DTOs.Story.Responses
         public BookingStatus BookingStatus { get; set; }
         public RoomType RoomType { get; set; }
         public DateTime DateAvailable { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
         public AddressStoryDto AddressStory { get; set; }
         public List<string> Images { get; set; }
     }
