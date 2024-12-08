@@ -5,5 +5,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
 {
     public interface IAddressStoryRepository : IBaseGenericRepository<AddressStory>
     {
+        Task<AddressStory> GetAddressByStoryIdAsync(Guid storyId);
     }
 }

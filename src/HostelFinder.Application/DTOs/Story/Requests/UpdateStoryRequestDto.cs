@@ -1,22 +1,27 @@
-﻿
-using HostelFinder.Application.DTOs.AddressStory;
+﻿using HostelFinder.Application.DTOs.AddressStory;
 using HostelFinder.Domain.Enums;
+using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
-namespace HostelFinder.Application.DTOs.Story.Responses
+namespace HostelFinder.Application.DTOs.Story.Requests
 {
-    public class ListStoryResponseDto
+    public class UpdateStoryRequestDto
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        [MaxLength(512)]
         public string Title { get; set; }
+
         public decimal MonthlyRentCost { get; set; }
+
+        [MaxLength(3000)]
         public string Description { get; set; }
+
         public decimal Size { get; set; }
-        public BookingStatus BookingStatus { get; set; }
+
         public RoomType RoomType { get; set; }
+
         public DateTime DateAvailable { get; set; }
-        public DateTimeOffset CreatedOn { get; set; }
+
         public AddressStoryDto AddressStory { get; set; }
-        public string Images { get; set; }
+
     }
 }

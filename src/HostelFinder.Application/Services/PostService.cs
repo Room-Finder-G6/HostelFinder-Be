@@ -305,128 +305,126 @@ public class PostService : IPostService
         );
     }
 
-   public async Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request,
-    List<IFormFile>? images, List<string>? imageUrls)
-{
-    var post = await _postRepository.GetByIdAsync(postId);
-    if (post == null)
+    public async Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request,
+     List<IFormFile>? images, List<string>? imageUrls)
     {
-        return new Response<PostResponseDto>
+        var post = await _postRepository.GetByIdAsync(postId);
+        if (post == null)
         {
-            Succeeded = false,
-            Message = "Post not found."
-        };
-    }
-
-    // Mapping updated data to post object
-    _mapper.Map(request, post);
-    post.LastModifiedOn = DateTime.Now;
-
-    try
-    {
-        await using (var transaction = await _postRepository.BeginTransactionAsync())
-        {
-            // Update post in repository
-            await _postRepository.UpdateAsync(post);
-
-            // Fetch existing images associated with the post
-            var existingImages = await _imageRepository.GetImagesByPostIdAsync(postId);
-
-            // List to hold new image URLs for adding
-            var newImageUrls = new List<string>();
-
-            // Nếu có hình ảnh mới, tải lên và thêm vào
-            if (images != null && images.Any())
+            return new Response<PostResponseDto>
             {
-                foreach (var image in images)
-                {
-                    try
-                    {
-                        // Upload image and get URL
-                        var imageUrl = await _s3Service.UploadFileAsync(image);
-                        newImageUrls.Add(imageUrl);
-                    }
-                    catch (Exception ex)
-                    {
-                        // In case of image upload failure, return an error message
-                        return new Response<PostResponseDto>
-                        {
-                            Succeeded = false,
-                            Message = $"Image upload failed: {ex.Message}"
-                        };
-                    }
-                }
-            }
-
-            // Nếu có hình ảnh URL mới, thêm vào
-            if (imageUrls != null && imageUrls.Any())
-            {
-                foreach (var item in imageUrls)
-                {
-                    try
-                    {
-                        // You may want to skip images that are already present
-                        var imageFromUrl = await _s3Service.UploadFileFromUrlAsync(item);
-                        newImageUrls.Add(imageFromUrl);
-                    }
-                    catch (Exception ex)
-                    {
-                        // In case of URL upload failure, return an error message
-                        return new Response<PostResponseDto>
-                        {
-                            Succeeded = false,
-                            Message = $"URL image upload failed: {ex.Message}"
-                        };
-                    }
-                }
-            }
-
-            // Xóa hình ảnh cũ nếu có hình ảnh mới được tải lên (chỉ xóa nếu có ảnh mới)
-            if (newImageUrls.Any())
-            {
-                foreach (var item in existingImages)
-                {
-                    await _imageRepository.DeletePermanentAsync(item.Id);
-                }
-            }
-
-            // Thêm hình ảnh mới vào kho lưu trữ
-            foreach (var imageUrl in newImageUrls)
-            {
-                await _imageRepository.AddAsync(new Image
-                {
-                    PostId = post.Id,
-                    HostelId = post.HostelId,
-                    Url = imageUrl,
-                    CreatedOn = DateTime.Now,
-                });
-            }
-
-            // Commit transaction
-            await transaction.CommitAsync();
+                Succeeded = false,
+                Message = "Post not found."
+            };
         }
 
-        // Map the updated post to response DTO
-        var postResponseDto = _mapper.Map<PostResponseDto>(post);
-        return new Response<PostResponseDto>
-        {
-            Data = postResponseDto,
-            Succeeded = true,
-            Message = "Cập nhật bài đăng thành công."
-        };
-    }
-    catch (Exception ex)
-    {
-        // Handle general exception
-        return new Response<PostResponseDto>
-        {
-            Succeeded = false,
-            Message = $"An error occurred: {ex.Message}"
-        };
-    }
-}
+        // Mapping updated data to post object
+        _mapper.Map(request, post);
+        post.LastModifiedOn = DateTime.Now;
 
+        try
+        {
+            await using (var transaction = await _postRepository.BeginTransactionAsync())
+            {
+                // Update post in repository
+                await _postRepository.UpdateAsync(post);
 
+                // Fetch existing images associated with the post
+                var existingImages = await _imageRepository.GetImagesByPostIdAsync(postId);
+
+                // List to hold new image URLs for adding
+                var newImageUrls = new List<string>();
+
+                // Nếu có hình ảnh mới, tải lên và thêm vào
+                if (images != null && images.Any())
+                {
+                    foreach (var image in images)
+                    {
+                        try
+                        {
+                            // Upload image and get URL
+                            var imageUrl = await _s3Service.UploadFileAsync(image);
+                            newImageUrls.Add(imageUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            // In case of image upload failure, return an error message
+                            return new Response<PostResponseDto>
+                            {
+                                Succeeded = false,
+                                Message = $"Image upload failed: {ex.Message}"
+                            };
+                        }
+                    }
+                }
+
+                // Nếu có hình ảnh URL mới, thêm vào
+                if (imageUrls != null && imageUrls.Any())
+                {
+                    foreach (var item in imageUrls)
+                    {
+                        try
+                        {
+                            // You may want to skip images that are already present
+                            var imageFromUrl = await _s3Service.UploadFileFromUrlAsync(item);
+                            newImageUrls.Add(imageFromUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            // In case of URL upload failure, return an error message
+                            return new Response<PostResponseDto>
+                            {
+                                Succeeded = false,
+                                Message = $"URL image upload failed: {ex.Message}"
+                            };
+                        }
+                    }
+                }
+
+                // Xóa hình ảnh cũ nếu có hình ảnh mới được tải lên (chỉ xóa nếu có ảnh mới)
+                if (newImageUrls.Any())
+                {
+                    foreach (var item in existingImages)
+                    {
+                        await _imageRepository.DeletePermanentAsync(item.Id);
+                    }
+                }
+
+                // Thêm hình ảnh mới vào kho lưu trữ
+                foreach (var imageUrl in newImageUrls)
+                {
+                    await _imageRepository.AddAsync(new Image
+                    {
+                        PostId = post.Id,
+                        HostelId = post.HostelId,
+                        Url = imageUrl,
+                        CreatedOn = DateTime.Now,
+                    });
+                }
+
+                // Commit transaction
+                await transaction.CommitAsync();
+            }
+
+            // Map the updated post to response DTO
+            var postResponseDto = _mapper.Map<PostResponseDto>(post);
+            return new Response<PostResponseDto>
+            {
+                Data = postResponseDto,
+                Succeeded = true,
+                Message = "Cập nhật bài đăng thành công."
+            };
+        }
+        catch (Exception ex)
+        {
+            // Handle general exception
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = $"An error occurred: {ex.Message}"
+            };
+        }
+    }
 
     public async Task<Response<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime()
     {
@@ -461,11 +459,11 @@ public class PostService : IPostService
             pagedPosts.TotalRecords
         );
     }
-    
+
     public async Task<PagedResponse<List<ListPostsResponseDto>>> GetFilteredAndPagedPostsAsync(FilterPostsRequestDto filter, int pageIndex, int pageSize)
     {
         var posts = await _postRepository.GetFilteredAndPagedPostsAsync(filter, pageIndex, pageSize);
-        
+
         var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts.Data);
 
         return PaginationHelper.CreatePagedResponse(

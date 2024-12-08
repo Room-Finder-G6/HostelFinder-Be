@@ -303,5 +303,9 @@ public class GeneralProfile : Profile
         CreateMap<Story, ListStoryResponseDto>()
            .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Select(i => i.Url).FirstOrDefault()))
            .ForMember(dest => dest.AddressStory, opt => opt.MapFrom(src => src.AddressStory));
+        CreateMap<UpdateStoryRequestDto, Story>()
+            .ForMember(dest => dest.LastModifiedOn, opt => opt.Ignore())  
+            .ForMember(dest => dest.Images, opt => opt.Ignore()) 
+            .ForMember(dest => dest.AddressStory, opt => opt.MapFrom(src => src.AddressStory)); 
     }
 }
