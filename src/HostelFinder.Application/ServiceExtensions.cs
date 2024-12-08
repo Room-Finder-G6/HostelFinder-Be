@@ -5,7 +5,6 @@ using HostelFinder.Application.Mappings;
 using HostelFinder.Application.Services;
 using HostelFinder.Application.Validations.Users;
 using HostelFinder.Domain.Entities;
-using HostelFinder.Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +13,6 @@ using Microsoft.IdentityModel.Tokens;
 using RoomFinder.Domain.Common.Settings;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 
 namespace HostelFinder.Application
 {
@@ -47,6 +45,7 @@ namespace HostelFinder.Application
             services.AddScoped<IOpenAiService, OpenAiService>();
             services.AddScoped<IMaintenanceRecordService, MaintenanceRecordService>();
             services.AddScoped<IStoryService, StoryService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             //register validation 
             services.AddScoped<IValidator<CreateUserRequestDto>, CreteUserRequestValidation>();

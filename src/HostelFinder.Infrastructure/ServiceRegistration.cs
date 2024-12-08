@@ -51,5 +51,6 @@ public class ServiceRegistration
         service.AddScoped<IMaintenanceRecordRepository, MaintenanceRecordRepository>();
         service.AddScoped<IStoryRepository, StoryRepository>();
         service.AddScoped<IAddressStoryRepository, AddressStoryRepository>();
+        service.AddScoped<INotificationRepository, NotificationRepository>();
     }
 }
