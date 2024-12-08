@@ -1,6 +1,5 @@
 ﻿using HostelFinder.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 
 namespace HostelFinder.Infrastructure.Context;
@@ -35,6 +34,7 @@ public class HostelFinderDbContext : DbContext
     public DbSet<Story> Stories { get; set; }
     public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
     public DbSet<AddressStory> AddressStories { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     public HostelFinderDbContext(DbContextOptions<HostelFinderDbContext> options)
         : base(options)
@@ -47,8 +47,9 @@ public class HostelFinderDbContext : DbContext
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile("appsettings.Development.json");
+                //.AddJsonFile("appsettings.Development.json")
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
             IConfigurationRoot configurationRoot = builder.Build();
             optionsBuilder.UseSqlServer(configurationRoot.GetConnectionString("DefaultConnection"));
         }
@@ -362,5 +363,12 @@ public class HostelFinderDbContext : DbContext
             entity.Property(e => e.MonthlyRentCost)
                 .HasPrecision(18, 2);
         });
+
+        // Cấu hình mối quan hệ giữa User và Notification
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)                
+            .WithMany(u => u.Notifications)   
+            .HasForeignKey(n => n.UserId)     
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
