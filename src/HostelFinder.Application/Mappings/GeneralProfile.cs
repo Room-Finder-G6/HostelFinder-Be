@@ -313,7 +313,6 @@ public class GeneralProfile : Profile
 
         //Mapping Notification - NotificationResponseDto
         CreateMap<Notification, NotificationResponseDto>()
-                .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.Message))
-                .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => src.CreatedOn));
+                .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.Message));
     }
 }

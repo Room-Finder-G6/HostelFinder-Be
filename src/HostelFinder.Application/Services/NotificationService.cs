@@ -29,7 +29,8 @@ namespace HostelFinder.Application.Services
 
             foreach (var notificationDto in notificationDtos)
             {
-                notificationDto.TimeAgo = GetTimeAgo(notificationDto.CreatedOn);
+                var notification = notifications.First(n => n.Message == notificationDto.Message);
+                notificationDto.TimeAgo = GetTimeAgo(notification.CreatedOn);
             }
 
             return notificationDtos;
