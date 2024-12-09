@@ -12,6 +12,7 @@ namespace HostelFinder.Application.DTOs.RentalContract.Request
         public string Phone { get; set; }
         public string? Description { get; set; }
         public DateTime? DateOfBirth { get; set; }
+        public DateTime MoveInDate { get; set; }
         public string? Province { get; set; }
         public string? District { get; set; }
         public string? Commune { get; set; }
