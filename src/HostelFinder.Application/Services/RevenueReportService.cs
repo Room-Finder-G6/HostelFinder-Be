@@ -9,10 +9,12 @@ public class RevenueReportService : IRevenueReportService
 {
     private readonly IInVoiceRepository _inVoiceRepository;
     private readonly IRoomRepository _roomRepository;
-    public RevenueReportService(IInVoiceRepository inVoiceRepository, IRoomRepository roomRepository)
+    private readonly IMaintenanceRecordRepository _maintenanceRecordRepository;
+    public RevenueReportService(IInVoiceRepository inVoiceRepository, IRoomRepository roomRepository, IMaintenanceRecordRepository maintenanceRecordRepository)
     {
         _inVoiceRepository = inVoiceRepository;
         _roomRepository = roomRepository;
+        _maintenanceRecordRepository = maintenanceRecordRepository;
     }
     public Task<Response<decimal>> GetRoomRevenueAsync(Guid roomId, int month, int year)
     {
@@ -40,7 +42,7 @@ public class RevenueReportService : IRevenueReportService
             {
                 RoomRevenueDetail = new List<RoomRevenueDetailReport>()
             };
-            decimal totalAllRevenue = 0;
+            decimal totalAllRoomRevenue = 0;
             foreach (var room in rooms)
             {
                 var roomRevenue = await _inVoiceRepository.GetRoomRevenueByYearAsync(room.Id, year);
@@ -54,10 +56,12 @@ public class RevenueReportService : IRevenueReportService
                     TotalRevenue = roomRevenue,
                     Year = year
                 });
-                totalAllRevenue += roomRevenue;
+                totalAllRoomRevenue += roomRevenue;
             }
-
-            reports.TotalAllRevenue = totalAllRevenue;
+            var totalCostOfMaintenance = await _maintenanceRecordRepository.GetTotalCostOfMaintenanceRecordInYearAsync(hostelId, year);
+            reports.TotalAllRevenue = totalAllRoomRevenue - totalCostOfMaintenance;
+            reports.TotalCostOfMaintenance = totalCostOfMaintenance;
+            reports.TotalRoomRevenue = totalAllRoomRevenue;
 
             return new Response<RoomRevenueReport> { Data = reports, Succeeded = true };
         }
@@ -93,6 +97,8 @@ public class RevenueReportService : IRevenueReportService
                 });
                 totalAllRevenue += roomRevenue;
             }
+            
+           
 
             reports.TotalAllRevenue = totalAllRevenue;
 
@@ -110,4 +116,29 @@ public class RevenueReportService : IRevenueReportService
         throw new NotImplementedException();
     }
 
+    public async Task<Response<decimal>> GetTotalCostOfMaintenanceRecordInYearAsync(Guid hostelId, int year)
+    {
+        try
+        {
+            var totalCost = await _maintenanceRecordRepository.GetTotalCostOfMaintenanceRecordInYearAsync(hostelId, year);
+            return new Response<decimal>() { Succeeded = true, Data = totalCost };
+        }
+        catch (Exception ex)
+        {
+            return new Response<decimal>() { Succeeded = false, Message = ex.Message };
+        }
+    }
+
+    public async Task<Response<decimal>> GetTotalCostOfMaintenanceRecordInMonthAsync(Guid hostelId, int year, int month)
+    {
+        try
+        {
+            var totalCost = await _maintenanceRecordRepository.GetTotalCostOfMaintenanceRecordInMonthAsync(hostelId, year, month);
+            return new Response<decimal>() { Succeeded = true, Data = totalCost };
+        }
+        catch (Exception ex)
+        {
+            return new Response<decimal>() { Succeeded = false, Message = ex.Message };
+        }
+    }
 }

@@ -19,7 +19,9 @@ public class MaintenanceRecordRepository : BaseGenericRepository<MaintenanceReco
     {
         var searchPhraseLower = searchPhrase?.ToLower();
         var baseQuery = _dbContext.MaintenanceRecords.Include(m => m.Room).Include(x => x.Hostel)
-            .Where(x =>x.HostelId == hostelId  && searchPhraseLower == null || (x.Room.RoomName.ToLower().Contains(searchPhraseLower)
+            .Where(x => x.HostelId == hostelId && !x.IsDeleted);
+         baseQuery = baseQuery
+            .Where(x =>  searchPhraseLower == null || (x.Room.RoomName.ToLower().Contains(searchPhraseLower)
                                                       || x.Hostel.HostelName.ToLower().Contains(searchPhraseLower)
                                                       || x.Title.ToLower().Contains(searchPhraseLower)
                                                       || x.Description.ToLower().Contains(searchPhraseLower))
@@ -49,8 +51,26 @@ public class MaintenanceRecordRepository : BaseGenericRepository<MaintenanceReco
         var maintenanceRecords = await baseQuery
             .Skip(pageSize * (pageNumber - 1))
             .Take(pageSize)
+            .OrderByDescending(x => x.CreatedOn)
             .ToListAsync();
 
         return (Data: maintenanceRecords, TotalRecords: totalRecords);
+    }
+
+    public async Task<decimal> GetTotalCostOfMaintenanceRecordInYearAsync(Guid hostelId, int year)
+    {
+        var totalCost = await _dbContext.MaintenanceRecords
+            .Where(x => x.HostelId == hostelId && x.MaintenanceDate.Year == year && !x.IsDeleted)
+            .SumAsync(x => x.Cost);
+        
+        return totalCost;
+    }
+
+    public async Task<decimal> GetTotalCostOfMaintenanceRecordInMonthAsync(Guid hostelId, int year, int month)
+    {
+        var totalCost = await _dbContext.MaintenanceRecords
+            .Where(x => x.HostelId == hostelId && x.MaintenanceDate.Year == year && x.MaintenanceDate.Month == month && !x.IsDeleted)
+            .SumAsync(x => x.Cost);
+        return totalCost;
     }
 }

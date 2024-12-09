@@ -36,6 +36,7 @@ using HostelFinder.Application.DTOs.MaintenanceRecord.Response;
 using HostelFinder.Application.DTOs.Vehicle.Responses;
 using HostelFinder.Application.DTOs.Story.Requests;
 using HostelFinder.Application.DTOs.AddressStory;
+using HostelFinder.Application.DTOs.Room;
 using HostelFinder.Application.DTOs.Story.Responses;
 using HostelFinder.Application.DTOs.Notification;
 
@@ -230,6 +231,7 @@ public class GeneralProfile : Profile
             .ReverseMap();
         CreateMap<EditRoomDtoResponse, Room>()
             .ReverseMap();
+        CreateMap<SelectRoomResponse, Room>().ReverseMap();
 
 
         //HostelService

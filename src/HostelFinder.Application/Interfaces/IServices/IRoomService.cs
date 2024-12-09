@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.DTOs.Room.Requests;
+﻿using HostelFinder.Application.DTOs.Room;
+using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Http;
@@ -20,6 +21,8 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<EditRoomDtoResponse>> GetRoomWithAmentitesAndImageAsync(Guid roomId);
 
         Task<Response<bool>> CheckDeleteRoom(Guid roomId);
+        
+        Task<Response<List<SelectRoomResponse>>> GetSelectRoomByHostelAsync(Guid hostelId);
 
     }
 }
