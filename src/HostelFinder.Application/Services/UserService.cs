@@ -25,6 +25,7 @@ namespace HostelFinder.Application.Services
         private readonly IValidator<CreateUserRequestDto> _createUserValidator;
         private readonly IS3Service _s3Service;
         private readonly IEmailService _emailService;
+        private readonly INotificationRepository _notificationRepository;
 
         public UserService
         (
@@ -34,7 +35,8 @@ namespace HostelFinder.Application.Services
             IValidator<CreateUserRequestDto> createUserValidator,
             IS3Service s3Service,
             IUserMembershipRepository userMembershipRepository,
-            IEmailService emailService
+            IEmailService emailService,
+            INotificationRepository notificationRepository
         )
         {
             _mapper = mapper;
@@ -45,6 +47,7 @@ namespace HostelFinder.Application.Services
             _membershipRepository = membershipRepository;
             _userMembershipRepository = userMembershipRepository;
             _emailService = emailService;
+            _notificationRepository = notificationRepository;
         }
 
         public async Task<Response<UserDto>> RegisterUserAsync(CreateUserRequestDto request)
@@ -86,8 +89,7 @@ namespace HostelFinder.Application.Services
                 userDomain.IsDeleted = false;
                 userDomain.CreatedOn = DateTime.Now;
 
-                var user = await _userRepository.AddAsync(userDomain);
-
+                var user = await _userRepository.AddAsync(userDomain);             
                 var userDto = _mapper.Map<UserDto>(user);
 
                 return new Response<UserDto>
@@ -147,6 +149,15 @@ namespace HostelFinder.Application.Services
             user.FullName = updateUserDto.FullName;
 
             await _userRepository.UpdateAsync(user);
+
+            var notificationMessage = $"{updateUserDto.Username} đã cập nhật thông tin cá nhân.";
+            var notification = new Notification
+            {
+                Message = notificationMessage,
+                UserId = user.Id,
+                CreatedOn = DateTime.Now
+            };
+            await _notificationRepository.AddAsync(notification);
             var updatedUserDto = _mapper.Map<UserDto>(user);
             return new Response<UserDto>(updatedUserDto);
         }
@@ -261,6 +272,14 @@ namespace HostelFinder.Application.Services
                 await _userRepository.UpdateAsync(user);
             }
 
+            var notificationMessage = "Gói thành viên mới đã đăng ký thành công.";
+            var notification = new Notification
+            {
+                Message = notificationMessage,
+                UserId = user.Id,
+                CreatedOn = DateTime.Now
+            };
+            await _notificationRepository.AddAsync(notification);
             return CreateSuccessResponse("Gói thành viên mới đã đăng ký thành công.");
         }
 
@@ -277,7 +296,7 @@ namespace HostelFinder.Application.Services
                 ExpiryDate = expiryDate,
                 PostsUsed = 0,
                 PushTopUsed = 0,
-                IsPaid = true, // Gói thử nghiệm không phải trả tiền
+                IsPaid = true, 
                 CreatedBy = "System",
                 CreatedOn = DateTime.Now
             };
@@ -289,7 +308,14 @@ namespace HostelFinder.Application.Services
                 user.Role = UserRole.Landlord;
                 await _userRepository.UpdateAsync(user);
             }
-
+            var notificationMessage = "Bạn đã đăng ký gói người dùng thử thành công.";
+            var notification = new Notification
+            {
+                Message = notificationMessage,
+                UserId = user.Id,
+                CreatedOn = DateTime.Now
+            };
+            await _notificationRepository.AddAsync(notification);
             return CreateSuccessResponse("Gói người dùng thử đã đăng ký thành công.");
         }
 
@@ -316,7 +342,6 @@ namespace HostelFinder.Application.Services
             var startDate = DateTime.Now;
             var expiryDate = startDate.AddDays(duration);
 
-            // Kiểm tra xem người dùng đã có gói thành viên này chưa
             var existingMembership = await _userMembershipRepository.GetByUserIdAndMembershipIdAsync(userId, membershipId);
             if (existingMembership != null)
             {
@@ -327,7 +352,6 @@ namespace HostelFinder.Application.Services
             }
             else
             {
-                // Nếu chưa có gói thành viên, tạo mới như hiện tại
                 var newUserMembership = new UserMembership
                 {
                     UserId = userId,
@@ -336,7 +360,7 @@ namespace HostelFinder.Application.Services
                     ExpiryDate = expiryDate,
                     PostsUsed = 0,
                     PushTopUsed = 0,
-                    IsPaid = true,  // Đây là gói trả phí, nếu là gói thử sẽ set IsPaid = false
+                    IsPaid = true,  
                     CreatedBy = "System",
                     CreatedOn = DateTime.Now
                 };

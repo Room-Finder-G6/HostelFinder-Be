@@ -134,7 +134,6 @@ namespace HostelFinder.Application.Services
             }
 
             // Sử dụng StartDate và EndDate từ hợp đồng để set MoveInDate và MoveOutDate
-            DateTime moveInDate = rentalContract.StartDate;
             DateTime? moveOutDate = rentalContract.EndDate;
 
             // Tạo bản ghi RoomTenancy để liên kết tenant và room
@@ -142,7 +141,7 @@ namespace HostelFinder.Application.Services
             {
                 TenantId = tenantCreated.Id,
                 RoomId = request.RoomId,
-                MoveInDate = moveInDate,
+                MoveInDate = request.MoveInDate,
                 MoveOutDate = moveOutDate, // MoveOutDate có thể là null nếu hợp đồng chưa kết thúc
                 CreatedOn = DateTime.Now,
             };

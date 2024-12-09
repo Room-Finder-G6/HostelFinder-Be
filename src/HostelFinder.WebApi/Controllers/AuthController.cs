@@ -1,13 +1,9 @@
-﻿using Google.Apis.Auth;
-using HostelFinder.Application.DTOs.Auth.Requests;
+﻿using HostelFinder.Application.DTOs.Auth.Requests;
 using HostelFinder.Application.DTOs.Auths.Requests;
 using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.Interfaces.IServices;
-using HostelFinder.Domain.Entities;
-using HostelFinder.Domain.Enums;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HostelFinder.WebApi.Controllers
 {
