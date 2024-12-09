@@ -73,7 +73,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 }
                 else if(statusFilter == "Hợp đồng chưa bắt đầu")
                 {
-                    query = query.Where(x => x.StartDate.Date <= DateTime.Now.Date && x.StartDate.AddDays(7) > DateTime.Now.Date);
+                    query = query.Where(x => x.StartDate.Date > DateTime.Now.Date);
                 }
             }
             var totalRecords = await query.CountAsync();

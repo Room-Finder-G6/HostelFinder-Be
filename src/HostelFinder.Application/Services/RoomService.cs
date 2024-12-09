@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HostelFinder.Application.DTOs.Room;
 using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Room.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
@@ -387,6 +388,20 @@ namespace HostelFinder.Application.Services
             catch (Exception ex)
             {
                 return new Response<bool>() { Succeeded = false, Message = ex.Message };
+            }
+        }
+
+        public async Task<Response<List<SelectRoomResponse>>> GetSelectRoomByHostelAsync(Guid hostelId)
+        {
+            try
+            {
+                var rooms = await _roomRepository.GetRoomsByHostelAsync(hostelId);
+                var result = _mapper.Map<List<SelectRoomResponse>>(rooms);
+                return new Response<List<SelectRoomResponse>>() { Succeeded = true, Data = result };
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<SelectRoomResponse>>() { Succeeded = false, Message = ex.Message };
             }
         }
     }
