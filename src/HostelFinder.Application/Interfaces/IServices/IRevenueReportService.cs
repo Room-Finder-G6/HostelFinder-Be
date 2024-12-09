@@ -31,5 +31,22 @@ public interface IRevenueReportService
     Task<Wrappers.Response<RoomRevenueReport>> GetEmptyRoomReport(Guid hostelId);
     
     
+    /// <summary>
+    /// Chi phí sửa chữa của một hostel trong một năm
+    /// </summary>
+    /// <param name="hostelId"></param>
+    /// <param name="year"></param>
+    /// <returns></returns>
+    Task<Wrappers.Response<decimal>> GetTotalCostOfMaintenanceRecordInYearAsync(Guid hostelId, int year);
+    /// <summary>
+    /// Chi phí sửa chữa của một hostel trong một tháng
+    /// </summary>
+    /// <param name="hostelId"></param>
+    /// <param name="year"></param>
+    /// <param name="month"></param>
+    /// <returns></returns>
+    Task<Wrappers.Response<decimal>> GetTotalCostOfMaintenanceRecordInMonthAsync(Guid hostelId, int year, int month);
+    
+    
 
 }
