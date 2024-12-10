@@ -45,8 +45,8 @@ namespace HostelFinder.WebApi.Controllers
             return Ok(storyResponse);
         }
 
-        [HttpGet("GetAllStoryIndex")]
-        public async Task<IActionResult> GetAllStoriesAsync([FromQuery] StoryFilterDto filter, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+        [HttpPost("GetAllStoryIndex")]
+        public async Task<IActionResult> GetAllStoriesAsync([FromForm] StoryFilterDto filter, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
