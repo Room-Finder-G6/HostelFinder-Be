@@ -17,7 +17,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<ServiceCost> CheckExistingServiceCostAsync(Guid hostelId, Guid serviceId, DateTime effectiveFrom)
         {
             return await _dbContext.ServiceCosts.SingleOrDefaultAsync(sc => sc.HostelId == hostelId &&
-                                                                        sc.ServiceId == serviceId
+                                                                        sc.ServiceId == serviceId && !sc.IsDeleted
                                                                          );
         }
 
@@ -48,6 +48,35 @@ namespace HostelFinder.Infrastructure.Repositories
                 throw new NotFoundException("Không tìm thấy giá dịch vụ ");
             }
             return serviceCost;
+        }
+
+        public async Task<ServiceCost> GetOverlappingServiceCostAsync(Guid hostelId, Guid serviceId, DateTime effectiveFrom)
+        {
+            return await _dbContext.ServiceCosts
+                .FirstOrDefaultAsync(sc =>
+                    sc.HostelId == hostelId
+                    && sc.ServiceId == serviceId
+                    && sc.EffectiveFrom <= effectiveFrom
+                    && (sc.EffectiveTo == null || sc.EffectiveTo >= effectiveFrom)
+                    && !sc.IsDeleted
+                );
+        }
+
+        public async Task<ServiceCost> GetLastServiceCostAsync(Guid hostelId, Guid serviceId)
+        {
+            return await _dbContext.ServiceCosts.Where(sc => sc.HostelId == hostelId && sc.ServiceId == serviceId && !sc.IsDeleted)
+                .OrderByDescending(sc => sc.EffectiveFrom)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<ServiceCost>> GetServiceCostForDateByHostelAsync(Guid hostelId, DateTime date)
+        {
+            return await _dbContext.ServiceCosts
+                .Where(sc => sc.HostelId == hostelId
+                             && sc.EffectiveFrom <= date
+                             && (sc.EffectiveTo == null || sc.EffectiveTo >= date)
+                             && !sc.IsDeleted)
+                .ToListAsync();
         }
     }
 }

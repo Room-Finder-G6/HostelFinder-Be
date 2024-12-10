@@ -1,15 +1,13 @@
 ﻿using AutoMapper;
-using HostelFinder.Application.DTOs.Hostel.Responses;
-using HostelFinder.Application.DTOs.Image.Responses;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
-using HostelFinder.Application.DTOs.Room.Requests;
 using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace HostelFinder.Application.Services;
 
@@ -18,23 +16,20 @@ public class PostService : IPostService
     private readonly IMapper _mapper;
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IHostelRepository _hostelRepository;
     private readonly IImageRepository _imageRepository;
-    private readonly IRoomRepository _roomRepository;
     private readonly IMembershipService _membershipService;
     private readonly IS3Service _s3Service;
 
     public PostService(IMapper mapper, IPostRepository postRepository, IUserRepository userRepository,
-        IHostelRepository hostelRepository, IImageRepository imageRepository, IMembershipService membershipService, IS3Service s3Service, IRoomRepository roomRepository)
+        IImageRepository imageRepository, IMembershipService membershipService,
+        IS3Service s3Service)
     {
         _mapper = mapper;
         _postRepository = postRepository;
         _userRepository = userRepository;
-        _hostelRepository = hostelRepository;
         _imageRepository = imageRepository;
         _membershipService = membershipService;
         _s3Service = s3Service;
-        _roomRepository = roomRepository;
     }
 
     public async Task<Response<bool>> DeletePostAsync(Guid postId, Guid userId)
@@ -58,7 +53,7 @@ public class PostService : IPostService
             };
         }
 
-        await _postRepository.DeletePermanentAsync(postId);
+        await _postRepository.DeleteAsync(postId);
         return new Response<bool> { Succeeded = true, Message = "Xóa bài đăng thành công." };
     }
 
@@ -74,25 +69,6 @@ public class PostService : IPostService
         var landlordDto = _mapper.Map<LandlordResponseDto>(hostel.Landlord);
 
         return landlordDto;
-    }
-
-    public async Task<HostelResponseDto> GetHostelByPostIdAsync(Guid postId)
-    {
-        var hostel = await _hostelRepository.GetHostelWithReviewsByPostIdAsync(postId);
-
-        if (hostel == null)
-        {
-            throw new NullReferenceException("Hostel not found for the provided Post ID.");
-        }
-
-        var hostelResponseDto = _mapper.Map<HostelResponseDto>(hostel);
-
-        if (hostel.Images != null && hostel.Images.Any())
-        {
-            hostelResponseDto.Image = _mapper.Map<List<ImageResponseDto>>(hostel.Images);
-        }
-
-        return hostelResponseDto;
     }
 
     public async Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostAysnc(GetAllPostsQuery request)
@@ -180,6 +156,8 @@ public class PostService : IPostService
         }
 
         var post = _mapper.Map<Post>(request);
+        post.CreatedBy = userId.ToString();
+        post.CreatedOn = DateTime.Now;
 
         try
         {
@@ -206,7 +184,7 @@ public class PostService : IPostService
             {
                 Data = postResponseDto,
                 Succeeded = true,
-                Message = "Post added successfully"
+                Message = "Thêm bài đăng thành công."
             };
         }
         catch (Exception ex)
@@ -225,10 +203,10 @@ public class PostService : IPostService
             filter.Province,
             filter.District,
             filter.Commune,
-            filter.minSize,
-            filter.maxSize,
-            filter.minPrice,
-            filter.maxPrice,
+            filter.MinSize,
+            filter.MaxSize,
+            filter.MinPrice,
+            filter.MaxPrice,
             filter.RoomType
         );
 
@@ -286,7 +264,7 @@ public class PostService : IPostService
             return new Response<PostResponseDto>
             {
                 Succeeded = true,
-                Message = "Post pushed to the top successfully.",
+                Message = "Đẩy bài đăng lên thành công.",
                 Data = postResponseDto
             };
         }
@@ -312,67 +290,196 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<Response<UpdatePostRequestDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request, List<string> imageUrls)
+    public async Task<PagedResponse<List<ListPostsResponseDto>>> GetPostsOrderedByPriorityAsync(int pageIndex,
+        int pageSize)
+    {
+        var pagedPosts = await _postRepository.GetPostsOrderedByMembershipPriceAndCreatedOnAsync(pageIndex, pageSize);
+
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(pagedPosts.Data);
+
+        return PaginationHelper.CreatePagedResponse(
+            postDtos,
+            pageIndex,
+            pageSize,
+            pagedPosts.TotalRecords
+        );
+    }
+
+    public async Task<Response<PostResponseDto>> UpdatePostAsync(Guid postId, UpdatePostRequestDto request,
+     List<IFormFile>? images, List<string>? imageUrls)
     {
         var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)
         {
-            return new Response<UpdatePostRequestDto>("Post not found.");
+            return new Response<PostResponseDto>
+            {
+                Succeeded = false,
+                Message = "Post not found."
+            };
         }
 
-        var room = await _roomRepository.GetByIdAsync(request.RoomId);
-        if (room == null || room.HostelId != post.HostelId)
-        {
-            return new Response<UpdatePostRequestDto>("The specified room does not belong to the hostel associated with this post.");
-        }
-
+        // Mapping updated data to post object
         _mapper.Map(request, post);
         post.LastModifiedOn = DateTime.Now;
 
         try
         {
-            using (var transaction = await _postRepository.BeginTransactionAsync())
+            await using (var transaction = await _postRepository.BeginTransactionAsync())
             {
+                // Update post in repository
+                await _postRepository.UpdateAsync(post);
+
+                // Fetch existing images associated with the post
                 var existingImages = await _imageRepository.GetImagesByPostIdAsync(postId);
 
-                foreach (var image in existingImages)
+                // List to hold new image URLs for adding
+                var newImageUrls = new List<string>();
+
+                // Nếu có hình ảnh mới, tải lên và thêm vào
+                if (images != null && images.Any())
                 {
-                    await _s3Service.DeleteFileAsync(image.Url);
-                    await _imageRepository.DeletePermanentAsync(image.Id);
+                    foreach (var image in images)
+                    {
+                        try
+                        {
+                            // Upload image and get URL
+                            var imageUrl = await _s3Service.UploadFileAsync(image);
+                            newImageUrls.Add(imageUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            // In case of image upload failure, return an error message
+                            return new Response<PostResponseDto>
+                            {
+                                Succeeded = false,
+                                Message = $"Image upload failed: {ex.Message}"
+                            };
+                        }
+                    }
                 }
 
-                foreach (var imageUrl in imageUrls)
+                // Nếu có hình ảnh URL mới, thêm vào
+                if (imageUrls != null && imageUrls.Any())
                 {
-                    var newImage = new Image
+                    foreach (var item in imageUrls)
+                    {
+                        try
+                        {
+                            // You may want to skip images that are already present
+                            var imageFromUrl = await _s3Service.UploadFileFromUrlAsync(item);
+                            newImageUrls.Add(imageFromUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            // In case of URL upload failure, return an error message
+                            return new Response<PostResponseDto>
+                            {
+                                Succeeded = false,
+                                Message = $"URL image upload failed: {ex.Message}"
+                            };
+                        }
+                    }
+                }
+
+                // Xóa hình ảnh cũ nếu có hình ảnh mới được tải lên (chỉ xóa nếu có ảnh mới)
+                if (newImageUrls.Any())
+                {
+                    foreach (var item in existingImages)
+                    {
+                        await _imageRepository.DeletePermanentAsync(item.Id);
+                    }
+                }
+
+                // Thêm hình ảnh mới vào kho lưu trữ
+                foreach (var imageUrl in newImageUrls)
+                {
+                    await _imageRepository.AddAsync(new Image
                     {
                         PostId = post.Id,
                         HostelId = post.HostelId,
                         Url = imageUrl,
                         CreatedOn = DateTime.Now,
-                    };
-                    await _imageRepository.AddAsync(newImage);
+                    });
                 }
 
-                await _postRepository.UpdateAsync(post);
+                // Commit transaction
                 await transaction.CommitAsync();
             }
 
-            var postResponseDto = _mapper.Map<UpdatePostRequestDto>(post);
-            return new Response<UpdatePostRequestDto>
+            // Map the updated post to response DTO
+            var postResponseDto = _mapper.Map<PostResponseDto>(post);
+            return new Response<PostResponseDto>
             {
                 Data = postResponseDto,
                 Succeeded = true,
-                Message = "Post updated successfully"
+                Message = "Cập nhật bài đăng thành công."
             };
         }
         catch (Exception ex)
         {
-            return new Response<UpdatePostRequestDto>
+            // Handle general exception
+            return new Response<PostResponseDto>
             {
                 Succeeded = false,
-                Message = ex.Message
+                Message = $"An error occurred: {ex.Message}"
             };
         }
     }
-}
 
+    public async Task<Response<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime()
+    {
+        // Fetch posts from the repository
+        var posts = await _postRepository.GetAllPostsOrderedAsync();
+
+        // Map posts to DTOs or initialize with an empty list if null/empty
+        var postDtos = posts.Any()
+            ? _mapper.Map<List<ListPostsResponseDto>>(posts)
+            : new List<ListPostsResponseDto>();
+
+        // Return the response with appropriate success status
+        return new Response<List<ListPostsResponseDto>>
+        {
+            Data = postDtos,
+            Succeeded = postDtos.Any(),
+            Message = postDtos.Any() ? "Posts retrieved successfully" : "No posts found"
+        };
+    }
+
+    public async Task<PagedResponse<List<ListPostsResponseDto>>> GetAllPostWithPriceAndStatusAndTime(int pageIndex,
+        int pageSize)
+    {
+        var pagedPosts = await _postRepository.GetAllPostsOrderedAsync(pageIndex, pageSize);
+
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(pagedPosts.Data);
+
+        return PaginationHelper.CreatePagedResponse(
+            postDtos,
+            pageIndex,
+            pageSize,
+            pagedPosts.TotalRecords
+        );
+    }
+
+    public async Task<PagedResponse<List<ListPostsResponseDto>>> GetFilteredAndPagedPostsAsync(FilterPostsRequestDto filter, int pageIndex, int pageSize)
+    {
+        var posts = await _postRepository.GetFilteredAndPagedPostsAsync(filter, pageIndex, pageSize);
+
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts.Data);
+
+        return PaginationHelper.CreatePagedResponse(
+            postDtos,
+            pageIndex,
+            pageSize,
+            posts.TotalPages
+        );
+    }
+
+    public async Task<Response<List<ListPostsResponseDto>>> GetTopPostsAsync(int topCount)
+    {
+        // Get the top posts from the repository
+        var posts = await _postRepository.GetTopPostsAsync(topCount);
+        var postDtos = _mapper.Map<List<ListPostsResponseDto>>(posts);
+
+        return new Response<List<ListPostsResponseDto>>(postDtos);
+    }
+}

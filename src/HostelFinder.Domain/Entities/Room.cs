@@ -1,6 +1,7 @@
 ﻿using HostelFinder.Domain.Enums;
 using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations;
+using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {
@@ -31,6 +32,8 @@ namespace HostelFinder.Domain.Entities
         public virtual ICollection<MeterReading> MeterReadings { get; set; }
 
         public virtual ICollection<RoomTenancy> RoomTenancies { get; set; } = new List<RoomTenancy>();
+
+        public virtual ICollection<MaintenanceRecord>? MaintenanceRecords { get; set; }
 
     }
 }

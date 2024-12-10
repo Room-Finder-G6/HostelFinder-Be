@@ -1,6 +1,7 @@
 ﻿using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {
@@ -22,6 +23,10 @@ namespace HostelFinder.Domain.Entities
         public decimal TotalAmount{ get; set; }
 
         public bool IsPaid { get; set; } = false;
+        
+        public string? FormOfTransfer { get; set; }
+        
+        public decimal? AmountPaid { get; set; }
         
         //Navigation
         public virtual Room Room { get; set; }

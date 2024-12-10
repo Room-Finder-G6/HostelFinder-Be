@@ -1,27 +1,28 @@
-﻿///*
-//using HostelFinder.Application.DTOs.Address;
+﻿//using HostelFinder.Application.DTOs.Address;
 //using HostelFinder.Application.DTOs.Hostel.Requests;
 //using HostelFinder.Application.DTOs.Hostel.Responses;
 //using HostelFinder.Application.DTOs.Image.Responses;
 //using HostelFinder.Application.Interfaces.IServices;
 //using HostelFinder.Application.Wrappers;
+//using HostelFinder.Domain.Common.Constants;
 //using HostelFinder.WebApi.Controllers;
 //using Microsoft.AspNetCore.Http;
 //using Microsoft.AspNetCore.Mvc;
 //using Moq;
-//using System.Security.Claims;
 
 //namespace XUnitTestHostelFinder.Controllers
 //{
 //    public class HostelControllerTests
 //    {
 //        private readonly Mock<IHostelService> _hostelServiceMock;
+//        private readonly Mock<IS3Service> _s3ServiceMock;
 //        private readonly HostelController _controller;
 
 //        public HostelControllerTests()
 //        {
 //            _hostelServiceMock = new Mock<IHostelService>();
-//            _controller = new HostelController(_hostelServiceMock.Object);
+//            _s3ServiceMock = new Mock<IS3Service>();
+//            _controller = new HostelController(_hostelServiceMock.Object, _s3ServiceMock.Object);
 //        }
 
 //        [Fact]
@@ -29,37 +30,33 @@
 //        {
 //            // Arrange
 //            var hostelId = Guid.NewGuid();
-//            var mockHostelResponse = new Response<HostelResponseDto>
+//            var mockHostel = new HostelResponseDto
 //            {
-//                Data = new HostelResponseDto
+//                Id = hostelId,
+//                HostelName = "Test Hostel",
+//                Description = "A lovely hostel",
+//                Address = new AddressDto
 //                {
-//                    Id = hostelId,
-//                    HostelName = "Mock Hostel",
-//                    Description = "A nice place to stay.",
-//                    Address = new AddressDto
-//                    {
-//                        Province = "Test Province",
-//                        District = "Test District",
-//                        Commune = "Test Commune",
-//                        DetailAddress = "123 Test Street"
-//                    },
-//                    NumberOfRooms = 10,
-//                    Image = new List<ImageResponseDto>
-//                    {
-//                        new ImageResponseDto
-//                        {
-//                            Image = "image_url",
-//                        }
-//                    },
-//                    Coordinates = "10.762622,106.660172",
-//                    CreatedOn = DateTimeOffset.Now
+//                    Province = "123 Test Street",
+//                    District = "Test City",
+//                    Commune = "Test Province",
+//                    DetailAddress = "12345"
 //                },
-//                Succeeded = true
+//                Size = 1000,
+//                NumberOfRooms = 20,
+//                Image = new List<ImageResponseDto>
+//        {
+//            new ImageResponseDto { Url = "https://example.com/image1.jpg" },
+//            new ImageResponseDto { Url = "https://example.com/image2.jpg" }
+//        },
+//                Coordinates = "10.123,20.456",
+//                CreatedOn = DateTimeOffset.UtcNow
 //            };
 
-//            _hostelServiceMock
-//                .Setup(service => service.GetHostelByIdAsync(hostelId))
-//                .ReturnsAsync(mockHostelResponse);
+//            var response = new Response<HostelResponseDto>(mockHostel);
+
+//            _hostelServiceMock.Setup(service => service.GetHostelByIdAsync(hostelId))
+//                .ReturnsAsync(response);
 
 //            // Act
 //            var result = await _controller.GetHostelById(hostelId);
@@ -68,7 +65,15 @@
 //            var okResult = Assert.IsType<OkObjectResult>(result);
 //            var returnValue = Assert.IsType<Response<HostelResponseDto>>(okResult.Value);
 //            Assert.True(returnValue.Succeeded);
-//            Assert.Equal("Mock Hostel", returnValue.Data.HostelName);
+//            Assert.NotNull(returnValue.Data);
+//            Assert.Equal("Test Hostel", returnValue.Data.HostelName);
+//            Assert.Equal("A lovely hostel", returnValue.Data.Description);
+//            Assert.Equal("123 Test Street", returnValue.Data.Address.Province);
+//            Assert.Equal(1000, returnValue.Data.Size);
+//            Assert.Equal(20, returnValue.Data.NumberOfRooms);
+//            Assert.NotEmpty(returnValue.Data.Image);
+//            Assert.Equal("https://example.com/image1.jpg", returnValue.Data.Image.First().Url);
+//            Assert.Equal("10.123,20.456", returnValue.Data.Coordinates);
 //        }
 
 //        [Fact]
@@ -76,16 +81,13 @@
 //        {
 //            // Arrange
 //            var hostelId = Guid.NewGuid();
-//            var mockHostelResponse = new Response<HostelResponseDto>
+//            var response = new Response<HostelResponseDto>("Hostel not found.")
 //            {
-//                Data = null,
-//                Succeeded = false,
-//                Errors = new List<string> { "Hostel not found" }
+//                Succeeded = false
 //            };
 
-//            _hostelServiceMock
-//                .Setup(service => service.GetHostelByIdAsync(hostelId))
-//                .ReturnsAsync(mockHostelResponse);
+//            _hostelServiceMock.Setup(service => service.GetHostelByIdAsync(hostelId))
+//                .ReturnsAsync(response);
 
 //            // Act
 //            var result = await _controller.GetHostelById(hostelId);
@@ -94,488 +96,623 @@
 //            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
 //            var returnValue = Assert.IsType<Response<HostelResponseDto>>(notFoundResult.Value);
 //            Assert.False(returnValue.Succeeded);
-//            Assert.Contains("Hostel not found", returnValue.Errors);
-//        }
-
-//        /*[Fact]
-//        public async Task GetHostelsByLandlordId_ReturnsOkResult_WhenHostelsExist()
-//        {
-//            // Arrange
-//            var landlordId = Guid.NewGuid();
-//            var mockHostels = new List<HostelResponseDto>
-//            {
-//                new HostelResponseDto { Id = Guid.NewGuid(), HostelName = "Hostel 1" },
-//                new HostelResponseDto { Id = Guid.NewGuid(), HostelName = "Hostel 2" }
-//            };
-
-//            var mockHostelsResponse = new Response<List<HostelResponseDto>>
-//            {
-//                Data = mockHostels,
-//                Succeeded = true
-//            };
-
-//            _hostelServiceMock
-//                .Setup(service => service.GetHostelsByUserIdAsync(landlordId))
-//                .ReturnsAsync(mockHostelsResponse);
-
-//            // Act
-//            var result = await _controller.GetHostelsByLandlordId(landlordId);
-
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result);
-//            var returnValue = Assert.IsType<Response<List<HostelResponseDto>>>(okResult.Value);
-//            Assert.True(returnValue.Succeeded);
-//            Assert.Equal(2, returnValue.Data.Count);
-//        }*/
-
-
-//        /*[Fact]
-//        public async Task GetHostelsByLandlordId_ReturnsOkResult_WhenNoHostelsFound()
-//        {
-//            // Arrange
-//            var landlordId = Guid.NewGuid();
-//            var mockHostelsResponse = new Response<List<HostelResponseDto>>
-//            {
-//                Data = new List<HostelResponseDto>(),
-//                Succeeded = true
-//            };
-
-//            // Setting up the mock to return the expected response
-//            _hostelServiceMock
-//                .Setup(service => service.GetHostelsByUserIdAsync(landlordId))
-//                .ReturnsAsync(mockHostelsResponse);
-
-//            // Act
-//            var result = await _controller.GetHostelsByLandlordId(landlordId);
-
-//            // Assert
-//            var okResult = Assert.IsType<OkObjectResult>(result);
-//            var returnValue = Assert.IsType<Response<List<HostelResponseDto>>>(okResult.Value);
-//            Assert.True(returnValue.Succeeded);
-//            Assert.Empty(returnValue.Data);
-//        }*/
-
-
-//        [Fact]
-//        public async Task AddHostel_ReturnsCreatedResult_WhenAddSucceeds()
-//        {
-//            // Arrange
-//            var hostelDto = new AddHostelRequestDto
-//            {
-//                LandlordId = Guid.NewGuid(),
-//                HostelName = "New Hostel",
-//                Description = "A description of the hostel.",
-//                Address = new AddressDto
-//                {
-//                    Province = "Some Province",
-//                    District = "Some District",
-//                    Commune = "Some Commune",
-//                    DetailAddress = "Some Detail Address"
-//                },
-//                Size = 100.0f,
-//                NumberOfRooms = 10,
-//                Coordinates = "Some Coordinates",
-//            };
-
-//            var mockHostelResponse = new HostelResponseDto
-//            {
-//                Id = Guid.NewGuid(),
-//                HostelName = hostelDto.HostelName,
-//            };
-
-//            var mockResponse = new Response<HostelResponseDto>
-//            {
-//                Data = mockHostelResponse,
-//                Succeeded = true
-//            };
-
-//            // Setup mock
-//            _hostelServiceMock
-//                .Setup(service => service.AddHostelAsync(It.IsAny<AddHostelRequestDto>()))
-//                .ReturnsAsync(mockResponse);
-
-//            // Act
-//            var result = await _controller.AddHostel(hostelDto);
-
-//            // Assert
-//            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-//            var returnValue = Assert.IsType<Response<HostelResponseDto>>(createdResult.Value);
-//            Assert.True(returnValue.Succeeded);
-//            Assert.Equal(mockHostelResponse.HostelName, returnValue.Data.HostelName);
-//        }
-
-
-
-//        [Fact]
-//        public async Task AddHostel_ReturnsBadRequest_WhenAddFails()
-//        {
-//            // Arrange
-//            var hostelDto = new AddHostelRequestDto
-//            {
-//                HostelName = "New Hostel",
-//                LandlordId = Guid.NewGuid(),
-//                Description = "A description of the hostel.",
-//                Address = new AddressDto
-//                {
-//                    Province = "Some Province",
-//                    District = "Some District",
-//                    Commune = "Some Commune",
-//                    DetailAddress = "Some Detail Address"
-//                },
-//                Size = 100.0f,
-//                NumberOfRooms = 10,
-//                Coordinates = "Some Coordinates",
-//            };
-
-//            var mockResponse = new Response<HostelResponseDto>
-//            {
-//                Data = null,
-//                Succeeded = false,
-//                Errors = new List<string> { "Add failed" }
-//            };
-
-//            // Ensure the setup is using the correct method signature
-//            _hostelServiceMock
-//                .Setup(service => service.AddHostelAsync(It.IsAny<AddHostelRequestDto>()))
-//                .ReturnsAsync(mockResponse);
-
-//            // Act
-//            var result = await _controller.AddHostel(hostelDto);
-
-//            // Assert
-//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-//            var returnValue = Assert.IsType<Response<HostelResponseDto>>(badRequestResult.Value);
-//            Assert.False(returnValue.Succeeded);
-//            Assert.Contains("Add failed", returnValue.Errors);
+//            Assert.Equal("Hostel not found.", returnValue.Message);
 //        }
 
 //        [Fact]
-//        public async Task UpdateHostel_ReturnsOkResult_WhenUpdateSucceeds()
+//        public async Task GetHostelById_ReturnsInternalServerError_WhenExceptionIsThrown()
 //        {
 //            // Arrange
 //            var hostelId = Guid.NewGuid();
-//            var userId = Guid.NewGuid(); // Mock user ID
-
-//            var hostelDto = new UpdateHostelRequestDto
-//            {
-//                HostelName = "Updated Hostel",
-//                Description = "A cozy hostel in the city center",
-//                Address = new AddressDto
-//                {
-//                    Province = "Hanoi",
-//                    District = "Hoan Kiem",
-//                    Commune = "Cau Go",
-//                    DetailAddress = "123 Street Name"
-//                },
-//                Size = 150.5f,
-//                NumberOfRooms = 10,
-//                Coordinates = "21.0285, 105.8542",
-//            };
-
-//            var mockResponse = new Response<HostelResponseDto>
-//            {
-//                Data = new HostelResponseDto
-//                {
-//                    Id = hostelId,
-//                    HostelName = "Updated Hostel",
-//                    Description = "A cozy hostel in the city center",
-//                    Address = hostelDto.Address,
-//                    NumberOfRooms = hostelDto.NumberOfRooms,
-//                    Coordinates = hostelDto.Coordinates,
-//                },
-//                Succeeded = true
-//            };
-
-//            _hostelServiceMock
-//                .Setup(service => service.UpdateHostelAsync(hostelId, userId, hostelDto))
-//                .ReturnsAsync(mockResponse);
-
-//            // Simulate User ID claim
-//            _controller.ControllerContext = new ControllerContext
-//            {
-//                HttpContext = new DefaultHttpContext()
-//            };
-//            _controller.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("UserId", userId.ToString()) }));
+//            _hostelServiceMock.Setup(service => service.GetHostelByIdAsync(hostelId))
+//                .ThrowsAsync(new Exception("Internal server error"));
 
 //            // Act
-//            var result = await _controller.UpdateHostel(hostelId, hostelDto);
+//            var result = await _controller.GetHostelById(hostelId);
+
+//            // Assert
+//            var objectResult = Assert.IsType<ObjectResult>(result);
+//            Assert.Equal(500, objectResult.StatusCode);
+
+//            var returnValue = Assert.IsType<Response<HostelResponseDto>>(objectResult.Value);
+//            Assert.False(returnValue.Succeeded);
+//            Assert.Equal("Internal server error", returnValue.Message);
+//        }
+//        [Fact]
+//        public async Task AddHostel_ReturnsOkResult_WhenSuccessful()
+//        {
+//            // Arrange
+//            var addHostelRequest = new AddHostelRequestDto
+//            {
+//                HostelName = "Test Hostel",
+//                Description = "Test Description",
+//                Address = new AddressDto
+//                {
+//                    Province = "Test Province",
+//                    District = "Test District",
+//                    Commune = "Test Commune",
+//                    DetailAddress = "123 Test Street"
+//                },
+//                ServiceId = new List<Guid> { Guid.NewGuid() }.Select(id => (Guid?)id).ToList(),
+//                LandlordId = Guid.NewGuid()
+//            };
+//            var images = new List<IFormFile>();
+//            var response = new Response<HostelResponseDto>
+//            {
+//                Succeeded = true,
+//                Data = new HostelResponseDto { Id = Guid.NewGuid(), HostelName = "Test Hostel" },
+//                Message = "Thêm trọ mới thành công."
+//            };
+
+//            _hostelServiceMock.Setup(s => s.AddHostelAsync(addHostelRequest, It.IsAny<List<string>>()))
+//                .ReturnsAsync(response);
+
+//            // Act
+//            var result = await _controller.AddHostel(addHostelRequest, images);
+
+//            // Assert
+//            var okResult = Assert.IsType<OkObjectResult>(result); // Expecting OkObjectResult
+//            var responseData = Assert.IsType<Response<HostelResponseDto>>(okResult.Value);
+//            Assert.True(responseData.Succeeded);
+//            Assert.Equal("Test Hostel", responseData.Data.HostelName);
+//            Assert.Equal("Thêm trọ mới thành công.", responseData.Message);
+//            Assert.NotNull(responseData.Data.Id); // Ensure ID is present
+//        }
+
+//        [Fact]
+//        public async Task AddHostel_ReturnsBadRequest_WhenInvalidModel()
+//        {
+//            // Arrange
+//            _controller.ModelState.AddModelError("HostelName", "Required");
+
+//            // Act
+//            var result = await _controller.AddHostel(null, null);
+
+//            // Assert
+//            Assert.IsType<BadRequestObjectResult>(result);
+//        }
+
+//        [Fact]
+//        public async Task UpdateHostel_ReturnsOkResult_WhenSuccessful()
+//        {
+//            // Arrange
+//            var hostelId = Guid.NewGuid();
+//            var updateHostelDto = new UpdateHostelRequestDto
+//            {
+//                HostelName = "Updated Hostel Name",
+//                Description = "Updated Description",
+//                Address = new AddressDto
+//                {
+//                    Province = "123 Updated Street",
+//                    District = "Updated City",
+//                    Commune = "Updated Province",
+//                    DetailAddress = "12345"
+//                },
+//                Size = 2000,
+//                NumberOfRooms = 25,
+//                Coordinates = "10.123,20.456",
+//                ServiceId = new List<Guid?> { Guid.NewGuid() }
+//            };
+
+//            var mockResponse = new Response<HostelResponseDto>(
+//                new HostelResponseDto
+//                {
+//                    Id = hostelId,
+//                    HostelName = "Updated Hostel Name",
+//                    Description = "Updated Description",
+//                    Address = updateHostelDto.Address,
+//                    Size = 2000,
+//                    NumberOfRooms = 25,
+//                    Coordinates = "10.123,20.456",
+//                    CreatedOn = DateTime.UtcNow
+//                },
+//                "Hostel updated successfully"
+//            );
+
+//            _hostelServiceMock.Setup(service => service.UpdateHostelAsync(hostelId, updateHostelDto, It.IsAny<List<string>>()))
+//                .ReturnsAsync(mockResponse);
+
+//            // Act
+//            var result = await _controller.UpdateHostel(hostelId, updateHostelDto, new List<IFormFile>());
 
 //            // Assert
 //            var okResult = Assert.IsType<OkObjectResult>(result);
 //            var returnValue = Assert.IsType<Response<HostelResponseDto>>(okResult.Value);
 //            Assert.True(returnValue.Succeeded);
-//            Assert.Equal("Updated Hostel", returnValue.Data.HostelName);
-//            Assert.Equal("A cozy hostel in the city center", returnValue.Data.Description);
-//            Assert.Equal(10, returnValue.Data.NumberOfRooms);
-//            Assert.Equal("21.0285, 105.8542", returnValue.Data.Coordinates);
+//            Assert.Equal("Hostel updated successfully", returnValue.Message);
+//            Assert.Equal("Updated Hostel Name", returnValue.Data.HostelName);
 //        }
 
 
-
 //        [Fact]
-//        public async Task UpdateHostel_ReturnsNotFound_WhenUpdateFails()
+//        public async Task DeleteHostel_ReturnsOkResult_WhenSuccessful()
 //        {
 //            // Arrange
 //            var hostelId = Guid.NewGuid();
-//            var userId = Guid.NewGuid(); // Mock user ID
+//            var response = new Response<bool> { Succeeded = true, Data = true, Message = "Delete successful." };
 
-//            var hostelDto = new UpdateHostelRequestDto
-//            {
-//                HostelName = "Updated Hostel",
-//                Description = "A cozy hostel in the city center",
-//                Address = new AddressDto
-//                {
-//                    Province = "Hanoi",
-//                    District = "Hoan Kiem",
-//                    Commune = "Cau Go",
-//                    DetailAddress = "123 Street Name"
-//                },
-//                Size = 150.5f,
-//                NumberOfRooms = 10,
-//                Coordinates = "21.0285, 105.8542",
-//            };
-
-//            var mockResponse = new Response<HostelResponseDto>
-//            {
-//                Data = null, // Simulate that the hostel was not found
-//                Succeeded = false,
-//                Errors = new List<string> { "Hostel not found" }
-//            };
-
-//            _hostelServiceMock
-//                .Setup(service => service.UpdateHostelAsync(hostelId, userId, hostelDto))
-//                .ReturnsAsync(mockResponse);
-
-//            // Simulate User ID claim
-//            _controller.ControllerContext = new ControllerContext
-//            {
-//                HttpContext = new DefaultHttpContext()
-//            };
-//            _controller.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
-//            {
-//        new Claim("UserId", userId.ToString())
-//    }));
-
-//            // Act
-//            var result = await _controller.UpdateHostel(hostelId, hostelDto);
-
-//            // Assert
-//            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-//            var returnValue = Assert.IsAssignableFrom<IDictionary<string, object>>(notFoundResult.Value);
-
-//            Assert.Equal("Hostel not found or update failed.", returnValue["message"]);
-//            Assert.Contains("Hostel not found", (List<string>)returnValue["errors"]);
-//        }
-
-
-
-
-//        [Fact]
-//        public async Task DeleteHostel_ReturnsOkResult_WhenDeleteSucceeds()
-//        {
-//            // Arrange
-//            var hostelId = Guid.NewGuid();
-//            var mockResponse = new Response<bool>
-//            {
-//                Data = true,
-//                Succeeded = true
-//            };
-
-//            // Set up the mock to return the success response
-//            _hostelServiceMock
-//                .Setup(service => service.DeleteHostelAsync(hostelId))
-//                .ReturnsAsync(mockResponse);
+//            _hostelServiceMock.Setup(s => s.DeleteHostelAsync(hostelId))
+//                .ReturnsAsync(response);
 
 //            // Act
 //            var result = await _controller.DeleteHostel(hostelId);
 
 //            // Assert
 //            var okResult = Assert.IsType<OkObjectResult>(result);
-//            var returnValue = Assert.IsType<Response<bool>>(okResult.Value);
-//            Assert.True(returnValue.Succeeded);
-//            Assert.True(returnValue.Data); // Data should be true indicating deletion succeeded
+//            var responseData = Assert.IsType<Response<bool>>(okResult.Value);
+//            Assert.True(responseData.Succeeded);
+//            Assert.True(responseData.Data);
+//            Assert.Equal("Delete successful.", responseData.Message);
 //        }
 
+
 //        [Fact]
-//        public async Task DeleteHostel_ReturnsNotFound_WhenDeleteFails()
+//        public async Task DeleteHostel_ReturnsInternalServerError_WhenExceptionIsThrown()
 //        {
 //            // Arrange
 //            var hostelId = Guid.NewGuid();
-//            var mockResponse = new Response<bool>
-//            {
-//                Data = false, // Indicating failure
-//                Succeeded = false,
-//                Errors = new List<string> { "Hostel not found" }
-//            };
 
-//            // Set up the mock to return the failure response
-//            _hostelServiceMock
-//                .Setup(service => service.DeleteHostelAsync(hostelId))
-//                .ReturnsAsync(mockResponse);
+//            _hostelServiceMock.Setup(service => service.DeleteHostelAsync(hostelId))
+//                .ThrowsAsync(new Exception("Internal server error"));
+
+//            // Act
+//            var result = await _controller.DeleteHostel(hostelId);
+
+//            // Assert
+//            var objectResult = Assert.IsType<ObjectResult>(result);
+//            Assert.Equal(500, objectResult.StatusCode);
+
+//            var responseData = Assert.IsType<Response<bool>>(objectResult.Value);
+//            Assert.False(responseData.Succeeded);
+//            Assert.Equal("Internal server error: Internal server error", responseData.Message);
+//        }
+
+
+//        [Fact]
+//        public async Task DeleteHostel_ReturnsNotFound_WhenFailed()
+//        {
+//            // Arrange
+//            var hostelId = Guid.NewGuid();
+//            var response = new Response<bool> { Succeeded = false, Data = false, Message = "Hostel not found" };
+
+//            _hostelServiceMock.Setup(s => s.DeleteHostelAsync(hostelId))
+//                .ReturnsAsync(response);
 
 //            // Act
 //            var result = await _controller.DeleteHostel(hostelId);
 
 //            // Assert
 //            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-//            var returnValue = Assert.IsType<Response<bool>>(notFoundResult.Value);
-//            Assert.False(returnValue.Succeeded);
-//            Assert.Contains("Hostel not found", returnValue.Errors);
+//            var responseData = Assert.IsType<Response<bool>>(notFoundResult.Value);
+//            Assert.False(responseData.Succeeded);
+//            Assert.False(responseData.Data);
+//            Assert.Equal("Hostel not found", responseData.Message);
 //        }
 
 //        [Fact]
-//        public async Task AddHostel_ReturnsBadRequest_WhenModelIsInvalid()
+//        public async Task AddHostel_ReturnsBadRequest_WhenHostelNameIsEmpty()
 //        {
 //            // Arrange
-//            var invalidHostelDto = new AddHostelRequestDto(); // Invalid as it has missing required fields
-
-//            _controller.ModelState.AddModelError("HostelName", "Required");
+//            var addHostelRequest = new AddHostelRequestDto
+//            {
+//                HostelName = "", // Invalid input
+//                Description = "Description"
+//            };
+//            _controller.ModelState.AddModelError("HostelName", "Hostel name is required.");
 
 //            // Act
-//            var result = await _controller.AddHostel(invalidHostelDto);
+//            var result = await _controller.AddHostel(addHostelRequest, new List<IFormFile>());
 
 //            // Assert
 //            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
 //            Assert.IsType<SerializableError>(badRequestResult.Value);
 //        }
 
-//        [Theory]
-//        [InlineData("Hostel A", 10)]
-//        [InlineData("Hostel B", 20)]
-//        [InlineData("", 0)] // Trường hợp đặc biệt, dữ liệu không hợp lệ
-//        public async Task AddHostel_WithDifferentData_ReturnsExpectedResult(string hostelName, int numberOfRooms)
+//        [Fact]
+//        public async Task AddHostel_ReturnsInternalServerError_WhenExceptionIsThrown()
 //        {
 //            // Arrange
-//            var hostelDto = new AddHostelRequestDto
+//            var addHostelRequest = new AddHostelRequestDto
+//            {
+//                HostelName = "Test Hostel",
+//                Description = "Test Description"
+//            };
+
+//            _hostelServiceMock.Setup(s => s.AddHostelAsync(addHostelRequest, It.IsAny<List<string>>()))
+//                .ThrowsAsync(new Exception("Server error"));
+
+//            // Act
+//            var result = await _controller.AddHostel(addHostelRequest, new List<IFormFile>());
+
+//            // Assert
+//            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+//            Assert.Equal(StatusCodes.Status500InternalServerError, statusCodeResult.StatusCode);
+//            Assert.Equal("Server error", statusCodeResult.Value);
+//        }
+
+//        [Theory]
+//        [InlineData("", "Test Description", false)] // Missing HostelName
+//        [InlineData("Test Hostel", "", false)]      // Missing Description
+//        [InlineData("Valid Hostel", "Valid Description", true)] // Valid input
+//        public async Task AddHostel_ReturnsExpectedResult(string hostelName, string description, bool expectedSuccess)
+//        {
+//            // Arrange
+//            var addHostelRequest = new AddHostelRequestDto
 //            {
 //                HostelName = hostelName,
-//                NumberOfRooms = numberOfRooms
+//                Description = description
 //            };
 
-//            // Xác định phản hồi cho các trường hợp hợp lệ và không hợp lệ
-//            Response<HostelResponseDto> mockResponse;
-//            if (string.IsNullOrEmpty(hostelName) || numberOfRooms <= 0)
+//            var response = new Response<HostelResponseDto>
 //            {
-//                mockResponse = new Response<HostelResponseDto>
-//                {
-//                    Succeeded = false,
-//                    Errors = new List<string> { "Invalid hostel data" } // Thay đổi thông báo lỗi cho dữ liệu không hợp lệ
-//                };
+//                Succeeded = expectedSuccess,
+//                Data = expectedSuccess ? new HostelResponseDto { Id = Guid.NewGuid(), HostelName = hostelName } : null
+//            };
+
+//            if (!expectedSuccess)
+//            {
+//                _controller.ModelState.AddModelError("HostelName", "Hostel name is required.");
 //            }
 //            else
 //            {
-//                mockResponse = new Response<HostelResponseDto>
-//                {
-//                    Data = new HostelResponseDto { HostelName = hostelName },
-//                    Succeeded = true
-//                };
+//                _hostelServiceMock.Setup(s => s.AddHostelAsync(addHostelRequest, It.IsAny<List<string>>()))
+//                    .ReturnsAsync(response);
 //            }
 
-//            _hostelServiceMock
-//                .Setup(service => service.AddHostelAsync(It.IsAny<AddHostelRequestDto>()))
-//                .ReturnsAsync(mockResponse);
-
 //            // Act
-//            var result = await _controller.AddHostel(hostelDto);
+//            var result = await _controller.AddHostel(addHostelRequest, new List<IFormFile>());
 
-//            // Assert
-//            if (string.IsNullOrEmpty(hostelName) || numberOfRooms <= 0)
+//            if (expectedSuccess)
 //            {
-//                // Kiểm tra rằng kết quả trả về là BadRequest
+//                var okResult = Assert.IsType<OkObjectResult>(result); // Changed from CreatedAtActionResult
+//                var responseData = Assert.IsType<Response<HostelResponseDto>>(okResult.Value);
+//                Assert.True(responseData.Succeeded);
+//            }
+//            else
+//            {
 //                var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-//                var returnValue = Assert.IsType<Response<HostelResponseDto>>(badRequestResult.Value);
-//                Assert.False(returnValue.Succeeded);
-//                Assert.Contains("Invalid hostel data", returnValue.Errors);
-//            }
-//            else
-//            {
-//                // Kiểm tra rằng kết quả trả về là CreatedAtAction
-//                var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-//                var returnValue = Assert.IsType<Response<HostelResponseDto>>(createdResult.Value);
-//                Assert.Equal(hostelName, returnValue.Data.HostelName);
+//                Assert.IsType<SerializableError>(badRequestResult.Value); // Ensure validation error returned
 //            }
 //        }
 
-
 //        [Fact]
-//        public async Task AddHostel_ReturnsInternalServerError_OnServiceFailure()
+//        public async Task UpdateHostel_ReturnsBadRequest_WhenModelStateIsInvalid()
 //        {
 //            // Arrange
-//            var hostelDto = new AddHostelRequestDto { /* Valid data #1# };
-
-//            _hostelServiceMock
-//                .Setup(service => service.AddHostelAsync(It.IsAny<AddHostelRequestDto>()))
-//                .ThrowsAsync(new Exception("Internal error"));
+//            _controller.ModelState.AddModelError("HostelName", "HostelName is required");
 
 //            // Act
-//            var result = await _controller.AddHostel(hostelDto);
+//            var result = await _controller.UpdateHostel(Guid.NewGuid(), null, null);
 
 //            // Assert
-//            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
-//            Assert.Equal(500, internalServerErrorResult.StatusCode);
-//            Assert.Equal("Internal error", internalServerErrorResult.Value);
+//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+//            var response = Assert.IsType<Response<HostelResponseDto>>(badRequestResult.Value);
+//            Assert.False(response.Succeeded);
+//            Assert.Equal("Invalid model state.", response.Message);
 //        }
 
-
 //        [Fact]
-//        public async Task GetAll_ReturnsOkResult_WhenGetAllSucceeds()
+//        public async Task UpdateHostel_ReturnsBadRequest_WhenUpdateFails()
 //        {
 //            // Arrange
-//            var request = new GetAllHostelQuery(); // You can set properties if needed
-//            var mockResponse = new PagedResponse<List<ListHostelResponseDto>>
+//            var hostelId = Guid.NewGuid();
+//            var updateHostelDto = new UpdateHostelRequestDto
 //            {
-//                Data = new List<ListHostelResponseDto>
-//        {
-//            new ListHostelResponseDto { HostelName = "Hostel A"},
-//            new ListHostelResponseDto { HostelName = "Hostel B"}
-//        },
-//                Succeeded = true
+//                HostelName = "Updated Hostel Name",
+//                Description = "Updated Description",
+//                Address = new AddressDto
+//                {
+//                    Province = "123 Updated Street",
+//                    District = "Updated City",
+//                    Commune = "Updated Province",
+//                    DetailAddress = "12345"
+//                },
+//                Size = 2000,
+//                NumberOfRooms = 25,
+//                Coordinates = "10.123,20.456",
+//                ServiceId = new List<Guid?> { Guid.NewGuid() }
 //            };
 
-//            // Set up the mock to return the success response
-//            _hostelServiceMock
-//                .Setup(service => service.GetAllHostelAsync(request))
+//            var mockResponse = new Response<HostelResponseDto>(null, "Update failed")
+//            {
+//                Succeeded = false
+//            };
+
+//            _hostelServiceMock.Setup(service => service.UpdateHostelAsync(hostelId, updateHostelDto, It.IsAny<List<string>>()))
 //                .ReturnsAsync(mockResponse);
 
 //            // Act
-//            var result = await _controller.GetAll(request);
+//            var result = await _controller.UpdateHostel(hostelId, updateHostelDto, new List<IFormFile>());
+
+//            // Assert
+//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+//            var response = Assert.IsType<Response<HostelResponseDto>>(badRequestResult.Value);
+//            Assert.False(response.Succeeded);
+//            Assert.Equal("Update failed", response.Message);
+//        }
+
+
+//        [Fact]
+//        public async Task UpdateHostel_ReturnsNotFound_WhenHostelDoesNotExist()
+//        {
+//            // Arrange
+//            var hostelId = Guid.NewGuid();
+//            var updateHostelDto = new UpdateHostelRequestDto
+//            {
+//                HostelName = "Updated Hostel Name",
+//                Description = "Updated Description",
+//                Address = new AddressDto
+//                {
+//                    Province = "123 Updated Street",
+//                    District = "Updated City",
+//                    Commune = "Updated Province",
+//                    DetailAddress = "12345"
+//                },
+//                Size = 2000,
+//                NumberOfRooms = 25,
+//                Coordinates = "10.123,20.456",
+//                ServiceId = new List<Guid?> { Guid.NewGuid() }
+//            };
+
+//            var mockResponse = new Response<HostelResponseDto>("Hostel not found.");
+
+//            _hostelServiceMock.Setup(service => service.UpdateHostelAsync(hostelId, updateHostelDto, It.IsAny<List<string>>()))
+//                .ReturnsAsync(mockResponse);
+
+//            // Act
+//            var result = await _controller.UpdateHostel(hostelId, updateHostelDto, new List<IFormFile>());
+
+//            // Assert
+//            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+//            var response = Assert.IsType<Response<HostelResponseDto>>(badRequestResult.Value);
+//            Assert.False(response.Succeeded);
+//            Assert.Equal("Hostel not found.", response.Message);
+//        }
+
+//        [Fact]
+//        public async Task UpdateHostel_ReturnsInternalServerError_WhenExceptionIsThrown()
+//        {
+//            // Arrange
+//            var hostelId = Guid.NewGuid();
+//            var updateHostelDto = new UpdateHostelRequestDto
+//            {
+//                HostelName = "Updated Hostel Name",
+//                Description = "Updated Description",
+//                Address = new AddressDto
+//                {
+//                    Province = "123 Updated Street",
+//                    District = "Updated City",
+//                    Commune = "Updated Province",
+//                    DetailAddress = "12345"
+//                },
+//                Size = 2000,
+//                NumberOfRooms = 25,
+//                Coordinates = "10.123,20.456",
+//                ServiceId = new List<Guid?> { Guid.NewGuid() }
+//            };
+
+//            _hostelServiceMock.Setup(service => service.UpdateHostelAsync(hostelId, updateHostelDto, It.IsAny<List<string>>()))
+//                .ThrowsAsync(new Exception("Internal server error"));
+
+//            // Act
+//            var result = await _controller.UpdateHostel(hostelId, updateHostelDto, new List<IFormFile>());
+
+//            // Assert
+//            var objectResult = Assert.IsType<ObjectResult>(result);
+//            Assert.Equal(500, objectResult.StatusCode);
+//            var response = Assert.IsType<Response<HostelResponseDto>>(objectResult.Value);
+//            Assert.False(response.Succeeded);
+//            Assert.Equal("Internal server error: Internal server error", response.Message);
+//        }
+
+//        [Fact]
+//        public async Task GetHostelsByLandlordId_ReturnsOkResult_WhenHostelsExist()
+//        {
+//            // Arrange
+//            var landlordId = Guid.NewGuid();
+//            var hostels = new List<ListHostelResponseDto>
+//    {
+//        new ListHostelResponseDto { Id = Guid.NewGuid(), HostelName = "Hostel 1" },
+//        new ListHostelResponseDto { Id = Guid.NewGuid(), HostelName = "Hostel 2" }
+//    };
+
+//            var response = new PagedResponse<List<ListHostelResponseDto>>(hostels, 1,10);
+
+//            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId, null, null, null, null, null))
+//                .ReturnsAsync(response);
+
+//            // Act
+//            var result = await _controller.GetHostelsByLandlordId(landlordId, null, null, null, null, null);
 
 //            // Assert
 //            var okResult = Assert.IsType<OkObjectResult>(result);
-//            var returnValue = Assert.IsType<PagedResponse<List<ListHostelResponseDto>>>(okResult.Value);
-//            Assert.True(returnValue.Succeeded);
-//            Assert.NotNull(returnValue.Data);
-//            Assert.Equal(2, returnValue.Data.Count); // Adjust this count based on mock data
+//            var responseData = Assert.IsType<Response<List<ListHostelResponseDto>>>(okResult.Value);
+//            Assert.True(responseData.Succeeded);
+//            Assert.Equal(2, responseData.Data.Count);
 //        }
 
 //        [Fact]
-//        public async Task GetAll_ReturnsNotFound_WhenGetAllFails()
+//        public async Task GetHostelsByLandlordId_ReturnsNotFound_WhenNoHostelsExist()
 //        {
 //            // Arrange
-//            var request = new GetAllHostelQuery(); // You can set properties if needed
-//            var mockResponse = new PagedResponse<List<ListHostelResponseDto>>
+//            var landlordId = Guid.NewGuid();
+//            var response = new PagedResponse<List<ListHostelResponseDto>>
 //            {
-//                Data = null,
 //                Succeeded = false,
 //                Errors = new List<string> { "No hostels found" }
 //            };
 
-//            // Set up the mock to return the failure response
-//            _hostelServiceMock
-//                .Setup(service => service.GetAllHostelAsync(request))
-//                .ReturnsAsync(mockResponse);
+//            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId,null, null, null, null, null))
+//                .ReturnsAsync(response);
 
 //            // Act
-//            var result = await _controller.GetAll(request);
+//            var result = await _controller.GetHostelsByLandlordId(landlordId, null, null, null, null, null);
 
 //            // Assert
 //            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-//            var returnValue = Assert.IsType<PagedResponse<List<ListHostelResponseDto>>>(notFoundResult.Value);
-//            Assert.False(returnValue.Succeeded);
-//            Assert.Contains("No hostels found", returnValue.Errors);
+//            var errors = Assert.IsType<List<string>>(notFoundResult.Value);
+//            Assert.Contains("No hostels found", errors);
+//        }
+
+//        [Fact]
+//        public async Task GetHostelsByLandlordId_ReturnsInternalServerError_WhenExceptionIsThrown()
+//        {
+//            // Arrange
+//            var landlordId = Guid.NewGuid();
+//            var searchPhrase = "Hostel";
+
+//            _hostelServiceMock.Setup(service => service.GetHostelsByUserIdAsync(landlordId,searchPhrase, null, null, null, null))
+//                .ThrowsAsync(new Exception("Internal server error"));
+
+//            // Act
+//            var result = await _controller.GetHostelsByLandlordId(landlordId, searchPhrase, null, null, null, null);
+
+//            // Assert
+//            var objectResult = Assert.IsType<ObjectResult>(result);
+//            Assert.Equal(500, objectResult.StatusCode);
+//            Assert.Equal("Internal server error", objectResult.Value);
+//        }
+
+//        [Fact]
+//        public async Task GetAll_ReturnsOkResult_WhenHostelsExist()
+//        {
+//            // Arrange
+//            var query = new GetAllHostelQuery
+//            {
+//                SearchPhrase = "Hostel",
+//                PageSize = 2,
+//                PageNumber = 1,
+//                SortBy = "HostelName",
+//                SortDirection = SortDirection.Ascending
+//            };
+
+//            var hostels = new List<ListHostelResponseDto>
+//    {
+//        new ListHostelResponseDto { Id = Guid.NewGuid(), HostelName = "Hostel A" },
+//        new ListHostelResponseDto { Id = Guid.NewGuid(), HostelName = "Hostel B" }
+//    };
+
+//            var response = new PagedResponse<List<ListHostelResponseDto>>(hostels, query.PageNumber, query.PageSize)
+//            {
+//                TotalRecords = 5,
+//                TotalPages = 3,
+//            };
+
+//            _hostelServiceMock.Setup(service => service.GetAllHostelAsync(query))
+//                .ReturnsAsync(response);
+
+//            // Act
+//            var result = await _controller.GetAll(query);
+
+//            // Assert
+//            var okResult = Assert.IsType<OkObjectResult>(result);
+//            var responseData = Assert.IsType<PagedResponse<List<ListHostelResponseDto>>>(okResult.Value);
+//            Assert.True(responseData.Succeeded);
+//            Assert.Equal(2, responseData.Data.Count);
+//            Assert.Equal(5, responseData.TotalRecords);
+//            Assert.Equal(3, responseData.TotalPages);
+//        }
+
+//        [Fact]
+//        public async Task GetAll_ReturnsNotFound_WhenNoHostelsMatch()
+//        {
+//            // Arrange
+//            var query = new GetAllHostelQuery
+//            {
+//                SearchPhrase = "NonExistentHostel",
+//                PageSize = 2,
+//                PageNumber = 1,
+//                SortBy = "HostelName",
+//                SortDirection = SortDirection.Descending
+//            };
+
+//            var response = new PagedResponse<List<ListHostelResponseDto>>(null, query.PageNumber, query.PageSize)
+//            {
+//                Succeeded = false,
+//                Message = "No hostels found."
+//            };
+
+//            _hostelServiceMock.Setup(service => service.GetAllHostelAsync(query))
+//                .ReturnsAsync(response);
+
+//            // Act
+//            var result = await _controller.GetAll(query);
+
+//            // Assert
+//            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+//            var responseData = Assert.IsType<PagedResponse<List<ListHostelResponseDto>>>(notFoundResult.Value);
+//            Assert.False(responseData.Succeeded);
+//            Assert.Equal("No hostels found.", responseData.Message);
+//        }
+
+//        [Fact]
+//        public async Task GetAll_ReturnsInternalServerError_WhenExceptionIsThrown()
+//        {
+//            // Arrange
+//            var query = new GetAllHostelQuery
+//            {
+//                SearchPhrase = "Hostel",
+//                PageSize = 2,
+//                PageNumber = 1,
+//                SortBy = "HostelName",
+//                SortDirection = SortDirection.Ascending
+//            };
+
+//            _hostelServiceMock.Setup(service => service.GetAllHostelAsync(query))
+//                .ThrowsAsync(new Exception("Internal server error"));
+
+//            // Act
+//            var result = await _controller.GetAll(query);
+
+//            // Assert
+//            var objectResult = Assert.IsType<ObjectResult>(result);
+//            Assert.Equal(500, objectResult.StatusCode);
+//            Assert.Equal("Internal server error", objectResult.Value);
+//        }
+
+//        [Theory]
+//        [InlineData(SortDirection.Ascending, "Ascending")]
+//        [InlineData(SortDirection.Descending, "Descending")]
+//        public async Task GetAll_HandlesSortDirectionParameter(SortDirection sortDirection, string sortDirectionText)
+//        {
+//            // Arrange
+//            var query = new GetAllHostelQuery
+//            {
+//                SearchPhrase = "Hostel",
+//                PageSize = 2,
+//                PageNumber = 1,
+//                SortBy = "HostelName",
+//                SortDirection = sortDirection
+//            };
+
+//            var hostels = new List<ListHostelResponseDto>
+//    {
+//        new ListHostelResponseDto { Id = Guid.NewGuid(), HostelName = $"Hostel {sortDirectionText}" }
+//    };
+
+//            // Use the three-argument constructor and then set additional properties
+//            var response = new PagedResponse<List<ListHostelResponseDto>>(hostels, query.PageNumber, query.PageSize)
+//            {
+//                TotalRecords = 1, // Total number of records
+//                TotalPages = 1 // Since there's only 1 record
+//            };
+
+//            _hostelServiceMock.Setup(service => service.GetAllHostelAsync(query))
+//                .ReturnsAsync(response);
+
+//            // Act
+//            var result = await _controller.GetAll(query);
+
+//            // Assert
+//            var okResult = Assert.IsType<OkObjectResult>(result);
+//            var responseData = Assert.IsType<PagedResponse<List<ListHostelResponseDto>>>(okResult.Value);
+//            Assert.True(responseData.Succeeded);
+//            Assert.Single(responseData.Data);
+//            Assert.Equal($"Hostel {sortDirectionText}", responseData.Data.First().HostelName);
+//            Assert.Equal(1, responseData.TotalRecords);
+//            Assert.Equal(1, responseData.TotalPages);
 //        }
 
 
 //    }
 //}
-//*/

@@ -16,9 +16,23 @@ namespace HostelFinder.Infrastructure.Repositories
         {
             return await _dbContext.Wishlists
                 .Include(w => w.WishlistPosts)
-                .ThenInclude(wr => wr.Post)
-                .FirstOrDefaultAsync(w => w.UserId == userId);
+                    .ThenInclude(wr => wr.Post)
+                        .ThenInclude(p => p.Hostel) 
+                        .ThenInclude(h => h.Address) 
+                .Include(w => w.WishlistPosts)
+                    .ThenInclude(wr => wr.Post)
+                        .ThenInclude(p => p.Room)
+                .Include(w => w.WishlistPosts)
+                    .ThenInclude(wr => wr.Post)
+                        .ThenInclude(p => p.MembershipServices) 
+                            .ThenInclude(ms => ms.Membership)
+                .Include(w => w.WishlistPosts)
+                        .ThenInclude(wr => wr.Post)
+                            .ThenInclude(p => p.Images)
+                .OrderByDescending(o => o.CreatedOn)
+                .FirstOrDefaultAsync(w => w.UserId == userId && !w.IsDeleted);
         }
+
 
         public async Task AddRoomToWishlistAsync(WishlistPost wishlistRoom)
         {
@@ -26,10 +40,5 @@ namespace HostelFinder.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task RemoveRoomFromWishlistAsync(WishlistPost wishlistRoom)
-        {
-            _dbContext.Set<WishlistPost>().Remove(wishlistRoom);
-            await _dbContext.SaveChangesAsync();
-        }
     }
 }

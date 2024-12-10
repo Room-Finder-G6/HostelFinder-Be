@@ -44,37 +44,80 @@ public class AmenityController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllAmenities()
     {
-        var response = await _amenityService.GetAllAmenitiesAsync();
-        if (!response.Succeeded || response.Data == null || !response.Data.Any())
+        try
         {
-            return NotFound(new Response<List<AmenityResponse>>("No amenities found"));
-        }
+            var response = await _amenityService.GetAllAmenitiesAsync();
+            if (!response.Succeeded || response.Data == null || !response.Data.Any())
+            {
+                return NotFound(new Response<List<AmenityResponse>>("No amenities found"));
+            }
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
+
 
     [HttpDelete("{amenityId}")]
     public async Task<IActionResult> DeleteAmenity(Guid amenityId)
     {
-        var response = await _amenityService.DeleteAmenityAsync(amenityId);
-
-        if (!response.Succeeded)
+        try
         {
-            return NotFound(response);
-        }
+            var response = await _amenityService.DeleteAmenityAsync(amenityId);
 
-        return Ok(response);
+            if (!response.Succeeded)
+            {
+                if (response.Message == "Amenity not found")
+                {
+                    return NotFound(new Response<bool>
+                    {
+                        Succeeded = false,
+                        Message = response.Message
+                    });
+                }
+
+                return BadRequest(new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = response.Message
+                });
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpGet("GetAmenitiesByRoomId/{roomId}")]
     public async Task<IActionResult> GetAmenitiesByRoomId(Guid roomId)
     {
-        var response = await _amenityService.GetAmenitiesByRoomlIdAsync(roomId);
-        if (!response.Succeeded || response.Data == null || !response.Data.Any())
+        try
         {
-            return NotFound(new Response<IEnumerable<AmenityResponse>>("No amenities found"));
-        }
+            var response = await _amenityService.GetAmenitiesByRoomlIdAsync(roomId);
+            if (!response.Succeeded || response.Data == null || !response.Data.Any())
+            {
+                return NotFound(new Response<IEnumerable<AmenityResponse>>
+                {
+                    Succeeded = false,
+                    Message = "No amenities found"
+                });
+            }
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new Response<IEnumerable<AmenityResponse>>
+            {
+                Succeeded = false,
+                Message = $"Internal server error: {ex.Message}"
+            });
+        }
     }
 }

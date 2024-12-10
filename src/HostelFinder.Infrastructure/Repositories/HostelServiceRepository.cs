@@ -14,7 +14,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<List<HostelServices>> GetServicesByHostelIdAsync(Guid hostelId)
         {
             return await _dbContext.HostelServices
-                .Where(hs => hs.HostelId == hostelId)
+                .Where(hs => hs.HostelId == hostelId && !hs.IsDeleted)
                 .Include(hs => hs.Services) 
                 .ToListAsync();
         }

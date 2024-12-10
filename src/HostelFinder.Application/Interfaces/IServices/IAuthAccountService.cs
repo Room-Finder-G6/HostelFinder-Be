@@ -14,5 +14,8 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<string>> ForgotPasswordAsync(ForgotPasswordRequest request);
 
         Task<Response<string>> ResetPasswordAsync(ResetPasswordRequest request);
+        
+        Task<Response<AuthenticationResponse>> LoginWithGoogleAsync(LoginWithGoogleRequest request);
+        
     }
 }

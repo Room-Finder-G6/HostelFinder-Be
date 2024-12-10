@@ -1,4 +1,6 @@
-﻿namespace HostelFinder.Application.DTOs.RentalContract.Request
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HostelFinder.Application.DTOs.RentalContract.Request
 {
     public class AddRentalContractDto
     {
@@ -6,8 +8,8 @@
 
         public Guid RoomId { get;set; }
 
+        [Required]
         public DateTime StartDate { get; set; }
-
         public DateTime? EndDate { get; set; }
 
         public decimal MonthlyRent { get; set; }
@@ -16,9 +18,5 @@
         public int PaymentCycleDays { get; set; }
         public string? ContractTerms { get; set; }
 
-        /// <summary>
-        /// Ghi số dịch vụ của tháng trước khi vào phòng
-        /// </summary>
-        public List<AddMeterReadingServiceDto>? AddMeterReadingServiceDto { get; set; }
     }
 }

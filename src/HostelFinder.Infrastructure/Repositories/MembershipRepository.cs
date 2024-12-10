@@ -47,8 +47,8 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<Membership> GetMembershipWithServicesAsync(Guid id)
         {
             var membership = await _dbContext.Memberships
-                .Include(m => m.MembershipServices) 
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(m => m.MembershipServices)
+                .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
             return membership;
         }
 
@@ -68,11 +68,30 @@ namespace HostelFinder.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<MembershipServices>> GetMembershipServicesByMembershipIdAsync(Guid membershipId)
+        public async Task<List<MembershipServices?>> GetMembershipServicesByMembershipIdAsync(Guid membershipId)
         {
             return await _dbContext.MembershipServices
-                .Where(ms => ms.MembershipId == membershipId)
+                .Where(ms => ms.MembershipId == membershipId && !ms.IsDeleted)
                 .ToListAsync();
+        }
+
+        public async Task<List<UserMembership>> GetUserMembershipsAsync(Guid userId)
+        {
+            return await _dbContext.UserMemberships
+                .Include(um => um.Membership)
+                .ThenInclude(m => m.MembershipServices)
+                .Where(um => um.UserId == userId && !um.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<List<MembershipServices>> GetMembershipServicesByUserAsync(Guid userId)
+        {
+            var userMemberships = await GetUserMembershipsAsync(userId);
+
+            return userMemberships
+                .SelectMany(um => um.Membership.MembershipServices)
+                .Where(ms => ms.MaxPostsAllowed > 0)
+                .ToList();
         }
     }
 }

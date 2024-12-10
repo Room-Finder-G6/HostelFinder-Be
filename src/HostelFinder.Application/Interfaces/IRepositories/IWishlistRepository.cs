@@ -7,6 +7,5 @@ namespace HostelFinder.Application.Interfaces.IRepositories
     {
         Task<Wishlist> GetWishlistByUserIdAsync(Guid userId);
         Task AddRoomToWishlistAsync(WishlistPost wishlistRoom);
-        Task RemoveRoomFromWishlistAsync(WishlistPost wishlistRoom);
     }
 }

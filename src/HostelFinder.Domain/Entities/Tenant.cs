@@ -1,6 +1,7 @@
 ﻿using HostelFinder.Domain.Enums;
 using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations;
+using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {
@@ -8,17 +9,15 @@ namespace HostelFinder.Domain.Entities
     {
         [Required]
         [MaxLength(100)]
-        public required string FullName { get; set; }
+        public  string FullName { get; set; }
 
         public string? AvatarUrl { get; set; }
 
         [EmailAddress]
         [Required]
-        public required string Email { get; set; }
-
-        [Required]
-        [Phone]
-        public required string Phone { get; set; }
+        public  string Email { get; set; }
+        
+        public  string Phone { get; set; }
 
         public string? Description { get; set; }
 
@@ -32,21 +31,16 @@ namespace HostelFinder.Domain.Entities
 
         [MaxLength(255)]
         public string? DetailAddress { get; set; }
-
-        /// <summary>
-        /// CCCD
-        /// </summary>
-        [Required]
-        [MaxLength(12)]
-        public string IdentityCardNumber { get; set; }
+        
+        public string? IdentityCardNumber { get; set; }
 
         [MaxLength(255)]
-        public string FrontImageUrl { get; set; }
+        public string? FrontImageUrl { get; set; }
 
         [MaxLength(255)]
-        public string BackImageUrl { get; set; } 
+        public string? BackImageUrl { get; set; } 
 
-        public TemporaryResidenceStatus TemporaryResidenceStatus { get; set; }
+        public TemporaryResidenceStatus? TemporaryResidenceStatus { get; set; }
 
 
         // Navigation properties

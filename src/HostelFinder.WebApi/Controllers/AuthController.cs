@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.Auths.Requests;
 using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Infrastructure.Context;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -12,11 +13,13 @@ namespace HostelFinder.WebApi.Controllers
     {
         private readonly IUserService _userService;
         private readonly IAuthAccountService _authAccountService;
+        private readonly HostelFinderDbContext _context;
 
-        public AuthController(IUserService userService, IAuthAccountService authAccountService)
+        public AuthController(IUserService userService, IAuthAccountService authAccountService, HostelFinderDbContext context)
         {
             _userService = userService;
             _authAccountService = authAccountService;
+            _context = context;
         }
 
         [HttpPost]
@@ -113,5 +116,24 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(ex);
             }
         }
+
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] LoginWithGoogleRequest request)
+        {
+            try
+            {
+                var response = await _authAccountService.LoginWithGoogleAsync(request);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(response);
+                }
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+       
     }
 }

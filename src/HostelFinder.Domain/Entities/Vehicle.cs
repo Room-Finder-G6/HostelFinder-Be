@@ -1,6 +1,7 @@
 ﻿using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using HostelFinder.Domain.Common;
 using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Domain.Entities

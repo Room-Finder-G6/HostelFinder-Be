@@ -1,4 +1,4 @@
-﻿using RoomFinder.Domain.Common;
+﻿using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {

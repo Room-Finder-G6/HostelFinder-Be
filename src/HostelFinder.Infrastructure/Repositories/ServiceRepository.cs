@@ -20,7 +20,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<bool> CheckDuplicateServiceAsync(string serviceName)
         {
-            return await _dbContext.Services.AnyAsync(s => s.ServiceName == serviceName);
+            return await _dbContext.Services.AnyAsync(s => s.ServiceName == serviceName && !s.IsDeleted);
         }
 
         public async Task<IEnumerable<Service>> GetAllServiceAsync()
@@ -64,10 +64,10 @@ namespace HostelFinder.Infrastructure.Repositories
                 .FirstOrDefaultAsync(sc => sc.HostelId == hostelId
                 && sc.ServiceId == serviceId
                     && sc.EffectiveFrom <= DateTime.Now
-                        && (sc.EffectiveTo == null || sc.EffectiveTo >= sc.EffectiveFrom));
+                        && (sc.EffectiveTo == null || sc.EffectiveTo >= sc.EffectiveFrom)
+                            && !sc.IsDeleted);
 
         }
-
 
     }
 }

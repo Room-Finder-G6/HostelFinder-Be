@@ -2,7 +2,6 @@
 {
     public class AddMembershipServiceReqDto
     {
-        public Guid Id { get; set; }
         public string ServiceName { get; set; }
         public int MaxPushTopAllowed {  get; set; }
         public int MaxPostsAllowed { get; set; }

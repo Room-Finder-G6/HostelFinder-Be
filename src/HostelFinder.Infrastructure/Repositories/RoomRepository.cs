@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using DocumentFormat.OpenXml.InkML;
 using HostelFinder.Application.Interfaces.IRepositories;
+using HostelFinder.Domain.Common.Constants;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Exceptions;
 using HostelFinder.Infrastructure.Common;
@@ -29,7 +30,7 @@ namespace HostelFinder.Infrastructure.Repositories
             return room;
         }
 
-        public async Task<IEnumerable<Room>> ListAllWithDetailsAsync()
+        public async Task<List<Room>> ListAllWithDetailsAsync()
         {
             return await _dbContext.Rooms
                 .Include(r => r.Hostel)
@@ -40,7 +41,7 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<List<Room>> GetRoomsByHostelIdAsync(Guid hostelId, int? floor)
         {
-            IQueryable<Room> query =  _dbContext.Rooms
+            IQueryable<Room> query = _dbContext.Rooms
                             .AsNoTracking()
                             .Include(r => r.Hostel)
                             .ThenInclude(h => h.ServiceCosts)
@@ -50,16 +51,32 @@ namespace HostelFinder.Infrastructure.Repositories
                             .Where(r => r.HostelId == hostelId && !r.IsDeleted);
             if (floor.HasValue)
             {
-                query = query.Where(r => r.Floor == floor); 
+                query = query.Where(r => r.Floor == floor);
             }
 
+            query = query.OrderByDescending(x => x.CreatedOn);
+            return await query.ToListAsync();
+
+        }
+
+        public async Task<List<Room>> GetRoomsByHostelIdAsync(Guid hostelId)
+        {
+            IQueryable<Room> query = _dbContext.Rooms
+                            .AsNoTracking()
+                            .Include(r => r.Hostel)
+                            .ThenInclude(h => h.ServiceCosts)
+                                .ThenInclude(sc => sc.Service)
+                            .Include(r => r.Invoices)
+                            .Include(r => r.Images)
+                            .Include(rt => rt.RoomTenancies)
+                            .Where(r => r.HostelId == hostelId && !r.IsDeleted);
             return await query.ToListAsync();
 
         }
 
         public async Task<bool> RoomExistsAsync(string roomName, Guid hostelId)
         {
-            return await _dbContext.Rooms.AnyAsync(r => r.RoomName == roomName && r.HostelId == hostelId);
+            return await _dbContext.Rooms.AnyAsync(r => r.RoomName == roomName && r.HostelId == hostelId && !r.IsDeleted);
         }
 
         public async Task<Room> GetRoomByIdAsync(Guid roomId)
@@ -72,12 +89,31 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(r => r.RoomAmenities)
                 .FirstOrDefaultAsync(r => r.Id == roomId && !r.IsDeleted);
 
-            if(room == null)
+            if (room == null)
             {
                 throw new NotFoundException("Không tìm thấy phòng trọ nào!");
             }
 
             return room;
+        }
+
+        public async Task<List<Room>> GetRoomsByHostelAsync(Guid hostelId)
+        {
+            var query = _dbContext.Rooms
+                .AsNoTracking()
+                .Include(r => r.Hostel)
+                .ThenInclude(h => h.ServiceCosts)
+                .ThenInclude(sc => sc.Service)
+                .Include(r => r.Invoices)
+                .Include(r => r.Images)
+                .Where(r => r.HostelId == hostelId && !r.IsDeleted);
+            return await query.ToListAsync();
+        }
+
+        public Task<(IEnumerable<Room> Data, int TotalRecords)> GetAllMatchingInLandLordAsync(Guid landlordId, string? searchPhrase, int pageSize, int pageNumber, string? sortBy,
+            SortDirection? sortDirection)
+        {
+            throw new NotImplementedException();
         }
     }
 }

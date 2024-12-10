@@ -16,16 +16,24 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     }
 
     public async Task<bool> CheckDuplicateHostelAsync(string hostelName, string province, string district,
-        string commune, string detailAddress)
+         string commune, string detailAddress)
     {
-        return await _dbContext.Hostels.AnyAsync(h =>
-            h.HostelName == hostelName
-            && h.Address.Province == province
-            && h.Address.District == district
-            && h.Address.Commune == commune
-            && h.Address.DetailAddress == detailAddress
-        );
+        var duplicateHostel = await _dbContext.Hostels
+            .Where(h => h.HostelName == hostelName
+                && h.Address.Province == province
+                && h.Address.District == district
+                && h.Address.Commune == commune
+                && h.Address.DetailAddress == detailAddress
+                && !h.IsDeleted)
+            .FirstOrDefaultAsync();
+
+        if (duplicateHostel != null)
+        {
+            return true;
+        }
+        return false;
     }
+
 
     public async Task<IEnumerable<Hostel>> GetHostelsByUserIdAsync(Guid landlordId)
     {
@@ -41,7 +49,8 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
         var searchPhraseLower = searchPhrase?.ToLower();
         var baseQuery = _dbContext.Hostels.Include(h => h.Landlord)
             .Where(x => searchPhraseLower == null || (x.HostelName.ToLower().Contains(searchPhraseLower)
-                                                      || x.Landlord.Username.ToLower().Contains(searchPhraseLower)));
+                                                      || x.Landlord.Username.ToLower().Contains(searchPhraseLower)
+                                                      && !x.IsDeleted));
 
         var totalRecords = await baseQuery.CountAsync();
 
@@ -70,7 +79,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     public Task<Hostel> GetHostelByIdAndUserIdAsync(Guid hostelId, Guid userId)
     {
         return Task.FromResult(_dbContext.Hostels.Include(h => h.Address)
-            .FirstOrDefault(h => h.Id == hostelId && h.LandlordId == userId));
+            .FirstOrDefault(h => h.Id == hostelId && h.LandlordId == userId && !h.IsDeleted));
     }
 
     public async Task<Hostel> GetHostelWithReviewsByPostIdAsync(Guid postId)
@@ -87,11 +96,75 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
         return await _dbContext.Database.BeginTransactionAsync();
     }
 
+    public async Task<(IEnumerable<Hostel> Data, int TotalRecords)> GetAllMatchingInLandLordAsync(Guid landlordId, string? searchPhrase, int? pageSize, int? pageNumber, string? sortBy,
+        SortDirection? sortDirection)
+    {
+        if (pageNumber == null)
+        {
+            pageNumber = 1;
+        }
+        if(pageSize == null)
+        {
+            pageSize = 10;
+        }
+
+        if (sortDirection == null)
+        {
+            sortDirection = SortDirection.Ascending;
+        }
+        
+        var searchPhraseLower = searchPhrase?.ToLower();
+        var baseQuery = _dbContext.Hostels.Include(h => h.Landlord)
+            .Include(h => h.Address)
+            .Include(h => h.Images)
+             .Where(x => x.LandlordId == landlordId);
+        baseQuery = baseQuery.Where(x =>!x.IsDeleted && searchPhraseLower == null || (x.HostelName.ToLower().Contains(searchPhraseLower)
+                                                                      || x.Landlord.Username.ToLower().Contains(searchPhraseLower)));
+
+        var totalRecords = await baseQuery.CountAsync();
+        //default sort by create on 
+        if (sortBy == null)
+        {
+            baseQuery = baseQuery.OrderByDescending(x => x.CreatedOn);
+        }
+        
+
+        if (sortBy != null)
+        {
+            var columnsSelector = new Dictionary<string, Expression<Func<Hostel, object>>>
+            {
+                { nameof(Hostel.HostelName), x => x.HostelName },
+                { nameof(Hostel.Size), x => x.Size},
+                { nameof(Hostel.NumberOfRooms), x => x.NumberOfRooms},
+                { nameof(Hostel.CreatedOn), x => x.CreatedOn},
+                { nameof(Hostel.LastModifiedOn), x => x.LastModifiedOn}
+            };
+
+            var selectedColumn = columnsSelector[sortBy];
+
+            baseQuery = sortDirection == SortDirection.Ascending
+                ? baseQuery.OrderBy(selectedColumn)
+                : baseQuery.OrderByDescending(selectedColumn);
+        }
+
+        
+        var hostels = await baseQuery
+            .Skip(pageSize.Value * (pageNumber.Value - 1))
+            .Take(pageSize.Value)
+            .ToListAsync();
+
+        return (Data: hostels, TotalRecords: totalRecords);
+    }
+
     public async Task<Hostel?> GetHostelByIdAsync(Guid hostelId)
     {
         return await _dbContext.Hostels
+            .Where(x => x.IsDeleted == false)
             .Include(h => h.Address)
             .Include(i => i.Images)
-            .FirstOrDefaultAsync(h => h.Id == hostelId);
+            .Include(s => s.HostelServices)
+            .ThenInclude(s => s.Services)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(h => h.Id == hostelId && !h.IsDeleted);
     }
 }

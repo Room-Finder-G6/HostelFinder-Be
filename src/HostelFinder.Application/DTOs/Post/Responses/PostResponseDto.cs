@@ -2,7 +2,7 @@
 
 public class PostResponseDto
 {
-    public Guid Id { get; set; }
+   public Guid Id { get; set; }
     public Guid HostelId { get; set; }
     public Guid RoomId { get; set; }
     public string Title { get; set; }

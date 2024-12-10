@@ -1,12 +1,11 @@
 ﻿using HostelFinder.Application.DTOs.Membership.Requests;
 using HostelFinder.Application.DTOs.Membership.Responses;
+using HostelFinder.Application.DTOs.MembershipService.Requests;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.WebApi.Controllers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Security.Claims;
 
 namespace HostelFinder.UnitTests.Controllers
 {
@@ -18,7 +17,7 @@ namespace HostelFinder.UnitTests.Controllers
         public MembershipControllerTests()
         {
             _membershipServiceMock = new Mock<IMembershipService>();
-            _controller = new MembershipController(_membershipServiceMock.Object);
+            //_controller = new MembershipController(_membershipServiceMock.Object);
         }
 
         [Fact]
@@ -214,61 +213,128 @@ namespace HostelFinder.UnitTests.Controllers
 
 
         [Fact]
-        public async Task EditMembership_ReturnsOkResult_WhenUpdateSucceeds()
+        public async Task EditMembership_ReturnsOkResult_WhenUpdateIsSuccessful()
         {
             // Arrange
-            var membershipDto = new UpdateMembershipRequestDto
-            {
-                // Populate with necessary data
-            };
             var membershipId = Guid.NewGuid();
-
-            var mockResponse = new Response<MembershipResponseDto>
+            var updateDto = new UpdateMembershipRequestDto
             {
-                Data = new MembershipResponseDto { /* populate with necessary data */ },
-                Succeeded = true
+                Name = "Updated Membership",
+                Description = "Updated Description",
+                Price = 100.0m,
+                Duration = 30,
+                MembershipServices = new List<UpdateMembershipServiceReqDto>()
+                {
+                    new UpdateMembershipServiceReqDto()
+                    {
+                        ServiceName = "New Service",
+                        Id = Guid.NewGuid(),
+                        MaxPushTopAllowed = 10,
+                        MaxPostsAllowed = 4,
+                    }
+                }
             };
 
-            _membershipServiceMock
-                .Setup(service => service.EditMembershipAsync(membershipId, membershipDto))
-                .ReturnsAsync(mockResponse);
+            var response = new Response<MembershipResponseDto>
+            {
+                Succeeded = true,
+                Data = new MembershipResponseDto
+                {
+                    Name = updateDto.Name,
+                    Description = updateDto.Description,
+                    Price = updateDto.Price,
+                    Duration = updateDto.Duration
+                }
+            };
+
+            _membershipServiceMock.Setup(service => service.EditMembershipAsync(membershipId, updateDto))
+                .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.EditMembership(membershipId, membershipDto);
+            var result = await _controller.EditMembership(membershipId, updateDto);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<Response<MembershipResponseDto>>(okResult.Value);
-            Assert.True(returnValue.Succeeded);
+            var responseData = Assert.IsType<Response<MembershipResponseDto>>(okResult.Value);
+            Assert.True(responseData.Succeeded);
+            Assert.Equal("Updated Membership", responseData.Data.Name);
         }
 
         [Fact]
-        public async Task EditMembership_ReturnsBadRequest_WhenUpdateFails()
+        public async Task EditMembership_ReturnsBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
-            var membershipDto = new UpdateMembershipRequestDto
-            {
-                // Populate with necessary data
-            };
-            var membershipId = Guid.NewGuid();
+            var invalidDto = new UpdateMembershipRequestDto(); // Missing required fields
 
-            var mockResponse = new Response<MembershipResponseDto>
-            {
-                Succeeded = false,
-                Errors = new List<string> { "Update failed" }
-            };
-
-            _membershipServiceMock
-                .Setup(service => service.EditMembershipAsync(membershipId, membershipDto))
-                .ReturnsAsync(mockResponse);
+            _controller.ModelState.AddModelError("Name", "Name is required");
 
             // Act
-            var result = await _controller.EditMembership(membershipId, membershipDto);
+            var result = await _controller.EditMembership(Guid.NewGuid(), invalidDto);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var returnValue = Assert.IsType<List<string>>(badRequestResult.Value);
-            Assert.Contains("Update failed", returnValue);
+            var modelStateErrors = Assert.IsType<SerializableError>(badRequestResult.Value);
+            Assert.True(modelStateErrors.ContainsKey("Name"));
+        }
+
+
+        [Fact]
+        public async Task EditMembership_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var membershipId = Guid.NewGuid();
+            var updateDto = new UpdateMembershipRequestDto
+            {
+                Name = "Updated Membership",
+                Description = "Updated Description",
+                Price = 100.0m,
+                Duration = 30
+            };
+
+            _membershipServiceMock.Setup(service => service.EditMembershipAsync(membershipId, updateDto))
+                .ThrowsAsync(new Exception("Internal server error"));
+
+            // Act
+            var result = await _controller.EditMembership(membershipId, updateDto);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+            var responseMessage = Assert.IsType<Response<string>>(objectResult.Value);
+            Assert.False(responseMessage.Succeeded);
+            Assert.Equal("Internal server error: Internal server error", responseMessage.Message);
+        }
+
+
+        [Fact]
+        public async Task EditMembership_ReturnsBadRequest_WhenMembershipNotFound()
+        {
+            // Arrange
+            var membershipId = Guid.NewGuid();
+            var updateDto = new UpdateMembershipRequestDto
+            {
+                Name = "Updated Membership",
+                Description = "Updated Description",
+                Price = 100.0m,
+                Duration = 30
+            };
+
+            var response = new Response<MembershipResponseDto>
+            {
+                Succeeded = false,
+                Message = "Membership not found."
+            };
+
+            _membershipServiceMock.Setup(service => service.EditMembershipAsync(membershipId, updateDto))
+                .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.EditMembership(membershipId, updateDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var responseMessage = Assert.IsType<string>(badRequestResult.Value);
+            Assert.Equal("Membership not found.", responseMessage);
         }
 
         [Fact]
@@ -276,10 +342,10 @@ namespace HostelFinder.UnitTests.Controllers
         {
             // Arrange
             var membershipId = Guid.NewGuid();
-            var mockResponse = new Response<string>
+            var mockResponse = new Response<bool>
             {
-                Data = "Membership deleted successfully",
-                Succeeded = true
+                Succeeded = true,
+                Message = "Membership deleted successfully."
             };
 
             _membershipServiceMock
@@ -291,19 +357,20 @@ namespace HostelFinder.UnitTests.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnValue = Assert.IsType<Response<string>>(okResult.Value);
-            Assert.True(returnValue.Succeeded);
+            var response = Assert.IsType<Response<bool>>(okResult.Value);
+            Assert.True(response.Succeeded);
+            Assert.Equal("Membership deleted successfully.", response.Message);
         }
 
         [Fact]
-        public async Task DeleteMembership_ReturnsBadRequest_WhenDeletionFails()
+        public async Task DeleteMembership_ReturnsNotFound_WhenMembershipDoesNotExist()
         {
             // Arrange
             var membershipId = Guid.NewGuid();
-            var mockResponse = new Response<string>
+            var mockResponse = new Response<bool>
             {
                 Succeeded = false,
-                Errors = new List<string> { "Deletion failed" }
+                Message = "Membership not found."
             };
 
             _membershipServiceMock
@@ -314,9 +381,49 @@ namespace HostelFinder.UnitTests.Controllers
             var result = await _controller.DeleteMembership(membershipId);
 
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var returnValue = Assert.IsType<List<string>>(badRequestResult.Value);
-            Assert.Contains("Deletion failed", returnValue);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            var response = Assert.IsType<Response<string>>(notFoundResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Membership not found.", response.Message);
         }
+
+        [Fact]
+        public async Task DeleteMembership_ReturnsBadRequest_WhenIdIsInvalid()
+        {
+            // Arrange
+            var invalidId = Guid.Empty;
+
+            // Act
+            var result = await _controller.DeleteMembership(invalidId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<Response<string>>(badRequestResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Invalid membership ID.", response.Message);
+        }
+
+        [Fact]
+        public async Task DeleteMembership_ReturnsInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var membershipId = Guid.NewGuid();
+
+            _membershipServiceMock
+                .Setup(service => service.DeleteMembershipAsync(membershipId))
+                .ThrowsAsync(new Exception("Internal server error"));
+
+            // Act
+            var result = await _controller.DeleteMembership(membershipId);
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode);
+
+            var response = Assert.IsType<Response<string>>(objectResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Internal server error", response.Message);
+        }
+
     }
 }

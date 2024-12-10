@@ -1,5 +1,7 @@
 ﻿using HostelFinder.Application.DTOs.Service.Request;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -16,13 +18,36 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetAllServices()
         {
-            var services = await _serviceService.GetAllServicesAsync();
-            return Ok(services);
+            try
+            {
+                var services = await _serviceService.GetAllServicesAsync();
+
+                if (services.Data == null || !services.Data.Any())
+                {
+                    return NotFound(new Response<string>
+                    {
+                        Succeeded = false,
+                        Message = "No services available."
+                    });
+                }
+
+                return Ok(services);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
 
         [HttpGet("GetServiceById/{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetServiceById(Guid id)
         {
             var service = await _serviceService.GetServiceByIdAsync(id);
@@ -33,6 +58,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost("AddService")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddService(ServiceCreateRequestDTO serviceCreateRequestDTO)
         {
             var response = await _serviceService.AddServiceAsync(serviceCreateRequestDTO);
@@ -44,6 +70,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPut("UpdateService/{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> UpdateService(Guid id, ServiceUpdateRequestDTO serviceUpdateRequestDTO)
         {
             var response = await _serviceService.UpdateServiceAsync(id, serviceUpdateRequestDTO);
@@ -55,17 +82,19 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpDelete("DeleteService/{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> DeleteService(Guid id)
         {
             var response = await _serviceService.DeleteServiceAsync(id);
             if (response.Succeeded)
             {
-                return NoContent();
+                return Ok(response);
             }
             return NotFound(response.Message);
         }
 
         [HttpGet]
+        [Authorize(Roles = "Landlord,Admin")]
         [Route("hostels/{hostelId}")]
         public async Task<IActionResult> GetServiceByHostel(Guid hostelId)
         {

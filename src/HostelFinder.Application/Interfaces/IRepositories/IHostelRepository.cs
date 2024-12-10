@@ -14,4 +14,5 @@ public interface IHostelRepository : IBaseGenericRepository<Hostel>
     Task<(IEnumerable<Hostel> Data, int TotalRecords)> GetAllMatchingAsync(string? searchPhrase, int pageSize, int pageNumber, string? sortBy, SortDirection sortDirection);
     Task<Hostel> GetHostelByIdAndUserIdAsync(Guid hostelId,Guid userId);
     Task<IDbContextTransaction> BeginTransactionAsync();
+    Task<(IEnumerable<Hostel> Data, int TotalRecords)> GetAllMatchingInLandLordAsync(Guid landlordId,string? searchPhrase, int? pageSize, int? pageNumber, string? sortBy, SortDirection? sortDirection);
 }

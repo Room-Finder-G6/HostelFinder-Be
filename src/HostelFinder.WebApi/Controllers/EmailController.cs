@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Infrastructure.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -17,12 +18,20 @@ namespace HostelFinder.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> SendEmailAsync(string emailTo, string subject, string body)
         {
-            var result = await _emailService.SendEmailAsync(emailTo, subject, body);
-            if (result)
+            try
             {
-                return Ok();
+                var result = await _emailService.SendEmailAsync(emailTo, subject, body);
+                if (result)
+                {
+                    return Ok();
+                }
+
+                return BadRequest();
             }
-            return BadRequest();
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An unexpected error occurred: " + ex.Message);
+            }
         }
     }
 }

@@ -1,6 +1,9 @@
-﻿using System.Security.Claims;
-using HostelFinder.Application.DTOs.Hostel.Requests;
+﻿using HostelFinder.Application.DTOs.Hostel.Requests;
+using HostelFinder.Application.DTOs.Hostel.Responses;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
+using HostelFinder.Domain.Common.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -11,7 +14,7 @@ namespace HostelFinder.WebApi.Controllers
     {
         private readonly IHostelService _hostelService;
         private readonly IS3Service _s3Service;
-        
+
         public HostelController(IHostelService hostelService, IS3Service s3Service)
         {
             _hostelService = hostelService;
@@ -19,55 +22,81 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("{hostelId}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetHostelById(Guid hostelId)
         {
-            var result = await _hostelService.GetHostelByIdAsync(hostelId);
-            if (!result.Succeeded || result.Data == null)
+            try
             {
-                return NotFound(result);
-            }
+                var result = await _hostelService.GetHostelByIdAsync(hostelId);
+                if (!result.Succeeded || result.Data == null)
+                {
+                    return NotFound(result);
+                }
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<HostelResponseDto>
+                {
+                    Succeeded = false,
+                    Message = ex.Message
+                });
+            }
         }
 
         [HttpGet("GetHostelsByLandlordId/{landlordId}")]
-        public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId)
+        [Authorize(Roles = "Landlord")]
+        public async Task<IActionResult> GetHostelsByLandlordId(Guid landlordId, string? searchPhrase, int? pageNumber, int? pageSize,string? sortBy, SortDirection? sortDirection)
         {
-            var hostels = await _hostelService.GetHostelsByUserIdAsync(landlordId);
-            if (hostels.Succeeded)
+            try
             {
-                return Ok(hostels);
-            }
+                var hostels = await _hostelService.GetHostelsByUserIdAsync(landlordId,searchPhrase, pageNumber, pageSize, sortBy, sortDirection);
+                if (hostels.Succeeded && hostels.Data != null)
+                {
+                    return Ok(hostels);
+                }
 
-            return NotFound(hostels.Errors);
+                return NotFound(hostels.Errors ?? new List<string> { "No hostels found" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddHostel([FromForm] AddHostelRequestDto hostelDto, [FromForm] List<IFormFile> images)
+        [Authorize(Roles = "Landlord,Admin")]
+        public async Task<IActionResult> AddHostel([FromForm] AddHostelRequestDto hostelDto, IFormFile image)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var imageUrls = new List<string>();
+            string imageUrl = null;
 
-            if (images != null && images.Count > 0)
+            // Kiểm tra nếu có hình ảnh
+            if (image != null)
             {
-                foreach (var image in images)
+                try
                 {
-                    var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
-                    var imageUrl = uploadToAWS3;
-                    imageUrls.Add(imageUrl);
+                    // Tải ảnh lên AWS S3 và lấy URL
+                    imageUrl = await _s3Service.UploadFileAsync(image);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Không thể tải ảnh lên: {ex.Message}");
                 }
             }
-            
+
             try
             {
-                var result = await _hostelService.AddHostelAsync(hostelDto, imageUrls);
+                // Gọi phương thức AddHostelAsync với chỉ một hình ảnh
+                var result = await _hostelService.AddHostelAsync(hostelDto, imageUrl);
                 if (result.Succeeded)
                 {
-                    return CreatedAtAction(nameof(GetHostelById), new { hostelId = result.Data.Id }, result);
+                    return Ok(result);
                 }
 
                 return BadRequest(result);
@@ -79,58 +108,85 @@ namespace HostelFinder.WebApi.Controllers
         }
 
 
+
         [HttpPut("{hostelId}")]
-        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromForm] UpdateHostelRequestDto request, [FromForm] List<IFormFile> images)
+        [Authorize(Roles = "Landlord,Admin")]
+        public async Task<IActionResult> UpdateHostel(Guid hostelId, [FromForm] UpdateHostelRequestDto request, IFormFile? image)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
-
-            var imageUrls = new List<string>();
-
-            if (images != null && images.Count > 0)
-            {
-                foreach (var image in images)
+                var result = await _hostelService.UpdateHostelAsync(hostelId, request, image);
+        
+                if (result.Succeeded)
                 {
-                    var uploadToAWS3 = await _s3Service.UploadFileAsync(image);
-                    var imageUrl = uploadToAWS3;
-                    imageUrls.Add(imageUrl);
+                    return Ok(result);  
                 }
+
+                // Trả về 400 nếu có lỗi về dữ liệu yêu cầu
+                return BadRequest(new Response<HostelResponseDto>
+                {
+                    Succeeded = false,
+                    Message = result.Message
+                });
             }
-
-            var result = await _hostelService.UpdateHostelAsync(hostelId, request, imageUrls);
-
-            if (result.Succeeded)
+            catch (Exception ex)
             {
-                return Ok(result);
+                // Trả về lỗi 500 khi có ngoại lệ
+                return StatusCode(500, new Response<HostelResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
             }
-
-            return BadRequest(result.Message);
         }
 
+
         [HttpDelete("DeleteHostel/{id}")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> DeleteHostel(Guid id)
         {
-            var result = await _hostelService.DeleteHostelAsync(id);
-            if (result.Succeeded)
+            try
             {
-                return Ok(result);
-            }
+                var result = await _hostelService.DeleteHostelAsync(id);
+                if (result.Succeeded)
+                {
+                    return Ok(result);
+                }
 
-            return NotFound(result);
+                return NotFound(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
         }
 
         [HttpPost("get-all")]
+        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetAll([FromBody] GetAllHostelQuery request)
         {
-            var response = await _hostelService.GetAllHostelAsync(request);
-            if (!response.Succeeded)
+            try
             {
-                return NotFound(response);
-            }
+                var response = await _hostelService.GetAllHostelAsync(request);
+                if (!response.Succeeded || response.Data == null || !response.Data.Any())
+                {
+                    return NotFound(new PagedResponse<List<ListHostelResponseDto>>
+                    {
+                        Succeeded = false,
+                        Message = "No hostels found."
+                    });
+                }
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
 }

@@ -1,21 +1,20 @@
 ﻿using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations;
+using HostelFinder.Domain.Common;
 using HostelFinder.Domain.Enums;
 
 namespace HostelFinder.Domain.Entities
 {
     public class User : BaseEntity
     {
-        [Required]
         [MaxLength(100)]
-        public string Username { get; set; }
+        public string? Username { get; set; }
 
-        [Required]
         [MaxLength(100)]
         public string FullName { get; set; }
-        [Required]
+        
         [MaxLength(100)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         [Required]
         [EmailAddress]
@@ -23,9 +22,8 @@ namespace HostelFinder.Domain.Entities
         public string Email { get; set; }
 
         [Phone]
-        [Required]
         [MaxLength(20)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [MaxLength(255)]
         public string? AvatarUrl { get; set; } =
@@ -41,10 +39,17 @@ namespace HostelFinder.Domain.Entities
         [MaxLength(255)]
         public bool? IsEmailConfirmed { get; set; }
 
-        public string? PasswordResetToken { get; set; }
-        public DateTime? PasswordResetTokenExpires { get; set; }
+        [Required]
+        [Range(0, double.MaxValue)]
+        public decimal WalletBalance { get; set; } = 0;
+        
+        public string? QRCode { get; set; }
+
         public virtual ICollection<Hostel>? Hostels { get; set; }
+        public virtual ICollection<Transaction>? Transactions { get; set; }
         public virtual Wishlist? Wishlists { get; set; }
         public virtual ICollection<UserMembership> UserMemberships { get; set; }
+        public virtual ICollection<Story> Stories { get; set; }
+        public virtual ICollection<Notification> Notifications { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using RoomFinder.Domain.Common;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using HostelFinder.Domain.Common;
 
 namespace HostelFinder.Domain.Entities
 {
@@ -11,8 +12,10 @@ namespace HostelFinder.Domain.Entities
         [ForeignKey("Room")]
         public Guid RoomId { get; set; }
         [Required]
+        [MaxLength(512)]
         public string Title { get; set; }
         [Required]
+        [MaxLength(3000)]
         public string Description { get; set; }
         public bool Status { get; set; } = true;
         public DateTime DateAvailable { get; set; }

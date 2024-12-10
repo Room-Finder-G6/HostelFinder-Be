@@ -1,0 +1,97 @@
+name: Deploy Backend to Docker Hub and VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Backend to Docker Hub and VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up .NET
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      # Step 3: Restore dependencies
+      - name: Restore dependencies
+        working-directory: src/HostelFinder.WebApi
+        run: dotnet restore
+
+      # Step 4: Build the application
+      - name: Build the application
+        working-directory: src/HostelFinder.WebApi
+        run: dotnet build --configuration Release --no-restore
+
+      # Step 5: Publish the application
+      - name: Publish the application
+        working-directory: src/HostelFinder.WebApi
+        run: dotnet publish --configuration Release --no-build --output ./publish
+
+      # Step 6: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 7: Build the Docker image
+      - name: Build Docker image
+        id: build-image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest .
+
+      # Step 8: Push Docker image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
+
+      # Step 9: SSH into VPS and deploy the Docker container
+      - name: Deploy Docker container on VPS
+        run: |
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
+            # Pull the Docker image from Docker Hub
+            docker pull ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
+            
+            # Stop and remove the old container (if it exists)
+            docker stop hostel-backend || true
+            docker rm hostel-backend || true
+            
+            # Run the new container with environment variables
+            run: |
+                docker run -d \
+                  --name hostel-backend \
+                  -p 4001:8080 \
+                  -e CONNECTIONSTRINGS__DEFAULTCONNECTION="${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}" \
+                  -e JWTSETTINGS__EXPIRYINMINUTES="${{ secrets.JWTSETTINGS__EXPIRYINMINUTES }}" \
+                  -e JWTSETTINGS__KEY="${{ secrets.JWTSETTINGS__KEY }}" \
+                  -e JWTSETTINGS__Issuer="${{ secrets.JWTSETTINGS__Issuer }}" \
+                  -e JWTSETTINGS__Audience="${{ secrets.JWTSETTINGS__Audience }}" \
+                  -e AWS__REGION="${{ secrets.AWS__REGION }}" \
+                  -e AWS__ACCESSKEY="${{ secrets.AWS__ACCESSKEY }}" \
+                  -e AWS__SECRETKEY="${{ secrets.AWS__SECRETKEY }}" \
+                  -e AWS__BUCKETNAME="${{ secrets.AWS__BUCKETNAME }}" \
+                  -e MAILSETTINGS__SERVER="${{ secrets.MAILSETTINGS__SERVER }}" \
+                  -e MAILSETTINGS__PORT="${{ secrets.MAILSETTINGS__PORT }}" \
+                  -e MAILSETTINGS__SENDERNAME="${{ secrets.MAILSETTINGS__SENDERNAME }}" \
+                  -e MAILSETTINGS__SENDEREMAIL="${{ secrets.MAILSETTINGS__SENDEREMAIL }}" \
+                  -e MAILSETTINGS__PASSWORD="${{ secrets.MAILSETTINGS__PASSWORD }}" \
+                  -e PayOS__ClientId="${{ secrets.PayOS__ClientId }}" \
+                  -e PayOS__ApiKey="${{ secrets.PayOS__ApiKey }}" \
+                  -e PayOS__ChecksumKey="${{ secrets.PayOS__ChecksumKey }}" \
+                  -e PayOS__ReturnUrl="${{ secrets.PayOS__ReturnUrl }}" \
+                  -e PayOS__CancelUrl="${{ secrets.PayOS__CancelUrl }}" \
+                  -e PayOS__WebhookUrl="${{ secrets.PayOS__WebhookUrl }}" \
+                  -e Google__ClientId="${{ secrets.Google__ClientId }}" \
+                  -e Google__ClientSecret="${{ secrets.Google__ClientSecret }}" \
+                  -e OpenAI__ApiKey="${{ secrets.OpenAI__ApiKey }}" \
+                  ${{ secrets.DOCKER_USERNAME }}/hostelfe-backend:latest
+          EOF
