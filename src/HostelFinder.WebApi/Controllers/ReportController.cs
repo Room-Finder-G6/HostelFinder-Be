@@ -54,5 +54,26 @@ namespace HostelFinder.WebApi.Controllers
                     return BadRequest(new { Error = ex.Message });
                }
           }
+          
+          //chi phí sửa chữa
+          [HttpGet("maintenance-cost")]
+          [Authorize(Roles = "Landlord,Admin")]
+          public async Task<IActionResult> GetMaintenanceCostReport(Guid hostelId, int year)
+          {
+               try
+               {
+                    var response = await _revenueReportService.GetTotalCostOfMaintenanceRecordInYearAsync(hostelId, year);
+                    if (!response.Succeeded)
+                    {
+                         return BadRequest(response);
+                    }
+
+                    return Ok(response);
+               }
+               catch (Exception ex)
+               {
+                    return BadRequest(new { Error = ex.Message });
+               }
+          }
      }
 }

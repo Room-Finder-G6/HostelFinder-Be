@@ -310,5 +310,28 @@ namespace HostelFinder.WebApi.Controllers
                 });
             }
         }
+        
+        [HttpGet("select-room/{hostelId}")]
+        [Authorize(Roles = "Landlord")]
+        
+        public async Task<IActionResult> GetRoomsByHostelId(Guid hostelId)
+        {
+            try
+            {
+                var response = await _roomService.GetSelectRoomByHostelAsync(hostelId);
+                if (!response.Succeeded)
+                    return BadRequest(response);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Internal server error: {ex.Message}"
+                });
+            }
+        }
     }
 }

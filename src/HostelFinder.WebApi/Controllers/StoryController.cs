@@ -53,7 +53,7 @@ namespace HostelFinder.WebApi.Controllers
                 var response = await _storyService.GetAllStoriesAsync(pageIndex, pageSize, filter);
 
                 if (response.Succeeded)
-                {
+                {   
                     return Ok(response);
                 }
                 else

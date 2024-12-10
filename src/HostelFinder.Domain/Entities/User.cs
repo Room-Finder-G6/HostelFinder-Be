@@ -42,6 +42,8 @@ namespace HostelFinder.Domain.Entities
         [Required]
         [Range(0, double.MaxValue)]
         public decimal WalletBalance { get; set; } = 0;
+        
+        public string? QRCode { get; set; }
 
         public virtual ICollection<Hostel>? Hostels { get; set; }
         public virtual ICollection<Transaction>? Transactions { get; set; }
