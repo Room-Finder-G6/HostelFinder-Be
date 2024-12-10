@@ -310,9 +310,8 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.LastModifiedOn, opt => opt.Ignore())  
             .ForMember(dest => dest.Images, opt => opt.Ignore()) 
             .ForMember(dest => dest.AddressStory, opt => opt.MapFrom(src => src.AddressStory));
-
-        //Mapping Notification - NotificationResponseDto
+        //Map Notification
         CreateMap<Notification, NotificationResponseDto>()
-                .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.Message));
+            .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.Message));
     }
 }
