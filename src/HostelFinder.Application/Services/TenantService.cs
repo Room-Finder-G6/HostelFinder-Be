@@ -204,6 +204,7 @@ namespace HostelFinder.Application.Services
                 // Cập nhật MoveOutDate của tenant yêu cầu
                 tenantTenancy.MoveOutDate = DateTime.Now;
                 tenantTenancy.LastModifiedOn = DateTime.Now;
+                tenantTenancy.IsDeleted = true;
                 await _roomTenancyRepository.UpdateAsync(tenantTenancy);
 
                 return new Response<string>
@@ -237,6 +238,7 @@ namespace HostelFinder.Application.Services
                 // Cập nhật lại trạng thái hợp đồng: EndDate và LastModifiedOn
                 rentalContract.EndDate = DateTime.Now;
                 rentalContract.LastModifiedOn = DateTime.Now;
+                rentalContract.IsDeleted = true;
                 await _rentalContractRepository.UpdateAsync(rentalContract);
 
                 // Cập nhật lại trạng thái của phòng
@@ -260,6 +262,7 @@ namespace HostelFinder.Application.Services
                 {
                     tenancy.MoveOutDate = DateTime.Now;
                     tenancy.LastModifiedOn = DateTime.Now;
+                    tenancy.IsDeleted = true;
                     await _roomTenancyRepository.UpdateAsync(tenancy);
                 }
 

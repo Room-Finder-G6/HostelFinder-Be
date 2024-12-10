@@ -20,7 +20,7 @@ namespace HostelFinder.Application.Services
         private readonly IMapper _mapper;
 
         public StoryService(IStoryRepository storyRepository, IAddressStoryRepository addressStoryRepository,
-                            IImageRepository imageRepository, IMapper mapper, IS3Service s3Service)
+            IImageRepository imageRepository, IMapper mapper, IS3Service s3Service)
         {
             _storyRepository = storyRepository;
             _addressStoryRepository = addressStoryRepository;
@@ -67,10 +67,12 @@ namespace HostelFinder.Application.Services
                         images.Add(image);
                     }
                 }
+
                 foreach (var image in images)
                 {
                     await _imageRepository.AddAsync(image);
                 }
+
                 story.Images = images;
 
                 return new Response<string>
@@ -106,7 +108,6 @@ namespace HostelFinder.Application.Services
                 }
 
                 var storyDto = _mapper.Map<StoryResponseDto>(story);
-                storyDto.CreatedOn = story.CreatedOn;
 
                 return new Response<StoryResponseDto>
                 {
@@ -125,7 +126,8 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<PagedResponse<List<ListStoryResponseDto>>> GetAllStoriesAsync(int pageIndex, int pageSize, StoryFilterDto filter)
+        public async Task<PagedResponse<List<ListStoryResponseDto>>> GetAllStoriesAsync(int pageIndex, int pageSize,
+            StoryFilterDto filter)
         {
             try
             {
@@ -145,7 +147,8 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<PagedResponse<List<ListStoryResponseDto>>> GetAllStoryForAdminAsync(int pageIndex, int pageSize)
+        public async Task<PagedResponse<List<ListStoryResponseDto>>> GetAllStoryForAdminAsync(int pageIndex,
+            int pageSize)
         {
             try
             {
@@ -166,7 +169,8 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<PagedResponse<List<ListStoryResponseDto>>> GetStoryByUserIdAsync(Guid userId, int pageIndex, int pageSize)
+        public async Task<PagedResponse<List<ListStoryResponseDto>>> GetStoryByUserIdAsync(Guid userId, int pageIndex,
+            int pageSize)
         {
             try
             {
@@ -182,6 +186,7 @@ namespace HostelFinder.Application.Services
                         Data = null
                     };
                 }
+
                 var storyDtos = _mapper.Map<List<ListStoryResponseDto>>(pagedStories.Data);
 
                 return PaginationHelper.CreatePagedResponse(storyDtos, pageIndex, pageSize, pagedStories.TotalRecords);
@@ -220,7 +225,8 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<StoryResponseDto>> UpdateStoryAsync(Guid storyId, UpdateStoryRequestDto request, List<IFormFile>? images, List<string>? imageUrls)
+        public async Task<Response<StoryResponseDto>> UpdateStoryAsync(Guid storyId, UpdateStoryRequestDto request,
+            List<IFormFile>? images, List<string>? imageUrls)
         {
             var story = await _storyRepository.GetStoryByIdAsync(storyId);
             if (story == null)
@@ -381,6 +387,5 @@ namespace HostelFinder.Application.Services
                 return new Response<StoryResponseDto>(message: ex.Message);
             }
         }
-
     }
 }
