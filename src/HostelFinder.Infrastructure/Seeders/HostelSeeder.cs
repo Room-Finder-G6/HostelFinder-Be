@@ -232,7 +232,6 @@ namespace HostelFinder.Infrastructure.Seeders
                     MembershipServices = new List<MembershipServices>
                     {
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 5, MaxPushTopAllowed = 5, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 },
                 new Membership
@@ -249,7 +248,6 @@ namespace HostelFinder.Infrastructure.Seeders
                     MembershipServices = new List<MembershipServices>
                     {
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 15, MaxPushTopAllowed = 15, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 },
                 new Membership
@@ -266,7 +264,6 @@ namespace HostelFinder.Infrastructure.Seeders
                     MembershipServices = new List<MembershipServices>
                     {
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 30, MaxPushTopAllowed = 30, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 },
                 new Membership
@@ -283,7 +280,6 @@ namespace HostelFinder.Infrastructure.Seeders
                     MembershipServices = new List<MembershipServices>
                     {
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 50, MaxPushTopAllowed = 50, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 }
             };
