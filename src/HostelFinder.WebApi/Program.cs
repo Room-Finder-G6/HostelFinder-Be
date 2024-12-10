@@ -29,6 +29,7 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:5131")
             .WithOrigins("https://27cd-118-71-222-200.ngrok-free.app")
             .WithOrigins("http://46.250.224.140:4000")
+            .WithOrigins("https://phongtro247.net/")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();

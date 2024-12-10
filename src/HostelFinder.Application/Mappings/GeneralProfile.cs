@@ -237,7 +237,6 @@ public class GeneralProfile : Profile
         //HostelService
         CreateMap<HostelServices, HostelServiceResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Services.ServiceName))
-            .ForMember(dest => dest.ChargingMethod, opt => opt.MapFrom(src => src.Services.ChargingMethod))
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
             .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.Services.ServiceCosts))
             .ReverseMap();
