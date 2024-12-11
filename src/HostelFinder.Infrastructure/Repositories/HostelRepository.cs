@@ -16,16 +16,24 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     }
 
     public async Task<bool> CheckDuplicateHostelAsync(string hostelName, string province, string district,
-        string commune, string detailAddress)
+         string commune, string detailAddress)
     {
-        return await _dbContext.Hostels.AnyAsync(h =>
-            h.HostelName == hostelName
-            && h.Address.Province == province
-            && h.Address.District == district
-            && h.Address.Commune == commune
-            && h.Address.DetailAddress == detailAddress
-            && !h.IsDeleted);
+        var duplicateHostel = await _dbContext.Hostels
+            .Where(h => h.HostelName == hostelName
+                && h.Address.Province == province
+                && h.Address.District == district
+                && h.Address.Commune == commune
+                && h.Address.DetailAddress == detailAddress
+                && !h.IsDeleted)
+            .FirstOrDefaultAsync();
+
+        if (duplicateHostel != null)
+        {
+            return true;
+        }
+        return false;
     }
+
 
     public async Task<IEnumerable<Hostel>> GetHostelsByUserIdAsync(Guid landlordId)
     {

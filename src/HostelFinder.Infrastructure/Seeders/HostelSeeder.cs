@@ -2,6 +2,7 @@
 using HostelFinder.Domain.Entities;
 using HostelFinder.Domain.Enums;
 using HostelFinder.Infrastructure.Context;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HostelFinder.Infrastructure.Seeders
@@ -16,24 +17,6 @@ namespace HostelFinder.Infrastructure.Seeders
             }
             if (await dbContext.Database.CanConnectAsync())
             {
-                if (await dbContext.Users.FirstOrDefaultAsync(x => x.Role == UserRole.Admin) == null)
-                {
-                    var admin = new User
-                    {
-                        Username = "admin",
-                        Password = "admin@123",
-                        Role = UserRole.Admin,
-                        Email = "matchfinder.center@gmail.com",
-                        Phone = "06868686868",
-                        IsActive = true,
-                        IsEmailConfirmed = true,
-                        CreatedBy = "Hệ Thống",
-                        CreatedOn = DateTime.Now,
-                        FullName = "HostelFinder"
-                    };
-                    await dbContext.Users.AddAsync(admin);
-                    await dbContext.SaveChangesAsync();
-                }
                 if (!dbContext.Services.Any())
                 {
                     var service = GetServices();
@@ -232,7 +215,6 @@ namespace HostelFinder.Infrastructure.Seeders
                     MembershipServices = new List<MembershipServices>
                     {
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 5, MaxPushTopAllowed = 5, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 },
                 new Membership
@@ -249,7 +231,6 @@ namespace HostelFinder.Infrastructure.Seeders
                     MembershipServices = new List<MembershipServices>
                     {
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 15, MaxPushTopAllowed = 15, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 },
                 new Membership
@@ -266,7 +247,6 @@ namespace HostelFinder.Infrastructure.Seeders
                     MembershipServices = new List<MembershipServices>
                     {
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 30, MaxPushTopAllowed = 30, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 },
                 new Membership
@@ -283,7 +263,6 @@ namespace HostelFinder.Infrastructure.Seeders
                     MembershipServices = new List<MembershipServices>
                     {
                         new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Số bài được đăng & Số lượt dẩy bài", MaxPostsAllowed = 50, MaxPushTopAllowed = 50, CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false },
-                        new MembershipServices { Id = Guid.NewGuid(), ServiceName = "Quản lý nhà trọ", CreatedOn = DateTime.Now, CreatedBy = "Hệ Thống", IsDeleted = false }
                     }
                 }
             };
