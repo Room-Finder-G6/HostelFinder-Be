@@ -65,7 +65,6 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetRoom(Guid id)
         {
             try
