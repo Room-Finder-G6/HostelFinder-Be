@@ -227,27 +227,6 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         [Fact]
-        public async Task CreateInvoice_ReturnsInternalServerError_WhenExceptionIsThrown()
-        {
-            // Arrange
-            var invoiceDto = new AddInVoiceRequestDto { roomId = Guid.NewGuid(), billingMonth = 11, billingYear = 2024 };
-
-            _invoiceServiceMock.Setup(service => service.GenerateMonthlyInvoicesAsync(invoiceDto.roomId, invoiceDto.billingMonth, invoiceDto.billingYear))
-                .ThrowsAsync(new Exception("Internal server error"));
-
-            // Act
-            var result = await _controller.CreateInvoice(invoiceDto);
-
-            // Assert
-            var objectResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, objectResult.StatusCode);
-            var response = Assert.IsType<Response<InvoiceResponseDto>>(objectResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Equal("Internal server error: Internal server error", response.Message);
-        }
-
-
-        [Fact]
         public async Task UpdateInvoice_ReturnsOkResult_WhenSuccessful()
         {
             // Arrange

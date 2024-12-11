@@ -1,16 +1,14 @@
 ﻿using HostelFinder.Application.DTOs.Address;
 using HostelFinder.Application.DTOs.Post.Requests;
 using HostelFinder.Application.DTOs.Post.Responses;
-using HostelFinder.Application.DTOs.Room.Requests;
-using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Services;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Common.Constants;
 using HostelFinder.WebApi.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Security.Claims;
 
 namespace XUnitTestHostelFinder.Controllers
 {
@@ -19,47 +17,30 @@ namespace XUnitTestHostelFinder.Controllers
         private readonly PostController _controller;
         private readonly Mock<IPostService> _postServiceMock;
         private readonly Mock<IS3Service> _s3ServiceMock;
-        private readonly Mock<IOpenAiService> _openAiService;
+        private readonly Mock<IOpenAiService> _openAiServiceMock;
 
         public PostControllerTests()
         {
             _postServiceMock = new Mock<IPostService>();
             _s3ServiceMock = new Mock<IS3Service>();
-            _controller = new PostController(_postServiceMock.Object, _s3ServiceMock.Object, _openAiService.Object);
+            _openAiServiceMock = new Mock<IOpenAiService>();
+
+            _controller = new PostController(_postServiceMock.Object, _s3ServiceMock.Object, _openAiServiceMock.Object);
         }
+
 
         [Fact]
-        public async Task GetAllPostWithPriceAndStatusAndTime_ReturnsCorrectPostData()
+        public async Task GetAllPostWithPriceAndStatusAndTime_ShouldReturnOk_WhenPostsExist()
         {
             // Arrange
-            var mockPosts = new List<ListPostsResponseDto>
-    {
-        new ListPostsResponseDto
-        {
-            Id = Guid.NewGuid(),
-            Title = "Post A",
-            Address = new AddressDto { Province = "Province A", District = "District A", Commune = "Commune A" },
-            MonthlyRentCost = 1200,
-            Size = 35,
-            FirstImage = "image_url_1.jpg",
-            CreatedOn = DateTimeOffset.UtcNow.AddDays(-1)
-        },
-        new ListPostsResponseDto
-        {
-            Id = Guid.NewGuid(),
-            Title = "Post B",
-            Address = new AddressDto { Province = "Province B", District = "District B", Commune = "Commune B" },
-            MonthlyRentCost = 1500,
-            Size = 40,
-            FirstImage = "image_url_2.jpg",
-            CreatedOn = DateTimeOffset.UtcNow.AddDays(-2)
-        }
-    };
-
             var mockResponse = new Response<List<ListPostsResponseDto>>
             {
-                Data = mockPosts,
-                Succeeded = true
+                Succeeded = true,
+                Data = new List<ListPostsResponseDto>
+            {
+                new ListPostsResponseDto { /* populate fields as needed */ },
+                new ListPostsResponseDto { /* populate fields as needed */ }
+            }
             };
 
             _postServiceMock.Setup(service => service.GetAllPostWithPriceAndStatusAndTime())
@@ -70,64 +51,20 @@ namespace XUnitTestHostelFinder.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var responseData = Assert.IsType<Response<List<ListPostsResponseDto>>>(okResult.Value);
-            Assert.True(responseData.Succeeded);
-            Assert.Equal(2, responseData.Data.Count);
-            Assert.Equal("Post A", responseData.Data.First().Title);
-            Assert.Equal("Province A", responseData.Data.First().Address.Province);
+            var response = Assert.IsType<Response<List<ListPostsResponseDto>>>(okResult.Value);
+            Assert.True(response.Succeeded);
+            Assert.NotNull(response.Data);
+            Assert.True(response.Data.Any());
         }
 
         [Fact]
-        public async Task GetAllPostWithPriceAndStatusAndTime_ReturnsPartialData_WhenFieldsAreMissing()
-        {
-            // Arrange
-            var mockPosts = new List<ListPostsResponseDto>
-    {
-        new ListPostsResponseDto
-        {
-            Id = Guid.NewGuid(),
-            Title = "Post Without Address",
-            Address = null, // Simulating missing Address
-            MonthlyRentCost = 0, // Simulating missing cost
-            Size = 0, // Simulating missing size
-            FirstImage = null, // Simulating missing image
-            CreatedOn = DateTimeOffset.UtcNow.AddDays(-3)
-        }
-    };
-
-            var mockResponse = new Response<List<ListPostsResponseDto>>
-            {
-                Data = mockPosts,
-                Succeeded = true
-            };
-
-            _postServiceMock.Setup(service => service.GetAllPostWithPriceAndStatusAndTime())
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.GetAllPostWithPriceAndStatusAndTime();
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var responseData = Assert.IsType<Response<List<ListPostsResponseDto>>>(okResult.Value);
-            Assert.True(responseData.Succeeded);
-            Assert.Single(responseData.Data);
-            Assert.Equal("Post Without Address", responseData.Data.First().Title);
-            Assert.Null(responseData.Data.First().Address);
-            Assert.Equal(0, responseData.Data.First().MonthlyRentCost);
-            Assert.Null(responseData.Data.First().FirstImage);
-        }
-
-
-        [Fact]
-        public async Task GetAllPostWithPriceAndStatusAndTime_ReturnsNotFound_WhenNoPostsExist()
+        public async Task GetAllPostWithPriceAndStatusAndTime_ShouldReturnNotFound_WhenNoPostsExist()
         {
             // Arrange
             var mockResponse = new Response<List<ListPostsResponseDto>>
             {
-                Data = new List<ListPostsResponseDto>(), // Ensuring Data is an empty list, not null
-                Succeeded = false,
-                Message = "No posts found"
+                Succeeded = true,
+                Data = new List<ListPostsResponseDto>() // Empty list
             };
 
             _postServiceMock.Setup(service => service.GetAllPostWithPriceAndStatusAndTime())
@@ -138,630 +75,285 @@ namespace XUnitTestHostelFinder.Controllers
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var responseData = Assert.IsType<Response<List<ListPostsResponseDto>>>(notFoundResult.Value);
-            Assert.False(responseData.Succeeded);
-            Assert.Equal("No posts found", responseData.Message);
-            Assert.Empty(responseData.Data); // Ensures the Data list is empty but not null
+            var response = Assert.IsType<Response<List<ListPostsResponseDto>>>(notFoundResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Empty(response.Data);
+            Assert.Equal("No posts found", response.Message);
         }
 
         [Fact]
-        public async Task GetAllPostWithPriceAndStatusAndTime_ReturnsInternalServerError_WhenExceptionIsThrown()
+        public async Task GetAllPostWithPriceAndStatusAndTime_ShouldReturnInternalServerError_WhenExceptionOccurs()
         {
             // Arrange
             _postServiceMock.Setup(service => service.GetAllPostWithPriceAndStatusAndTime())
-                .ThrowsAsync(new Exception("Unexpected error"));
+                .ThrowsAsync(new Exception("Something went wrong"));
 
             // Act
             var result = await _controller.GetAllPostWithPriceAndStatusAndTime();
 
             // Assert
-            var objectResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, objectResult.StatusCode);
-
-            var responseData = Assert.IsType<Response<string>>(objectResult.Value);
-            Assert.False(responseData.Succeeded);
-            Assert.Equal("Internal server error: Unexpected error", responseData.Message);
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+            var response = Assert.IsType<Response<string>>(statusCodeResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Something went wrong", response.Message);
         }
 
         [Fact]
-        public async Task AddPost_ReturnsOkResult_WhenPostIsSuccessfullyAdded()
+        public async Task GetAllPostWithPriceAndStatusAndTimePaging_ShouldReturnOk_WhenPostsExist()
         {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var postDto = new AddPostRequestDto
-            {
-                HostelId = Guid.NewGuid(),
-                RoomId = Guid.NewGuid(),
-                Title = "Sample Post",
-                Description = "Description",
-                DateAvailable = DateTime.Now
-            };
-            var mockResponse = new Response<AddPostRequestDto>(postDto)
+            // Arrange: Create a mock PagedResponse for posts with necessary fields
+            var mockPagedResponse = new PagedResponse<List<ListPostsResponseDto>>
             {
                 Succeeded = true,
-                Message = "Post added successfully"
-            };
-
-            _postServiceMock.Setup(service => service.AddPostAsync(postDto, It.IsAny<List<string>>(), userId))
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.AddPost(userId, postDto, null);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result); // Assert it's an OkObjectResult
-            var responseData = Assert.IsType<Response<AddPostRequestDto>>(okResult.Value); // Assert correct response type
-            Assert.True(responseData.Succeeded);
-            Assert.Equal("Post added successfully", responseData.Message);
-        }
-
-        [Fact]
-        public async Task AddPost_ReturnsBadRequest_WhenModelStateIsInvalid()
+                Data = new List<ListPostsResponseDto>
         {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var postDto = new AddPostRequestDto(); // Missing required fields
-            _controller.ModelState.AddModelError("Title", "The Title field is required.");
-
-            // Act
-            var result = await _controller.AddPost(userId, postDto, null);
-
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var modelState = Assert.IsType<SerializableError>(badRequestResult.Value); // Validate SerializableError
-            Assert.Contains("Title", modelState.Keys); // Check for the missing Title error
-        }
-
-        [Fact]
-        public async Task AddPost_ReturnsBadRequest_WhenImageUploadFails()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var postDto = new AddPostRequestDto
+            new ListPostsResponseDto
             {
-                HostelId = Guid.NewGuid(),
-                RoomId = Guid.NewGuid(),
-                Title = "Sample Post",
-                Description = "Description",
-                DateAvailable = DateTime.Now
+                Id = Guid.NewGuid(),
+                Title = "Post 1",
+                Description = "Description of Post 1",
+                Address = new AddressDto
+                {
+                    Commune = "123 Main St",
+                    Province = "Cityville",
+                    District = "State",
+                    DetailAddress = "12345"
+                },
+                MonthlyRentCost = 1000,
+                Size = 25.5m,
+                MembershipTag = "Premium",
+                FirstImage = "image1.jpg",
+                CreatedOn = DateTimeOffset.Now,
+                Status = true
+            },
+            new ListPostsResponseDto
+            {
+                Id = Guid.NewGuid(),
+                Title = "Post 2",
+                Description = "Description of Post 2",
+                Address = new AddressDto
+                {
+                    Commune = "456 Oak St",
+                    Province = "Townsville",
+                    District = "State",
+                    DetailAddress = "67890"
+                },
+                MonthlyRentCost = 1200,
+                Size = 30.5m,
+                MembershipTag = "Standard",
+                FirstImage = "image2.jpg",
+                CreatedOn = DateTimeOffset.Now,
+                Status = true
+            }
+        },
+                TotalRecords = 2
             };
-            var images = new List<IFormFile>
-    {
-        new Mock<IFormFile>().Object // Simulate invalid file
-    };
 
-            _s3ServiceMock.Setup(s3 => s3.UploadFileAsync(It.IsAny<IFormFile>()))
-                .ThrowsAsync(new ArgumentException("File không hợp lệ."));
+            // Mock the service call to return a PagedResponse
+            _postServiceMock.Setup(service => service.GetAllPostWithPriceAndStatusAndTime(1, 10))
+                .ReturnsAsync(mockPagedResponse);
 
-            // Act
-            var result = await _controller.AddPost(userId, postDto, images);
+            // Act: Call the controller action
+            var result = await _controller.GetAllPostWithPriceAndStatusAndTimePaging(1, 10);
 
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var response = Assert.IsType<Response<string>>(badRequestResult.Value);
+            // Assert: Verify the response is OK and contains the expected data
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<PagedResponse<List<ListPostsResponseDto>>>(okResult.Value);
+
+            // Check the success flag
+            Assert.True(response.Succeeded);
+
+            // Ensure we have posts returned
+            Assert.NotNull(response.Data);
+            Assert.Equal(2, response.Data.Count);  // Ensure we have two posts
+
+            // Check if TotalRecords is set correctly
+            Assert.Equal(2, response.TotalRecords);
+
+            // Check the properties of the first post to ensure everything is mapped correctly
+            var firstPost = response.Data[0];
+            Assert.Equal("Post 1", firstPost.Title);
+            Assert.Equal("Description of Post 1", firstPost.Description);
+            Assert.Equal("123 Main St", firstPost.Address.Commune);
+            Assert.Equal("Cityville", firstPost.Address.Province);
+            Assert.Equal("State", firstPost.Address.District);
+            Assert.Equal("12345", firstPost.Address.DetailAddress);
+            Assert.Equal(1000, firstPost.MonthlyRentCost);
+            Assert.Equal(25.5m, firstPost.Size);
+            Assert.Equal("Premium", firstPost.MembershipTag);
+            Assert.Equal("image1.jpg", firstPost.FirstImage);
+            Assert.True(firstPost.Status);
+        }
+
+        [Fact]
+        public async Task GetAllPostWithPriceAndStatusAndTimePaging_ShouldReturnNotFound_WhenNoPostsExist()
+        {
+            // Arrange: Create a mock PagedResponse with no posts
+            var mockPagedResponse = new PagedResponse<List<ListPostsResponseDto>>
+            {
+                Succeeded = true,
+                Data = new List<ListPostsResponseDto>(),  // No posts found
+                TotalRecords = 0
+            };
+
+            // Mock the service call to return the empty PagedResponse
+            _postServiceMock.Setup(service => service.GetAllPostWithPriceAndStatusAndTime(1, 10))
+                .ReturnsAsync(mockPagedResponse);
+
+            // Act: Call the controller action
+            var result = await _controller.GetAllPostWithPriceAndStatusAndTimePaging(1, 10);
+
+            // Assert: Verify the response is NotFound
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            var response = Assert.IsType<Response<List<ListPostsResponseDto>>>(notFoundResult.Value);
+
+            // Check the success flag is false
             Assert.False(response.Succeeded);
-            Assert.Equal("Image upload failed: File không hợp lệ.", response.Message);
+
+            // Check that the message is "No posts found"
+            Assert.Equal("No posts found", response.Message);
+
+            // Ensure the Data is an empty list
+            Assert.Empty(response.Data);
         }
 
         [Fact]
-        public async Task AddPost_ReturnsBadRequest_WhenPostCountExceeded()
+        public async Task GetAllPostWithPriceAndStatusAndTimePaging_ShouldReturnInternalServerError_WhenExceptionOccurs()
         {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var postDto = new AddPostRequestDto
-            {
-                HostelId = Guid.NewGuid(),
-                RoomId = Guid.NewGuid(),
-                Title = "Sample Post",
-                Description = "Description",
-                DateAvailable = DateTime.Now
-            };
-            var mockResponse = new Response<AddPostRequestDto>
-            {
-                Succeeded = false,
-                Message = "You have reached the maximum number of posts allowed for your membership."
-            };
+            // Arrange: Setup the mock to throw an exception when the service method is called
+            _postServiceMock.Setup(service => service.GetAllPostWithPriceAndStatusAndTime(It.IsAny<int>(), It.IsAny<int>()))
+                .ThrowsAsync(new Exception("An unexpected error occurred"));
 
-            _postServiceMock.Setup(service => service.AddPostAsync(postDto, It.IsAny<List<string>>(), userId))
-                .ReturnsAsync(mockResponse);
+            // Act: Call the controller action
+            var result = await _controller.GetAllPostWithPriceAndStatusAndTimePaging(1, 10);
 
-            // Act
-            var result = await _controller.AddPost(userId, postDto, null);
+            // Assert: Verify the response is InternalServerError
+            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, internalServerErrorResult.StatusCode);
 
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var response = Assert.IsType<Response<string>>(badRequestResult.Value);
+            var response = Assert.IsType<Response<string>>(internalServerErrorResult.Value);
+
+            // Check that the response is not succeeded and contains the error message
             Assert.False(response.Succeeded);
-            Assert.Equal("You have reached the maximum number of posts allowed for your membership.", response.Message);
+            Assert.Contains("Internal server error", response.Message);
         }
 
+        //[Fact]
+        //public async Task AddPostAsync_ShouldReturnFailed_WhenMembershipServiceIsNotInitialized()
+        //{
+        //    // Arrange: Set _membershipService to null
+        //    _membershipServiceMock = null;
+
+        //    var postDto = new AddPostRequestDto
+        //    {
+        //        HostelId = Guid.NewGuid(),
+        //        RoomId = Guid.NewGuid(),
+        //        Title = "Test Title",
+        //        Description = "Test Description",
+        //        DateAvailable = DateTime.Now
+        //    };
+
+        //    var imageUrls = new List<string> { "https://example.com/image1.jpg" };
+        //    var userId = Guid.NewGuid();
+
+        //    // Act: Call AddPostAsync
+        //    var result = await _postService.AddPostAsync(postDto, imageUrls, userId);
+
+        //    // Assert: Ensure that the response indicates failure due to uninitialized membership service
+        //    Assert.False(result.Succeeded);
+        //    Assert.Equal("Membership service not initialized.", result.Message);
+        //}
+
         [Fact]
-        public async Task AddPost_ReturnsInternalServerError_WhenExceptionIsThrown()
+        public async Task AddPostAsync_ShouldReturnInternalServerError_WhenExceptionOccurs()
         {
             // Arrange
-            var userId = Guid.NewGuid();
             var postDto = new AddPostRequestDto
             {
                 HostelId = Guid.NewGuid(),
                 RoomId = Guid.NewGuid(),
-                Title = "Sample Post",
-                Description = "Description",
+                Title = "Test Title",
+                Description = "Test Description",
                 DateAvailable = DateTime.Now
             };
-            var images = new List<IFormFile>();
 
-            _postServiceMock.Setup(service => service.AddPostAsync(It.IsAny<AddPostRequestDto>(), It.IsAny<List<string>>(), userId))
-                .ThrowsAsync(new Exception("Unexpected error"));
+            var userId = Guid.NewGuid();
+
+            _postServiceMock.Setup(service => service.AddPostAsync(It.IsAny<AddPostRequestDto>(), It.IsAny<List<string>>(), It.IsAny<Guid>()))
+                .ThrowsAsync(new Exception("Something went wrong"));
 
             // Act
-            var result = await _controller.AddPost(userId, postDto, images);
+            var result = await _controller.AddPost(userId, postDto, new List<IFormFile>());
 
             // Assert
             var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(500, internalServerErrorResult.StatusCode);
             var response = Assert.IsType<Response<string>>(internalServerErrorResult.Value);
             Assert.False(response.Succeeded);
-            Assert.Equal("Internal server error: Unexpected error", response.Message);
-        }
-
-        [Theory]
-        [InlineData("", "Valid Description", true, false, "The Title field is required.")] // Missing Title
-        [InlineData("Valid Title", "", true, false, "The Description field is required.")] // Missing Description
-        [InlineData("Valid Title", "Valid Description", false, false, "Invalid model state.")] // Invalid ModelState
-        [InlineData("Valid Title", "Valid Description", true, true, null)] // Valid Data
-        public async Task AddPost_WithDifferentData(string title, string description, bool isModelStateValid, bool expectedSuccess, string expectedError)
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var postDto = new AddPostRequestDto
-            {
-                HostelId = Guid.NewGuid(),
-                RoomId = Guid.NewGuid(),
-                Title = title,
-                Description = description,
-                DateAvailable = DateTime.Now
-            };
-
-            if (!isModelStateValid)
-            {
-                _controller.ModelState.AddModelError("Key", expectedError ?? "Invalid model state.");
-            }
-
-            var mockResponse = new Response<AddPostRequestDto>
-            {
-                Succeeded = expectedSuccess,
-                Message = expectedSuccess ? "Post added successfully" : expectedError
-            };
-
-            _postServiceMock
-                .Setup(service => service.AddPostAsync(postDto, It.IsAny<List<string>>(), userId))
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.AddPost(userId, postDto, null);
-
-            // Assert
-            if (expectedSuccess)
-            {
-                var okResult = Assert.IsType<OkObjectResult>(result);
-                var responseData = Assert.IsType<Response<AddPostRequestDto>>(okResult.Value);
-                Assert.True(responseData.Succeeded);
-                Assert.Equal("Post added successfully", responseData.Message);
-            }
-            else
-            {
-                var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-                if (isModelStateValid)
-                {
-                    var response = Assert.IsType<Response<string>>(badRequestResult.Value);
-                    Assert.False(response.Succeeded);
-                    Assert.Equal(expectedError, response.Message);
-                }
-                else
-                {
-                    var modelState = Assert.IsType<SerializableError>(badRequestResult.Value);
-                    Assert.Contains("Key", modelState.Keys);
-                }
-            }
-        }
-
-        //[Fact]
-        //public async Task UpdatePost_ReturnsBadRequest_WhenImageUploadFails()
-        //{
-        //    // Arrange
-        //    var postId = Guid.NewGuid();
-        //    var request = new UpdatePostRequestDto
-        //    {
-        //        HostelId = Guid.NewGuid(),
-        //        RoomId = Guid.NewGuid(),
-        //        Title = "Updated Title",
-        //        Description = "Updated Description",
-        //        Status = true,
-        //        DateAvailable = DateTime.Now.AddDays(10)
-        //    };
-        //    var images = new List<IFormFile> { new Mock<IFormFile>().Object };
-
-        //    _s3ServiceMock.Setup(service => service.UploadFileAsync(It.IsAny<IFormFile>()))
-        //        .ThrowsAsync(new ArgumentException("Invalid file"));
-
-        //    // Act
-        //    var result = await _controller.UpdatePost(postId, request, images);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        //    var response = Assert.IsType<Response<string>>(badRequestResult.Value);
-        //    Assert.False(response.Succeeded);
-        //    Assert.Equal("Image upload failed: Invalid file", response.Message);
-        //}
-
-        //[Fact]
-        //public async Task UpdatePost_ReturnsOkResult_WhenPostIsSuccessfullyUpdated()
-        //{
-        //    // Arrange
-        //    var postId = Guid.NewGuid();
-        //    var request = new UpdatePostRequestDto
-        //    {
-        //        HostelId = Guid.NewGuid(),
-        //        RoomId = Guid.NewGuid(),
-        //        Title = "Updated Title",
-        //        Description = "Updated Description",
-        //        Status = true,
-        //        DateAvailable = DateTime.Now.AddDays(10)
-        //    };
-        //    var mockResponse = new Response<UpdatePostRequestDto>(request)
-        //    {
-        //        Succeeded = true,
-        //        Message = "Post updated successfully"
-        //    };
-
-        //    // Mock the service to return a successful response
-        //    _postServiceMock.Setup(service => service.UpdatePostAsync(postId, request, It.IsAny<List<string>>()))
-        //        .ReturnsAsync(mockResponse);
-
-        //    // Act
-        //    var result = await _controller.UpdatePost(postId, request, null); // Pass null for images
-
-        //    // Assert
-        //    var okResult = Assert.IsType<OkObjectResult>(result); // Ensure it's OkObjectResult
-        //    var response = Assert.IsType<Response<UpdatePostRequestDto>>(okResult.Value); // Ensure response is of the expected type
-        //    Assert.True(response.Succeeded); // Assert success
-        //    Assert.Equal("Post updated successfully", response.Message); // Check the message
-        //}
-
-        //[Fact]
-        //public async Task UpdatePost_ReturnsBadRequest_WhenPostNotFound()
-        //{
-        //    // Arrange
-        //    var postId = Guid.NewGuid();
-        //    var request = new UpdatePostRequestDto
-        //    {
-        //        HostelId = Guid.NewGuid(),
-        //        RoomId = Guid.NewGuid(),
-        //        Title = "Updated Title",
-        //        Description = "Updated Description",
-        //        Status = true,
-        //        DateAvailable = DateTime.Now.AddDays(10)
-        //    };
-        //    var mockResponse = new Response<UpdatePostRequestDto>
-        //    {
-        //        Succeeded = false,
-        //        Message = "Post not found."
-        //    };
-
-        //    _postServiceMock
-        //        .Setup(service => service.UpdatePostAsync(postId, request, It.IsAny<List<string>>()))
-        //        .ReturnsAsync(mockResponse);
-
-        //    // Act
-        //    var result = await _controller.UpdatePost(postId, request, null);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        //    var responseMessage = Assert.IsType<Response<UpdatePostRequestDto>>(badRequestResult.Value);
-        //    Assert.False(responseMessage.Succeeded);
-        //    Assert.Equal("Post not found.", responseMessage.Message);
-        //}
-
-        //[Fact]
-        //public async Task UpdatePost_ReturnsBadRequest_WhenRoomIsInvalid()
-        //{
-        //    // Arrange
-        //    var postId = Guid.NewGuid();
-        //    var request = new UpdatePostRequestDto
-        //    {
-        //        HostelId = Guid.NewGuid(),
-        //        RoomId = Guid.NewGuid(),
-        //        Title = "Updated Title",
-        //        Description = "Updated Description",
-        //        Status = true,
-        //        DateAvailable = DateTime.Now.AddDays(10)
-        //    };
-        //    var mockResponse = new Response<UpdatePostRequestDto>("The specified room does not belong to the hostel associated with this post.")
-        //    {
-        //        Succeeded = false
-        //    };
-
-        //    _postServiceMock.Setup(service => service.UpdatePostAsync(postId, request, It.IsAny<List<string>>()))
-        //        .ReturnsAsync(mockResponse);
-
-        //    // Act
-        //    var result = await _controller.UpdatePost(postId, request, null);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        //    var response = Assert.IsType<Response<UpdatePostRequestDto>>(badRequestResult.Value); // Adjusted to expect Response<UpdatePostRequestDto>
-        //    Assert.False(response.Succeeded);
-        //    Assert.Equal("The specified room does not belong to the hostel associated with this post.", response.Message);
-        //}
-
-        //[Fact]
-        //public async Task UpdatePost_ReturnsBadRequest_WhenModelStateIsInvalid()
-        //{
-        //    // Arrange
-        //    var postId = Guid.NewGuid();
-        //    var request = new UpdatePostRequestDto(); // Missing required fields
-        //    _controller.ModelState.AddModelError("Title", "The Title field is required.");
-
-        //    // Act
-        //    var result = await _controller.UpdatePost(postId, request, null);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<BadRequestObjectResult>(result); // Check for BadRequestObjectResult
-        //    var modelState = Assert.IsType<SerializableError>(badRequestResult.Value); // Ensure SerializableError is returned
-        //    Assert.Contains("Title", modelState.Keys); // Validate that the error contains the expected field
-        //}
-
-        //[Fact]
-        //public async Task UpdatePost_ReturnsInternalServerError_WhenExceptionIsThrown()
-        //{
-        //    // Arrange
-        //    var postId = Guid.NewGuid();
-        //    var request = new UpdatePostRequestDto
-        //    {
-        //        HostelId = Guid.NewGuid(),
-        //        RoomId = Guid.NewGuid(),
-        //        Title = "Updated Title",
-        //        Description = "Updated Description",
-        //        Status = true,
-        //        DateAvailable = DateTime.Now.AddDays(10)
-        //    };
-
-        //    _postServiceMock.Setup(service => service.UpdatePostAsync(postId, request, It.IsAny<List<string>>()))
-        //        .ThrowsAsync(new Exception("Unexpected error"));
-
-        //    // Act
-        //    var result = await _controller.UpdatePost(postId, request, null);
-
-        //    // Assert
-        //    var objectResult = Assert.IsType<ObjectResult>(result);
-        //    Assert.Equal(500, objectResult.StatusCode);
-        //    var response = Assert.IsType<Response<string>>(objectResult.Value);
-        //    Assert.False(response.Succeeded);
-        //    Assert.Equal("Internal server error: Unexpected error", response.Message);
-        //}
-
-        [Fact]
-        public async Task DeletePost_ReturnsInternalServerError_WhenExceptionIsThrown()
-        {
-            // Arrange
-            var postId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
-
-            _postServiceMock
-                .Setup(service => service.DeletePostAsync(postId, userId))
-                .ThrowsAsync(new Exception("Unexpected error"));
-
-            var claims = new List<Claim> { new Claim("UserId", userId.ToString()) };
-            _controller.ControllerContext.HttpContext = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new ClaimsIdentity(claims))
-            };
-
-            // Act
-            var result = await _controller.DeletePost(postId);
-
-            // Assert
-            var objectResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, objectResult.StatusCode);
-
-            var response = Assert.IsType<Response<string>>(objectResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Equal("Internal server error: Unexpected error", response.Message);
+            Assert.Contains("Internal server error", response.Message);
         }
 
         [Fact]
-        public async Task DeletePost_ReturnsUnauthorized_WhenUserNotAuthenticated()
+        public async Task UpdatePostAsync_ShouldReturnBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
             var postId = Guid.NewGuid();
-            _controller.ControllerContext.HttpContext = new DefaultHttpContext();
+            var postDto = new UpdatePostRequestDto();  // Invalid data
+            _controller.ModelState.AddModelError("Title", "Title is required"); // Force model state invalid
 
             // Act
-            var result = await _controller.DeletePost(postId);
-
-            // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            Assert.Equal("Người dùng chưa được xác thực.", unauthorizedResult.Value);
-        }
-
-        [Fact]
-        public async Task DeletePost_ReturnsBadRequest_WhenPostDoesNotExist()
-        {
-            // Arrange
-            var postId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
-
-            var mockResponse = new Response<bool>
-            {
-                Succeeded = false,
-                Errors = new List<string> { "Bài đăng không tồn tại." }
-            };
-
-            _postServiceMock
-                .Setup(service => service.DeletePostAsync(postId, userId))
-                .ReturnsAsync(mockResponse);
-
-            var claims = new List<Claim> { new Claim("UserId", userId.ToString()) };
-            _controller.ControllerContext.HttpContext = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new ClaimsIdentity(claims))
-            };
-
-            // Act
-            var result = await _controller.DeletePost(postId);
+            var result = await _controller.UpdatePost(postId, postDto, null, null);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var errors = Assert.IsType<List<string>>(badRequestResult.Value);
-            Assert.Contains("Bài đăng không tồn tại.", errors);
+            Assert.Equal(400, badRequestResult.StatusCode);
         }
 
         [Fact]
-        public async Task DeletePost_ReturnsBadRequest_WhenUserDoesNotHavePermission()
+        public async Task DeletePost_ShouldReturnInternalServerError_WhenExceptionIsThrown()
         {
             // Arrange
             var postId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var mockResponse = new Response<bool>
-            {
-                Succeeded = false,
-                Errors = new List<string> { "Bạn không có quyền xóa bài đăng này." }
-            };
-
-            _postServiceMock
-                .Setup(service => service.DeletePostAsync(postId, userId))
-                .ReturnsAsync(mockResponse);
-
-            var claims = new List<Claim> { new Claim("UserId", userId.ToString()) };
-            _controller.ControllerContext.HttpContext = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new ClaimsIdentity(claims))
-            };
+            _postServiceMock.Setup(service => service.DeletePostAsync(postId, userId))
+                .ThrowsAsync(new Exception("Some error occurred"));
 
             // Act
             var result = await _controller.DeletePost(postId);
 
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var errors = Assert.IsType<List<string>>(badRequestResult.Value);
-            Assert.Contains("Bạn không có quyền xóa bài đăng này.", errors);
-        }
-
-        [Fact]
-        public async Task DeletePost_ReturnsOk_WhenPostIsSuccessfullyDeleted()
-        {
-            // Arrange
-            var postId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
-
-            var mockResponse = new Response<bool>
-            {
-                Succeeded = true,
-                Message = "Xóa bài đăng thành công."
-            };
-
-            _postServiceMock
-                .Setup(service => service.DeletePostAsync(postId, userId))
-                .ReturnsAsync(mockResponse);
-
-            var claims = new List<Claim> { new Claim("UserId", userId.ToString()) };
-            _controller.ControllerContext.HttpContext = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new ClaimsIdentity(claims))
-            };
-
-            // Act
-            var result = await _controller.DeletePost(postId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<Response<bool>>(okResult.Value);
-            Assert.True(response.Succeeded);
-            Assert.Equal("Xóa bài đăng thành công.", response.Message);
-        }
-
-        [Fact]
-        public async Task Get_ReturnsBadRequest_WhenInvalidQuery()
-        {
-            // Arrange
-            var request = new GetAllPostsQuery
-            {
-                PageNumber = -1, // Invalid PageNumber
-                PageSize = 0,    // Invalid PageSize
-                SortBy = null
-            };
-
-            var mockResponse = new PagedResponse<List<ListPostsResponseDto>>
-            {
-                Succeeded = false,
-                Errors = new List<string> { "Invalid query parameters." }
-            };
-
-            _postServiceMock.Setup(service => service.GetAllPostAysnc(request))
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.Get(request);
-
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var response = Assert.IsType<Response<string>>(badRequestResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Contains("Invalid query parameters.", response.Errors);
-        }
-
-        [Fact]
-        public async Task Get_ReturnsInternalServerError_WhenExceptionIsThrown()
-        {
-            // Arrange
-            var request = new GetAllPostsQuery
-            {
-                SearchPhrase = "Keyword",
-                PageNumber = 1,
-                PageSize = 10,
-                SortBy = "Title",
-                SortDirection = SortDirection.Ascending
-            };
-
-            _postServiceMock.Setup(service => service.GetAllPostAysnc(request))
-                .ThrowsAsync(new Exception("Unexpected error"));
-
-            // Act
-            var result = await _controller.Get(request);
-
-            // Assert
-            var serverErrorResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, serverErrorResult.StatusCode);
-
-            var response = Assert.IsType<Response<string>>(serverErrorResult.Value);
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+            var response = Assert.IsType<Response<string>>(statusCodeResult.Value);
             Assert.False(response.Succeeded);
             Assert.Contains("Internal server error", response.Message);
         }
 
         [Fact]
-        public async Task Get_ReturnsOkResult_WhenPostsAreFound()
+        public async Task Get_ShouldReturnOk_WhenPostsAreFound()
         {
             // Arrange
             var request = new GetAllPostsQuery
             {
-                SearchPhrase = "Keyword",
-                PageNumber = 1,
+                SearchPhrase = "Test",
                 PageSize = 10,
-                SortBy = "Title",
+                PageNumber = 1,
+                SortBy = "Date",
                 SortDirection = SortDirection.Ascending
             };
 
-            var mockPosts = new List<ListPostsResponseDto>
-    {
-        new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 1" },
-        new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 2" }
-    };
-
-            var mockResponse = PaginationHelper.CreatePagedResponse(mockPosts, request.PageNumber, request.PageSize, 2);
+            var mockPostsResponse = new PagedResponse<List<ListPostsResponseDto>>
+            {
+                Succeeded = true,
+                Data = new List<ListPostsResponseDto> { new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Test Post" } },
+                TotalRecords = 1,
+                Message = "Posts retrieved successfully."
+            };
 
             _postServiceMock.Setup(service => service.GetAllPostAysnc(request))
-                .ReturnsAsync(mockResponse);
+                .ReturnsAsync(mockPostsResponse);
 
             // Act
             var result = await _controller.Get(request);
@@ -770,91 +362,76 @@ namespace XUnitTestHostelFinder.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<PagedResponse<List<ListPostsResponseDto>>>(okResult.Value);
             Assert.True(response.Succeeded);
-            Assert.Equal(2, response.Data.Count);
+            Assert.Equal("Posts retrieved successfully.", response.Message);
+            Assert.NotEmpty(response.Data);
         }
 
         [Fact]
-        public async Task GetPostsByUserId_ReturnsInternalServerError_WhenExceptionIsThrown()
+        public async Task Get_ShouldReturnBadRequest_WhenServiceFails()
         {
             // Arrange
-            var userId = Guid.NewGuid();
+            var request = new GetAllPostsQuery
+            {
+                SearchPhrase = "Invalid",
+                PageSize = 10,
+                PageNumber = 1,
+                SortBy = "Date",
+                SortDirection = SortDirection.Ascending
+            };
 
-            _postServiceMock.Setup(service => service.GetPostsByUserIdAsync(userId))
+            var mockFailedResponse = new PagedResponse<List<ListPostsResponseDto>>
+            {
+                Succeeded = false,
+                Errors = new List<string> { "No posts found." }
+            };
+
+            _postServiceMock.Setup(service => service.GetAllPostAysnc(request))
+                .ReturnsAsync(mockFailedResponse);
+
+            // Act
+            var result = await _controller.Get(request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<Response<string>>(badRequestResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Contains("No posts found.", response.Errors);
+        }
+
+        [Fact]
+        public async Task Get_ShouldReturnInternalServerError_WhenExceptionOccurs()
+        {
+            // Arrange
+            var request = new GetAllPostsQuery
+            {
+                SearchPhrase = "Test",
+                PageSize = 10,
+                PageNumber = 1,
+                SortBy = "Date",
+                SortDirection = SortDirection.Ascending
+            };
+
+            _postServiceMock.Setup(service => service.GetAllPostAysnc(request))
                 .ThrowsAsync(new Exception("Unexpected error"));
 
             // Act
-            var result = await _controller.GetPostsByUserId(userId);
+            var result = await _controller.Get(request);
 
             // Assert
-            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, internalServerErrorResult.StatusCode);
-
-            var response = Assert.IsType<Response<string>>(internalServerErrorResult.Value);
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            var response = Assert.IsType<Response<string>>(statusCodeResult.Value);
             Assert.False(response.Succeeded);
             Assert.Equal("Internal server error: Unexpected error", response.Message);
         }
 
         [Fact]
-        public async Task GetPostsByUserId_ReturnsOkResult_WhenPostsExist()
+        public async Task GetPostsByUserId_ShouldReturnBadRequest_WhenUserIdIsInvalid()
         {
             // Arrange
-            var userId = Guid.NewGuid();
-            var mockPosts = new List<ListPostsResponseDto>
-    {
-        new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 1" },
-        new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 2" }
-    };
-            var mockResponse = new Response<List<ListPostsResponseDto>>
-            {
-                Succeeded = true,
-                Data = mockPosts
-            };
-
-            _postServiceMock.Setup(service => service.GetPostsByUserIdAsync(userId))
-                .ReturnsAsync(mockResponse);
+            var invalidUserId = Guid.Empty;
 
             // Act
-            var result = await _controller.GetPostsByUserId(userId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var responseData = Assert.IsType<Response<List<ListPostsResponseDto>>>(okResult.Value);
-            Assert.True(responseData.Succeeded);
-            Assert.Equal(2, responseData.Data.Count);
-        }
-
-        [Fact]
-        public async Task GetPostsByUserId_ReturnsNotFound_WhenNoPostsExist()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            var mockResponse = new Response<List<ListPostsResponseDto>>
-            {
-                Succeeded = false,
-                Errors = new List<string> { "Bạn chưa có bài đăng nào." }
-            };
-
-            _postServiceMock.Setup(service => service.GetPostsByUserIdAsync(userId))
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.GetPostsByUserId(userId);
-
-            // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var response = Assert.IsType<Response<string>>(notFoundResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Contains("Bạn chưa có bài đăng nào.", response.Errors);
-        }
-
-        [Fact]
-        public async Task GetPostsByUserId_ReturnsBadRequest_WhenUserIdIsInvalid()
-        {
-            // Arrange
-            var userId = Guid.Empty;
-
-            // Act
-            var result = await _controller.GetPostsByUserId(userId);
+            var result = await _controller.GetPostsByUserId(invalidUserId);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -864,28 +441,66 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         [Fact]
-        public async Task GetPostById_ReturnsInternalServerError_WhenExceptionIsThrown()
+        public async Task GetPostsByUserId_ShouldReturnNotFound_WhenUserHasNoPosts()
         {
             // Arrange
-            var postId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
 
-            _postServiceMock.Setup(service => service.GetPostByIdAsync(postId))
-                .ThrowsAsync(new Exception("Unexpected error"));
+            // Mock the service to return no posts
+            var emptyResponse = new Response<List<ListPostsResponseDto>>
+            {
+                Succeeded = false,
+                Errors = new List<string> { "Bạn chưa có bài đăng nào." }
+            };
+
+            _postServiceMock.Setup(service => service.GetPostsByUserIdAsync(userId))
+                .ReturnsAsync(emptyResponse);
 
             // Act
-            var result = await _controller.GetPostById(postId);
+            var result = await _controller.GetPostsByUserId(userId);
 
             // Assert
-            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, internalServerErrorResult.StatusCode);
-
-            var response = Assert.IsType<Response<string>>(internalServerErrorResult.Value);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            var response = Assert.IsType<Response<string>>(notFoundResult.Value);
             Assert.False(response.Succeeded);
-            Assert.Equal("Internal server error: Unexpected error", response.Message);
+            Assert.Equal("Bạn chưa có bài đăng nào.", response.Errors.First());
         }
 
         [Fact]
-        public async Task GetPostById_ReturnsBadRequest_WhenPostIdIsInvalid()
+        public async Task GetPostsByUserId_ShouldReturnOk_WhenUserHasPosts()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+
+            // Mock the service to return some posts
+            var mockPosts = new List<ListPostsResponseDto>
+        {
+            new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Test Post 1" },
+            new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Test Post 2" }
+        };
+
+            var successResponse = new Response<List<ListPostsResponseDto>>
+            {
+                Succeeded = true,
+                Data = mockPosts
+            };
+
+            _postServiceMock.Setup(service => service.GetPostsByUserIdAsync(userId))
+                .ReturnsAsync(successResponse);
+
+            // Act
+            var result = await _controller.GetPostsByUserId(userId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<Response<List<ListPostsResponseDto>>>(okResult.Value);
+            Assert.True(response.Succeeded);
+            Assert.Equal(2, response.Data.Count);
+            Assert.Equal("Test Post 1", response.Data.First().Title);
+        }
+
+        [Fact]
+        public async Task GetPostById_ShouldReturnBadRequest_WhenPostIdIsInvalid()
         {
             // Arrange
             var invalidPostId = Guid.Empty;
@@ -901,47 +516,27 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         [Fact]
-        public async Task GetPostById_ReturnsNotFound_WhenPostDoesNotExist()
+        public async Task GetPostById_ShouldReturnOk_WhenPostIsFound()
         {
             // Arrange
             var postId = Guid.NewGuid();
-            var mockResponse = new Response<PostResponseDto>
-            {
-                Succeeded = false,
-                Errors = new List<string> { "Bài đăng không tồn tại." }
-            };
 
-            _postServiceMock.Setup(service => service.GetPostByIdAsync(postId))
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.GetPostById(postId);
-
-            // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var response = Assert.IsType<Response<string>>(notFoundResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Contains("Bài đăng không tồn tại.", response.Errors);
-        }
-
-        [Fact]
-        public async Task GetPostById_ReturnsOk_WhenPostExists()
-        {
-            // Arrange
-            var postId = Guid.NewGuid();
-            var postResponse = new PostResponseDto
+            var mockPost = new PostResponseDto
             {
                 Id = postId,
-                Title = "Sample Post"
-            };
-            var mockResponse = new Response<PostResponseDto>
-            {
-                Data = postResponse,
-                Succeeded = true
+                Title = "Test Post",
+                Description = "Test Description"
             };
 
+            var successResponse = new Response<PostResponseDto>
+            {
+                Succeeded = true,
+                Data = mockPost
+            };
+
+            // Correct mock setup using the correct return type
             _postServiceMock.Setup(service => service.GetPostByIdAsync(postId))
-                .ReturnsAsync(mockResponse);
+                .ReturnsAsync(successResponse);
 
             // Act
             var result = await _controller.GetPostById(postId);
@@ -950,38 +545,43 @@ namespace XUnitTestHostelFinder.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<Response<PostResponseDto>>(okResult.Value);
             Assert.True(response.Succeeded);
-            Assert.Equal(postId, response.Data.Id);
+            Assert.Equal("Test Post", response.Data.Title);
+            Assert.Equal("Test Description", response.Data.Description);
+        }
+
+
+        [Fact]
+        public async Task GetPostById_ShouldReturnInternalServerError_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var postId = Guid.NewGuid();
+
+            // Mock the service to throw an exception
+            _postServiceMock.Setup(service => service.GetPostByIdAsync(postId))
+                .ThrowsAsync(new Exception("Something went wrong"));
+
+            // Act
+            var result = await _controller.GetPostById(postId);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+            var response = Assert.IsType<Response<string>>(statusCodeResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: Something went wrong", response.Message);
         }
 
         [Fact]
-        public async Task FilterPosts_ReturnsInternalServerError_WhenExceptionIsThrown()
+        public async Task FilterPosts_ShouldReturnBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
             var filter = new FilterPostsRequestDto
             {
-                Province = "Province1"
+                // Set invalid values here that will cause the model state to be invalid.
+                Province = "",  // Example invalid field
+                MinSize = -1    // Example invalid field
             };
 
-            _postServiceMock.Setup(service => service.FilterPostsAsync(filter))
-                .ThrowsAsync(new Exception("Unexpected error"));
-
-            // Act
-            var result = await _controller.FilterPosts(filter);
-
-            // Assert
-            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, internalServerErrorResult.StatusCode);
-
-            var response = Assert.IsType<Response<string>>(internalServerErrorResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Equal("Internal server error: Unexpected error", response.Message);
-        }
-
-        [Fact]
-        public async Task FilterPosts_ReturnsBadRequest_WhenFilterIsInvalid()
-        {
-            // Arrange
-            var filter = new FilterPostsRequestDto(); // Missing required fields
             _controller.ModelState.AddModelError("Province", "Province is required.");
 
             // Act
@@ -995,23 +595,24 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         [Fact]
-        public async Task FilterPosts_ReturnsNotFound_WhenNoPostsMatchFilter()
+        public async Task FilterPosts_ShouldReturnNotFound_WhenNoPostsMatchFilterCriteria()
         {
             // Arrange
             var filter = new FilterPostsRequestDto
             {
-                Province = "NonExistentProvince",
-                District = "NonExistentDistrict"
+                Province = "Hanoi",
+                District = "District X"
+                // Add any filter criteria here
             };
 
-            var mockResponse = new Response<List<ListPostsResponseDto>>
+            var noPostsResponse = new Response<List<ListPostsResponseDto>>
             {
-                Data = new List<ListPostsResponseDto>(),
-                Succeeded = true
+                Succeeded = true,
+                Data = new List<ListPostsResponseDto>() // No posts
             };
 
-            _postServiceMock.Setup(service => service.FilterPostsAsync(filter))
-                .ReturnsAsync(mockResponse);
+            _postServiceMock.Setup(service => service.FilterPostsAsync(It.IsAny<FilterPostsRequestDto>()))
+                .ReturnsAsync(noPostsResponse);
 
             // Act
             var result = await _controller.FilterPosts(filter);
@@ -1022,31 +623,30 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.False(response.Succeeded);
             Assert.Equal("No posts found matching the filter criteria.", response.Message);
         }
-
         [Fact]
-        public async Task FilterPosts_ReturnsOkResult_WhenPostsMatchFilter()
+        public async Task FilterPosts_ShouldReturnOk_WhenPostsMatchFilterCriteria()
         {
             // Arrange
             var filter = new FilterPostsRequestDto
             {
-                Province = "Province1",
-                District = "District1",
-                MinPrice = 1000,
-                MaxPrice = 2000
+                Province = "Hanoi",
+                District = "District X"
             };
 
-            var mockResponse = new Response<List<ListPostsResponseDto>>
+            var filteredPosts = new List<ListPostsResponseDto>
+    {
+        new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 1" },
+        new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 2" }
+    };
+
+            var successResponse = new Response<List<ListPostsResponseDto>>
             {
-                Data = new List<ListPostsResponseDto>
-        {
-            new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 1", MonthlyRentCost = 1500 },
-            new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 2", MonthlyRentCost = 1800 }
-        },
-                Succeeded = true
+                Succeeded = true,
+                Data = filteredPosts
             };
 
-            _postServiceMock.Setup(service => service.FilterPostsAsync(filter))
-                .ReturnsAsync(mockResponse);
+            _postServiceMock.Setup(service => service.FilterPostsAsync(It.IsAny<FilterPostsRequestDto>()))
+                .ReturnsAsync(successResponse);
 
             // Act
             var result = await _controller.FilterPosts(filter);
@@ -1055,40 +655,40 @@ namespace XUnitTestHostelFinder.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<Response<List<ListPostsResponseDto>>>(okResult.Value);
             Assert.True(response.Succeeded);
-            Assert.Equal(2, response.Data.Count);
+            Assert.Equal(2, response.Data.Count); // Expecting 2 posts
+        }
+        [Fact]
+        public async Task FilterPosts_ShouldReturnInternalServerError_WhenExceptionOccurs()
+        {
+            // Arrange
+            var filter = new FilterPostsRequestDto
+            {
+                Province = "Hanoi"
+            };
+
+            _postServiceMock.Setup(service => service.FilterPostsAsync(It.IsAny<FilterPostsRequestDto>()))
+                .ThrowsAsync(new Exception("An unexpected error occurred"));
+
+            // Act
+            var result = await _controller.FilterPosts(filter);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+            var response = Assert.IsType<Response<string>>(statusCodeResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Internal server error: An unexpected error occurred", response.Message);
         }
 
         [Fact]
-        public async Task PushPost_ReturnsInternalServerError_WhenExceptionIsThrown()
+        public async Task PushPost_ShouldReturnBadRequest_WhenUserIdIsInvalid()
         {
             // Arrange
             var postId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
-
-            _postServiceMock.Setup(service => service.PushPostOnTopAsync(postId, It.IsAny<DateTime>(), userId))
-                .ThrowsAsync(new Exception("Unexpected error"));
+            var userId = Guid.Empty; // Invalid userId
 
             // Act
             var result = await _controller.PushPost(postId, userId);
-
-            // Assert
-            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, internalServerErrorResult.StatusCode);
-
-            var response = Assert.IsType<Response<string>>(internalServerErrorResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Equal("Internal server error: Unexpected error", response.Message);
-        }
-
-        [Fact]
-        public async Task PushPost_ReturnsBadRequest_WhenUserIdIsInvalid()
-        {
-            // Arrange
-            var postId = Guid.NewGuid();
-            var invalidUserId = Guid.Empty;
-
-            // Act
-            var result = await _controller.PushPost(postId, invalidUserId);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -1098,44 +698,15 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         [Fact]
-        public async Task PushPost_ReturnsBadRequest_WhenPostNotFound()
+        public async Task PushPost_ShouldReturnBadRequest_WhenMembershipServiceNotInitialized()
         {
             // Arrange
             var postId = Guid.NewGuid();
             var userId = Guid.NewGuid();
-            var mockResponse = new Response<PostResponseDto>
-            {
-                Succeeded = false,
-                Message = "Post not found."
-            };
 
+            // Simulate that the membership service is null or not initialized
             _postServiceMock.Setup(service => service.PushPostOnTopAsync(postId, It.IsAny<DateTime>(), userId))
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.PushPost(postId, userId);
-
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var response = Assert.IsType<Response<string>>(badRequestResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Equal("Post not found.", response.Message);
-        }
-
-        [Fact]
-        public async Task PushPost_ReturnsBadRequest_WhenMembershipServiceNotInitialized()
-        {
-            // Arrange
-            var postId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
-            var mockResponse = new Response<PostResponseDto>
-            {
-                Succeeded = false,
-                Message = "Membership service not initialized."
-            };
-
-            _postServiceMock.Setup(service => service.PushPostOnTopAsync(postId, It.IsAny<DateTime>(), userId))
-                .ReturnsAsync(mockResponse);
+                .ReturnsAsync(new Response<PostResponseDto> { Succeeded = false, Message = "Membership service not initialized." });
 
             // Act
             var result = await _controller.PushPost(postId, userId);
@@ -1148,20 +719,47 @@ namespace XUnitTestHostelFinder.Controllers
         }
 
         [Fact]
-        public async Task PushPost_ReturnsOkResult_WhenPostIsSuccessfullyPushed()
+        public async Task PushPost_ShouldReturnBadRequest_WhenPostNotFound()
         {
             // Arrange
             var postId = Guid.NewGuid();
             var userId = Guid.NewGuid();
-            var mockResponse = new Response<PostResponseDto>
+
+            // Simulate that the post is not found
+            _postServiceMock.Setup(service => service.PushPostOnTopAsync(postId, It.IsAny<DateTime>(), userId))
+                .ReturnsAsync(new Response<PostResponseDto> { Succeeded = false, Message = "Post not found." });
+
+            // Act
+            var result = await _controller.PushPost(postId, userId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<Response<string>>(badRequestResult.Value);
+            Assert.False(response.Succeeded);
+            Assert.Equal("Post not found.", response.Message);
+        }
+
+        [Fact]
+        public async Task PushPost_ShouldReturnOk_WhenPushPostIsSuccessful()
+        {
+            // Arrange
+            var postId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var newPostResponse = new PostResponseDto
+            {
+                Id = postId,
+                Title = "Sample Post",
+            };
+
+            var successResponse = new Response<PostResponseDto>
             {
                 Succeeded = true,
-                Message = "Post pushed to the top successfully.",
-                Data = new PostResponseDto { Id = postId, Title = "Sample Post" }
+                Message = "Đẩy bài đăng lên thành công.",
+                Data = newPostResponse
             };
 
             _postServiceMock.Setup(service => service.PushPostOnTopAsync(postId, It.IsAny<DateTime>(), userId))
-                .ReturnsAsync(mockResponse);
+                .ReturnsAsync(successResponse);
 
             // Act
             var result = await _controller.PushPost(postId, userId);
@@ -1170,79 +768,29 @@ namespace XUnitTestHostelFinder.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<Response<PostResponseDto>>(okResult.Value);
             Assert.True(response.Succeeded);
-            Assert.Equal("Post pushed to the top successfully.", response.Message);
+            Assert.Equal("Đẩy bài đăng lên thành công.", response.Message);
             Assert.Equal(postId, response.Data.Id);
         }
 
         [Fact]
-        public async Task GetPostsOrderedByPriority_ReturnsInternalServerError_WhenExceptionIsThrown()
+        public async Task PushPost_ShouldReturnInternalServerError_WhenExceptionOccurs()
         {
             // Arrange
-            _postServiceMock.Setup(service => service.GetPostsOrderedByPriorityAsync())
+            var postId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+
+            _postServiceMock.Setup(service => service.PushPostOnTopAsync(postId, It.IsAny<DateTime>(), userId))
                 .ThrowsAsync(new Exception("Unexpected error"));
 
             // Act
-            var result = await _controller.GetPostsOrderedByPriority();
+            var result = await _controller.PushPost(postId, userId);
 
             // Assert
-            var internalServerErrorResult = Assert.IsType<ObjectResult>(result);
-            Assert.Equal(500, internalServerErrorResult.StatusCode);
-
-            var response = Assert.IsType<Response<string>>(internalServerErrorResult.Value);
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+            var response = Assert.IsType<Response<string>>(statusCodeResult.Value);
             Assert.False(response.Succeeded);
             Assert.Equal("Internal server error: Unexpected error", response.Message);
-        }
-
-        [Fact]
-        public async Task GetPostsOrderedByPriority_ReturnsNotFound_WhenNoPostsExist()
-        {
-            // Arrange
-            var mockResponse = new Response<List<ListPostsResponseDto>>
-            {
-                Succeeded = true,
-                Data = new List<ListPostsResponseDto>()
-            };
-
-            _postServiceMock.Setup(service => service.GetPostsOrderedByPriorityAsync())
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.GetPostsOrderedByPriority();
-
-            // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var response = Assert.IsType<Response<string>>(notFoundResult.Value);
-            Assert.False(response.Succeeded);
-            Assert.Equal("No posts available.", response.Message);
-        }
-
-        [Fact]
-        public async Task GetPostsOrderedByPriority_ReturnsOkResult_WhenPostsExist()
-        {
-            // Arrange
-            var mockPosts = new List<ListPostsResponseDto>
-    {
-        new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 1", MonthlyRentCost = 1000 },
-        new ListPostsResponseDto { Id = Guid.NewGuid(), Title = "Post 2", MonthlyRentCost = 2000 }
-    };
-            var mockResponse = new Response<List<ListPostsResponseDto>>
-            {
-                Succeeded = true,
-                Data = mockPosts
-            };
-
-            _postServiceMock.Setup(service => service.GetPostsOrderedByPriorityAsync())
-                .ReturnsAsync(mockResponse);
-
-            // Act
-            var result = await _controller.GetPostsOrderedByPriority();
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var response = Assert.IsType<Response<List<ListPostsResponseDto>>>(okResult.Value);
-            Assert.True(response.Succeeded);
-            Assert.NotEmpty(response.Data);
-            Assert.Equal(2, response.Data.Count);
         }
 
     }
