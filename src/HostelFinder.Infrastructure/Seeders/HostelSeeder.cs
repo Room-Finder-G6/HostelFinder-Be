@@ -226,6 +226,7 @@ namespace HostelFinder.Infrastructure.Seeders
                     Description = "Gói hội viên dùng thử có hạn trong 7 ngày",
                     Price = 0,
                     Duration = 7,
+                    Tag = "Dùng thử",
                     CreatedBy = "Hệ Thống",
                     CreatedOn = DateTime.Now,
                     IsDeleted = false,

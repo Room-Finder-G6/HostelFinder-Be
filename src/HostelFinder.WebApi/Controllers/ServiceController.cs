@@ -94,7 +94,6 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Landlord,Admin")]
         [Route("hostels/{hostelId}")]
         public async Task<IActionResult> GetServiceByHostel(Guid hostelId)
         {
