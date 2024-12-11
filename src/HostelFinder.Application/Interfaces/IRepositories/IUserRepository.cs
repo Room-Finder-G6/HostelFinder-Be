@@ -13,8 +13,6 @@ namespace HostelFinder.Application.Interfaces.IRepositories
         Task<bool> CheckPhoneNumberAsync(string phoneNumber);
         Task<UserRole> GetRoleAsync(Guid userId);
         Task<IEnumerable<User>> GetAllAsync();
-        Task<User> GetByIdAsync(Guid id);
-        Task UpdateAsync(User user);
         Task<User> GetLandlordByHostelIdAsync(Guid hostelId);
         Task<Hostel> GetHostelByPostIdAsync(Guid postId);
         Task<User> GetUserByHostelIdAsync(Guid hostelId);
