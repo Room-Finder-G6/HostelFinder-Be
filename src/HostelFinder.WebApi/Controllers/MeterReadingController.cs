@@ -23,8 +23,12 @@ namespace HostelFinder.WebApi.Controllers
         {
             try
             {
-                var meterReaded = await _meterReadingService.AddMeterReadingAsync(createMeterReadingDto.roomId, createMeterReadingDto.serviceId, createMeterReadingDto.previousReading, createMeterReadingDto.currentReading,createMeterReadingDto.billingMonth, createMeterReadingDto.billingYear);
-                return Ok(meterReaded);
+                var response = await _meterReadingService.AddMeterReadingAsync(createMeterReadingDto.roomId, createMeterReadingDto.serviceId, createMeterReadingDto.previousReading, createMeterReadingDto.currentReading,createMeterReadingDto.billingMonth, createMeterReadingDto.billingYear);
+                if(!response.Succeeded)
+                {
+                    return BadRequest(response);
+                }
+                return Ok(response);
             }
             catch (Exception ex)
             {

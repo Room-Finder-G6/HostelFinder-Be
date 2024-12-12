@@ -67,10 +67,6 @@ namespace HostelFinder.Application.Services
                 // lấy số liệu tháng trước
                 var previousMeterReading = await _meterReadingRepository.GetPreviousMeterReadingAsync(roomId, serviceId, billingMonth, billingYear);
                 //nếu không có số liệu tháng trước thì sẽ mặc định là 0
-                if (currentReading < previousMeterReading.Reading)
-                {
-                    return new Response<string>(){Message = "Số liệu tháng này phải lớn hơn hoặc bằng số liệu tháng trước", Succeeded = false};
-                }
                 if (previousMeterReading == null)
                 {
                     var newPreviousMeterReading = new MeterReading
@@ -119,6 +115,10 @@ namespace HostelFinder.Application.Services
             {
                 foreach (var meterReading in createMeterReadingDtos.ToList())
                 {
+                    if(meterReading.previousReading.HasValue && meterReading.currentReading < meterReading.previousReading)
+                    {
+                        return new Response<string> { Message = "Số liệu tháng này phải lớn hơn hoặc bằng số liệu tháng trước", Succeeded = false };
+                    }
                     var service = await _serviceRepository.GetByIdAsync(meterReading.serviceId);
                     if(service.ChargingMethod != Domain.Enums.ChargingMethod.PerUsageUnit )
                     {

@@ -38,7 +38,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<UserMembership> GetTrialMembershipByUserIdAsync(Guid userId)
         {
             return await _dbContext.UserMemberships
-                .FirstOrDefaultAsync(um => um.UserId == userId && !um.IsPaid);
+                .FirstOrDefaultAsync(um => um.UserId == userId && um.IsPaid);
         }
 
         public async Task<UserMembership> GetByUserIdAndMembershipIdAsync(Guid userId, Guid membershipId)

@@ -176,6 +176,7 @@ public class GeneralProfile : Profile
 
         // MembershipServices mappings
         CreateMap<MembershipServices, MembershipServiceResponseDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
             .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
             .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))
@@ -237,7 +238,6 @@ public class GeneralProfile : Profile
         //HostelService
         CreateMap<HostelServices, HostelServiceResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Services.ServiceName))
-            .ForMember(dest => dest.ChargingMethod, opt => opt.MapFrom(src => src.Services.ChargingMethod))
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
             .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.Services.ServiceCosts))
             .ReverseMap();
