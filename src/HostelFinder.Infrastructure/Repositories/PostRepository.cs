@@ -208,7 +208,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     {
         var query = _dbContext.Posts
             .AsNoTracking()
-            .Where(p => p.Status)
+            .Where(p => p.Status && !p.IsDeleted)
             .Include(p => p.Hostel)
             .ThenInclude(h => h.Address)
             .Include(p => p.Room)
