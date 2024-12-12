@@ -35,14 +35,37 @@ namespace HostelFinder.WebApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStoryById(Guid id)
         {
-            var storyResponse = await _storyService.GetStoryByIdAsync(id);
-
-            if (storyResponse == null)
+            if (id == Guid.Empty)
             {
-                return NotFound(new { message = "Bài đăng không tìm thấy." });
+                return BadRequest(new { message = "ID không hợp lệ." });
             }
 
-            return Ok(storyResponse);
+            try
+            {
+                var storyResponse = await _storyService.GetStoryByIdAsync(id);
+
+                if (storyResponse == null || storyResponse.Data == null || !storyResponse.Succeeded)
+                {
+                    var errorResponse = new Response<StoryResponseDto>
+                    {
+                        Succeeded = false,
+                        Message = "Bài đăng không tìm thấy."
+                    };
+                    return NotFound(errorResponse);
+                }
+
+                return Ok(storyResponse);
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Lỗi: {ex.Message}"
+                };
+
+                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
+            }
         }
 
         [HttpPost("GetAllStoryIndex")]
@@ -53,7 +76,7 @@ namespace HostelFinder.WebApi.Controllers
                 var response = await _storyService.GetAllStoriesAsync(pageIndex, pageSize, filter);
 
                 if (response.Succeeded)
-                {   
+                {
                     return Ok(response);
                 }
                 else
@@ -75,40 +98,76 @@ namespace HostelFinder.WebApi.Controllers
         [HttpGet("GetAllStoryForAdmin")]
         public async Task<IActionResult> GetAllStoryForAdmin([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
-            var pagedResponse = await _storyService.GetAllStoryForAdminAsync(pageIndex, pageSize);
-
-            if (pagedResponse.Succeeded)
+            try
             {
-                return Ok(pagedResponse);
-            }
+                var pagedResponse = await _storyService.GetAllStoryForAdminAsync(pageIndex, pageSize);
 
-            return BadRequest(pagedResponse);
+                if (pagedResponse.Succeeded)
+                {
+                    return Ok(pagedResponse);
+                }
+
+                return BadRequest(pagedResponse);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<PagedResponse<ListStoryResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = $"Lỗi server: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetStoryByUserId(Guid userId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
-            var response = await _storyService.GetStoryByUserIdAsync(userId, pageIndex, pageSize);
-
-            if (response.Succeeded)
+            try
             {
-                return Ok(response);
-            }
+                var response = await _storyService.GetStoryByUserIdAsync(userId, pageIndex, pageSize);
 
-            return BadRequest(response);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+
+                return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<PagedResponse<ListStoryResponseDto>>
+                {
+                    Succeeded = false,
+                    Message = $"Lỗi server: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpDelete("{storyId}")]
         public async Task<IActionResult> DeleteStory(Guid storyId)
         {
-            var response = await _storyService.DeleteStoryAsync(storyId);
-
-            if (response.Succeeded)
+            try
             {
-                return Ok(response);
-            }
+                var response = await _storyService.DeleteStoryAsync(storyId);
 
-            return BadRequest(response);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+
+                return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string>
+                {
+                    Succeeded = false,
+                    Message = $"Lỗi server: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpPut("{storyId}")]
@@ -119,40 +178,74 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(new Response<StoryResponseDto>("Invalid input data."));
             }
 
-            var response = await _storyService.UpdateStoryAsync(storyId, request, images, imageUrls);
-
-            if (response.Succeeded)
+            try
             {
-                return Ok(response);
-            }
+                var response = await _storyService.UpdateStoryAsync(storyId, request, images, imageUrls);
 
-            return BadRequest(response);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+
+                return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<StoryResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"Lỗi server: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpPatch("deny/{storyId}")]
         public async Task<IActionResult> DenyStory(Guid storyId)
         {
-            var response = await _storyService.DenyStoryAsync(storyId);
-
-            if (response.Succeeded)
+            try
             {
-                return Ok(response);
-            }
+                var response = await _storyService.DenyStoryAsync(storyId);
 
-            return BadRequest(response);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+
+                return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<StoryResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"Lỗi server: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpPatch("accept/{storyId}")]
         public async Task<IActionResult> AcceptStory(Guid storyId)
         {
-            var response = await _storyService.AcceptStoryAsync(storyId);
-
-            if (response.Succeeded)
+            try
             {
-                return Ok(response);
+                var response = await _storyService.AcceptStoryAsync(storyId);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+                return BadRequest(response);
             }
-
-            return BadRequest(response);
+            catch (Exception ex)
+            {
+                var errorResponse = new Response<StoryResponseDto>
+                {
+                    Succeeded = false,
+                    Message = $"An unexpected error occurred: {ex.Message}"
+                };
+                return StatusCode(500, errorResponse);
+            }
         }
 
     }
