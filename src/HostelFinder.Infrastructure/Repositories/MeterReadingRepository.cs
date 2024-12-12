@@ -42,6 +42,7 @@ namespace HostelFinder.Infrastructure.Repositories
             while (meterReading == null && (previousYear > 0 && previousMonth > 0))
             {
                 meterReading = await _dbContext.MeterReadings
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(mr =>
                         mr.RoomId == roomId &&
                         mr.ServiceId == serviceId &&
@@ -58,7 +59,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 }
 
                 // Kiểm tra điều kiện dừng nếu không tìm thấy bất kỳ dữ liệu nào
-                if (previousYear < 2020 || previousMonth < 1)
+                if (previousYear < 2022 || previousMonth < 1)
                 {
                     break;
                 }
