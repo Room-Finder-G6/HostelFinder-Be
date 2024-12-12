@@ -25,7 +25,7 @@ namespace HostelFinder.WebApi.Controllers
             var response = await _membershipService.GetAllMembershipWithMembershipService();
             if (!response.Succeeded || response.Data == null)
             {
-                return NotFound(response.Errors);
+                return NotFound(response);
             }
 
             return Ok(response);
@@ -52,34 +52,40 @@ namespace HostelFinder.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An unexpected error occurred: " + ex.Message);
+                var errorResponse = new Response<string>
+                {
+                    Succeeded = false,
+                    Message = "An unexpected error occurred: " + ex.Message
+                };
+                return StatusCode(500, errorResponse);
             }
         }
 
         [HttpPut("EditMembership/{id}")]
         public async Task<IActionResult> EditMembership(Guid id, [FromBody] UpdateMembershipRequestDto membershipDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
-                var response = await _membershipService.EditMembershipAsync(id, membershipDto);
-                if (response.Succeeded)
+                if (!ModelState.IsValid)
                 {
-                    return Ok(response);
+                    return BadRequest(ModelState);
                 }
 
-                return BadRequest(response.Message);
+                var response = await _membershipService.EditMembershipAsync(id, membershipDto);
+
+                if (!response.Succeeded)
+                {
+                    return NotFound(response); 
+                }
+
+                return Ok(response); 
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new Response<string>
                 {
                     Succeeded = false,
-                    Message = $"Internal server error: {ex.Message}"
+                    Message = $"An unexpected error occurred: {ex.Message}"
                 });
             }
         }
