@@ -255,7 +255,7 @@ namespace HostelFinder.Infrastructure.Seeders
                 {
                     Id = Guid.NewGuid(),
                     Name = "Hội viên Tiêu chuẩn",
-                    Description = "Phù hợp với quy mô và số lượng nhà trọ vừa từ 10 BDS",
+                    Description = "Phù hợp với quy mô và số lượng nhà trọ vừa từ 10 BĐS",
                     Price = 150000,
                     Duration = 30,
                     Tag = "Bạc",
