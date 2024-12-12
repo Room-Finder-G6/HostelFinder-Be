@@ -1,7 +1,9 @@
 ﻿using HostelFinder.Application.DTOs.Auth.Requests;
+using HostelFinder.Application.DTOs.Auth.Responses;
 using HostelFinder.Application.DTOs.Auths.Requests;
 using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.Interfaces.IServices;
+using HostelFinder.Application.Wrappers;
 using HostelFinder.Infrastructure.Context;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,18 +28,25 @@ namespace HostelFinder.WebApi.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] CreateUserRequestDto request)
         {
+            if (request == null)
+            {
+                return BadRequest("Request body cannot be null.");
+            }
+
             try
             {
                 var response = await _userService.RegisterUserAsync(request);
+
                 if (!response.Succeeded)
                 {
-                    return BadRequest(response);
+                    return BadRequest(response); 
                 }
+
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                return StatusCode(500, $"Error: {ex.Message}");
             }
         }
 
@@ -50,13 +59,18 @@ namespace HostelFinder.WebApi.Controllers
                 var response = await _authAccountService.LoginAsync(request);
                 if (!response.Succeeded)
                 {
-                    return BadRequest(response);
+                    return BadRequest(response); 
                 }
-                return Ok(response);
+                return Ok(response);  
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                var errorResponse = new Response<AuthenticationResponse>
+                {
+                    Message = $"Error: {ex.Message}",
+                    Succeeded = false
+                };
+                return StatusCode(500, errorResponse);
             }
         }
 
@@ -69,13 +83,19 @@ namespace HostelFinder.WebApi.Controllers
                 var response = await _authAccountService.ChangePasswordAsync(request);
                 if (!response.Succeeded)
                 {
-                    return BadRequest(response);
+                    return BadRequest(response);  
                 }
-                return Ok(response);
+                return Ok(response);  
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                var errorResponse = new Response<string>
+                {
+                    Message = $"Error: {ex.Message}",
+                    Succeeded = false
+                };
+
+                return StatusCode(500, errorResponse); 
             }
         }
 
@@ -88,13 +108,19 @@ namespace HostelFinder.WebApi.Controllers
                 var response = await _authAccountService.ForgotPasswordAsync(request);
                 if (!response.Succeeded)
                 {
-                    return BadRequest(response);
+                    return BadRequest(response); 
                 }
-                return Ok(response);
+                return Ok(response); 
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                var errorResponse = new Response<string>
+                {
+                    Message = $"Error: {ex.Message}",
+                    Succeeded = false
+                };
+
+                return StatusCode(500, errorResponse);  
             }
         }
 
