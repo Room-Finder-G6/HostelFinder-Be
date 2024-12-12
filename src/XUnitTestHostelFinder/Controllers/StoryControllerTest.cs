@@ -954,7 +954,7 @@ namespace XUnitTestHostelFinder.Controllers
             Assert.False(response.Succeeded);  // Kết quả không thành công
             Assert.Equal("Story not found.", response.Message);  // Kiểm tra thông báo lỗi đúng
         }
-
+      
 
     }
 }
