@@ -76,7 +76,9 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _dbContext.Users.ToListAsync();
+            return await _dbContext.Users
+                .Where(u => u.Role != UserRole.Admin)
+                .ToListAsync();
         }
 
         public async Task<User> GetByIdAsync(Guid id)
