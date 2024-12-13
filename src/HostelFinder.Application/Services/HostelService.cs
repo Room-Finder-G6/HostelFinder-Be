@@ -6,9 +6,9 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 using HostelFinder.Domain.Common.Constants;
+using HostelFinder.Application.DTOs.Report;
 
 namespace HostelFinder.Application.Services
 {
@@ -279,6 +279,23 @@ namespace HostelFinder.Application.Services
             {
                 return new PagedResponse<List<ListHostelResponseDto>> { Succeeded = false, Errors = { ex.Message } };
             }
+        }
+
+        public async Task<DashboardForLandlordResponse> GetDashboardDataAsync(Guid landlordId)
+        {
+            var dashboardData = new DashboardForLandlordResponse
+            {
+                HostelCount = await _hostelRepository.GetHostelCountAsync(landlordId),
+                TenantCount = await _hostelRepository.GetTenantCountAsync(landlordId),
+                RoomCount = await _hostelRepository.GetRoomCountAsync(landlordId),
+                OccupiedRoomCount = await _hostelRepository.GetOccupiedRoomCountAsync(landlordId),
+                AvailableRoomCount = await _hostelRepository.GetAvailableRoomCountAsync(landlordId),
+                AllInvoicesCount = await _hostelRepository.GetAllInvoicesCountAsync(landlordId),
+                UnpaidInvoicesCount = await _hostelRepository.GetUnpaidInvoicesCountAsync(landlordId),
+                ExpiringContractsCount = await _hostelRepository.GetExpiringContractsCountAsync(landlordId, DateTime.Now)
+            };
+
+            return dashboardData;
         }
     }
 }

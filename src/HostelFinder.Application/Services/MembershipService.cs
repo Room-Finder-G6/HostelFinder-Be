@@ -7,7 +7,6 @@ using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using HostelFinder.Domain.Entities;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace HostelFinder.Application.Services
 {
@@ -60,13 +59,13 @@ namespace HostelFinder.Application.Services
             try
             {
                 var membershipServiceRequests =
-                    _mapper.Map<List<AddMembershipServiceReqDto>>(membershipDto.MembershipServices);
+                    _mapper.Map<AddMembershipServiceReqDto>(membershipDto.MembershipServices);
 
-                await _membershipRepository.AddMembershipWithServicesAsync(membership, membershipServiceRequests);
+                await _membershipRepository.AddMembershipWithServiceAsync(membership, membershipServiceRequests);
 
                 var membershipResponseDto = _mapper.Map<MembershipResponseDto>(membership);
                 membershipResponseDto.MembershipServices =
-                    _mapper.Map<List<MembershipServiceResponseDto>>(membership.MembershipServices);
+                    _mapper.Map<MembershipServiceResponseDto>(membership.MembershipServices);
 
                 return new Response<MembershipResponseDto>
                 {
@@ -80,8 +79,7 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<Response<MembershipResponseDto>> EditMembershipAsync(Guid id,
-            UpdateMembershipRequestDto membershipDto)
+        public async Task<Response<MembershipResponseDto>> EditMembershipAsync(Guid id, UpdateMembershipRequestDto membershipDto)
         {
             var membership = await _membershipRepository.GetMembershipWithServicesAsync(id);
             if (membership == null)
@@ -93,53 +91,19 @@ namespace HostelFinder.Application.Services
             membership.LastModifiedOn = DateTime.Now;
             membership.LastModifiedBy = "System";
 
-            if (membershipDto.MembershipServices != null && membershipDto.MembershipServices.Any())
+            var existingService = membership.MembershipServices.FirstOrDefault();
+
+            if (existingService != null)
             {
-                var existingServices = membership.MembershipServices.ToList();
-
-                foreach (var newServiceDto in membershipDto.MembershipServices)
-                {
-                    if (string.IsNullOrWhiteSpace(newServiceDto.ServiceName))
-                    {
-                        continue;
-                    }
-
-                    var existingService = existingServices
-                        .FirstOrDefault(s => s.Id == newServiceDto.Id);
-
-                    if (existingService != null)
-                    {
-                        existingService.ServiceName = newServiceDto.ServiceName;
-                        existingService.MaxPostsAllowed = newServiceDto.MaxPostsAllowed;
-                        existingService.MaxPushTopAllowed = newServiceDto.MaxPushTopAllowed;
-                        existingService.CreatedOn = DateTime.Now;
-                        existingService.CreatedBy = "System";
-                        existingService.LastModifiedOn = DateTime.Now;
-                        existingService.LastModifiedBy = "System";
-                    }
-                    else
-                    {
-                        var newService = new MembershipServices
-                        {
-                            ServiceName = newServiceDto.ServiceName,
-                            MaxPostsAllowed = newServiceDto.MaxPostsAllowed,
-                            MaxPushTopAllowed = newServiceDto.MaxPushTopAllowed,
-                            Membership = membership,
-                            CreatedOn = DateTime.Now,
-                            CreatedBy = "System"
-                        };
-                        membership.MembershipServices.Add(newService);
-                        await _membershipRepository.Add(newService);
-                    }
-                }
-
-                foreach (var existingService in existingServices)
-                {
-                    if (!membershipDto.MembershipServices.Any(ms => ms.Id == existingService.Id))
-                    {
-                        await _membershipRepository.DeletePermanentAsync(existingService.Id);
-                    }
-                }
+                existingService.ServiceName = membershipDto.MembershipServices.ServiceName;
+                existingService.MaxPostsAllowed = membershipDto.MembershipServices.MaxPostsAllowed;
+                existingService.MaxPushTopAllowed = membershipDto.MembershipServices.MaxPushTopAllowed;
+                existingService.LastModifiedOn = DateTime.Now;
+                existingService.LastModifiedBy = "System";
+            }
+            else
+            {
+                return new Response<MembershipResponseDto>("No existing service found to update.");
             }
 
             await _membershipRepository.UpdateAsync(membership);
@@ -173,11 +137,11 @@ namespace HostelFinder.Application.Services
             {
                 foreach (var service in membershipServices)
                 {
-                    await _membershipRepository.DeletePermanentAsync(service.Id);
+                    await _membershipRepository.DeleteAsync(service.Id);
                 }
             }
 
-            await _membershipRepository.DeletePermanentAsync(membership.Id);
+            await _membershipRepository.DeleteAsync(membership.Id);
             return new Response<bool>(true, "Membership deleted successfully.");
         }
 

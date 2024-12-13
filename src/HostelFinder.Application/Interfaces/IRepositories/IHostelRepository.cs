@@ -15,4 +15,12 @@ public interface IHostelRepository : IBaseGenericRepository<Hostel>
     Task<Hostel> GetHostelByIdAndUserIdAsync(Guid hostelId,Guid userId);
     Task<IDbContextTransaction> BeginTransactionAsync();
     Task<(IEnumerable<Hostel> Data, int TotalRecords)> GetAllMatchingInLandLordAsync(Guid landlordId,string? searchPhrase, int? pageSize, int? pageNumber, string? sortBy, SortDirection? sortDirection);
+    Task<int> GetHostelCountAsync(Guid landlordId);
+    Task<int> GetTenantCountAsync(Guid landlordId);
+    Task<int> GetRoomCountAsync(Guid landlordId);
+    Task<int> GetOccupiedRoomCountAsync(Guid landlordId);
+    Task<int> GetAvailableRoomCountAsync(Guid landlordId);
+    Task<int> GetAllInvoicesCountAsync(Guid landlordId);
+    Task<int> GetUnpaidInvoicesCountAsync(Guid landlordId);
+    Task<int> GetExpiringContractsCountAsync(Guid landlordId, DateTime currentDate);
 }

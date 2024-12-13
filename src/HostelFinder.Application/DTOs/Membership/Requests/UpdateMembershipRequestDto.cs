@@ -8,6 +8,6 @@ namespace HostelFinder.Application.DTOs.Membership.Requests
         public string Description { get; set; }
         public decimal Price { get; set; }
         public int Duration { get; set; }
-        public List<UpdateMembershipServiceReqDto>? MembershipServices { get; set; }
+        public UpdateMembershipServiceReqDto? MembershipServices { get; set; }
     }
 }

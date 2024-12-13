@@ -187,5 +187,30 @@ namespace HostelFinder.WebApi.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("GetDashboardForLandlord")]
+        [Authorize(Roles = "Landlord,Admin")]
+        public async Task<IActionResult> GetDashboard(Guid landlordId)
+        {
+            try
+            {
+                var dashboardData = await _hostelService.GetDashboardDataAsync(landlordId);
+
+                if (dashboardData == null)
+                {
+                    return NotFound(new { message = "Dashboard data not found for the given landlordId." });
+                }
+
+                return Ok(dashboardData);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+            }
+        }
     }
 }

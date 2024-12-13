@@ -103,7 +103,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
         {
             pageNumber = 1;
         }
-        if(pageSize == null)
+        if (pageSize == null)
         {
             pageSize = 10;
         }
@@ -112,13 +112,13 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
         {
             sortDirection = SortDirection.Ascending;
         }
-        
+
         var searchPhraseLower = searchPhrase?.ToLower();
         var baseQuery = _dbContext.Hostels.Include(h => h.Landlord)
             .Include(h => h.Address)
             .Include(h => h.Images)
              .Where(x => x.LandlordId == landlordId);
-        baseQuery = baseQuery.Where(x =>!x.IsDeleted && searchPhraseLower == null || (x.HostelName.ToLower().Contains(searchPhraseLower)
+        baseQuery = baseQuery.Where(x => !x.IsDeleted && searchPhraseLower == null || (x.HostelName.ToLower().Contains(searchPhraseLower)
                                                                       || x.Landlord.Username.ToLower().Contains(searchPhraseLower)));
 
         var totalRecords = await baseQuery.CountAsync();
@@ -127,7 +127,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
         {
             baseQuery = baseQuery.OrderByDescending(x => x.CreatedOn);
         }
-        
+
 
         if (sortBy != null)
         {
@@ -147,7 +147,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
                 : baseQuery.OrderByDescending(selectedColumn);
         }
 
-        
+
         var hostels = await baseQuery
             .Skip(pageSize.Value * (pageNumber.Value - 1))
             .Take(pageSize.Value)
@@ -166,5 +166,62 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
             .ThenInclude(s => s.Services)
             .AsSplitQuery()
             .FirstOrDefaultAsync(h => h.Id == hostelId && !h.IsDeleted);
+    }
+
+    public async Task<int> GetHostelCountAsync(Guid landlordId)
+    {
+        return await _dbContext.Hostels.Where(h => h.LandlordId == landlordId && !h.IsDeleted).CountAsync();
+    }
+
+    public async Task<int> GetTenantCountAsync(Guid landlordId)
+    {
+        return await _dbContext.RoomTenancies
+                             .Where(rt => rt.Room.Hostel.LandlordId == landlordId && (rt.MoveOutDate < DateTime.Now || rt.MoveOutDate == null) && !rt.IsDeleted)
+                             .Select(rt => rt.TenantId)
+                             .Distinct()
+                             .CountAsync();
+    }
+
+    public async Task<int> GetRoomCountAsync(Guid landlordId)
+    {
+        return await _dbContext.Rooms.Where(r => r.Hostel.LandlordId == landlordId && !r.IsDeleted).CountAsync();
+    }
+
+    public async Task<int> GetOccupiedRoomCountAsync(Guid landlordId)
+    {
+        return await _dbContext.RoomTenancies
+                             .Where(rt => rt.Room.Hostel.LandlordId == landlordId
+                                          && (rt.MoveOutDate == null || rt.MoveOutDate < DateTime.Now) && !rt.IsDeleted)
+                             .Select(rt => rt.RoomId)
+                             .Distinct()
+                             .CountAsync();
+    }
+
+    public async Task<int> GetAvailableRoomCountAsync(Guid landlordId)
+    {
+        return await _dbContext.Rooms.Where(r => r.Hostel.LandlordId == landlordId && r.IsAvailable == true).CountAsync();
+    }
+
+    public async Task<int> GetAllInvoicesCountAsync(Guid landlordId)
+    {
+        return await _dbContext.InVoices.Where(i => i.Room.Hostel.LandlordId == landlordId).CountAsync();
+    }
+
+    public async Task<int> GetUnpaidInvoicesCountAsync(Guid landlordId)
+    {
+        return await _dbContext.InVoices.Where(i => i.Room.Hostel.LandlordId == landlordId && !i.IsPaid).CountAsync();
+    }
+
+    public async Task<int> GetExpiringContractsCountAsync(Guid landlordId, DateTime currentDate)
+    {
+        var nextMonthStart = new DateTime(currentDate.Year, currentDate.Month, 1).AddMonths(1); 
+        var nextMonthEnd = nextMonthStart.AddMonths(1).AddDays(-1);
+
+        return await _dbContext.RentalContracts
+                             .Where(rc => rc.Room.Hostel.LandlordId == landlordId
+                                         && rc.EndDate.HasValue  
+                                         && rc.EndDate.Value >= nextMonthStart
+                                         && rc.EndDate.Value <= nextMonthEnd)  
+                             .CountAsync();
     }
 }

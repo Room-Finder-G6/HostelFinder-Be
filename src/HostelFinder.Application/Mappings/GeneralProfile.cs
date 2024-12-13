@@ -40,6 +40,7 @@ using HostelFinder.Application.DTOs.Room;
 using HostelFinder.Application.DTOs.Story.Responses;
 using HostelFinder.Application.DTOs.Notification;
 using HostelFinder.Application.DTOs.Tenancies.Responses;
+using HostelFinder.Application.Services;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -153,8 +154,8 @@ public class GeneralProfile : Profile
 
         // Membership mappings
         CreateMap<Membership, MembershipResponseDto>()
-            .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices))
-            .ReverseMap();
+       .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices.FirstOrDefault()));
+
         CreateMap<AddMembershipRequestDto, Membership>().ReverseMap()
             .ForMember(dest => dest.MembershipServices, opt => opt.MapFrom(src => src.MembershipServices));
         CreateMap<UpdateMembershipRequestDto, Membership>().ReverseMap();
@@ -174,10 +175,11 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.MembershipName, opt => opt.MapFrom(src => src.Name))
             .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Price))
             .ForMember(dest => dest.TotalUsers, opt => opt.Ignore()); // Không tính total users ở đây
+        CreateMap<UpdateMembershipRequestDto, Membership>()
+            .ForMember(dest => dest.MembershipServices, opt => opt.Ignore());
 
         // MembershipServices mappings
         CreateMap<MembershipServices, MembershipServiceResponseDto>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.ServiceName))
             .ForMember(dest => dest.MaxPostsAllowed, opt => opt.MapFrom(src => src.MaxPostsAllowed))
             .ForMember(dest => dest.MaxPushTopAllowed, opt => opt.MapFrom(src => src.MaxPushTopAllowed))

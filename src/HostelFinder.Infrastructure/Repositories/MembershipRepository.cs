@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.Membership.Responses;
 using HostelFinder.Application.DTOs.MembershipService.Requests;
 using HostelFinder.Application.Interfaces.IRepositories;
+using HostelFinder.Application.Services;
 using HostelFinder.Domain.Entities;
 using HostelFinder.Infrastructure.Common;
 using HostelFinder.Infrastructure.Context;
@@ -18,25 +19,32 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<IEnumerable<Membership>> GetAllMembershipWithMembershipService()
         {
             return await _dbContext.Memberships.
-                    Include(mb => mb.MembershipServices).ToListAsync();
+                    Include(mb => mb.MembershipServices)
+                    .Where (mb => !mb.IsDeleted)
+                    .ToListAsync();
         }
 
-        public async Task AddMembershipWithServicesAsync(Membership membership, List<AddMembershipServiceReqDto> membershipServices)
+        public async Task AddMembershipWithServiceAsync(Membership membership, AddMembershipServiceReqDto membershipServiceDto)
         {
-            membership.MembershipServices = membershipServices
-                .Select(ms => new MembershipServices
-                {
-                    ServiceName = ms.ServiceName,
-                    MaxPostsAllowed = ms.MaxPostsAllowed,
-                    MaxPushTopAllowed = ms.MaxPushTopAllowed,
-                    Membership = membership,
-                    CreatedOn = DateTime.Now,
-                    CreatedBy = "System"
-                }).ToList();
+            // Tạo một đối tượng MembershipService từ DTO
+            var membershipService = new MembershipServices
+            {
+                ServiceName = membershipServiceDto.ServiceName,
+                MaxPostsAllowed = membershipServiceDto.MaxPostsAllowed,
+                MaxPushTopAllowed = membershipServiceDto.MaxPushTopAllowed,
+                Membership = membership,
+                CreatedOn = DateTime.Now,
+                CreatedBy = "System",
+            };
 
+            // Gán dịch vụ cho Membership
+            membership.MembershipServices = new List<MembershipServices> { membershipService };
+
+            // Thêm Membership cùng dịch vụ liên quan vào cơ sở dữ liệu
             await _dbContext.Memberships.AddAsync(membership);
             await _dbContext.SaveChangesAsync();
         }
+
 
         public async Task<bool> CheckDuplicateMembershipAsync(string name, string description)
         {
