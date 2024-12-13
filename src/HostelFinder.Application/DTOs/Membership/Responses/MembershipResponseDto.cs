@@ -9,6 +9,6 @@ namespace HostelFinder.Application.DTOs.Membership.Responses
         public string Description { get; set; }
         public decimal Price { get; set; }
         public int Duration { get; set; }
-        public List<MembershipServiceResponseDto> MembershipServices { get; internal set; }
+        public List<MembershipServiceResponseDto> MembershipServices { get; set; }
     }
 }

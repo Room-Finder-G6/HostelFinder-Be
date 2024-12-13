@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Application.DTOs.Service.Request;
+using HostelFinder.Application.DTOs.Service.Response;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Authorization;
@@ -50,59 +51,100 @@ namespace HostelFinder.WebApi.Controllers
         [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetServiceById(Guid id)
         {
-            var service = await _serviceService.GetServiceByIdAsync(id);
-            if (service == null)
-                return NotFound();
-
-            return Ok(service);
+            try
+            {
+                var service = await _serviceService.GetServiceByIdAsync(id);
+                if (service.Data == null)
+                {
+                    return NotFound(new Response<string> { Succeeded = false, Message = "Service not found." });
+                }
+                return Ok(service);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string> { Succeeded = false, Message = $"Internal server error: {ex.Message}" });
+            }
         }
 
         [HttpPost("AddService")]
         [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddService(ServiceCreateRequestDTO serviceCreateRequestDTO)
         {
-            var response = await _serviceService.AddServiceAsync(serviceCreateRequestDTO);
-            if (response.Succeeded)
+            try
             {
-                return Ok(response); 
+                var response = await _serviceService.AddServiceAsync(serviceCreateRequestDTO);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+                return BadRequest(response.Message);
             }
-            return BadRequest(response.Message); 
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string> { Succeeded = false, Message = $"Internal server error: {ex.Message}" });
+            }
+
         }
 
         [HttpPut("UpdateService/{id}")]
         [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> UpdateService(Guid id, ServiceUpdateRequestDTO serviceUpdateRequestDTO)
         {
-            var response = await _serviceService.UpdateServiceAsync(id, serviceUpdateRequestDTO);
-            if (response.Succeeded)
+            try
             {
-                return NoContent();
+                var response = await _serviceService.UpdateServiceAsync(id, serviceUpdateRequestDTO);
+                if (response.Succeeded)
+                {
+                    return NoContent();
+                }
+                return NotFound(new Response<string> { Succeeded = false, Message = response.Message });
             }
-            return NotFound(response.Message);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string> { Succeeded = false, Message = $"Internal server error: {ex.Message}" });
+            }
         }
 
         [HttpDelete("DeleteService/{id}")]
         [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> DeleteService(Guid id)
         {
-            var response = await _serviceService.DeleteServiceAsync(id);
-            if (response.Succeeded)
+            try
             {
-                return Ok(response);
+                var response = await _serviceService.DeleteServiceAsync(id);
+                if (response.Succeeded)
+                {
+                    return Ok(response);
+                }
+                return NotFound(new Response<string> { Succeeded = false, Message = response.Message });
             }
-            return NotFound(response.Message);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string> { Succeeded = false, Message = $"Internal server error: {ex.Message}" });
+            }
         }
 
         [HttpGet]
         [Route("hostels/{hostelId}")]
         public async Task<IActionResult> GetServiceByHostel(Guid hostelId)
         {
-            var response = await _serviceService.GetAllServiceByHostelAsync(hostelId);
-            if(!response.Succeeded)
+            try
             {
-                return BadRequest(response);
+                var response = await _serviceService.GetAllServiceByHostelAsync(hostelId);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(new Response<List<HostelServiceResponseDto>>
+                    {
+                        Succeeded = false,
+                        Message = "Không tìm thấy dịch vụ nào trong phòng trọ"
+                    });
+                }
+                return Ok(response);
             }
-            return Ok(response);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response<string> { Succeeded = false, Message = $"Internal server error: {ex.Message}" });
+            }
         }
     }
 }

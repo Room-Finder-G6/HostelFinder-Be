@@ -17,14 +17,22 @@ namespace HostelFinder.WebApi.Controllers
         [HttpGet("messages/{userId}")]
         public async Task<ActionResult<IEnumerable<NotificationResponseDto>>> GetMessagesByUserId(Guid userId)
         {
-            var notificationDtos = await _notificationService.GetMessagesByUserIdAsync(userId);
-
-            if (notificationDtos == null || notificationDtos.Count == 0)
+            try
             {
-                return NotFound(new { Message = "No notifications found for this user." });
+                var notificationDtos = await _notificationService.GetMessagesByUserIdAsync(userId);
+
+                if (notificationDtos == null || notificationDtos.Count == 0)
+                {
+                    return NotFound(new { Message = "No notifications found for this user." });
+                }
+
+                return Ok(notificationDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = $"Internal server error: {ex.Message}" });
             }
 
-            return Ok(notificationDtos);
         }
     }
 }
