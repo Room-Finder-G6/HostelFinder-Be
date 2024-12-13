@@ -133,7 +133,7 @@ public class OpenAiService : IOpenAiService
             };
             
             var responseTitle = await GenerateAsync(requestTitleOpenAi);
-            var postTitle =  responseTitle.Choices.FirstOrDefault()?.Message?.Content.Trim();
+            var postTitle =  responseTitle.Choices.FirstOrDefault()?.Message?.Content.Trim('"');
 
             var responseDescription = await GenerateAsync(requestDescriptionOpenAi);
             var postDescription = responseDescription.Choices.LastOrDefault()?.Message?.Content.Trim();

@@ -482,4 +482,19 @@ public class PostService : IPostService
 
         return new Response<List<ListPostsResponseDto>>(postDtos);
     }
+
+    public async Task<Response<bool>> CheckUserHostelExist(Guid userId)
+    {
+        var exists = await _postRepository.CheckUserHostelExist(userId);
+        if (!exists)
+        {
+            return new Response<bool>
+            {
+                Succeeded = false,
+                Message = "Bạn chưa có phòng trọ nào. Vui lòng thêm nhà trọ và phòng trọ trước!"
+            };
+        }
+        
+        return new Response<bool>{ Succeeded = true, Message = "Hostel found." };
+    }
 }
