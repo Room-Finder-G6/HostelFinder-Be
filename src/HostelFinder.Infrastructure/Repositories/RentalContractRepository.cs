@@ -59,19 +59,19 @@ namespace HostelFinder.Infrastructure.Repositories
             }
             if(statusFilter != null)
             {
-                if (statusFilter == "Hợp đồng đã kết thúc")
+                if (statusFilter == "Đã kết thúc")
                 {
                     query = query.Where(x => x.EndDate.HasValue && x.EndDate.Value.Date < DateTime.Now.Date);
                 }
-                else if (statusFilter == "Hợp đồng đang trong thời hạn")
+                else if (statusFilter == "Trong thời hạn")
                 {
                     query = query.Where(x => x.StartDate.Date <= DateTime.Now.Date && (x.EndDate == null || x.EndDate.Value.Date > DateTime.Now.Date));
                 }
-                else if(statusFilter == "Hợp đồng sắp kết thúc")
+                else if(statusFilter == "Sắp kết thúc")
                 {
-                    query = query.Where(x => x.EndDate.HasValue && x.EndDate.Value.AddDays(-7) <= DateTime.Now.Date && x.EndDate.Value.Date > DateTime.Now.Date);
+                    query = query.Where(x => x.EndDate.HasValue && x.EndDate.Value.AddMonths(-1) <= DateTime.Now.Date && x.EndDate.Value.Date > DateTime.Now.Date);
                 }
-                else if(statusFilter == "Hợp đồng chưa bắt đầu")
+                else if(statusFilter == "Chưa bắt đầu")
                 {
                     query = query.Where(x => x.StartDate.Date > DateTime.Now.Date);
                 }

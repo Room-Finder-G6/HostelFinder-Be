@@ -4,7 +4,7 @@ namespace HostelFinder.Application.DTOs.RentalContract.Request
 {
     public class AddRentalContractDto
     {
-        public AddTenantDto AddTenantDto { get; set; }
+        public AddTenantDto? AddTenantDto { get; set; }
 
         public Guid RoomId { get;set; }
 

@@ -18,8 +18,8 @@ namespace HostelFinder.Application.DTOs.RentalContract.Response
         public string? Commune { get; set; }
         public string? DetailAddress { get; set; }
         public string IdentityCardNumber { get; set; }
-        public IFormFile FrontImageImage { get; set; }
-        public IFormFile BackImageImage { get; set; }
+        public IFormFile? FrontImageImage { get; set; }
+        public IFormFile? BackImageImage { get; set; }
         public TemporaryResidenceStatus TemporaryResidenceStatus { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }

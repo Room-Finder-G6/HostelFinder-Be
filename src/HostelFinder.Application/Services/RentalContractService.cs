@@ -61,7 +61,6 @@ namespace HostelFinder.Application.Services
                 var currentTenantsCount = await _roomTenancyRepository.CountCurrentTenantsAsync(room.Id);
                 if (currentTenantsCount >= room.MaxRenters)
                 {
-                    //throw new Exception("Phòng đã đạt số lượng người thuê tối đa");
                     return new Response<string> { Succeeded = false, Message = "Phòng hiện tại đã đạt tối đa số lượng người thuê" };
                 }
 
@@ -259,18 +258,18 @@ namespace HostelFinder.Application.Services
             var currentDate = DateTime.Now.Date;
             if(endDate.HasValue && endDate.Value.Date < currentDate)
             {
-                return "Hợp đồng đã kết thúc";
+                return "Đã kết thúc";
             }
             if(startDate.Date <= currentDate && (!endDate.HasValue || endDate.Value.Date > currentDate))
             {
-                return "Hợp đồng đang trong thời hạn";
+                return "Trong thời hạn";
             }
             //hợp đồng sắp hết hạn sau 7 ngày
-            if(endDate.HasValue && endDate.Value.Date.AddDays(-7) <= currentDate && endDate.Value.Date >= currentDate)
+            if(endDate.HasValue && endDate.Value.Date.AddMonths(-1) <= currentDate && endDate.Value.Date >= currentDate)
             {
-                return "Hợp đồng sắp kết thúc";
+                return "Sắp kết thúc";
             }
-            return "Hợp đồng chưa bắt đầu";
+            return "Chưa bắt đầu";
         }
     }
 }

@@ -54,8 +54,14 @@ namespace HostelFinder.Application.Services
                     tenent.AvatarUrl = "https://hostel-finder-images.s3.ap-southeast-1.amazonaws.com/Default-Avatar.png";
                 }
                 //upload image CCCD
-                tenent.BackImageUrl = await _s3Service.UploadFileAsync(request.BackImageImage);
-                tenent.FrontImageUrl = await _s3Service.UploadFileAsync(request.FrontImageImage);
+                if(request.FrontImageImage != null)
+                {
+                    tenent.FrontImageUrl = await _s3Service.UploadFileAsync(request.FrontImageImage);
+                }
+                if(request.BackImageImage != null)
+                {
+                    tenent.BackImageUrl = await _s3Service.UploadFileAsync(request.BackImageImage);
+                }
                 tenent.CreatedOn = DateTime.Now;
 
                 var tenentCreated = await _tenantRepository.AddAsync(tenent);

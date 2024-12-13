@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.Interfaces.IServices;
+﻿using HostelFinder.Application.DTOs.Report;
+using HostelFinder.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,13 +16,13 @@ namespace HostelFinder.WebApi.Controllers
                _revenueReportService = revenueReportService;
           }
 
-          [HttpGet("yearly-revenue")]
+          [HttpPost("yearly-revenue")]
           [Authorize(Roles = "Landlord,Admin")]
-          public async Task<IActionResult> GetYearlyRevenueReport(Guid hostelId, int year)
+          public async Task<IActionResult> GetYearlyRevenueReport(YearlyRevenueReportRequest request)
           {
                try
                {
-                    var response = await _revenueReportService.GetYearlyRevenueReportByHostel(hostelId, year);
+                    var response = await _revenueReportService.GetYearlyRevenueReportByHostel(request.HostelId, request.Year);
                     if (!response.Succeeded)
                     {
                          return BadRequest(response);
@@ -35,13 +36,13 @@ namespace HostelFinder.WebApi.Controllers
                }
           }
 
-          [HttpGet("monthly-revenue")]
+          [HttpPost("monthly-revenue")]
           [Authorize(Roles = "Landlord,Admin")]
-          public async Task<IActionResult> GetMonthlyRevenueReport(Guid hostelId, int month, int year)
+          public async Task<IActionResult> GetMonthlyRevenueReport(MonthlyRevenueReportRequest request)
           {
                try
                {
-                    var response = await _revenueReportService.GetMonthlyRevenueReportByHostel(hostelId, month, year);
+                    var response = await _revenueReportService.GetMonthlyRevenueReportByHostel(request.HostelId, request.Month, request.Year);
                     if (!response.Succeeded)
                     {
                          return BadRequest(response);
