@@ -289,4 +289,9 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
             .Take(topCount)
             .ToListAsync();
     }
+
+    public Task<bool> CheckUserHostelExist(Guid userId)
+    {
+        return _dbContext.Hostels.AnyAsync(h => h.LandlordId == userId && !h.IsDeleted);
+    }
 }

@@ -521,4 +521,10 @@ public class PostController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("check-user-hostel/{userId}")]
+    public async Task<ActionResult<bool>> CheckHostelExist(Guid userId)
+    {
+        var result = await _postService.CheckUserHostelExist(userId);
+        return Ok(result);
+    }
 }
