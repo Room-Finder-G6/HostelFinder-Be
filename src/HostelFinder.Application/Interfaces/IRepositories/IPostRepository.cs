@@ -26,4 +26,5 @@ public interface IPostRepository : IBaseGenericRepository<Post>
     Task<PagedResponse<List<Post>>> GetPostsOrderedByMembershipPriceAndCreatedOnAsync(int pageIndex, int pageSize); 
     Task<PagedResponse<List<Post>>> GetFilteredAndPagedPostsAsync(FilterPostsRequestDto filter, int pageIndex, int pageSize);
     Task<List<Post>> GetTopPostsAsync(int topCount);
+    Task<bool> CheckUserHostelExist(Guid userId);
 }
