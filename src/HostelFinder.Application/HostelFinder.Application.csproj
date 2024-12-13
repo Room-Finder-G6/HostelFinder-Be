@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="DTOs\RoomTenancies\Response\" />
-    <Folder Include="DTOs\Tenancies\Requests\" />
     <Folder Include="Mappings\" />
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="ClosedXML" Version="0.102.3" />
