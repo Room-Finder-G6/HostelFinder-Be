@@ -39,6 +39,7 @@ using HostelFinder.Application.DTOs.AddressStory;
 using HostelFinder.Application.DTOs.Room;
 using HostelFinder.Application.DTOs.Story.Responses;
 using HostelFinder.Application.DTOs.Notification;
+using HostelFinder.Application.DTOs.Tenancies.Responses;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -264,6 +265,7 @@ public class GeneralProfile : Profile
                .ForMember(dest => dest.FrontImageUrl, opt => opt.Ignore())
                .ForMember(dest => dest.BackImageUrl, opt => opt.Ignore())
                .ForMember(dest => dest.CreatedOn, opt => opt.MapFrom(src => DateTime.Now));
+        CreateMap<Tenant, TenantResponseDto>().ReverseMap();
 
         //Vehicle
         CreateMap<Vehicle, VehicleResponseDto>()

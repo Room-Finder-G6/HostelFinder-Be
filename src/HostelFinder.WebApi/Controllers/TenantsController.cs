@@ -1,4 +1,5 @@
-﻿using HostelFinder.Application.Interfaces.IServices;
+﻿using HostelFinder.Application.DTOs.Tenancies.Requests;
+using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +25,10 @@ namespace HostelFinder.WebApi.Controllers
             [FromQuery] string? status,
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10
-            )
+        )
         {
-            var result = await _tenantService.GetAllTenantsByHostelAsync(hostelId, roomName, pageNumber, pageSize, status);
+            var result =
+                await _tenantService.GetAllTenantsByHostelAsync(hostelId, roomName, pageNumber, pageSize, status);
 
             if (result.Succeeded)
             {
@@ -61,6 +63,46 @@ namespace HostelFinder.WebApi.Controllers
             }
 
             return Ok(result);
+        }
+
+        [HttpPut]
+        [Authorize(Roles = "Landlord,Admin")]
+        public async Task<IActionResult> UpdateTenantAsync([FromForm] UpdateTenantDto request)
+        {
+            try
+            {
+                var result = await _tenantService.UpdateTenantAsync(request);
+                if (result.Succeeded)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("{tenantId}")]
+        [Authorize(Roles = "Landlord,Admin")]
+        public async Task<IActionResult> GetTenantByIdAsync(Guid tenantId)
+        {
+            try
+            {
+                var result = await _tenantService.GetTenantByIdAsync(tenantId);
+                if (result.Succeeded)
+                {
+                    return Ok(result);
+                }
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
         }
     }
 }

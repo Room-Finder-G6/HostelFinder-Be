@@ -2,6 +2,7 @@
 {
     public class InformationTenacyReponseDto
     {
+        public Guid TenantId { get; set; }
         public required string FullName { get; set; }
 
         public string? AvatarUrl { get; set; }

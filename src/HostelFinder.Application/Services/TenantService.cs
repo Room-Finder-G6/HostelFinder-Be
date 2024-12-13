@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.RentalContract.Request;
 using HostelFinder.Application.DTOs.RentalContract.Response;
 using HostelFinder.Application.DTOs.Room.Responses;
+using HostelFinder.Application.DTOs.Tenancies.Requests;
 using HostelFinder.Application.DTOs.Tenancies.Responses;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
@@ -280,5 +281,57 @@ namespace HostelFinder.Application.Services
             }
         }
 
+        public async Task<Response<string>> UpdateTenantAsync(UpdateTenantDto request)
+        {
+            try
+            {
+            
+                var tenant = await _tenantRepository.GetByIdAsync(request.Id);
+                if (tenant == null)
+                {
+                    return new Response<string> { Message = "Không tìm thấy thông tin người thuê", Succeeded = false };
+                }
+                var checkIdentityCardNumber = await _tenantRepository.GetByIdentityCardNumber(request.IdentityCardNumber);
+                if (checkIdentityCardNumber != null && checkIdentityCardNumber.Id != request.Id)
+                {
+                    return new Response<string> { Message = $"Đã tồn tại CCCD của {checkIdentityCardNumber.FullName}", Succeeded = false };
+                }
+                tenant.FullName = request.FullName;
+                tenant.AvatarUrl = request.AvatarImage != null ? await _s3Service.UploadFileAsync(request.AvatarImage) : tenant.AvatarUrl;
+                tenant.Email = request.Email;
+                tenant.Phone = request.Phone;
+                tenant.IdentityCardNumber = request.IdentityCardNumber;
+                tenant.FrontImageUrl = request.FrontImageImage != null ? await _s3Service.UploadFileAsync(request.FrontImageImage) : tenant.FrontImageUrl;
+                tenant.BackImageUrl = request.BackImageImage != null ? await _s3Service.UploadFileAsync(request.BackImageImage) : tenant.BackImageUrl;
+                tenant.Description = request.Description;
+                tenant.TemporaryResidenceStatus = request.TemporaryResidenceStatus;
+                
+                //update tenant
+                await _tenantRepository.UpdateAsync(tenant);
+                return new Response<string> { Message = "Cập nhật thông tin người thuê thành công", Succeeded = true };
+            }
+            catch (Exception ex)
+            {
+                return new Response<string> { Message = ex.Message, Succeeded = false };
+            }
+        }
+
+        public async Task<Response<TenantResponseDto>> GetTenantByIdAsync(Guid tenantId)
+        {
+            try
+            {
+                var tenant = await _tenantRepository.GetByIdAsync(tenantId);
+                if (tenant == null)
+                {
+                    return new Response<TenantResponseDto> { Message = "Không tìm thấy thông tin người thuê", Succeeded = false };
+                }
+                var tenantDto = _mapper.Map<TenantResponseDto>(tenant);
+                return new Response<TenantResponseDto> { Data = tenantDto, Succeeded = true };
+            }
+            catch (Exception ex)
+            {
+               return new Response<TenantResponseDto> { Message = ex.Message, Succeeded = false };
+            }
+        }
     }
 }
