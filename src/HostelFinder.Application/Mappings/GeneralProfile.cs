@@ -261,7 +261,8 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.MoveInDate, opt => opt.MapFrom(src => src.MoveInDate))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Tenant.Email))
             .ReverseMap();
-        CreateMap<RoomInfoDetailResponseDto, Room>().ReverseMap();
+        CreateMap<RoomInfoDetailResponseDto, Room>().ReverseMap()
+            .ForMember(dest => dest.RoomId, opt => opt.MapFrom(src => src.Id));
         CreateMap<AddRoommateDto, Tenant>()
                .ForMember(dest => dest.AvatarUrl, opt => opt.Ignore())
                .ForMember(dest => dest.FrontImageUrl, opt => opt.Ignore())

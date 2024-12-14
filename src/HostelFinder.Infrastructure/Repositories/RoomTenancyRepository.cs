@@ -27,8 +27,9 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(x => x.Tenant)
                 .Include(x => x.Room)
                 .Where(x => x.RoomId == roomId && x.MoveInDate <=DateTime.Now
-                                    &&(x.MoveOutDate == null || x.MoveOutDate > DateTime.Now) && !x.IsDeleted)
+                                    &&(x.MoveOutDate == null || x.MoveOutDate.Value.Date > DateTime.Now.Date) && !x.IsDeleted)
                 .AsNoTracking()
+                .OrderBy(x => x.MoveInDate)
                 .ToListAsync();
             
         }
