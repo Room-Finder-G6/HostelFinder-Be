@@ -4,6 +4,7 @@ namespace HostelFinder.Application.DTOs.MaintenanceRecord.Response;
 
 public class ListMaintenanceRecordResponseDto
 {
+    public Guid Id { get; set; }
     public Guid HostelId { get; set; }
     public Guid? RoomId { get; set; }
     public string HostelName { get; set; }
