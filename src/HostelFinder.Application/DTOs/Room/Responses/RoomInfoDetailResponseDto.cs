@@ -5,6 +5,7 @@ namespace HostelFinder.Application.DTOs.Room.Responses
 {
     public class RoomInfoDetailResponseDto
     {
+        public Guid RoomId { get; set; }
         public string? RoomName { get; set; }
         [MaxLength(500)]
         public int? Floor { get; set; }
