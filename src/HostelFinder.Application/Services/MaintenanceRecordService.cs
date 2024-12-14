@@ -39,10 +39,12 @@ public class MaintenanceRecordService : IMaintenanceRecordService
     {
         try
         {
-            if(request.PageSize == 0){
+            if (request.PageSize == 0)
+            {
                 request.PageSize = 10;
             }
-            if(request.PageNumber == 0){
+            if (request.PageNumber == 0)
+            {
                 request.PageNumber = 1;
             }
 
@@ -54,7 +56,7 @@ public class MaintenanceRecordService : IMaintenanceRecordService
                 request.SortBy,
                 request.SortDirection
             );
-            
+
             var maintenanceRecordResponse = _mapper.Map<List<ListMaintenanceRecordResponseDto>>(maintenanceRecords.Data);
             var pageResponse = PaginationHelper.CreatePagedResponse(maintenanceRecordResponse, request.PageNumber ?? 1,
                 request.PageSize ?? 10, maintenanceRecords.TotalRecords);
@@ -69,4 +71,36 @@ public class MaintenanceRecordService : IMaintenanceRecordService
             };
         }
     }
+
+    public async Task<Response<bool>> DeleteMaintenanceRecordAsync(Guid id)
+    {
+        var existingRecord = await _maintenanceRecordRepository.GetByIdAsync(id);
+
+        if (existingRecord == null)
+        {
+            return new Response<bool>("Maintenance record not found.");
+        }
+
+        await _maintenanceRecordRepository.DeleteAsync(id);
+
+        return new Response<bool>(true, "Xóa thông tin sữa chữa & bảo dưỡng thành công.");
+    }
+
+    public async Task<Response<bool>> EditMaintenanceRecordAsync(Guid id, EditMaintenanceRecordDto dto)
+    {
+        var existingRecord = await _maintenanceRecordRepository.GetByIdAsync(id);
+
+        if (existingRecord == null)
+        {
+            return new Response<bool>("Maintenance record not found.");
+        }
+
+        _mapper.Map(dto, existingRecord);
+
+        await _maintenanceRecordRepository.UpdateAsync(existingRecord);
+
+        return new Response<bool>(true, "Cập nhật thông tin sữa chữa & bảo dưỡng thành công.");
+    }
+
+
 }

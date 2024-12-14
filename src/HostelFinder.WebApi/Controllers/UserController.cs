@@ -208,5 +208,25 @@ namespace HostelFinder.WebApi.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("filter")]
+        public async Task<IActionResult> FilterUsersByActiveStatus([FromForm] bool isActive)
+        {
+            try
+            {
+                var users = await _userService.FilterUsersByActiveStatusAsync(isActive);
+
+                if (users == null || !users.Any())
+                {
+                    return NotFound(new { message = "No users found with the specified active status." });
+                }
+
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred.", error = ex.Message });
+            }
+        }
     }
 }

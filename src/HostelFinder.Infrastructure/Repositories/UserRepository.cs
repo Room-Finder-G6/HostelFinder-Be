@@ -117,5 +117,13 @@ namespace HostelFinder.Infrastructure.Repositories
                 .Include(u => u.Hostels)
                 .FirstOrDefaultAsync(u => u.Hostels.Any(h => h.Id == hostelId));
         }
+
+        public async Task<IEnumerable<User>> FilterUsersByActiveStatusAsync(bool isActive)
+        {
+            return await _dbContext.Users
+                .Where(u => u.IsActive == isActive)
+                .ToListAsync();
+        }
+
     }
 }
