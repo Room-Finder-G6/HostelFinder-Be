@@ -15,6 +15,6 @@ public interface IMaintenanceRecordRepository : IBaseGenericRepository<Maintenan
     /// <param name="year"></param>
     /// <returns></returns>
     Task<decimal> GetTotalCostOfMaintenanceRecordInYearAsync(Guid hostelId, int year);
-    
+    Task<MaintenanceRecord> GetByIdWithDetailsAsync(Guid id);
     Task<decimal> GetTotalCostOfMaintenanceRecordInMonthAsync(Guid hostelId, int year, int month);
 }

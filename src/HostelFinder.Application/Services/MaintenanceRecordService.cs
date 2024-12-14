@@ -102,5 +102,18 @@ public class MaintenanceRecordService : IMaintenanceRecordService
         return new Response<bool>(true, "Cập nhật thông tin sữa chữa & bảo dưỡng thành công.");
     }
 
+    public async Task<Response<MaintenanceRecordDetailsDto>> GetMaintenanceRecordByIdAsync(Guid id)
+    {
+        var maintenanceRecord = await _maintenanceRecordRepository.GetByIdWithDetailsAsync(id);
+
+        if (maintenanceRecord == null)
+        {
+            return new Response<MaintenanceRecordDetailsDto>("Maintenance record not found.");
+        }
+
+        var maintenanceRecordDto = _mapper.Map<MaintenanceRecordDetailsDto>(maintenanceRecord);
+
+        return new Response<MaintenanceRecordDetailsDto>(maintenanceRecordDto, "Maintenance record retrieved successfully.");
+    }
 
 }

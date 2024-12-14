@@ -73,4 +73,12 @@ public class MaintenanceRecordRepository : BaseGenericRepository<MaintenanceReco
             .SumAsync(x => x.Cost);
         return totalCost;
     }
+
+    public async Task<MaintenanceRecord> GetByIdWithDetailsAsync(Guid id)
+    {
+        return await _dbContext.MaintenanceRecords
+            .Include(m => m.Hostel) 
+            .Include(m => m.Room)  
+            .FirstOrDefaultAsync(m => m.Id == id);
+    }
 }

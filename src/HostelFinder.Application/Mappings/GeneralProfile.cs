@@ -322,6 +322,10 @@ public class GeneralProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore()) 
             .ForMember(dest => dest.CreatedOn, opt => opt.Ignore()) 
             .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
-            .ForMember(dest => dest.LastModifiedOn, opt => opt.MapFrom(src => DateTime.Now)); 
+            .ForMember(dest => dest.LastModifiedOn, opt => opt.MapFrom(src => DateTime.Now));
+
+        CreateMap<MaintenanceRecord, MaintenanceRecordDetailsDto>()
+          .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName)) 
+          .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName)); 
     }
 }
