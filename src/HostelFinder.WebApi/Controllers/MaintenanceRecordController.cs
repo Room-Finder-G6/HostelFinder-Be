@@ -94,4 +94,24 @@ public class MaintenanceRecordController : ControllerBase
         }
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        try
+        {
+            var response = await _maintenanceRecordService.GetMaintenanceRecordByIdAsync(id);
+
+            if (!response.Succeeded)
+            {
+                return NotFound(new { message = response.Message });
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred.", error = ex.Message });
+        }
+    }
+
 }
