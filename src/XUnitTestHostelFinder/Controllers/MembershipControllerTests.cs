@@ -30,10 +30,16 @@ namespace HostelFinder.UnitTests.Controllers
         {
             // Arrange
             var membershipList = new List<MembershipResponseDto>
-    {
-        new MembershipResponseDto { /* populate properties */ },
-        new MembershipResponseDto { /* populate properties */ }
-    };
+            {
+                new MembershipResponseDto
+                {
+                    /* populate properties */
+                },
+                new MembershipResponseDto
+                {
+                    /* populate properties */
+                }
+            };
 
             _membershipServiceMock.Setup(service => service.GetAllMembershipWithMembershipService())
                 .ReturnsAsync(new Response<List<MembershipResponseDto>>
@@ -49,7 +55,7 @@ namespace HostelFinder.UnitTests.Controllers
             var actionResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<Response<List<MembershipResponseDto>>>(actionResult.Value);
             Assert.True(response.Succeeded);
-            Assert.Equal(2, response.Data.Count);  // Check if we have two memberships in the response
+            Assert.Equal(2, response.Data.Count); // Check if we have two memberships in the response
         }
 
         [Fact]
@@ -111,7 +117,7 @@ namespace HostelFinder.UnitTests.Controllers
         public async Task AddMembership_ShouldReturnBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
-            var membershipDto = new AddMembershipRequestDto();  // Model is invalid
+            var membershipDto = new AddMembershipRequestDto(); // Model is invalid
             _controller.ModelState.AddModelError("Error", "Model is invalid");
 
             // Act
@@ -119,7 +125,7 @@ namespace HostelFinder.UnitTests.Controllers
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.IsType<SerializableError>(badRequestResult.Value);  // ModelState errors
+            Assert.IsType<SerializableError>(badRequestResult.Value); // ModelState errors
         }
 
         [Fact]
@@ -139,10 +145,11 @@ namespace HostelFinder.UnitTests.Controllers
             var result = await _controller.AddMembership(membershipDto);
 
             // Assert
-            var objectResult = Assert.IsType<ObjectResult>(result);  // Expect ObjectResult
-            Assert.Equal(500, objectResult.StatusCode);  // Check for HTTP 500 status
-            var response = Assert.IsType<Response<string>>(objectResult.Value);  // Check if response contains error message
-            Assert.Equal("An unexpected error occurred: Unexpected error", response.Message);  // Check error message
+            var objectResult = Assert.IsType<ObjectResult>(result); // Expect ObjectResult
+            Assert.Equal(500, objectResult.StatusCode); // Check for HTTP 500 status
+            var response =
+                Assert.IsType<Response<string>>(objectResult.Value); // Check if response contains error message
+            Assert.Equal("An unexpected error occurred: Unexpected error", response.Message); // Check error message
         }
 
         [Fact]
@@ -159,7 +166,8 @@ namespace HostelFinder.UnitTests.Controllers
 
             var id = Guid.NewGuid(); // Assume this is a valid ID
 
-            _membershipServiceMock.Setup(service => service.EditMembershipAsync(id, It.IsAny<UpdateMembershipRequestDto>()))
+            _membershipServiceMock
+                .Setup(service => service.EditMembershipAsync(id, It.IsAny<UpdateMembershipRequestDto>()))
                 .ThrowsAsync(new Exception("Unexpected error"));
 
             // Act
@@ -185,7 +193,8 @@ namespace HostelFinder.UnitTests.Controllers
             };
 
             var id = Guid.NewGuid(); // Assume this is a non-existing ID
-            _membershipServiceMock.Setup(service => service.EditMembershipAsync(id, It.IsAny<UpdateMembershipRequestDto>()))
+            _membershipServiceMock
+                .Setup(service => service.EditMembershipAsync(id, It.IsAny<UpdateMembershipRequestDto>()))
                 .ReturnsAsync(new Response<MembershipResponseDto>("Membership not found."));
 
             // Act
@@ -209,15 +218,15 @@ namespace HostelFinder.UnitTests.Controllers
                 Price = 99.99m,
                 Duration = 12,
                 MembershipServices = new List<UpdateMembershipServiceReqDto>
-        {
-            new UpdateMembershipServiceReqDto
-            {
-                Id = Guid.NewGuid(),
-                ServiceName = "Service 1",
-                MaxPushTopAllowed = 5,
-                MaxPostsAllowed = 10
-            }
-        }
+                {
+                    new UpdateMembershipServiceReqDto
+                    {
+                        Id = Guid.NewGuid(),
+                        ServiceName = "Service 1",
+                        MaxPushTopAllowed = 5,
+                        MaxPostsAllowed = 10
+                    }
+                }
             };
 
             var id = Guid.NewGuid(); // Assume this is a valid membership ID
@@ -229,18 +238,19 @@ namespace HostelFinder.UnitTests.Controllers
                 Price = 99.99m,
                 Duration = 12,
                 MembershipServices = new List<MembershipServiceResponseDto>
-        {
-            new MembershipServiceResponseDto
-            {
-                Id = Guid.NewGuid(),
-                ServiceName = "Service 1",
-                MaxPushTopAllowed = 5,
-                MaxPostsAllowed = 10
-            }
-        }
+                {
+                    new MembershipServiceResponseDto
+                    {
+                        Id = Guid.NewGuid(),
+                        ServiceName = "Service 1",
+                        MaxPushTopAllowed = 5,
+                        MaxPostsAllowed = 10
+                    }
+                }
             };
 
-            _membershipServiceMock.Setup(service => service.EditMembershipAsync(id, It.IsAny<UpdateMembershipRequestDto>()))
+            _membershipServiceMock
+                .Setup(service => service.EditMembershipAsync(id, It.IsAny<UpdateMembershipRequestDto>()))
                 .ReturnsAsync(new Response<MembershipResponseDto>
                 {
                     Succeeded = true,
@@ -365,11 +375,11 @@ namespace HostelFinder.UnitTests.Controllers
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result); // Checking for NotFoundObjectResult
-            var response = Assert.IsType<Response<List<PostingMemberShipServiceDto>>>(notFoundResult.Value); // Correct type to assert
+            var response =
+                Assert.IsType<Response<List<PostingMemberShipServiceDto>>>(notFoundResult
+                    .Value); // Correct type to assert
             Assert.False(response.Succeeded);
             Assert.Equal("No membership services found for this user.", response.Message);
         }
-
-
     }
 }
