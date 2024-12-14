@@ -368,5 +368,11 @@ namespace HostelFinder.Application.Services
             }
         }
 
+        public async Task<List<UserDto>> FilterUsersByActiveStatusAsync(bool isActive)
+        {
+            var users = await _userRepository.FilterUsersByActiveStatusAsync(isActive);
+            return _mapper.Map<List<UserDto>>(users);
+        }
+
     }
 }

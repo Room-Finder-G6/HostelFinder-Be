@@ -15,5 +15,6 @@ namespace HostelFinder.Application.Interfaces.IServices
         Task<Response<bool>> UnActiveUserAsync(Guid userId);
         Task<Response<UserProfileResponse>> GetUserByHostelIdAsync(Guid hostelId);
         Task<Response<string>> ManageUserMembershipAsync(Guid userId, Guid membershipId);
+        Task<List<UserDto>> FilterUsersByActiveStatusAsync(bool isActive);
     }
 }

@@ -318,5 +318,10 @@ public class GeneralProfile : Profile
         //Map Notification
         CreateMap<Notification, NotificationResponseDto>()
             .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.Message));
+        CreateMap<EditMaintenanceRecordDto, MaintenanceRecord>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore()) 
+            .ForMember(dest => dest.CreatedOn, opt => opt.Ignore()) 
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.LastModifiedOn, opt => opt.MapFrom(src => DateTime.Now)); 
     }
 }
