@@ -44,6 +44,10 @@ namespace HostelFinder.Domain.Entities
         public decimal WalletBalance { get; set; } = 0;
         
         public string? QRCode { get; set; }
+        
+        public string? AccountNumber { get; set; }
+        
+        public string? BankName { get; set; }
 
         public virtual ICollection<Hostel>? Hostels { get; set; }
         public virtual ICollection<Transaction>? Transactions { get; set; }
