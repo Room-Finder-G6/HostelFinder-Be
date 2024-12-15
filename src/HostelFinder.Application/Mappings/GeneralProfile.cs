@@ -241,6 +241,7 @@ public class GeneralProfile : Profile
         //HostelService
         CreateMap<HostelServices, HostelServiceResponseDto>()
             .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Services.ServiceName))
+            .ForMember(dest => dest.ChargingMethod, opt => opt.MapFrom(src => src.Services.ChargingMethod))
             .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName))
             .ForMember(dest => dest.ServiceCost, opt => opt.MapFrom(src => src.Services.ServiceCosts))
             .ReverseMap();
@@ -318,5 +319,14 @@ public class GeneralProfile : Profile
         //Map Notification
         CreateMap<Notification, NotificationResponseDto>()
             .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.Message));
+        CreateMap<EditMaintenanceRecordDto, MaintenanceRecord>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore()) 
+            .ForMember(dest => dest.CreatedOn, opt => opt.Ignore()) 
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.LastModifiedOn, opt => opt.MapFrom(src => DateTime.Now));
+
+        CreateMap<MaintenanceRecord, MaintenanceRecordDetailsDto>()
+          .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName)) 
+          .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName)); 
     }
 }

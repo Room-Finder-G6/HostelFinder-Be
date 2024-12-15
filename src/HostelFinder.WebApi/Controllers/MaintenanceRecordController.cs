@@ -52,4 +52,66 @@ public class MaintenanceRecordController : ControllerBase
             return StatusCode(500, $"An unexpected error occurred: {ex.Message}");
         }
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Edit(Guid id, [FromBody] EditMaintenanceRecordDto dto)
+    {
+        try
+        {
+            var response = await _maintenanceRecordService.EditMaintenanceRecordAsync(id, dto);
+
+            if (!response.Succeeded)
+            {
+                return NotFound(response.Errors);
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred.", error = ex.Message });
+        }
+    }
+
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            var response = await _maintenanceRecordService.DeleteMaintenanceRecordAsync(id);
+
+            if (!response.Succeeded)
+            {
+                return NotFound(response.Errors);
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred.", error = ex.Message });
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        try
+        {
+            var response = await _maintenanceRecordService.GetMaintenanceRecordByIdAsync(id);
+
+            if (!response.Succeeded)
+            {
+                return NotFound(new { message = response.Message });
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred.", error = ex.Message });
+        }
+    }
+
 }
