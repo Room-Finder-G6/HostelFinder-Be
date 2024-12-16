@@ -42,6 +42,7 @@ using HostelFinder.Application.DTOs.Notification;
 using HostelFinder.Application.DTOs.Tenancies.Responses;
 using HostelFinder.Application.Services;
 using HostelFinder.Application.DTOs.MeterReading.Response;
+using HostelFinder.Application.DTOs.MeterReading.Request;
 
 namespace HostelFinder.Application.Mappings;
 

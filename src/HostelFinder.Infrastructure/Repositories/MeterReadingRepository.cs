@@ -71,6 +71,7 @@ namespace HostelFinder.Infrastructure.Repositories
         public async Task<(List<MeterReading> Data, int TotalRecords)> GetPagedMeterReadingsAsync(
             int pageIndex,
             int pageSize,
+            Guid hostelId,
             string? roomName = null,
             int? month = null,
             int? year = null)
@@ -78,7 +79,7 @@ namespace HostelFinder.Infrastructure.Repositories
             var query = _dbContext.MeterReadings
                 .Include(m => m.Room)
                 .Include(m => m.Service)
-                .Where(m => !m.IsDeleted)
+                .Where(m => m.Room.HostelId == hostelId && !m.IsDeleted)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(roomName))

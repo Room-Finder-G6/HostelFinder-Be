@@ -19,10 +19,10 @@ namespace HostelFinder.Application.Services
         private readonly IServiceRepository _serviceRepository;
         private readonly IServiceCostService _serviceCostService;
         private readonly IMapper _mapper;
-       
+
         public MeterReadingService(
-            IMeterReadingRepository meterReadingRepository, 
-            IRoomRepository roomRepository, 
+            IMeterReadingRepository meterReadingRepository,
+            IRoomRepository roomRepository,
             IServiceRepository serviceRepository,
             IServiceCostService serviceCostService, IMapper mapper)
         {
@@ -32,14 +32,14 @@ namespace HostelFinder.Application.Services
             _serviceCostService = serviceCostService;
             _mapper = mapper;
         }
-        public async Task<Response<string>> AddMeterReadingAsync(Guid roomId, Guid serviceId, int? previousReading, int currentReading  , int billingMonth, int billingYear)
+        public async Task<Response<string>> AddMeterReadingAsync(Guid roomId, Guid serviceId, int? previousReading, int currentReading, int billingMonth, int billingYear)
         {
             try
             {
                 var existingRoom = await _roomRepository.GetRoomByIdAsync(roomId);
                 if (existingRoom == null)
                 {
-                    return new Response<string> { Message = "Không tìm thấy phòng để ghi số liệu", Succeeded = false }; 
+                    return new Response<string> { Message = "Không tìm thấy phòng để ghi số liệu", Succeeded = false };
                 }
 
                 var existingService = await _serviceRepository.GetByIdAsync(serviceId);
@@ -47,7 +47,7 @@ namespace HostelFinder.Application.Services
                 {
                     return new Response<string> { Succeeded = false, Message = "Không có dịch vụ trong phòng trọ" };
                 }
-           
+
                 if (currentReading < 0 && previousReading < 0)
                 {
                     return new Response<string> { Message = "Số liệu phải lớn hơn 0", Succeeded = false };
@@ -86,7 +86,7 @@ namespace HostelFinder.Application.Services
                     await _meterReadingRepository.AddAsync(newPreviousMeterReading);
 
                 }
-                if ((previousMeterReading?.Reading ?? 0)  > currentReading)
+                if ((previousMeterReading?.Reading ?? 0) > currentReading)
                 {
                     return new Response<string> { Message = $"Số liệu tháng {billingMonth} phải lớn hơn hoặc bằng số liệu tháng {billingMonth - 1}", Succeeded = false };
                 }
@@ -107,7 +107,7 @@ namespace HostelFinder.Application.Services
 
                 return new Response<string> { Message = $"Ghi thành công {existingService.ServiceName} của phòng {existingRoom.RoomName} ở tháng {billingMonth}/{billingYear}", Succeeded = true };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new Response<string> { Message = ex.Message, Succeeded = false };
             }
@@ -119,12 +119,12 @@ namespace HostelFinder.Application.Services
             {
                 foreach (var meterReading in createMeterReadingDtos.ToList())
                 {
-                    if(meterReading.previousReading.HasValue && meterReading.currentReading < meterReading.previousReading)
+                    if (meterReading.previousReading.HasValue && meterReading.currentReading < meterReading.previousReading)
                     {
                         return new Response<string> { Message = "Số liệu tháng này phải lớn hơn hoặc bằng số liệu tháng trước", Succeeded = false };
                     }
                     var service = await _serviceRepository.GetByIdAsync(meterReading.serviceId);
-                    if(service.ChargingMethod != Domain.Enums.ChargingMethod.PerUsageUnit )
+                    if (service.ChargingMethod != Domain.Enums.ChargingMethod.PerUsageUnit)
                     {
                         return new Response<string> { Message = "Dịch vụ này không phải là dịch vụ đo số liệu", Succeeded = false };
                     }
@@ -168,7 +168,7 @@ namespace HostelFinder.Application.Services
                             ChargingMethod = serviceCost.ChargingMethod,
                             Unit = serviceCost.Unit,
                             ServiceId = serviceCost.ServiceId,
-                            PreviousReading = meterPreviousReading == null ? 0 : meterPreviousReading.Reading,  
+                            PreviousReading = meterPreviousReading == null ? 0 : meterPreviousReading.Reading,
                             CurrentReading = meterCurrentReading == null ? 0 : meterCurrentReading.Reading,
                         };
                         serviceCostReadingResponses.Add(serviceCostReadingResponse);
@@ -176,7 +176,7 @@ namespace HostelFinder.Application.Services
                 }
 
                 return new Response<List<ServiceCostReadingResponse>>
-                    { Data = serviceCostReadingResponses, Succeeded = true };
+                { Data = serviceCostReadingResponses, Succeeded = true };
             }
             catch (Exception ex)
             {
@@ -184,39 +184,75 @@ namespace HostelFinder.Application.Services
             }
         }
 
-        public async Task<PagedResponse<List<MeterReadingDto>>> GetPagedMeterReadingsAsync(int pageIndex, int pageSize, string? roomName = null, int? month = null, int? year = null)
+        public async Task<PagedResponse<List<MeterReadingDto>>> GetPagedMeterReadingsAsync(int pageIndex, int pageSize, Guid hostelId, string? roomName = null, int? month = null, int? year = null)
         {
-            var result = await _meterReadingRepository.GetPagedMeterReadingsAsync(pageIndex, pageSize, roomName, month, year);
+            try
+            {
+                var result = await _meterReadingRepository.GetPagedMeterReadingsAsync(pageIndex, pageSize, hostelId, roomName, month, year);
 
-            var meterReadingDtos = _mapper.Map<List<MeterReadingDto>>(result.Data);
+                var meterReadingDtos = _mapper.Map<List<MeterReadingDto>>(result.Data);
 
-            var pagedResponse = PaginationHelper.CreatePagedResponse(
-                meterReadingDtos, pageIndex, pageSize, result.TotalRecords);
+                var pagedResponse = PaginationHelper.CreatePagedResponse(
+                    meterReadingDtos, pageIndex, pageSize, result.TotalRecords);
 
-            return pagedResponse;
+                return pagedResponse;
+            }
+            catch (Exception ex)
+            {
+                return new PagedResponse<List<MeterReadingDto>>
+                {
+                    Succeeded = false,
+                    Message = "An error occurred while fetching meter readings.",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
 
 
         public async Task<Response<bool>> EditMeterReadingAsync(Guid id, EditMeterReadingDto dto)
         {
-            var meterReading = await _meterReadingRepository.GetByIdAsync(id);
-            if (meterReading == null)
-                return new Response<bool>("Meter reading not found.");
+            try
+            {
+                var meterReading = await _meterReadingRepository.GetByIdAsync(id);
+                if (meterReading == null)
+                    return new Response<bool>("Meter reading not found.");
 
-            _mapper.Map(dto, meterReading);
-            await _meterReadingRepository.UpdateAsync(meterReading);
+                _mapper.Map(dto, meterReading);
+                await _meterReadingRepository.UpdateAsync(meterReading);
 
-            return new Response<bool>(true, "Sửa bản ghi điện nước thành công.");
+                return new Response<bool>(true, "Sửa bản ghi điện nước thành công.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = "An error occurred while updating the meter reading.",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
 
         public async Task<Response<bool>> DeleteMeterReadingAsync(Guid id)
         {
-            var meterReading = await _meterReadingRepository.GetByIdAsync(id);
-            if (meterReading == null)
-                return new Response<bool>("Meter reading not found.");
+            try
+            {
+                var meterReading = await _meterReadingRepository.GetByIdAsync(id);
+                if (meterReading == null)
+                    return new Response<bool>("Meter reading not found.");
 
-            await _meterReadingRepository.DeleteAsync(id);
-            return new Response<bool>(true, "Xóa bản ghi điện nước thành công.");
+                await _meterReadingRepository.DeleteAsync(id);
+                return new Response<bool>(true, "Xóa bản ghi điện nước thành công.");
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>
+                {
+                    Succeeded = false,
+                    Message = "An error occurred while deleting the meter reading.",
+                    Errors = new List<string> { ex.Message }
+                };
+            }
         }
     }
 }
