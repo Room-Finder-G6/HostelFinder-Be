@@ -10,7 +10,8 @@
         public string? AvatarUrl { get; set; }
         public required string Email { get; set; }
         public required string Phone { get; set; }
-        public DateTime MoveInDate { get; set; }
+        public string? MoveInDate { get; set; }
+        public string? MoveOutDate { get; set; }
         public string Status { get; set; }
     }
 }
