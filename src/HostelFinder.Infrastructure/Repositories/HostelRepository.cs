@@ -176,7 +176,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     public async Task<int> GetTenantCountAsync(Guid landlordId)
     {
         return await _dbContext.RoomTenancies
-                             .Where(rt => rt.Room.Hostel.LandlordId == landlordId && (rt.MoveOutDate < DateTime.Now || rt.MoveOutDate == null) && !rt.IsDeleted)
+                             .Where(rt => rt.Room.Hostel.LandlordId == landlordId && (rt.MoveOutDate > DateTime.Now || rt.MoveOutDate == null) && !rt.IsDeleted)
                              .Select(rt => rt.TenantId)
                              .Distinct()
                              .CountAsync();
