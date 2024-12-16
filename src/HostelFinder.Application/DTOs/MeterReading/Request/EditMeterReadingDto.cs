@@ -1,5 +1,4 @@
-﻿
-namespace HostelFinder.Application.DTOs.MeterReading.Response
+﻿namespace HostelFinder.Application.DTOs.MeterReading.Request
 {
     public class EditMeterReadingDto
     {
