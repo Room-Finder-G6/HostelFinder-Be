@@ -110,13 +110,13 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public async Task<RentalContract?> GetRoomRentalContrctByRoom(Guid roomId)
         {
-            var currentDate = DateTime.Now.Date;
+            var currentDate = DateTime.Now;
             return await _dbContext.RentalContracts
                 .Include(rt => rt.Room)
                 .Include(rt => rt.Tenant)
                 .Where(rt => rt.RoomId == roomId
                         && rt.StartDate.Date <= currentDate
-                            && (rt.EndDate == null || rt.EndDate.Value.Date > currentDate)
+                            && (rt.EndDate == null || rt.EndDate.Value >= currentDate)
                                 && !rt.IsDeleted)
                 .FirstOrDefaultAsync();
         }
