@@ -292,7 +292,8 @@ namespace HostelFinder.Application.Services
                 AvailableRoomCount = await _hostelRepository.GetAvailableRoomCountAsync(landlordId),
                 AllInvoicesCount = await _hostelRepository.GetAllInvoicesCountAsync(landlordId),
                 UnpaidInvoicesCount = await _hostelRepository.GetUnpaidInvoicesCountAsync(landlordId),
-                ExpiringContractsCount = await _hostelRepository.GetExpiringContractsCountAsync(landlordId, DateTime.Now)
+                ExpiringContractsCount = await _hostelRepository.GetExpiringContractsCountAsync(landlordId, DateTime.Now),
+                PostCount = await _hostelRepository.GetPostCountAsync(landlordId)
             };
 
             return dashboardData;

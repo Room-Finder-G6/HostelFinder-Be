@@ -23,4 +23,5 @@ public interface IHostelRepository : IBaseGenericRepository<Hostel>
     Task<int> GetAllInvoicesCountAsync(Guid landlordId);
     Task<int> GetUnpaidInvoicesCountAsync(Guid landlordId);
     Task<int> GetExpiringContractsCountAsync(Guid landlordId, DateTime currentDate);
+    Task<int> GetPostCountAsync(Guid landlordId);
 }
