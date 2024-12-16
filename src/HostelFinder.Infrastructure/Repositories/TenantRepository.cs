@@ -69,12 +69,13 @@ namespace HostelFinder.Infrastructure.Repositories
                     FullName = rt.Tenant.FullName,
                     Email = rt.Tenant.Email,
                     Phone = rt.Tenant.Phone,
-                    MoveInDate = rt.MoveInDate,
+                    MoveInDate = rt.MoveInDate.ToString("dd/MM/yyyy"),
+                    MoveOutDate = rt.MoveOutDate.HasValue ? rt.MoveOutDate.Value.ToString("dd/MM/yyyy HH:mm:ss") : "N/A",
                     // Trạng thái sẽ được tính trong Select
-                    Status = rt.MoveOutDate.HasValue && rt.MoveOutDate < DateTime.Now ? "Đã rời phòng" : "Đang thuê"
+                    Status = rt.MoveOutDate.HasValue && rt.MoveOutDate < DateTime.Now.AddHours(7) ? "Đã rời phòng" : "Đang thuê"
                 })
                 .ToListAsync();
-
+        
             // Tính tổng số bản ghi và phân trang
             var totalRecords = tenants.Count();
             var pagedData = tenants.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
