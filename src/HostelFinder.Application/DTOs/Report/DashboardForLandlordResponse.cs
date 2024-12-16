@@ -11,5 +11,7 @@ namespace HostelFinder.Application.DTOs.Report
         public int AllInvoicesCount { get; set; } 
         public int UnpaidInvoicesCount { get; set; }
         public int ExpiringContractsCount { get; set; }
+        
+        public int PostCount { get; set; }
     }
 }

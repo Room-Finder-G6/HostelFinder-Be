@@ -176,7 +176,7 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
     public async Task<int> GetTenantCountAsync(Guid landlordId)
     {
         return await _dbContext.RoomTenancies
-                             .Where(rt => rt.Room.Hostel.LandlordId == landlordId && (rt.MoveOutDate > DateTime.Now || rt.MoveOutDate == null) && !rt.IsDeleted)
+                             .Where(rt => rt.Room.Hostel.LandlordId == landlordId && (rt.MoveOutDate > DateTime.Now.AddHours(8) || rt.MoveOutDate == null) && !rt.IsDeleted)
                              .Select(rt => rt.TenantId)
                              .Distinct()
                              .CountAsync();
@@ -189,27 +189,22 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
 
     public async Task<int> GetOccupiedRoomCountAsync(Guid landlordId)
     {
-        return await _dbContext.RoomTenancies
-                             .Where(rt => rt.Room.Hostel.LandlordId == landlordId
-                                          && (rt.MoveOutDate == null || rt.MoveOutDate < DateTime.Now) && !rt.IsDeleted)
-                             .Select(rt => rt.RoomId)
-                             .Distinct()
-                             .CountAsync();
+        return await _dbContext.Rooms.Where(r => r.Hostel.LandlordId == landlordId && r.IsAvailable == false && !r.IsDeleted).CountAsync();
     }
 
     public async Task<int> GetAvailableRoomCountAsync(Guid landlordId)
     {
-        return await _dbContext.Rooms.Where(r => r.Hostel.LandlordId == landlordId && r.IsAvailable == true).CountAsync();
+        return await _dbContext.Rooms.Where(r => r.Hostel.LandlordId == landlordId && r.IsAvailable == true && !r.IsDeleted).CountAsync();
     }
 
     public async Task<int> GetAllInvoicesCountAsync(Guid landlordId)
     {
-        return await _dbContext.InVoices.Where(i => i.Room.Hostel.LandlordId == landlordId).CountAsync();
+        return await _dbContext.InVoices.Where(i => i.Room.Hostel.LandlordId == landlordId && !i.IsDeleted).CountAsync();
     }
 
     public async Task<int> GetUnpaidInvoicesCountAsync(Guid landlordId)
     {
-        return await _dbContext.InVoices.Where(i => i.Room.Hostel.LandlordId == landlordId && !i.IsPaid).CountAsync();
+        return await _dbContext.InVoices.Where(i => i.Room.Hostel.LandlordId == landlordId && !i.IsPaid && !i.IsDeleted).CountAsync();
     }
 
     public async Task<int> GetExpiringContractsCountAsync(Guid landlordId, DateTime currentDate)
@@ -221,7 +216,16 @@ public class HostelRepository : BaseGenericRepository<Hostel>, IHostelRepository
                              .Where(rc => rc.Room.Hostel.LandlordId == landlordId
                                          && rc.EndDate.HasValue  
                                          && rc.EndDate.Value >= nextMonthStart
-                                         && rc.EndDate.Value <= nextMonthEnd)  
+                                         && rc.EndDate.Value <= nextMonthEnd
+                                         && !rc.IsDeleted)  
                              .CountAsync();
+    }
+
+    public async Task<int> GetPostCountAsync(Guid landlordId)
+    {
+        var hostelIds = await _dbContext.Hostels.Where(x => x.LandlordId == landlordId && !x.IsDeleted).Select(x => x.Id).ToListAsync();
+        return await _dbContext.Posts
+            .Where(x => hostelIds.Contains(x.HostelId) && !x.IsDeleted)
+            .CountAsync();
     }
 }
