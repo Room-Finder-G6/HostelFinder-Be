@@ -76,9 +76,10 @@ namespace HostelFinder.Application.Services
                 WishlistId = wishlist.Id,
                 Posts = wishlist.WishlistPosts.Select(wr => new WishlistPostResponseDto
                 {
-                    WishlistPostId = wr.Id,  
+                    Id = wr.Post.Id,
                     HostelId = wr.Post.HostelId,  
-                    RoomId = wr.Post.RoomId,  
+                    RoomId = wr.Post.RoomId,
+                    WishlistPostId = wr.Id,
                     Title = wr.Post.Title, 
                     Description = wr.Post.Description, 
                     Address = new AddressDto
