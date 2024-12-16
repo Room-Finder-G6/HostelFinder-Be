@@ -41,6 +41,7 @@ using HostelFinder.Application.DTOs.Story.Responses;
 using HostelFinder.Application.DTOs.Notification;
 using HostelFinder.Application.DTOs.Tenancies.Responses;
 using HostelFinder.Application.Services;
+using HostelFinder.Application.DTOs.MeterReading.Response;
 
 namespace HostelFinder.Application.Mappings;
 
@@ -327,6 +328,12 @@ public class GeneralProfile : Profile
 
         CreateMap<MaintenanceRecord, MaintenanceRecordDetailsDto>()
           .ForMember(dest => dest.HostelName, opt => opt.MapFrom(src => src.Hostel.HostelName)) 
-          .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName)); 
+          .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName));
+
+        CreateMap<MeterReading, MeterReadingDto>()
+           .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.RoomName))
+           .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service.ServiceName));
+
+        CreateMap<EditMeterReadingDto, MeterReading>();
     }
 }

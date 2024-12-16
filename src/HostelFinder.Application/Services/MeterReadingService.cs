@@ -1,7 +1,9 @@
-﻿using ClosedXML.Excel;
+﻿using AutoMapper;
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.VariantTypes;
 using HostelFinder.Application.DTOs.MeterReading.Request;
 using HostelFinder.Application.DTOs.MeterReading.Response;
+using HostelFinder.Application.Helpers;
 using HostelFinder.Application.Interfaces.IRepositories;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
@@ -16,17 +18,19 @@ namespace HostelFinder.Application.Services
         private readonly IRoomRepository _roomRepository;
         private readonly IServiceRepository _serviceRepository;
         private readonly IServiceCostService _serviceCostService;
+        private readonly IMapper _mapper;
        
         public MeterReadingService(
             IMeterReadingRepository meterReadingRepository, 
             IRoomRepository roomRepository, 
             IServiceRepository serviceRepository,
-            IServiceCostService serviceCostService)
+            IServiceCostService serviceCostService, IMapper mapper)
         {
             _meterReadingRepository = meterReadingRepository;
             _roomRepository = roomRepository;
             _serviceRepository = serviceRepository;
             _serviceCostService = serviceCostService;
+            _mapper = mapper;
         }
         public async Task<Response<string>> AddMeterReadingAsync(Guid roomId, Guid serviceId, int? previousReading, int currentReading  , int billingMonth, int billingYear)
         {
@@ -178,6 +182,41 @@ namespace HostelFinder.Application.Services
             {
                 return await Task.FromResult(new Response<List<ServiceCostReadingResponse>> { Message = ex.Message, Succeeded = false });
             }
+        }
+
+        public async Task<PagedResponse<List<MeterReadingDto>>> GetPagedMeterReadingsAsync(int pageIndex, int pageSize, string? roomName = null, int? month = null, int? year = null)
+        {
+            var result = await _meterReadingRepository.GetPagedMeterReadingsAsync(pageIndex, pageSize, roomName, month, year);
+
+            var meterReadingDtos = _mapper.Map<List<MeterReadingDto>>(result.Data);
+
+            var pagedResponse = PaginationHelper.CreatePagedResponse(
+                meterReadingDtos, pageIndex, pageSize, result.TotalRecords);
+
+            return pagedResponse;
+        }
+
+
+        public async Task<Response<bool>> EditMeterReadingAsync(Guid id, EditMeterReadingDto dto)
+        {
+            var meterReading = await _meterReadingRepository.GetByIdAsync(id);
+            if (meterReading == null)
+                return new Response<bool>("Meter reading not found.");
+
+            _mapper.Map(dto, meterReading);
+            await _meterReadingRepository.UpdateAsync(meterReading);
+
+            return new Response<bool>(true, "Sửa bản ghi điện nước thành công.");
+        }
+
+        public async Task<Response<bool>> DeleteMeterReadingAsync(Guid id)
+        {
+            var meterReading = await _meterReadingRepository.GetByIdAsync(id);
+            if (meterReading == null)
+                return new Response<bool>("Meter reading not found.");
+
+            await _meterReadingRepository.DeleteAsync(id);
+            return new Response<bool>(true, "Xóa bản ghi điện nước thành công.");
         }
     }
 }

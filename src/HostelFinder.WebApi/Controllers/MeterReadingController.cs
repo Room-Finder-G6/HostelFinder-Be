@@ -1,4 +1,5 @@
 ﻿using HostelFinder.Application.DTOs.MeterReading.Request;
+using HostelFinder.Application.DTOs.MeterReading.Response;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -69,5 +70,45 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("paged")]
+        public async Task<IActionResult> GetPagedMeterReadings(
+                [FromQuery] int pageIndex = 1,
+                [FromQuery] int pageSize = 10,
+                [FromForm] string? roomName = null,
+                [FromForm] int? month = null,
+                [FromForm] int? year = null)
+        {
+            try
+            {
+                var response = await _meterReadingService.GetPagedMeterReadingsAsync(pageIndex, pageSize, roomName, month, year);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred.", error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(Guid id, [FromForm] EditMeterReadingDto dto)
+        {
+            var response = await _meterReadingService.EditMeterReadingAsync(id, dto);
+            if (!response.Succeeded)
+                return NotFound(new { message = response.Message });
+
+            return Ok(response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var response = await _meterReadingService.DeleteMeterReadingAsync(id);
+            if (!response.Succeeded)
+                return NotFound(new { message = response.Message });
+
+            return Ok(response);
+        }
+
     }
 }

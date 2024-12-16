@@ -67,5 +67,48 @@ namespace HostelFinder.Infrastructure.Repositories
 
             return meterReading;
         }
+
+        public async Task<(List<MeterReading> Data, int TotalRecords)> GetPagedMeterReadingsAsync(
+            int pageIndex,
+            int pageSize,
+            string? roomName = null,
+            int? month = null,
+            int? year = null)
+        {
+            var query = _dbContext.MeterReadings
+                .Include(m => m.Room)
+                .Include(m => m.Service)
+                .Where(m => !m.IsDeleted)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(roomName))
+            {
+                query = query.Where(m => m.Room.RoomName.Contains(roomName));
+            }
+
+            if (month.HasValue)
+            {
+                query = query.Where(m => m.BillingMonth == month.Value);
+            }
+
+            if (year.HasValue)
+            {
+                query = query.Where(m => m.BillingYear == year.Value);
+            }
+
+            int totalRecords = await query.CountAsync();
+
+            query = query.OrderByDescending(m => m.BillingYear)
+                         .ThenByDescending(m => m.BillingMonth);
+
+            // Phân trang
+            var data = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (data, totalRecords);
+        }
+
     }
 }
