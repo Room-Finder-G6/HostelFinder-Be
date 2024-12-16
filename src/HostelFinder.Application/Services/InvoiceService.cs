@@ -234,10 +234,13 @@ namespace HostelFinder.Application.Services
             {
                 var invoice = await _invoiceRepository.GetByIdAsync(id);
                 if (invoice == null)
-                    return new Response<bool>(false, "Invoice not found.");
-
+                    return new Response<bool>(false, "Không tìm thấy hóa đơn.");
+                if(invoice.IsPaid)
+                {
+                    return new Response<bool>(false, "Không thể xóa hóa đơn đã thanh toán.");
+                }
                 await _invoiceRepository.DeleteAsync(id);
-                return new Response<bool>(true, "Invoice deleted successfully.");
+                return new Response<bool>(true, "Xóa hóa đơn thành công.");
             }
             catch (Exception ex)
             {
