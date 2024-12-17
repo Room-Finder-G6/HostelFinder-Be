@@ -1,10 +1,11 @@
 ﻿using HostelFinder.Application.DTOs.InVoice.Responses;
+using HostelFinder.Domain.Entities;
 
 namespace HostelFinder.Application.DTOs.Email;
 
 public class SendEmailInvoice
 {
-    public static string BodyInvoiceEmail(InvoiceResponseDto invoice)
+ public static string BodyInvoiceEmail(User user, InvoiceResponseDto invoice)
 {
     var invoiceDate = DateTime.Now.ToString("dd/MM/yyyy");
     var billingPeriod = $"{invoice.BillingMonth}/{invoice.BillingYear}";
@@ -15,14 +16,35 @@ public class SendEmailInvoice
         invoiceDetailsRows += $@"
             <tr>
                 <td>{detail.ServiceName}</td>
-                <td style='text-align: right;'>{detail.UnitCost:N0} VND</td>
-                <td style='text-align: right;'>{detail.ActualCost:N0} VND</td>
+                <td style='text-align: right;'>{detail.UnitCost:#,##0} VND</td>
+                <td style='text-align: right;'>{detail.ActualCost:#,##0} VND</td>
             </tr>";
     }
     
     string statusColor = invoice.IsPaid ? "green" : "red";
     string statusText = invoice.IsPaid ? "Đã Thanh Toán" : "Chưa Thanh Toán";
     string statusHtml = $"<span style='color: {statusColor}; font-weight: bold;'>{statusText}</span>";
+
+    string paymentSection = string.Empty;
+    if (!invoice.IsPaid)
+    {
+        paymentSection = $@"
+            <div class='payment-section'>
+                <h3>Thông Tin Thanh Toán</h3>
+                <div class='payment-info'>
+                    <div class='bank-details'>
+                        <p><strong>Ngân hàng:</strong> {user.BankName}</p>
+                        <p><strong>Số tài khoản:</strong> {user.AccountNumber}</p>
+                        <p><strong>Số tiền:</strong> {invoice.TotalAmount:#,##0} VND</p>
+                        <p><strong>Nội dung chuyển khoản:</strong> THANHTOAN_{invoice.BillingMonth}{invoice.BillingYear}</p>
+                    </div>
+                    <div class='qr-code'>
+                        <img src='{user.QRCode}' alt='QR Code Thanh Toán' style='max-width: 200px;'>
+                        <p class='qr-note'>Quét mã QR để thanh toán nhanh</p>
+                    </div>
+                </div>
+            </div>";
+    }
 
     return $@"
         <!DOCTYPE html>
@@ -50,7 +72,7 @@ public class SendEmailInvoice
                 .header {{
                     background-color: #2c3e50;
                     color: #ffffff;
-                    padding: 10px;
+                    padding: 15px;
                     text-align: center;
                     border-radius: 8px 8px 0 0;
                 }}
@@ -63,14 +85,16 @@ public class SendEmailInvoice
                     font-size: 12px;
                     color: #777777;
                     margin-top: 20px;
+                    padding-top: 20px;
+                    border-top: 1px solid #dddddd;
                 }}
                 table {{
                     width: 100%;
                     border-collapse: collapse;
-                    margin-top: 20px;
+                    margin: 20px 0;
                 }}
                 th, td {{
-                    padding: 10px;
+                    padding: 12px;
                     border: 1px solid #dddddd;
                 }}
                 th {{
@@ -78,6 +102,45 @@ public class SendEmailInvoice
                 }}
                 .total {{
                     font-weight: bold;
+                }}
+                .payment-section {{
+                    margin: 30px 0;
+                    padding: 20px;
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                }}
+                .payment-info {{
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                }}
+                .bank-details {{
+                    flex: 1;
+                    min-width: 250px;
+                }}
+                .qr-code {{
+                    text-align: center;
+                }}
+                .qr-note {{
+                    margin-top: 10px;
+                    font-size: 14px;
+                    color: #666;
+                }}
+                .status-badge {{
+                    display: inline-block;
+                    padding: 5px 10px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                }}
+                @media screen and (max-width: 600px) {{
+                    .payment-info {{
+                        flex-direction: column;
+                    }}
+                    .bank-details, .qr-code {{
+                        width: 100%;
+                    }}
                 }}
             </style>
         </head>
@@ -102,12 +165,13 @@ public class SendEmailInvoice
                             {invoiceDetailsRows}
                             <tr>
                                 <td colspan='2' class='total'>Tổng Cộng</td>
-                                <td style='text-align: right;' class='total'>{invoice.TotalAmount:N0} VND</td>
+                                <td style='text-align: right;' class='total'>{invoice.TotalAmount:#,##0} VND</td>
                             </tr>
                         </tbody>
                     </table>
                     <p><strong>Trạng Thái:</strong> {statusHtml}</p>
-                    <p>Vui lòng thanh toán hóa đơn tháng <strong>{billingPeriod}</strong> để tránh bị phạt trễ hạn .</p>
+                    {paymentSection}
+                    <p>Vui lòng thanh toán hóa đơn tháng <strong>{billingPeriod}</strong> để tránh bị phạt trễ hạn.</p>
                     <p>Trân trọng cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
                 </div>
                 <div class='footer'>
@@ -117,7 +181,7 @@ public class SendEmailInvoice
             </div>
         </body>
         </html>";
-    }
+}
 
         public static string BodyInvoiceSuccessEmail(InvoiceResponseDto invoice)
     {
@@ -207,7 +271,7 @@ public class SendEmailInvoice
                     <p>Thông tin chi tiêt hóa đơn thanh toán tháng <strong>{billingPeriod}</strong>:</p>
                     <p><strong>Ngày Lập Hóa Đơn:</strong> {invoiceDate}</p>
                     <p><strong>Trạng Thái:</strong> {statusHtml}</p>
-                    <p><strong>Số tiền:</strong> {invoice.TotalAmount:N0} VNĐ</p>
+                    <p><strong>Số tiền:</strong> {invoice.TotalAmount:#,##0} VNĐ</p>
                     <p><strong> Hình thức thành toán : {invoice.FormOfTransfer} </strong></p>
                     <table>
                         <thead>
@@ -221,7 +285,7 @@ public class SendEmailInvoice
                             {invoiceDetailsRows}
                             <tr>
                                 <td colspan='2' class='total'>Tổng Cộng</td>
-                                <td style='text-align: right;' class='total'>{invoice.TotalAmount:N0} VND</td>
+                                <td style='text-align: right;' class='total'>{invoice.TotalAmount:#,##0} VND</td>
                             </tr>
                         </tbody>
                     </table>
