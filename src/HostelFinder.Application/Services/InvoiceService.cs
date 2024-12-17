@@ -480,7 +480,7 @@ namespace HostelFinder.Application.Services
             {
                 return new Response<bool> { Succeeded = false, Message = "Phòng không tồn tại" };
             }
-            var invoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear);
+            var invoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear && !i.IsDeleted);
             if (invoice != null)
             {
                 return new Response<bool>{Succeeded = true, Message = $"Đã có hóa đơn cho tháng {billingMonth}/{billingYear}"};
