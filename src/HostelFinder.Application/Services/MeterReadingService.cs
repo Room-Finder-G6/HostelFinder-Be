@@ -242,7 +242,8 @@ namespace HostelFinder.Application.Services
                     }
                 }
 
-                await _meterReadingRepository.UpdateAsync(meterReading);
+            _mapper.Map(dto, meterReading);
+            await _meterReadingRepository.UpdateAsync(meterReading);
 
                 return new Response<bool>(true, "Sửa bản ghi điện nước thành công.");
             }
