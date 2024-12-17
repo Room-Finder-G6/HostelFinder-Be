@@ -245,7 +245,7 @@ public class PostService : IPostService
             return new Response<PostResponseDto>
             {
                 Succeeded = false,
-                Message = "Post not found."
+                Message = "Không tìm thấy bài đăng."
             };
         }
 

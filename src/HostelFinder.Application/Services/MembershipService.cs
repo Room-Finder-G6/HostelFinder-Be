@@ -169,7 +169,7 @@ namespace HostelFinder.Application.Services
                     return new Response<string>
                     {
                         Succeeded = false,
-                        Message = "You have reached the maximum number of posts allowed for your membership."
+                        Message = "Bạn đã dùng hết lượt đăng bài cho gói hội viên này."
                     };
                 }
             }
