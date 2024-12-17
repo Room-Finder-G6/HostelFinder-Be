@@ -267,7 +267,7 @@ namespace HostelFinder.Application.Services
                 {
                     return new Response<InvoiceResponseDto> { Message = "Phòng đang trống không cần lập hóa đơn", Succeeded = false };
                 }
-                var existingInvoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear);
+                var existingInvoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear && !i.IsDeleted);
 
                 if (existingInvoice != null)
                 {
