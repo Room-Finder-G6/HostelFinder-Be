@@ -236,7 +236,7 @@ namespace HostelFinder.Application.Services
                 }
                 if (invoice != null)
                 {
-                    if (invoice.IsPaid)
+                    if (invoice.IsPaid && !invoice.IsDeleted)
                     {
                         return new Response<bool>{Succeeded = false, Message = "Không thể sửa số liệu đã được thanh toán"};
                     }
