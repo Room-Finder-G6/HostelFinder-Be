@@ -219,7 +219,7 @@ namespace HostelFinder.Application.Services
                     if (roomTenancy != null)
                     {
                         // Nếu có người thuê đang còn trong phòng, không cho phép xóa hostel
-                        return new Response<bool>(false, "Nhà trọ vẫn còn phòng thuê, nên không thể xóa");
+                        return new Response<bool>{Succeeded = false, Message = "Nhà trọ vẫn còn phòng thuê, nên không thể xóa", Data = false};
                     }
                 }
 
