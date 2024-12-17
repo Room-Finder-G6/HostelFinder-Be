@@ -130,6 +130,16 @@ namespace HostelFinder.Application.Services
                     return new Response<AuthenticationResponse> { Succeeded = false, Message = "Tên người dùng không tồn tại. Vui lòng kiểm tra hoặc tạo tài khoản mới." };
                 }
 
+                if (user.IsActive == false)
+                {
+                    return new Response<AuthenticationResponse>()
+                    {
+                        Succeeded = false,
+                        Message =
+                            "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ với quản trị viên để biêt thêm chi tiết"
+                    };
+                }
+
                 var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, request.Password);
                 if (verificationResult == PasswordVerificationResult.Failed)
                 {

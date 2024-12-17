@@ -106,7 +106,7 @@ namespace HostelFinder.WebApi.Controllers
                 var result = await _userService.UnActiveUserAsync(userId);
                 if (!result.Succeeded)
                 {
-                    return NotFound(new Response<bool>
+                    return BadRequest(new Response<bool>
                     {
                         Succeeded = false,
                         Message = result.Message,

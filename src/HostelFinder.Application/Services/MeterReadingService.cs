@@ -242,7 +242,7 @@ namespace HostelFinder.Application.Services
                     }
                 }
 
-                await _meterReadingRepository.UpdateAsync(meterReading);
+            await _meterReadingRepository.UpdateAsync(meterReading);
 
                 return new Response<bool>(true, "Sửa bản ghi điện nước thành công.");
             }

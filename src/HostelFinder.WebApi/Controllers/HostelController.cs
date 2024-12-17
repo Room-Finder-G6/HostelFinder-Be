@@ -147,12 +147,12 @@ namespace HostelFinder.WebApi.Controllers
             try
             {
                 var result = await _hostelService.DeleteHostelAsync(id);
-                if (result.Succeeded)
+                if (!result.Succeeded)
                 {
-                    return Ok(result);
+                    return BadRequest(result);
                 }
 
-                return NotFound(result);
+                return Ok(result);
             }
             catch (Exception ex)
             {

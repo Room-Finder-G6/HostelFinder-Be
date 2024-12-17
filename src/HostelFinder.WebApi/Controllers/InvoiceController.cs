@@ -309,11 +309,11 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpPost("send-email")]
         [Authorize(Roles = "Landlord,Admin")]
-        public async Task<IActionResult> SendEmailInvoice(Guid invoiceId)
+        public async Task<IActionResult> SendEmailInvoice(Guid landlordId,Guid invoiceId)
         {
             try
             {
-                var response = await _invoiceService.SendEmailInvoiceToTenantAsync(invoiceId);
+                var response = await _invoiceService.SendEmailInvoiceToTenantAsync(landlordId,invoiceId);
                 if (!response)
                 {
                     return BadRequest(new Response<string>

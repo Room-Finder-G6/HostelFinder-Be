@@ -4,4 +4,5 @@
     {
         public int Reading { get; set; }
     }
+
 }
