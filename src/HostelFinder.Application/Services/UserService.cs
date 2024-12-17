@@ -374,5 +374,28 @@ namespace HostelFinder.Application.Services
             return _mapper.Map<List<UserDto>>(users);
         }
 
+        public async Task<Response<string>> UploadQRCodeAsync(Guid userId, UploadQRCodeRequestDto request)
+        {
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    return new Response<string>() { Succeeded = false, Message = "Không tìm thấy người dùng." };
+                }
+
+                user.QRCode = await _s3Service.UploadFileAsync(request.QRCodeImage);
+                user.BankName = request.BankName;
+                user.AccountNumber = request.AccountNumber;
+                user.LastModifiedOn = DateTime.Now;
+                await _userRepository.UpdateAsync(user);
+
+                return new Response<string>() { Succeeded = true, Message = "Cập nhật QR Code thành công" };
+            }
+            catch (Exception ex)
+            {
+                return new Response<string>() { Succeeded = false, Message = ex.Message };
+            }
+        }
     }
 }
