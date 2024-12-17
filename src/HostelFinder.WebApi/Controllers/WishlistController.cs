@@ -2,6 +2,7 @@
 using HostelFinder.Application.DTOs.Wishlist.Response;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -18,6 +19,7 @@ namespace HostelFinder.WebApi.Controllers
         }
 
         [HttpPost("AddRoomToWishlist")]
+        [Authorize(Roles = "User, Landlord")]
         public async Task<IActionResult> AddRoomToWishlist([FromBody] AddPostToWishlistRequestDto request)
         {
             try

@@ -278,13 +278,13 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     public async Task<List<Post>> GetTopPostsAsync(int topCount)
     {
         return await _dbContext.Posts
-            .Where(p => !p.IsDeleted)
+            .Where(p => !p.IsDeleted && p.Status)
             .Include(p => p.Hostel)
-                .ThenInclude(h => h.Address)
+            .ThenInclude(h => h.Address)
             .Include(p => p.Room)
             .Include(p => p.Images)
             .Include(p => p.MembershipServices)
-                .ThenInclude(ms => ms.Membership)
+            .ThenInclude(ms => ms.Membership)
             .OrderByDescending(p => p.MembershipServices.Membership.Price)
             .ThenByDescending(p => p.CreatedOn)
             .Take(topCount)
