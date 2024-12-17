@@ -259,6 +259,10 @@ namespace HostelFinder.Application.Services
             try
             {
                 var room = await _roomRepository.GetRoomByIdAsync(id);
+                if (room.IsAvailable == false)
+                {
+                    return new Response<bool>() { Succeeded = false, Message = "Phòng đang có người thuê không thể xóa." };
+                }
 
                 await _roomRepository.DeleteAsync(id);
                 return new Response<bool>(true, "Xóa phòng thành công.");

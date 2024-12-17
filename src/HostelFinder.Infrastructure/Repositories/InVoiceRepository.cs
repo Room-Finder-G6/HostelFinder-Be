@@ -130,5 +130,13 @@ namespace HostelFinder.Infrastructure.Repositories
                 .FirstOrDefaultAsync(x => x.Id == invoiceId && !x.IsDeleted);
         }
 
+        public Task<Invoice?> GetInvoiceByRoomIdAndMonthYearAsync(Guid roomId, int month, int year)
+        {
+            return _dbContext.InVoices
+                .AsNoTracking()
+                .Include(x => x.InvoiceDetails)
+                .ThenInclude(details => details.Service)
+                .FirstOrDefaultAsync(x => x.RoomId == roomId && x.BillingMonth == month && x.BillingYear == year && !x.IsDeleted);
+        }
     }
 }

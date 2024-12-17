@@ -145,11 +145,7 @@ namespace HostelFinder.WebApi.Controllers
 
                 if (!response.Succeeded)
                 {
-                    return NotFound(new Response<string>
-                    {
-                        Succeeded = false,
-                        Message = response.Message
-                    });
+                    return BadRequest(response);
                 }
 
                 return Ok(response);

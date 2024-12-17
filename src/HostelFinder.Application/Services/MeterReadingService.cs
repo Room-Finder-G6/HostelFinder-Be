@@ -19,18 +19,23 @@ namespace HostelFinder.Application.Services
         private readonly IServiceRepository _serviceRepository;
         private readonly IServiceCostService _serviceCostService;
         private readonly IMapper _mapper;
+        private readonly IInVoiceRepository _inVoiceRepository;
 
-        public MeterReadingService(
+        public MeterReadingService
+        (
             IMeterReadingRepository meterReadingRepository,
             IRoomRepository roomRepository,
             IServiceRepository serviceRepository,
-            IServiceCostService serviceCostService, IMapper mapper)
+            IServiceCostService serviceCostService, IMapper mapper,
+            IInVoiceRepository inVoiceRepository
+            )
         {
             _meterReadingRepository = meterReadingRepository;
             _roomRepository = roomRepository;
             _serviceRepository = serviceRepository;
             _serviceCostService = serviceCostService;
             _mapper = mapper;
+            _inVoiceRepository = inVoiceRepository;
         }
         public async Task<Response<string>> AddMeterReadingAsync(Guid roomId, Guid serviceId, int? previousReading, int currentReading, int billingMonth, int billingYear)
         {
@@ -128,6 +133,12 @@ namespace HostelFinder.Application.Services
                     {
                         return new Response<string> { Message = "Dịch vụ này không phải là dịch vụ đo số liệu", Succeeded = false };
                     }
+                    var existingReading = await _meterReadingRepository.GetCurrentMeterReadingAsync(meterReading.roomId, meterReading.serviceId, meterReading.billingMonth, meterReading.billingYear);
+
+                    if (existingReading != null)
+                    {
+                        return new Response<string> { Message = "Đã có số liệu đọc cho phòng dịch và dịch vụ trong tháng này", Succeeded = false };
+                    }
                     await AddMeterReadingAsync(meterReading.roomId, meterReading.serviceId, meterReading.previousReading, meterReading.currentReading, meterReading.billingMonth, meterReading.billingYear);
                 }
                 return new Response<string> { Message = "Ghi số liệu thành công", Succeeded = true };
@@ -215,9 +226,22 @@ namespace HostelFinder.Application.Services
             {
                 var meterReading = await _meterReadingRepository.GetByIdAsync(id);
                 if (meterReading == null)
-                    return new Response<bool>("Meter reading not found.");
+                    return new Response<bool>("Không tìm thấy bản ghi số liệu.");
+                var invoice = await _inVoiceRepository.GetInvoiceByRoomIdAndMonthYearAsync(meterReading.RoomId,
+                    meterReading.BillingMonth, meterReading.BillingYear);
+                if (invoice == null)
+                {
+                    meterReading.Reading = dto.Reading;
+                    meterReading.LastModifiedOn = DateTime.Now;
+                }
+                if (invoice != null)
+                {
+                    if (invoice.IsPaid)
+                    {
+                        return new Response<bool>{Succeeded = false, Message = "Không thể sửa số liệu đã được thanh toán"};
+                    }
+                }
 
-                _mapper.Map(dto, meterReading);
                 await _meterReadingRepository.UpdateAsync(meterReading);
 
                 return new Response<bool>(true, "Sửa bản ghi điện nước thành công.");
@@ -239,8 +263,16 @@ namespace HostelFinder.Application.Services
             {
                 var meterReading = await _meterReadingRepository.GetByIdAsync(id);
                 if (meterReading == null)
-                    return new Response<bool>("Meter reading not found.");
-
+                    return new Response<bool>("Không tìm thấy số liệu để xóa.");
+                var invoice = await _inVoiceRepository.GetInvoiceByRoomIdAndMonthYearAsync(meterReading.RoomId,
+                    meterReading.BillingMonth, meterReading.BillingYear);
+                if (invoice != null)
+                {
+                    if (invoice.IsPaid)
+                    {
+                        return new Response<bool>{Succeeded = false, Message = "Không thể sửa số liệu đã được thanh toán"};
+                    }
+                }
                 await _meterReadingRepository.DeleteAsync(id);
                 return new Response<bool>(true, "Xóa bản ghi điện nước thành công.");
             }

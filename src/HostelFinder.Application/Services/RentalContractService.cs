@@ -260,15 +260,17 @@ namespace HostelFinder.Application.Services
             {
                 return "Đã kết thúc";
             }
-            if(startDate.Date <= currentDate && (!endDate.HasValue || endDate.Value.Date > currentDate))
-            {
-                return "Trong thời hạn";
-            }
             //hợp đồng sắp hết hạn sau 7 ngày
-            if(endDate.HasValue && endDate.Value.Date.AddMonths(-1) <= currentDate && endDate.Value.Date >= currentDate)
+            if(endDate.HasValue && endDate.Value.AddMonths(-1) <= currentDate && endDate.Value.Date >= currentDate)
             {
                 return "Sắp kết thúc";
             }
+
+            if (startDate.Date <= currentDate && (!endDate.HasValue || endDate.Value.Date > currentDate))
+            {
+                return "Trong thời hạn";
+            }
+
             return "Chưa bắt đầu";
         }
     }

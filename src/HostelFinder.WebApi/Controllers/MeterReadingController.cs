@@ -97,7 +97,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 var response = await _meterReadingService.EditMeterReadingAsync(id, dto);
                 if (!response.Succeeded)
-                    return NotFound(new { message = response.Message });
+                    return BadRequest(response);
 
                 return Ok(response);
             }
@@ -114,7 +114,7 @@ namespace HostelFinder.WebApi.Controllers
             {
                 var response = await _meterReadingService.DeleteMeterReadingAsync(id);
                 if (!response.Succeeded)
-                    return NotFound(new { message = response.Message });
+                    return BadRequest(response);
 
                 return Ok(response);
             }
