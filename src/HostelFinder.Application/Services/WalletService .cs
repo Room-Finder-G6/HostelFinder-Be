@@ -107,7 +107,7 @@ namespace HostelFinder.Application.Services
             var paymentData = new PaymentData(
                 orderCode: orderCode,
                 amount: (int)(depositRequest.Amount), // Convert amount to smallest unit
-                description: $"Nạp tiền: {user.FullName}",
+                description: $"Nạp tiền",
                 items: new List<ItemData> { new ItemData("Wallet Deposit", 1, (int)(depositRequest.Amount)) },
                 returnUrl: _configuration["PayOS:ReturnUrl"],
                 cancelUrl: _configuration["PayOS:CancelUrl"]
