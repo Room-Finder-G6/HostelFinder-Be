@@ -278,6 +278,7 @@ public class PostRepository : BaseGenericRepository<Post>, IPostRepository
     public async Task<List<Post>> GetTopPostsAsync(int topCount)
     {
         return await _dbContext.Posts
+            .Where(p => !p.IsDeleted)
             .Include(p => p.Hostel)
                 .ThenInclude(h => h.Address)
             .Include(p => p.Room)
