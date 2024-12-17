@@ -93,7 +93,7 @@ namespace HostelFinder.Application.Services
                     Size = wr.Post.Room.Size, 
                     FirstImage = wr.Post.Images.Any() ? wr.Post.Images.First().Url : null, 
                     MembershipTag = wr.Post.MembershipServices?.Membership?.Tag, 
-                    CreatedOn = wr.CreatedOn,  
+                    CreatedOn = wr.Post.CreatedOn,  
                     Status = wr.Post.Status  
                 }).ToList()  
             };
