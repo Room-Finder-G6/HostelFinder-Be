@@ -27,10 +27,9 @@ namespace HostelFinder.Application.Services
 
             var notificationDtos = _mapper.Map<List<NotificationResponseDto>>(notifications);
 
-            foreach (var notificationDto in notificationDtos)
+            for (int i = 0; i < notificationDtos.Count; i++)
             {
-                var notification = notifications.First(n => n.Message == notificationDto.Message);
-                notificationDto.TimeAgo = GetTimeAgo(notification.CreatedOn);
+                notificationDtos[i].TimeAgo = GetTimeAgo(notifications[i].CreatedOn);
             }
 
             return notificationDtos;
@@ -38,7 +37,7 @@ namespace HostelFinder.Application.Services
 
         private string GetTimeAgo(DateTimeOffset createdOn)
         {
-            var timeDifference = DateTimeOffset.Now - createdOn;
+            var timeDifference = DateTimeOffset.Now - createdOn.ToUniversalTime();
 
             if (timeDifference.Days > 365)
             {

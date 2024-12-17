@@ -1,5 +1,4 @@
 ﻿using HostelFinder.Application.DTOs.MeterReading.Request;
-using HostelFinder.Application.DTOs.MeterReading.Response;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -24,8 +23,8 @@ namespace HostelFinder.WebApi.Controllers
         {
             try
             {
-                var response = await _meterReadingService.AddMeterReadingAsync(createMeterReadingDto.roomId, createMeterReadingDto.serviceId, createMeterReadingDto.previousReading, createMeterReadingDto.currentReading,createMeterReadingDto.billingMonth, createMeterReadingDto.billingYear);
-                if(!response.Succeeded)
+                var response = await _meterReadingService.AddMeterReadingAsync(createMeterReadingDto.roomId, createMeterReadingDto.serviceId, createMeterReadingDto.previousReading, createMeterReadingDto.currentReading, createMeterReadingDto.billingMonth, createMeterReadingDto.billingYear);
+                if (!response.Succeeded)
                 {
                     return BadRequest(response);
                 }
@@ -36,7 +35,7 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
         [HttpPost("list")]
         [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> AddMeterReadingList([FromBody] List<CreateMeterReadingDto> createMeterReadingDtos)
@@ -55,7 +54,7 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
         [HttpGet("{hostelId}/{roomId}")]
         [Authorize(Roles = "Landlord,Admin")]
         public async Task<IActionResult> GetServiceCostReading(Guid hostelId, Guid roomId, int? billingMonth, int? billingYear)
@@ -73,6 +72,7 @@ namespace HostelFinder.WebApi.Controllers
 
         [HttpPost("paged")]
         public async Task<IActionResult> GetPagedMeterReadings(
+                [FromForm] Guid hostelId,
                 [FromQuery] int pageIndex = 1,
                 [FromQuery] int pageSize = 10,
                 [FromForm] string? roomName = null,
@@ -81,7 +81,7 @@ namespace HostelFinder.WebApi.Controllers
         {
             try
             {
-                var response = await _meterReadingService.GetPagedMeterReadingsAsync(pageIndex, pageSize, roomName, month, year);
+                var response = await _meterReadingService.GetPagedMeterReadingsAsync(pageIndex, pageSize, hostelId, roomName, month, year);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -93,21 +93,35 @@ namespace HostelFinder.WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(Guid id, [FromForm] EditMeterReadingDto dto)
         {
-            var response = await _meterReadingService.EditMeterReadingAsync(id, dto);
-            if (!response.Succeeded)
-                return NotFound(new { message = response.Message });
+            try
+            {
+                var response = await _meterReadingService.EditMeterReadingAsync(id, dto);
+                if (!response.Succeeded)
+                    return NotFound(new { message = response.Message });
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating the meter reading.", error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var response = await _meterReadingService.DeleteMeterReadingAsync(id);
-            if (!response.Succeeded)
-                return NotFound(new { message = response.Message });
+            try
+            {
+                var response = await _meterReadingService.DeleteMeterReadingAsync(id);
+                if (!response.Succeeded)
+                    return NotFound(new { message = response.Message });
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while deleting the meter reading.", error = ex.Message });
+            }
         }
 
     }
