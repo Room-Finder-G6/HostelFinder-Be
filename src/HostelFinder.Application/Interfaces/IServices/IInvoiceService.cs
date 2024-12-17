@@ -29,7 +29,7 @@ namespace HostelFinder.Application.Interfaces.IServices
         
         Task<bool> CheckInvoiceNotPaidAsync(Guid roomId);
         
-        Task<bool> SendEmailInvoiceToTenantAsync(Guid invoiceId);
+        Task<bool> SendEmailInvoiceToTenantAsync(Guid landlordId,Guid invoiceId);
 
     }
 }

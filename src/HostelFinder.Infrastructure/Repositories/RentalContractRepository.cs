@@ -69,7 +69,7 @@ namespace HostelFinder.Infrastructure.Repositories
                 }
                 else if(statusFilter == "Sắp kết thúc")
                 {
-                    query = query.Where(x => x.EndDate.HasValue && x.EndDate.Value.AddMonths(-1) <= DateTime.Now.Date && x.EndDate.Value.Date > DateTime.Now.Date);
+                    query = query.Where(x => x.EndDate.HasValue && x.EndDate.Value.AddMonths(-1) <= DateTime.Now.Date && x.EndDate.Value.Date >= DateTime.Now.Date);
                 }
                 else if(statusFilter == "Chưa bắt đầu")
                 {

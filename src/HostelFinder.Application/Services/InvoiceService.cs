@@ -27,6 +27,7 @@ namespace HostelFinder.Application.Services
         private readonly IRoomTenancyRepository _roomTenancyRepository;
         private readonly IServiceCostRepository _serviceCostRepository;
         private readonly IEmailService _emailService;
+        private readonly IUserRepository _userRepository;
 
         public InvoiceService(IInVoiceRepository invoiceRepository,
             IRoomRepository roomRepository,
@@ -36,7 +37,8 @@ namespace HostelFinder.Application.Services
             IServiceRepository serviceRepository,
             IRoomTenancyRepository roomTenancyRepository,
             IServiceCostRepository serviceCostRepository,
-            IEmailService emailService)
+            IEmailService emailService,
+            IUserRepository userRepository)
         {
             _invoiceRepository = invoiceRepository;
             _roomRepository = roomRepository;
@@ -47,6 +49,7 @@ namespace HostelFinder.Application.Services
             _roomTenancyRepository = roomTenancyRepository;
             _serviceCostRepository = serviceCostRepository;
             _emailService = emailService;
+            _userRepository = userRepository;
         }
 
         public async Task<Response<List<InvoiceResponseDto>>> GetAllAsync()
@@ -169,7 +172,7 @@ namespace HostelFinder.Application.Services
             return false;
         }
 
-        public async Task<bool> SendEmailInvoiceToTenantAsync(Guid invoiceId)
+        public async Task<bool> SendEmailInvoiceToTenantAsync(Guid landlordId,Guid invoiceId)
         {
             try
             {
@@ -191,7 +194,8 @@ namespace HostelFinder.Application.Services
                 else
                 {
                     var emailSubject = SendEmailInvoice.SUBJECT_INVOICE;
-                    var emailBody = SendEmailInvoice.BodyInvoiceEmail(invoiceDetails.Data);
+                    var landlord = await _userRepository.GetByIdAsync(landlordId);
+                    var emailBody = SendEmailInvoice.BodyInvoiceEmail(landlord,invoiceDetails.Data);
                     // lấy ra email của người thuê trọ
                     var tenant = await _roomTenancyRepository.GetRoomTenancyRepresentativeAsync(invoiceDetails.Data.RoomId);
                     var email = tenant.Tenant.Email;
@@ -480,7 +484,7 @@ namespace HostelFinder.Application.Services
             {
                 return new Response<bool> { Succeeded = false, Message = "Phòng không tồn tại" };
             }
-            var invoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear);
+            var invoice = room.Invoices.FirstOrDefault(i => i.BillingMonth == billingMonth && i.BillingYear == billingYear && !i.IsDeleted);
             if (invoice != null)
             {
                 return new Response<bool>{Succeeded = true, Message = $"Đã có hóa đơn cho tháng {billingMonth}/{billingYear}"};

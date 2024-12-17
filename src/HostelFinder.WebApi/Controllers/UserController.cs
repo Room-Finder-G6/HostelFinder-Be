@@ -228,5 +228,27 @@ namespace HostelFinder.WebApi.Controllers
                 return StatusCode(500, new { message = "An error occurred.", error = ex.Message });
             }
         }
+        
+        //Upload QR code for user
+        [HttpPost("UploadQRCode")]
+        
+        public async Task<IActionResult> UploadQRCode(Guid landlordId,[FromForm] UploadQRCodeRequestDto request)
+        {
+            try
+            {
+                var response = await _userService.UploadQRCodeAsync(landlordId,request);
+                if (!response.Succeeded)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+        
     }
 }
