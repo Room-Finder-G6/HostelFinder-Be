@@ -4,6 +4,7 @@ using HostelFinder.Application.DTOs.Users.Requests;
 using HostelFinder.Application.DTOs.Users.Response;
 using HostelFinder.Application.Interfaces.IServices;
 using HostelFinder.Application.Wrappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HostelFinder.WebApi.Controllers
@@ -51,6 +52,7 @@ namespace HostelFinder.WebApi.Controllers
 
         // PUT: api/User/UpdateUser/{userId}
         [HttpPut("UpdateUser/{userId}")]
+        [Authorize(Roles = "User, Landlord")]
         public async Task<IActionResult> UpdateUser(Guid userId, [FromForm] UpdateUserRequestDto request, [FromForm] UploadImageRequestDto? image)
         {
             if (!ModelState.IsValid)
@@ -231,7 +233,7 @@ namespace HostelFinder.WebApi.Controllers
         
         //Upload QR code for user
         [HttpPost("UploadQRCode")]
-        
+        [Authorize(Roles = "Landlord")]
         public async Task<IActionResult> UploadQRCode(Guid landlordId,[FromForm] UploadQRCodeRequestDto request)
         {
             try
@@ -249,6 +251,5 @@ namespace HostelFinder.WebApi.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-        
     }
 }
