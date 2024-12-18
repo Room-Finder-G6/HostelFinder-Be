@@ -63,9 +63,15 @@ namespace HostelFinder.Infrastructure.Repositories
 
         public Task<int> CountCurrentTenantsByRoomsInMonthAsync(Guid roomId, int month, int year)
         {
-            return  _dbContext.RoomTenancies
+            var startDate = new DateTime(year, month, 1); 
+            var endDate = startDate.AddMonths(1).AddDays(-1);
+
+            return _dbContext.RoomTenancies
                 .AsNoTracking()
-                .Where(rt => rt.RoomId == roomId && rt.MoveInDate.Month == month && rt.MoveInDate.Year == year && (rt.MoveOutDate == null || rt.MoveOutDate.Value.Date > DateTime.Now.Date) && !rt.IsDeleted)
+                .Where(rt => rt.RoomId == roomId 
+                             && rt.MoveInDate <= endDate
+                             && (rt.MoveOutDate == null || rt.MoveOutDate >= startDate) 
+                             && !rt.IsDeleted)
                 .CountAsync();        
         }
 
