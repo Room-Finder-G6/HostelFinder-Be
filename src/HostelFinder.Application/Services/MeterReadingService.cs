@@ -270,7 +270,7 @@ namespace HostelFinder.Application.Services
                 {
                     if (invoice.IsPaid)
                     {
-                        return new Response<bool>{Succeeded = false, Message = "Không thể sửa số liệu đã được thanh toán"};
+                        return new Response<bool>{Succeeded = false, Message = "Không thể xóa số liệu đã được thanh toán"};
                     }
                 }
                 await _meterReadingRepository.DeleteAsync(id);
